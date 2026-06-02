@@ -8,6 +8,7 @@ payroll automation service.
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -42,6 +43,18 @@ def process_invoice_via_automation(
     raise RuntimeError(result.error or "급여 산출에 실패했습니다.")
 
 
+def _install_settings_panel_integrations() -> None:
+    settings_module = sys.modules.get("ui.payroll_settings_panel")
+    if settings_module is None:
+        return
+    try:
+        from services.payroll_settings_ui_bridge import install_payroll_settings_panel_integrations
+
+        install_payroll_settings_panel_integrations(settings_module)
+    except Exception:
+        pass
+
+
 def install_app_ui_integrations(app_ui_module: Any) -> None:
     """Patch app_ui once after it is imported."""
     if getattr(app_ui_module, "_bitween_payroll_integrations_installed", False):
@@ -56,6 +69,8 @@ def install_app_ui_integrations(app_ui_module: Any) -> None:
         except Exception:
             # Startup should never fail because a performance patch could not install.
             pass
+
+    _install_settings_panel_integrations()
 
     if hasattr(app_ui_module, "process_invoice"):
         if not hasattr(app_ui_module, "_bitween_original_process_invoice"):
