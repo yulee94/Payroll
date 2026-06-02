@@ -37,6 +37,8 @@ def process_invoice_via_automation(
     )
     if result.ok:
         return dict(result.raw or result.as_dict())
+    if result.exception is not None:
+        raise result.exception
     raise RuntimeError(result.error or "급여 산출에 실패했습니다.")
 
 
