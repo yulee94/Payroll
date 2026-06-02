@@ -77,6 +77,10 @@ def _determine_input_type(request: PayrollAutomationRequest) -> str:
 
 
 def _policy_input_type(request: PayrollAutomationRequest) -> str:
+    # Explicit callers, including the current desktop upload button, should keep
+    # their requested path. Tenant/site policy only decides ambiguous API calls.
+    if request.input_type != "auto":
+        return request.input_type
     try:
         from services.payroll_policy_store import resolve_payroll_operation_policy
 
