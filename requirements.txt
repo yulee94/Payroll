@@ -1,0 +1,7 @@
+openpyxl>=3.1.0
+openai>=1.0
+windnd>=1.0.7
+matplotlib>=3.8
+
+# EXE 배포 (선택)
+# pyinstaller>=6.0

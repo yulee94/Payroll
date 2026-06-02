@@ -1,0 +1,47 @@
+﻿{
+    "common":  {
+                   "cancel":  "取消",
+                   "ok":  "確定",
+                   "settings":  "設定",
+                   "refresh":  "重新整理"
+               },
+    "platform":  {
+                     "accounting":  {
+                                        "status":  "準備中"
+                                    },
+                     "payroll":  {
+                                     "login_required":  "請先登入後使用。",
+                                     "title":  "薪資·人事",
+                                     "status":  "運行中",
+                                     "subtitle":  "Payroll \u0026 HR",
+                                     "open":  "開啟  →"
+                                 },
+                     "bidding":  {
+                                     "status":  "準備中"
+                                 },
+                     "maintenance":  {
+                                         "status":  "準備中"
+                                     },
+                     "workflow":  {
+                                      "login_required":  "請先登入後使用。",
+                                      "title":  "流程簽核",
+                                      "status":  "MVP",
+                                      "subtitle":  "Workflow \u0026 ERP",
+                                      "open":  "開啟  →"
+                                  }
+                 },
+    "i18n":  {
+                 "document":  {
+                                  "auto_translate_note":  "設定 OpenAI API 後可使用自動翻譯。"
+                              },
+                 "language":  "語言",
+                 "restart_hint":  "部分畫面需要刷新/重啟後完全生效。"
+             },
+    "locale":  "zh-Hant",
+    "nav":  {
+                "home":  "首頁",
+                "platform":  "平台",
+                "payroll":  "薪資·人事",
+                "workflow":  "流程簽核"
+            }
+}

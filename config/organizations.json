@@ -1,0 +1,75 @@
+{
+  "default_affiliate": "(주)코스",
+  "workplace_aliases": {
+    "한국앰코": [
+      "한국앰코생산",
+      "한국앰코스페셜티카톤즈",
+      "한국앰코 스페셜티카톤즈",
+      "한국엠코",
+      "엠코",
+      "앰코"
+    ]
+  },
+  "affiliates": [
+    {
+      "name": "㈜대상솔루션",
+      "workplaces": []
+    },
+    {
+      "name": "㈜디에스엘",
+      "workplaces": []
+    },
+    {
+      "name": "㈜베스텍",
+      "workplaces": []
+    },
+    {
+      "name": "㈜씨앤엘",
+      "workplaces": []
+    },
+    {
+      "name": "㈜엘소",
+      "workplaces": []
+    },
+    {
+      "name": "㈜엘소 창원공장",
+      "workplaces": []
+    },
+    {
+      "name": "㈜진성",
+      "workplaces": []
+    },
+    {
+      "name": "㈜청운",
+      "workplaces": []
+    },
+    {
+      "name": "㈜청운HR",
+      "workplaces": []
+    },
+    {
+      "name": "㈜청운로지스",
+      "workplaces": []
+    },
+    {
+      "name": "㈜케이앤엘",
+      "workplaces": []
+    },
+    {
+      "name": "㈜코스",
+      "workplaces": []
+    },
+    {
+      "name": "㈜코스텍",
+      "workplaces": []
+    },
+    {
+      "name": "(주)제이와이테크",
+      "workplaces": []
+    },
+    {
+      "name": "(주)코스텍",
+      "workplaces": []
+    }
+  ]
+}

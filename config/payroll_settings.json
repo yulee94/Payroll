@@ -1,0 +1,14 @@
+{
+  "shutdown_pay_percent": 70.0,
+  "updated_at": "",
+  "default_workplace_hours_policy": {
+    "mode": "fixed",
+    "hours": 209
+  },
+  "workplace_hours_policies": {
+    "한국앰코": {
+      "mode": "fixed",
+      "hours": 209
+    }
+  }
+}

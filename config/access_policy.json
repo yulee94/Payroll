@@ -1,0 +1,19 @@
+{
+  "executive_title_keywords": [
+    "대표",
+    "부사장",
+    "사장",
+    "회장",
+    "전무",
+    "상무",
+    "이사",
+    "본부장",
+    "부본부장",
+    "총괄",
+    "CEO",
+    "CFO",
+    "COO",
+    "CTO"
+  ],
+  "executive_field_values": ["Y", "YES", "O", "1", "TRUE", "예", "임원", "해당", "Y"]
+}

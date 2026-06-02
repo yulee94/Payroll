@@ -1,0 +1,9 @@
+{
+  "version": "1.0.1",
+  "release_date": "2026-05-27",
+  "release_notes": "예시: 연차 계산 개선, 월별 보고 UI 추가",
+  "mandatory": false,
+  "update_kind": "portable_exe",
+  "installer_url": "\\\\fileserver\\coss\\payroll\\updates\\COSS_Payroll.exe",
+  "installer_sha256": "scripts/build_developer_zip.py 또는 publish_release.py 가 자동 생성합니다"
+}

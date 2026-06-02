@@ -1,0 +1,76 @@
+{
+    "common": {
+        "cancel": "Cancel",
+        "ok": "OK",
+        "settings": "Settings",
+        "refresh": "Refresh"
+    },
+    "platform": {
+        "accounting": {
+            "status": "Coming soon"
+        },
+        "payroll": {
+            "login_required": "Please sign in to use this platform.",
+            "title": "Payroll & HR",
+            "status": "Live",
+            "subtitle": "Payroll & HR",
+            "open": "Open  →"
+        },
+        "bidding": {
+            "status": "Coming soon"
+        },
+        "maintenance": {
+            "status": "Coming soon"
+        },
+        "workflow": {
+            "login_required": "Please sign in to use this platform.",
+            "title": "Workflow",
+            "status": "MVP",
+            "subtitle": "Workflow & ERP",
+            "open": "Open  →"
+        }
+    },
+    "i18n": {
+        "document": {
+            "auto_translate_note": "Auto-translation is available when OpenAI API is configured."
+        },
+        "language": "Language",
+        "restart_hint": "Some screens apply fully after refresh/restart."
+    },
+    "locale": "en",
+    "nav": {
+        "home": "Home",
+        "platform": "Platform",
+        "payroll": {
+            "home": "Payroll run",
+            "archive": "Monthly archive",
+            "summary": "Monthly summary",
+            "monthly_report": "Monthly report",
+            "reports": "Payroll reports",
+            "settings": "Payroll settings"
+        },
+        "workflow": "Workflow",
+        "permissions": "Permissions",
+        "tenant": "Legal entities",
+        "personal_ai": "✨ Personal AI",
+        "org": "Organization",
+        "group_settings": "Group & approval"
+    },
+    "launcher": {},
+    "settings": {
+        "appearance": {
+            "title": "Appearance",
+            "subtitle": "Theme and language are saved per account and apply to the home banner, sidebar, and menus immediately.",
+            "theme_title": "Color theme",
+            "theme_hint": "Click a swatch to update the home banner, sidebar, buttons, and table headers right away.",
+            "applied_theme": "Theme applied: {label}",
+            "applied_language": "Language changed to {name}."
+        }
+    },
+    "pages": {
+        "settings": {
+            "title": "Payroll settings",
+            "subtitle": "Configure shutdown pay rate and default monthly work hours per workplace."
+        }
+    }
+}
