@@ -9,7 +9,6 @@ function without knowing the Tkinter details.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Literal
@@ -48,6 +47,7 @@ class PayrollAutomationResult:
     roster: dict[str, Any] = field(default_factory=dict)
     raw: dict[str, Any] = field(default_factory=dict)
     error: str = ""
+    exception: Exception | None = field(default=None, repr=False, compare=False)
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -209,6 +209,7 @@ def run_payroll_automation(request: PayrollAutomationRequest) -> PayrollAutomati
             input_type=request.input_type,
             error=str(exc),
             warnings=[str(exc)],
+            exception=exc,
         )
 
 
