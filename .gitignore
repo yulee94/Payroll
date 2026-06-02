@@ -21,6 +21,10 @@ dist/
 *.manifest
 *.pyz
 
+# Generated release packages
+/release/*
+!/release/version.json.example
+
 # Local environment / secrets
 .env
 .env.*
