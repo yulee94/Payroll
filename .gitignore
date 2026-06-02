@@ -49,6 +49,7 @@ desktop.ini
 /locale.json
 /theme.json
 /_leave_usage_inspect.json
+/employee_dump.json
 
 # Bitween generated payroll outputs and sensitive business data
 /output/
