@@ -26,4 +26,4 @@ jobs:
 
       - name: Run focused tests
         run: |
-          python -m unittest tests.test_payroll_operation_policy tests.test_payroll_ui_bridge tests.test_payroll_settings_ui_bridge tests.test_preview_grid_filter tests.test_workflow tests.test_org_access -v
+          python -m unittest tests.test_payroll_automation tests.test_payroll_operation_policy tests.test_payroll_ui_bridge tests.test_payroll_settings_ui_bridge tests.test_preview_grid_filter tests.test_workflow tests.test_org_access -v
