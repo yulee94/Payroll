@@ -1,0 +1,91 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+*.manifest
+*.pyz
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Logs
+*.log
+output/logs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Office temp files
+~$*
+*.tmp
+
+# Bitween local runtime settings
+/session.json
+/tenants.json
+/locale.json
+/theme.json
+/_leave_usage_inspect.json
+
+# Bitween generated payroll outputs and sensitive business data
+/output/
+/employees/
+/급여차이내역/
+/연차사용대장/
+/월별보고/
+/data/
+
+# Runtime tenant/user/workspace data
+/users/
+/workspace/
+/tenant_logos/
+
+# Top-level module data stores (source lives under core/, ui/, services/)
+/accounting/
+/bidding/
+/bulletin/
+/compliance_docs/
+/groups/
+/gw_import/
+/hr/
+/hr_recruitment/
+/kpi/
+/maintenance/
+/mobile/
+/org/
+/payroll_settings/
+/recruitment/
+/workflow/
+
+# Local/sample data that may contain personal or payroll information
+/test_data/
+/samples/
+/fixtures/
+
+# Keep templates trackable, but avoid committing employee roster files
+/templates/*명부*.xlsx
+/templates/*직원*.xlsx
+/templates/~$*
