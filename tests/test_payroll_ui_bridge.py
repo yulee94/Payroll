@@ -22,14 +22,6 @@ class _DummyDashboard:
         return page
 
 
-class _DummyAppUi:
-    PayrollDashboard = _DummyDashboard
-
-    @staticmethod
-    def process_invoice(*_args, **_kwargs):
-        return {"original": True}
-
-
 class PayrollUiBridgeTests(unittest.TestCase):
     def test_install_integrations_patches_dashboard_and_process_invoice(self) -> None:
         app_ui = SimpleNamespace(
@@ -55,10 +47,31 @@ class PayrollUiBridgeTests(unittest.TestCase):
 
     def test_process_invoice_via_automation_raises_backend_error(self) -> None:
         scope = PayrollScope("Affiliate", "Site", "2026-05")
-        result = SimpleNamespace(ok=False, raw={}, error="boom", as_dict=lambda: {"ok": False})
+        result = SimpleNamespace(
+            ok=False,
+            raw={},
+            error="boom",
+            exception=None,
+            as_dict=lambda: {"ok": False},
+        )
         with patch("services.payroll_automation.run_invoice_payroll", return_value=result):
             with self.assertRaisesRegex(RuntimeError, "boom"):
                 process_invoice_via_automation("invoice.xlsx", scope)
+
+    def test_process_invoice_via_automation_reraises_preserved_exception(self) -> None:
+        scope = PayrollScope("Affiliate", "Site", "2026-05")
+        original = ValueError("validation failed")
+        result = SimpleNamespace(
+            ok=False,
+            raw={},
+            error="validation failed",
+            exception=original,
+            as_dict=lambda: {"ok": False},
+        )
+        with patch("services.payroll_automation.run_invoice_payroll", return_value=result):
+            with self.assertRaises(ValueError) as ctx:
+                process_invoice_via_automation("invoice.xlsx", scope)
+        self.assertIs(ctx.exception, original)
 
 
 if __name__ == "__main__":
