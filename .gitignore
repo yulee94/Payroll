@@ -90,7 +90,12 @@ desktop.ini
 /samples/
 /fixtures/
 
-# Keep templates trackable, but avoid committing employee roster files
-/templates/*명부*.xlsx
-/templates/*직원*.xlsx
+# Keep payroll form templates trackable, but avoid committing roster/personnel workbooks
+/templates/.roster_meta.json
+/templates/**/근로자명부*.xlsx
+/templates/**/*명부*.xlsx
+/templates/**/*직원*.xlsx
+/templates/**/*재직증명서*.xlsx
+/templates/**/*연차관리*.xlsx
 /templates/~$*
+/templates/**/~$*
