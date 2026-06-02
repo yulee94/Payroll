@@ -89,6 +89,9 @@ desktop.ini
 /test_data/
 /samples/
 /fixtures/
+/tools/gw_import/_probe_*.py
+/tools/gw_import/_parse_snapshot.py
+/tools/gw_import/_extract_gw_forms.py
 
 # Keep payroll form templates trackable, but avoid committing roster/personnel workbooks
 /templates/.roster_meta.json
