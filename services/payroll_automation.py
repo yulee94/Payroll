@@ -234,3 +234,41 @@ def run_invoice_payroll(
             interactive_parent=interactive_parent,
         )
     )
+
+
+def run_attendance_payroll(
+    attendance_path: Path | str,
+    scope: PayrollScope,
+    *,
+    tenant_id: str | None = None,
+    interactive_parent: Any = None,
+) -> PayrollAutomationResult:
+    return run_payroll_automation(
+        PayrollAutomationRequest(
+            scope=scope,
+            attendance_path=Path(attendance_path),
+            input_type="attendance",
+            tenant_id=tenant_id,
+            interactive_parent=interactive_parent,
+        )
+    )
+
+
+def run_mixed_payroll(
+    invoice_path: Path | str,
+    attendance_path: Path | str,
+    scope: PayrollScope,
+    *,
+    tenant_id: str | None = None,
+    interactive_parent: Any = None,
+) -> PayrollAutomationResult:
+    return run_payroll_automation(
+        PayrollAutomationRequest(
+            scope=scope,
+            invoice_path=Path(invoice_path),
+            attendance_path=Path(attendance_path),
+            input_type="mixed",
+            tenant_id=tenant_id,
+            interactive_parent=interactive_parent,
+        )
+    )
