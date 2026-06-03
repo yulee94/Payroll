@@ -82,6 +82,23 @@ class PayrollAutomationRoutingTests(unittest.TestCase):
         self.assertEqual(mixed_req.attendance_path, Path("attendance.csv"))
         self.assertEqual(mixed_req.tenant_id, "tenant-a")
 
+    def test_api_result_includes_policy_context_without_exception_object(self) -> None:
+        result = PayrollAutomationResult(
+            ok=False,
+            scope=self._scope(),
+            input_type="attendance",
+            operation_policy={"input_basis": "attendance"},
+            operation_policy_source="site",
+            error="근태 파일이 필요합니다.",
+            exception=ValueError("근태 파일이 필요합니다."),
+        )
+
+        payload = result.as_dict()
+
+        self.assertEqual(payload["operation_policy"], {"input_basis": "attendance"})
+        self.assertEqual(payload["operation_policy_source"], "site")
+        self.assertNotIn("exception", payload)
+
 
 if __name__ == "__main__":
     unittest.main()
