@@ -49,7 +49,7 @@ python main.py
 PR 자동검사와 동일한 핵심 테스트부터 실행합니다.
 
 ```powershell
-python -m unittest tests.test_payroll_automation tests.test_payroll_operation_policy tests.test_payroll_ui_bridge tests.test_payroll_settings_ui_bridge tests.test_preview_grid_filter tests.test_workflow tests.test_org_access -v
+python -m unittest tests.test_attendance_import tests.test_payroll_automation tests.test_payroll_operation_policy tests.test_payroll_ui_bridge tests.test_payroll_settings_ui_bridge tests.test_preview_grid_filter tests.test_workflow tests.test_org_access -v
 ```
 
 전체 테스트는 변경 범위가 넓을 때 실행합니다.
