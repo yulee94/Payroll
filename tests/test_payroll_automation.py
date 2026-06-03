@@ -54,7 +54,7 @@ class PayrollAutomationRoutingTests(unittest.TestCase):
             result = run_payroll_automation(request)
 
         self.assertFalse(result.ok)
-        self.assertEqual(result.input_type, "auto")
+        self.assertEqual(result.input_type, "attendance")
         self.assertIn("근태 파일", result.error)
 
 
