@@ -171,10 +171,18 @@ def _number_as_hours(value: Any) -> float:
         except ValueError:
             return 0.0
     n = safe_number(value, 0.0)
-    # Common attendance exports use minutes for late/early columns.
     if n > 24:
         return n / 60.0
     return n
+
+
+def _minutes_as_hours(value: Any) -> float:
+    if _is_blank(value):
+        return 0.0
+    raw = str(value).strip()
+    if ":" in raw:
+        return _number_as_hours(value)
+    return max(0.0, safe_number(value, 0.0) / 60.0)
 
 
 def _round_hours(hours: float, rounding_minutes: int) -> float:
@@ -209,8 +217,8 @@ def _iter_record_rows(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
             "workplace": str(_value(row, mapping, "workplace") or "").strip(),
             "date": str(_value(row, mapping, "date") or "").strip(),
             "work_hours": max(0.0, work_hours),
-            "late_hours": _number_as_hours(_value(row, mapping, "late_minutes")),
-            "early_leave_hours": _number_as_hours(_value(row, mapping, "early_leave_minutes")),
+            "late_hours": _minutes_as_hours(_value(row, mapping, "late_minutes")),
+            "early_leave_hours": _minutes_as_hours(_value(row, mapping, "early_leave_minutes")),
             "overtime_hours": _number_as_hours(_value(row, mapping, "overtime_hours")),
             "night_hours": _number_as_hours(_value(row, mapping, "night_hours")),
             "special_hours": _number_as_hours(_value(row, mapping, "special_hours")),
