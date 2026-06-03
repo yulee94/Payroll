@@ -39,6 +39,7 @@ python main.py
 ## 급여 자동화 구조
 
 - `services/payroll_automation.py`가 청구서/근태/혼합 입력을 받는 공통 백엔드 진입점입니다.
+- `services/payroll_api_adapter.py`가 JSON에 가까운 API 요청/응답 형태를 내부 급여 자동화 요청으로 변환합니다.
 - `services/payroll_policy_store.py`가 법인 기본값과 사업장별 운영 기준을 저장하고 해석합니다.
 - `services/attendance_import.py`와 `services/attendance_invoice_bridge.py`가 외부 근태 파일을 기존 급여 엔진이 읽을 수 있는 청구서형 데이터로 변환합니다.
 - `services/payroll_ui_bridge.py`와 `services/payroll_settings_ui_bridge.py`가 데스크톱 UI를 새 자동화 서비스와 설정 UX에 연결합니다.
@@ -49,7 +50,7 @@ python main.py
 PR 자동검사와 동일한 핵심 테스트부터 실행합니다.
 
 ```powershell
-python -m unittest tests.test_attendance_import tests.test_payroll_automation tests.test_payroll_operation_policy tests.test_payroll_ui_bridge tests.test_payroll_settings_ui_bridge tests.test_preview_grid_filter tests.test_workflow tests.test_org_access -v
+python -m unittest tests.test_attendance_import tests.test_payroll_api_adapter tests.test_payroll_automation tests.test_payroll_operation_policy tests.test_payroll_ui_bridge tests.test_payroll_settings_ui_bridge tests.test_preview_grid_filter tests.test_workflow tests.test_org_access -v
 ```
 
 전체 테스트는 변경 범위가 넓을 때 실행합니다.
