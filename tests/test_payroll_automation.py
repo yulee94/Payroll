@@ -7,6 +7,9 @@ from unittest.mock import patch
 from services.payroll_automation import (
     PayrollAutomationRequest,
     PayrollAutomationResult,
+    run_attendance_payroll,
+    run_invoice_payroll,
+    run_mixed_payroll,
     run_payroll_automation,
 )
 from services.payroll_policy_store import INPUT_ATTENDANCE
@@ -56,6 +59,28 @@ class PayrollAutomationRoutingTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertEqual(result.input_type, "attendance")
         self.assertIn("근태 파일", result.error)
+
+    def test_convenience_entrypoints_build_explicit_requests(self) -> None:
+        expected = PayrollAutomationResult(ok=True, scope=self._scope(), input_type="invoice")
+        with patch("services.payroll_automation.run_payroll_automation", return_value=expected) as run:
+            run_invoice_payroll("invoice.xlsx", self._scope(), tenant_id="tenant-a")
+            run_attendance_payroll("attendance.csv", self._scope(), tenant_id="tenant-a")
+            run_mixed_payroll("invoice.xlsx", "attendance.csv", self._scope(), tenant_id="tenant-a")
+
+        invoice_req = run.call_args_list[0].args[0]
+        attendance_req = run.call_args_list[1].args[0]
+        mixed_req = run.call_args_list[2].args[0]
+
+        self.assertEqual(invoice_req.input_type, "invoice")
+        self.assertEqual(invoice_req.invoice_path, Path("invoice.xlsx"))
+        self.assertIsNone(invoice_req.attendance_path)
+        self.assertEqual(attendance_req.input_type, "attendance")
+        self.assertEqual(attendance_req.attendance_path, Path("attendance.csv"))
+        self.assertIsNone(attendance_req.invoice_path)
+        self.assertEqual(mixed_req.input_type, "mixed")
+        self.assertEqual(mixed_req.invoice_path, Path("invoice.xlsx"))
+        self.assertEqual(mixed_req.attendance_path, Path("attendance.csv"))
+        self.assertEqual(mixed_req.tenant_id, "tenant-a")
 
 
 if __name__ == "__main__":
