@@ -45,6 +45,8 @@ class PayrollAutomationResult:
     paths: dict[str, str] = field(default_factory=dict)
     payroll_audit: dict[str, Any] = field(default_factory=dict)
     roster: dict[str, Any] = field(default_factory=dict)
+    operation_policy: dict[str, Any] = field(default_factory=dict)
+    operation_policy_source: str = ""
     raw: dict[str, Any] = field(default_factory=dict)
     error: str = ""
     exception: Exception | None = field(default=None, repr=False, compare=False)
@@ -62,6 +64,8 @@ class PayrollAutomationResult:
             "paths": dict(self.paths),
             "payroll_audit": dict(self.payroll_audit),
             "roster": dict(self.roster),
+            "operation_policy": dict(self.operation_policy),
+            "operation_policy_source": self.operation_policy_source,
             "error": self.error,
         }
 
@@ -100,6 +104,22 @@ def _policy_input_type(request: PayrollAutomationRequest) -> str:
     return _determine_input_type(request)
 
 
+def _operation_policy_context(request: PayrollAutomationRequest) -> tuple[dict[str, Any], str]:
+    try:
+        from services.payroll_policy_store import resolve_payroll_operation_policy
+
+        resolved = resolve_payroll_operation_policy(
+            request.scope.workplace,
+            tenant_id=request.tenant_id,
+        )
+        policy = resolved.get("policy") if isinstance(resolved, dict) else None
+        return (dict(policy) if isinstance(policy, dict) else {}), str(
+            resolved.get("source") or ""
+        )
+    except Exception:
+        return {}, ""
+
+
 def _stringify_paths(paths: dict[str, Any]) -> dict[str, str]:
     out: dict[str, str] = {}
     for key, value in (paths or {}).items():
@@ -127,6 +147,7 @@ def _process_invoice_path(
     warnings = list(raw.get("warnings") or [])
     if extra_warnings:
         warnings = list(extra_warnings) + warnings
+    operation_policy, operation_policy_source = _operation_policy_context(request)
     return PayrollAutomationResult(
         ok=True,
         scope=request.scope,
@@ -136,6 +157,8 @@ def _process_invoice_path(
         paths=_stringify_paths(raw.get("paths") or {}),
         payroll_audit=raw.get("payroll_audit") or {},
         roster=raw.get("roster") or {},
+        operation_policy=operation_policy,
+        operation_policy_source=operation_policy_source,
         raw=raw,
     )
 
@@ -208,12 +231,15 @@ def run_payroll_automation(request: PayrollAutomationRequest) -> PayrollAutomati
 
         raise ValueError(f"지원하지 않는 급여 입력 방식입니다: {input_type}")
     except Exception as exc:
+        operation_policy, operation_policy_source = _operation_policy_context(request)
         return PayrollAutomationResult(
             ok=False,
             scope=request.scope,
             input_type=input_type,
             error=str(exc),
             warnings=[str(exc)],
+            operation_policy=operation_policy,
+            operation_policy_source=operation_policy_source,
             exception=exc,
         )
 
