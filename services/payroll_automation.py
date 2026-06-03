@@ -142,6 +142,7 @@ def _process_invoice_path(
 
 def run_payroll_automation(request: PayrollAutomationRequest) -> PayrollAutomationResult:
     """Run payroll automation from invoice, attendance, or mixed inputs."""
+    input_type = request.input_type
     try:
         input_type = _policy_input_type(request)
         invoice_path = Path(request.invoice_path) if request.invoice_path else None
@@ -210,7 +211,7 @@ def run_payroll_automation(request: PayrollAutomationRequest) -> PayrollAutomati
         return PayrollAutomationResult(
             ok=False,
             scope=request.scope,
-            input_type=request.input_type,
+            input_type=input_type,
             error=str(exc),
             warnings=[str(exc)],
             exception=exc,
