@@ -4,6 +4,9 @@ use crate::access::{
 use crate::attendance::{
     aggregate_attendance_records, AttendanceInvoiceRow, AttendanceSourceRecord,
 };
+use crate::employment_insurance_65::{
+    resolve_ei_65_for_payroll, Ei65PayrollInput, Ei65PayrollResult,
+};
 use crate::execution_plan::{plan_payroll_execution, PayrollExecutionPlan};
 use crate::fixed_hours::{
     apply_fixed_hours_to_invoice, FixedHoursApplication, FixedHoursInvoice, FixedHoursProfile,
@@ -221,6 +224,10 @@ impl PayrollApiService {
         audit_invoice_batch(items, workplace)
     }
 
+    pub fn resolve_ei_65_for_payroll(&self, input: &Ei65PayrollInput) -> Ei65PayrollResult {
+        resolve_ei_65_for_payroll(input)
+    }
+
     pub fn apply_site_benefits_to_invoice<S>(
         &self,
         invoice: SiteBenefitsInvoice,
@@ -342,6 +349,9 @@ fn readiness_state(checks: &[ReadinessCheck]) -> ReadinessState {
 #[cfg(test)]
 mod tests {
     use crate::access::{PayrollAction, PayrollPosition, PayrollPrincipal, PayrollRole};
+    use crate::employment_insurance_65::{
+        Ei65EligibilityStatus, Ei65PayrollInput, Ei65UnknownDefault, Ei65VerificationRecord,
+    };
     use crate::policy::{OperationPolicy, OperationPolicySnapshot, PayrollInputBasis};
     use crate::request::parse_payroll_api_request;
     use crate::service::{
@@ -398,6 +408,22 @@ mod tests {
         assert_eq!(value["ok"], true);
         assert_eq!(value["action"], "run");
         assert_eq!(value["scope"], "COSS/Site A/2026-05");
+    }
+
+    #[test]
+    fn service_resolves_ei65_payroll_decision() {
+        let service = PayrollApiService::new(ServiceConfig::default());
+        let input = Ei65PayrollInput::new("500615-1", "2026-05")
+            .with_employee_name("김순자")
+            .with_unknown_default(Ei65UnknownDefault::Deduct)
+            .with_verification(Ei65VerificationRecord::new(0).with_management_no("1234567890"));
+        let result = service.resolve_ei_65_for_payroll(&input);
+        let value = serde_json::to_value(&result).unwrap();
+
+        assert_eq!(result.status, Ei65EligibilityStatus::Exempt);
+        assert!(!result.deduct_employment_insurance);
+        assert_eq!(value["status"], "exempt");
+        assert_eq!(value["management_no"], "1234567890");
     }
 
     #[test]

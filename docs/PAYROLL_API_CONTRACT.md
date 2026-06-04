@@ -20,6 +20,7 @@ Rust transition entry point:
 - Workplace monthly-hours application function: `PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)`
 - Invoice audit row function: `PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)`
 - Invoice audit batch function: `PayrollApiService::audit_invoice_batch(items, workplace)`
+- Employment-insurance 65+ decision function: `PayrollApiService::resolve_ei_65_for_payroll(input)`
 - Site-benefits application function: `PayrollApiService::apply_site_benefits_to_invoice(invoice, site_benefits_config, payroll_period)`
 - Fixed-hours application function: `PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)`
 - Execution plan function: `PayrollApiService::plan_run_request(request, policy_snapshot)`
@@ -27,7 +28,7 @@ Rust transition entry point:
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, employment-insurance 65+ payroll decisions, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -260,6 +261,61 @@ Example batch result shape:
   ],
   "pass_count": 2,
   "warn_count": 1
+}
+```
+
+
+## Employment-Insurance 65+ Payroll Decision
+
+Python compatibility code may still import and persist KCOMWEL verification
+records, resolve site management numbers from payroll settings, match employees,
+call future live KCOMWEL APIs, apply EDI premiums, mutate payroll invoice rows,
+and read/write workbooks. Once callers supply identity, a valid payroll period,
+labels, a resolved site management number, an optional latest KCOMWEL
+verification record, and the tenant unknown-status default, Rust owns the pure
+age-65+ employment-insurance decision through
+`resolve_ei_65_for_payroll(input)` and
+`PayrollApiService::resolve_ei_65_for_payroll(input)`.
+
+Decision invariants:
+
+1. Valid payroll periods use the calendar month end as the age basis.
+2. Korean RRN century codes and six-digit birth dates use Python-compatible age
+   parsing for the supplied period.
+3. Workers below age 65 return `liable`, `premium_amount: null`, and
+   `deduct_employment_insurance: true` without requiring a KCOMWEL record.
+4. Supplied KCOMWEL premiums `<= 0` return `exempt` and suppress employment
+   insurance deduction.
+5. Supplied positive KCOMWEL premiums return `liable` and keep employment
+   insurance deduction enabled.
+6. Missing records return `unknown` and apply the supplied unknown default:
+   `skip` suppresses deduction and `deduct` keeps deduction enabled.
+7. Unknown warnings preserve the Korean payroll-review wording used by Python
+   compatibility code.
+
+Example supplied-input decision:
+
+```json
+{
+  "status": "exempt",
+  "premium_amount": 0,
+  "management_no": "1234567890",
+  "deduct_employment_insurance": false,
+  "warning": "",
+  "default_action": "skip"
+}
+```
+
+Example unknown decision:
+
+```json
+{
+  "status": "unknown",
+  "premium_amount": null,
+  "management_no": "1234567890",
+  "deduct_employment_insurance": false,
+  "warning": "김순자: 만 65세 이상 고용보험 KCOMWEL 확인 미완료 → 설정 기본값(공제 생략) 적용",
+  "default_action": "skip"
 }
 ```
 
@@ -870,6 +926,7 @@ Frontend code must use `error_code`, not parse `error` text.
 - Rust owns supplied-policy workplace monthly-hours application through `PayrollApiService::apply_monthly_hours_to_invoice`; Python settings persistence and canonical workplace alias resolution remain compatibility-only until repository/storage migration lands.
 - Rust owns supplied-input invoice audit row evaluation through `PayrollApiService::audit_invoice_row`; Python settings lookup, ledger matching, fixed-profile resolution, and workbook I/O remain compatibility-only boundaries.
 - Rust owns supplied-input invoice audit batch summarization through `PayrollApiService::audit_invoice_batch`; Python still supplies resolved row inputs and keeps UI text rendering compatibility.
+- Rust owns supplied-input employment-insurance 65+ payroll decisions through `PayrollApiService::resolve_ei_65_for_payroll`; Python still imports/persists KCOMWEL records, resolves settings/site management numbers, calls future live APIs, applies EDI premiums, and mutates payroll rows.
 - Rust owns supplied-config site-benefits row application through `PayrollApiService::apply_site_benefits_to_invoice`; Python still resolves settings, checks/persists identity-insurance ledgers, and recalculates payroll totals.
 - Rust owns resolved fixed-hours profile application through `PayrollApiService::apply_fixed_hours_to_invoice`; Python contract/template/settings resolution remains compatibility-only until persistence and HR contract repositories move to Rust.
 - Rust now owns run-result success and execution-failure envelope shaping through `PayrollApiService::run_response`; Python execution remains a compatibility source until the Rust executor and persistence slices land.

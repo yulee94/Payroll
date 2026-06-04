@@ -3,6 +3,7 @@ PAYROLL_API_SRCS = [
     "src/access.rs",
     "src/attendance.rs",
     "src/error.rs",
+    "src/employment_insurance_65.rs",
     "src/execution_plan.rs",
     "src/fixed_hours.rs",
     "src/invoice_audit.rs",

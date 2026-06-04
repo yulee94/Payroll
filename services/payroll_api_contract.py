@@ -536,6 +536,91 @@ def payroll_invoice_audit_batch_example() -> dict[str, Any]:
     }
 
 
+def payroll_ei65_decision_example() -> dict[str, Any]:
+    """Return the Rust-owned supplied-input EI 65+ payroll decision shape."""
+    return {
+        "rust_entrypoint": "PayrollApiService::resolve_ei_65_for_payroll(input)",
+        "calculator_entrypoint": "resolve_ei_65_for_payroll(input)",
+        "python_compatibility_source": "core.payroll.employment_insurance_65.resolve_ei_65_for_payroll",
+        "resolver_boundary": (
+            "Python compatibility code may still import/persist KCOMWEL records, "
+            "resolve site management numbers, match employees, call future live KCOMWEL APIs, "
+            "mutate payroll invoice rows, apply EDI premiums, and read/write workbooks before or after "
+            "supplying pure decision inputs to Rust."
+        ),
+        "status_values": ["exempt", "liable", "unknown"],
+        "unknown_default_values": ["skip", "deduct"],
+        "source_values": ["manual", "import", "api"],
+        "verification_fields": [
+            "employee_id",
+            "employee_name",
+            "check_date",
+            "premium_amount",
+            "management_no",
+            "source",
+        ],
+        "input_fields": [
+            "identity",
+            "payroll_period",
+            "employee_id",
+            "employee_name",
+            "workplace",
+            "site_management_no",
+            "unknown_default",
+            "latest_verification",
+        ],
+        "result_fields": [
+            "status",
+            "premium_amount",
+            "management_no",
+            "deduct_employment_insurance",
+            "warning",
+            "default_action",
+        ],
+        "example_input": {
+            "identity": "500615-1",
+            "payroll_period": "2026-05",
+            "employee_id": "E65",
+            "employee_name": "김순자",
+            "workplace": "한국앰코",
+            "site_management_no": "1234567890",
+            "unknown_default": "skip",
+            "latest_verification": {
+                "employee_id": "E65",
+                "employee_name": "김순자",
+                "check_date": "2026-05-01",
+                "premium_amount": 0,
+                "management_no": "1234567890",
+                "source": "manual",
+            },
+        },
+        "example_result": {
+            "status": "exempt",
+            "premium_amount": 0,
+            "management_no": "1234567890",
+            "deduct_employment_insurance": False,
+            "warning": "",
+            "default_action": "skip",
+        },
+        "example_unknown_result": {
+            "status": "unknown",
+            "premium_amount": None,
+            "management_no": "1234567890",
+            "deduct_employment_insurance": False,
+            "warning": "김순자: 만 65세 이상 고용보험 KCOMWEL 확인 미완료 → 설정 기본값(공제 생략) 적용",
+            "default_action": "skip",
+        },
+        "invariants": [
+            "valid payroll periods use the calendar month end as the age basis",
+            "Korean RRN century codes and six-digit birth dates use Python-compatible age parsing",
+            "workers below age 65 return liable with no KCOMWEL premium lookup requirement",
+            "supplied premiums less than or equal to zero return exempt and suppress employment-insurance deduction",
+            "supplied positive premiums return liable and keep employment-insurance deduction enabled",
+            "missing verification records return unknown and apply the supplied unknown_default skip/deduct behavior",
+            "KCOMWEL storage, site settings lookup, live API calls, payroll row mutation, EDI premium application, and workbook I/O remain Python compatibility boundaries in this slice",
+        ],
+    }
+
 def payroll_site_benefits_application_example() -> dict[str, Any]:
     """Return the Rust-owned supplied-config site-benefits application shape."""
     return {
@@ -923,6 +1008,7 @@ def payroll_api_contract() -> dict[str, Any]:
         "workplace_hours_application": payroll_workplace_hours_application_example(),
         "invoice_audit_row": payroll_invoice_audit_row_example(),
         "invoice_audit_batch": payroll_invoice_audit_batch_example(),
+        "ei65_payroll_decision": payroll_ei65_decision_example(),
         "site_benefits_application": payroll_site_benefits_application_example(),
         "fixed_hours_application": payroll_fixed_hours_application_example(),
         "policy_resolution": payroll_policy_resolution_example(),
@@ -1111,6 +1197,7 @@ def payroll_api_contract() -> dict[str, Any]:
             "workplace_hours_application_entrypoint": "PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)",
             "invoice_audit_row_entrypoint": "PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)",
             "invoice_audit_batch_entrypoint": "PayrollApiService::audit_invoice_batch(items, workplace)",
+            "ei65_payroll_decision_entrypoint": "PayrollApiService::resolve_ei_65_for_payroll(input)",
             "site_benefits_application_entrypoint": "PayrollApiService::apply_site_benefits_to_invoice(invoice, site_benefits_config, payroll_period)",
             "fixed_hours_application_entrypoint": "PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)",
             "never_include": ["exception"],
