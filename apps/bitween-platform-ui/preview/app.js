@@ -555,6 +555,7 @@ function renderModule(id) {
       ${sectionHead("", "업무 목록", "필터로 상태를 좁히고 필요한 다음 작업을 확인합니다.", button(secondaryLabel(id), secondaryTarget(id), "secondary"))}
       <div class="list-toolbar">
         <div class="filters">${data.filters.map((filter) => `<button class="filter-chip ${state.filter === filter ? "active" : ""}" data-filter="${filter}">${filter}</button>`).join("")}</div>
+        ${state.search ? '<button class="btn ghost search-clear" data-clear-search="true" type="button">검색 초기화</button>' : ""}
         <label class="search-box" for="work-search"><span>검색</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="업무, 상태, 담당자 검색" /></label>
       </div>
       <div class="list-summary"><strong>${rows.length}건</strong><span class="helper">${state.filter} 필터${state.search ? ` · "${escapeText(state.search)}" 검색` : ""}</span></div>
@@ -948,6 +949,16 @@ function bindEvents() {
       });
     });
   }
+
+  document.querySelectorAll("[data-clear-search]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.search = "";
+      state.selectedRowKey = "";
+      render();
+      window.requestAnimationFrame(() => document.getElementById("work-search")?.focus());
+      toast("검색어를 초기화했습니다.");
+    });
+  });
 
   const companyCode = document.getElementById("company-code");
   if (companyCode) {

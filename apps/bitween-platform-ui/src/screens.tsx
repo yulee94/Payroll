@@ -510,6 +510,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
             <Label size="sm" weight="bold">검색</Label>
             <TextInput
               autoCapitalize="none"
+              accessibilityLabel="업무 목록 검색"
               onChangeText={setSearch}
               placeholder="업무, 상태, 담당자 검색"
               placeholderTextColor={colors.muted}
@@ -517,6 +518,11 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
               style={styles.input}
               value={search}
             />
+            {search ? (
+              <ActionButton accessibilityLabel="업무 목록 검색어 초기화" onPress={() => setSearch("")} variant="ghost">
+                검색 초기화
+              </ActionButton>
+            ) : null}
           </View>
         </View>
         <View style={styles.listSummary}>

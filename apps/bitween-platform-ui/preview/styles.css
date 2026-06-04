@@ -941,12 +941,22 @@ button {
   align-items: end;
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px) auto;
 }
 
 .search-box {
   display: grid;
   gap: 6px;
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.search-clear {
+  align-self: end;
+  grid-column: 3;
+  grid-row: 1;
+  min-height: 40px;
+  white-space: nowrap;
 }
 
 .search-box span {
@@ -1125,6 +1135,12 @@ button {
 
   .list-toolbar {
     grid-template-columns: 1fr;
+  }
+
+  .search-box,
+  .search-clear {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .table {
