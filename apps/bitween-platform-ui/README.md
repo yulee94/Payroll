@@ -22,6 +22,10 @@ This app is intentionally added in parallel to the existing Python/Tkinter deskt
 - `src/types.ts`: strict frontend domain types
 - `src/theme.ts`: color, spacing, radius, and status-tone tokens
 
+## Dependency Baseline
+
+The package is aligned to Expo SDK 54, which targets React Native 0.81, React 19.1, and react-native-web 0.21.
+
 ## Commands
 
 ```powershell
