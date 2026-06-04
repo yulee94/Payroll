@@ -558,7 +558,7 @@ function renderModule(id) {
         <label class="search-box" for="work-search"><span>검색</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="업무, 상태, 담당자 검색" /></label>
       </div>
       <div class="list-summary"><strong>${rows.length}건</strong><span class="helper">${state.filter} 필터${state.search ? ` · "${escapeText(state.search)}" 검색` : ""}</span></div>
-      ${table(rows, true)}
+      ${data.rows.length === 0 ? empty("표시할 항목이 없습니다.", "처리할 업무가 생기면 목록이 자동으로 채워집니다.") : rows.length ? table(rows, true) : filteredEmpty()}
       ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
     <div class="action-panels">
@@ -731,6 +731,13 @@ function selectedWorkRow(rows) {
   return rows.find((row) => rowKey(row) === state.selectedRowKey) || rows[0];
 }
 
+function filteredEmpty() {
+  return `<div class="filtered-empty">
+    ${empty("검색 결과가 없습니다.", "필터나 검색어를 조정하면 업무 목록을 다시 확인할 수 있습니다.")}
+    <button class="btn secondary" data-reset-list>필터 초기화</button>
+  </div>`;
+}
+
 function workDetail([category, status, owner, next, tone]) {
   return `<div class="detail-panel">
     <div class="detail-head"><div><span class="helper">선택한 업무</span><strong>${escapeText(category)}</strong></div>${badge(status, tone)}</div>
@@ -845,6 +852,16 @@ function bindEvents() {
       state.selectedRowKey = "";
       render();
       toast(`${state.filter} 필터가 선택되었습니다.`);
+    });
+  });
+
+  document.querySelectorAll("[data-reset-list]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.filter = "전체";
+      state.search = "";
+      state.selectedRowKey = "";
+      render();
+      toast("필터와 검색어를 초기화했습니다.");
     });
   });
 

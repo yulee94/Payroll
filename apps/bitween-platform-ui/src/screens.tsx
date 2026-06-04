@@ -459,6 +459,11 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
   const selectRow = (row: ModuleRow) => {
     setSelectedRowId(row.id);
   };
+  const resetListFilters = () => {
+    setActiveFilter(defaultFilter);
+    setSearch("");
+    setSelectedRowId(dashboard.rows[0]?.id);
+  };
 
   return (
     <View style={styles.stack}>
@@ -523,10 +528,15 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
           <Label weight="bold">{filteredRows.length}건</Label>
           <Label size="sm" muted>{activeFilter} 필터{search ? ` · "${search}" 검색` : ""}</Label>
         </View>
-        {dashboard.rows.length > 0 ? (
+        {dashboard.rows.length === 0 ? (
+          <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />
+        ) : filteredRows.length > 0 ? (
           <DataTable onRowPress={selectRow} rows={filteredRows} selectedRowId={selectedRow?.id} />
         ) : (
-          <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />
+          <View style={styles.filteredEmptyState}>
+            <EmptyState title="검색 결과가 없습니다." description="필터나 검색어를 조정하면 업무 목록을 다시 확인할 수 있습니다." />
+            <ActionButton onPress={resetListFilters} variant="secondary">필터 초기화</ActionButton>
+          </View>
         )}
         {selectedRow ? <WorkDetailPanel row={selectedRow} onSelect={onSelect} /> : null}
       </Card>
@@ -1205,6 +1215,10 @@ const styles = StyleSheet.create({
   },
   formGroup: {
     gap: spacing.xs
+  },
+  filteredEmptyState: {
+    alignItems: "flex-start",
+    gap: spacing.md
   },
   heroCopy: {
     color: colors.card,
