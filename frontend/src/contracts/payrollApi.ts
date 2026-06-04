@@ -1,10 +1,14 @@
 export const PAYROLL_API_VERSION = "v1" as const;
 export const PAYROLL_API_ENDPOINT = "/api/payroll/v1/runs" as const;
 export const PAYROLL_API_VALIDATE_ENDPOINT = "/api/payroll/v1/runs/validate" as const;
+export const PAYROLL_API_HEALTH_ENDPOINT = "/api/payroll/v1/healthz" as const;
+export const PAYROLL_API_READINESS_ENDPOINT = "/api/payroll/v1/readiness" as const;
 
 export type PayrollInputType = "auto" | "invoice" | "attendance" | "mixed";
 export type PayrollInputBasis = "invoice" | "attendance" | "hybrid";
 export type PayrollMissingClockPolicy = "warn" | "ignore" | "deduct";
+export type PayrollHealthStatus = "ok";
+export type PayrollReadinessState = "ready" | "degraded" | "not_ready";
 
 export type PayrollErrorCode =
   | "invalid_payload"
@@ -129,6 +133,31 @@ export type PayrollApiResponse =
   | PayrollSuccessResponse
   | PayrollValidationResponse
   | PayrollErrorResponse;
+
+export interface PayrollHealthResponse {
+  ok: true;
+  status: PayrollHealthStatus;
+  service: string;
+  version: typeof PAYROLL_API_VERSION;
+  environment: string;
+  build_sha: string;
+  uptime_seconds: number;
+}
+
+export interface PayrollReadinessCheck {
+  name: string;
+  state: PayrollReadinessState;
+  required: boolean;
+  message: string;
+}
+
+export interface PayrollReadinessResponse {
+  ready: boolean;
+  state: PayrollReadinessState;
+  service: string;
+  version: typeof PAYROLL_API_VERSION;
+  checks: PayrollReadinessCheck[];
+}
 
 export function buildPayrollValidateRequest(request: PayrollApiRequest): PayrollApiRequest {
   return {

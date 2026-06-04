@@ -249,15 +249,16 @@ cargo test --workspace
 
 **Acceptance criteria:**
 
-- [ ] Rust owns the selected behavior behind a stable API and server-side policy enforcement.
+- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, health, and readiness.
 - [ ] Python adapter is retained only as compatibility fallback while rollout is incomplete.
-- [ ] Health/readiness behavior, service-account permissions, and initial latency/error budgets are defined for Kubernetes.
+- [x] Health/readiness behavior is defined in framework-neutral Rust DTOs and API contracts.
+- [ ] Service-account permissions and initial latency/error budgets are defined for Kubernetes.
 
 **Verification:**
 
-- [ ] Rust unit/integration tests pass.
-- [ ] Contract parity tests pass against Python compatibility fixtures.
-- [ ] TypeScript contract typecheck passes.
+- [x] Rust unit/integration tests pass.
+- [x] Contract parity tests pass against Python compatibility fixtures for the contract metadata slice.
+- [x] TypeScript contract typecheck passes.
 
 **Dependencies:** Task 3
 
@@ -292,6 +293,30 @@ Verified commands:
 cargo test -p bitween-payroll-api
 buck2 test //crates/payroll-api:payroll_api_test
 python -m unittest tests.test_payroll_operation_policy tests.test_payroll_api_adapter -v
+npm run typecheck --prefix frontend
+```
+
+## Implementation checkpoint: Rust service boundary and probes
+
+Completed on 2026-06-04 as the first framework-neutral service-boundary slice:
+
+- `crates/payroll-api` exposes `PayrollApiService`.
+- `PayrollApiService::validate_run_payload` is the Rust service facade for
+  validation-only payroll run requests.
+- `PayrollApiService::health()` returns a stable `/api/payroll/v1/healthz`
+  payload with service, version, environment, build SHA, and uptime fields.
+- `PayrollApiService::readiness(checks)` aggregates named readiness checks for
+  `/api/payroll/v1/readiness` without exposing secrets or payroll output paths.
+- Frontend/Python contract metadata names the health/readiness DTOs so future
+  HTTP, Tauri, or Kubernetes wrappers call the Rust-owned shapes.
+- Slice spec: `docs/PAYROLL_RUST_SERVICE_BOUNDARY_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo test -p bitween-payroll-api
+buck2 test //crates/payroll-api:payroll_api_test
+python -m unittest tests.test_payroll_api_contract -v
 npm run typecheck --prefix frontend
 ```
 

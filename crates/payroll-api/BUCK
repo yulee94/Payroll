@@ -4,6 +4,7 @@ PAYROLL_API_SRCS = [
     "src/policy.rs",
     "src/request.rs",
     "src/response.rs",
+    "src/service.rs",
 ]
 
 PAYROLL_API_DEPS = [

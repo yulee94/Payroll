@@ -6,6 +6,8 @@ import unittest
 from services.payroll_api_adapter import build_payroll_api_request
 from services.payroll_api_contract import (
     PAYROLL_API_ENDPOINT,
+    PAYROLL_API_HEALTH_ENDPOINT,
+    PAYROLL_API_READINESS_ENDPOINT,
     PAYROLL_API_VALIDATE_ENDPOINT,
     payroll_api_contract,
     payroll_api_request_example,
@@ -22,6 +24,8 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertEqual(contract["http"]["method"], "POST")
         self.assertEqual(contract["http"]["path"], PAYROLL_API_ENDPOINT)
         self.assertEqual(contract["http"]["validation_path"], PAYROLL_API_VALIDATE_ENDPOINT)
+        self.assertEqual(contract["http"]["health_path"], PAYROLL_API_HEALTH_ENDPOINT)
+        self.assertEqual(contract["http"]["readiness_path"], PAYROLL_API_READINESS_ENDPOINT)
         self.assertIn("mixed", contract["input_types"])
 
     def test_contract_examples_build_internal_requests(self) -> None:
@@ -69,6 +73,18 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertEqual(response["validation"]["requested_input_type"], "mixed")
         self.assertEqual(response["validation"]["operation_policy_source"], "tenant")
         self.assertEqual(response["validation"]["error_code"], "")
+
+    def test_contract_declares_rust_service_health_and_readiness(self) -> None:
+        response = payroll_api_contract()["response"]
+
+        self.assertEqual(response["health"]["status"], "ok")
+        self.assertEqual(response["health"]["service"], "bitween-payroll-api")
+        self.assertEqual(response["health"]["version"], "v1")
+        self.assertEqual(response["readiness"]["state"], "not_ready")
+        self.assertFalse(response["readiness"]["ready"])
+        self.assertTrue(response["readiness"]["checks"][0]["required"])
+        self.assertEqual(response["readiness"]["checks"][1]["state"], "degraded")
+        self.assertFalse(response["readiness"]["checks"][1]["required"])
 
 
 if __name__ == "__main__":
