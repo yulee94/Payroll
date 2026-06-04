@@ -947,6 +947,7 @@ input:focus-visible {
   padding: 14px;
 }
 
+.workflow-approval-grid,
 .recruit-placement-grid,
 .hr-people-grid {
   display: grid;
@@ -954,6 +955,7 @@ input:focus-visible {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.workflow-approval-card,
 .recruit-placement-card,
 .hr-people-card {
   background: var(--bg);
@@ -967,6 +969,7 @@ input:focus-visible {
   text-align: left;
 }
 
+.workflow-approval-head,
 .recruit-placement-head,
 .hr-people-head {
   align-items: start;
