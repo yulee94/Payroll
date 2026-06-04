@@ -18,13 +18,14 @@ Rust transition entry point:
 - Policy-resolved validation function: `PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)`
 - Attendance aggregation function: `PayrollApiService::aggregate_attendance_records(records, workplace, attendance_policy)`
 - Workplace monthly-hours application function: `PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)`
+- Invoice audit row function: `PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)`
 - Fixed-hours application function: `PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)`
 - Execution plan function: `PayrollApiService::plan_run_request(request, policy_snapshot)`
 - Run-result response function: `PayrollApiService::run_response(result, request_id)`
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -158,6 +159,47 @@ Example application output:
     "daily_hours": 8,
     "break_minutes": 60
   }
+}
+```
+
+
+## Invoice Audit Row
+
+Python compatibility code may still resolve settings, match payroll ledger records, resolve employee fixed-hours profiles, read workbooks, and aggregate batch summaries. Once a single invoice row, workplace-hours policy, optional ledger record, and optional fixed-hours profile have been supplied, Rust owns the deterministic audit-row evaluation through `audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)` and `PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)`.
+
+Audit invariants:
+
+1. `status` remains either `pass` or `warn`, with Korean labels `정상` and `확인`.
+2. Break-hour estimation uses positive `break_minutes` first; otherwise it falls back to the invoice `base_days - work_days - leave_days` gap when the I/J columns look hour-based.
+3. Base-salary mismatch, missing invoice-hours, missing roster base-hourly, fixed-hours mismatch, and ledger monthly-hour mismatch flags preserve Python Korean wording.
+4. Optional fixed-hours profiles reuse the Rust fixed-hours application/audit flags and prepend those flags before row-level warnings.
+5. Batch summary aggregation, settings lookup, record matching, and workbook I/O remain Python compatibility boundaries in this slice.
+
+Example audit row output:
+
+```json
+{
+  "name": "박감사",
+  "workplace": "앰코",
+  "status": "warn",
+  "status_label": "확인",
+  "flags": [
+    "기본급 불일치: 산출 2,090,000원 vs 청구서 2,000,000원",
+    "대장 적용시간(208h)과 재검열(209h) 상이"
+  ],
+  "base_days": 209,
+  "work_days": 200,
+  "break_hours": 9,
+  "applied_monthly_hours": 209,
+  "hours_source": "앰코: 고정 209시간",
+  "policy_mode": "fixed",
+  "policy_fixed_hours": 209,
+  "base_hourly": 10000,
+  "invoice_base_salary": 2000000,
+  "calc_base_salary": 2090000,
+  "formula": "기본시급 10,000원 × 209시간 = 2,090,000원",
+  "fixed_hours_mode": false,
+  "fixed_hours_source": ""
 }
 ```
 
@@ -713,6 +755,7 @@ Frontend code must use `error_code`, not parse `error` text.
 - Responses include `operation_policy` and `operation_policy_source` (`site`, `tenant`, or `global`) so operators can audit which policy was applied.
 - Rust owns site -> tenant -> global policy-resolution precedence for supplied settings snapshots through `PayrollApiService::validate_run_payload_with_policy_settings`; Python settings persistence remains compatibility-only until the repository/storage migration lands.
 - Rust owns supplied-policy workplace monthly-hours application through `PayrollApiService::apply_monthly_hours_to_invoice`; Python settings persistence and canonical workplace alias resolution remain compatibility-only until repository/storage migration lands.
+- Rust owns supplied-input invoice audit row evaluation through `PayrollApiService::audit_invoice_row`; Python settings lookup, ledger matching, fixed-profile resolution, batch summaries, and workbook I/O remain compatibility-only boundaries.
 - Rust owns resolved fixed-hours profile application through `PayrollApiService::apply_fixed_hours_to_invoice`; Python contract/template/settings resolution remains compatibility-only until persistence and HR contract repositories move to Rust.
 - Rust now owns run-result success and execution-failure envelope shaping through `PayrollApiService::run_response`; Python execution remains a compatibility source until the Rust executor and persistence slices land.
 - Rust normalizes `operation_policy` known fields before serializing responses: invalid input basis falls back to `hybrid`; attendance minute fields are clamped to Python-compatible ranges; missing-clock policy falls back to `warn`.

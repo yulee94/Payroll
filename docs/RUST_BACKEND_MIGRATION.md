@@ -159,6 +159,38 @@ Verification evidence for this checkpoint:
 
 Slice spec: `docs/PAYROLL_RUST_ATTENDANCE_AGGREGATION_SLICE.md`.
 
+
+## Current implementation checkpoint: Rust payroll invoice audit row
+
+Implemented on 2026-06-04 as the next payroll audit behavior slice:
+
+- `crates/payroll-api` now exposes `InvoiceAuditInvoice`,
+  `InvoiceAuditRecord`, `InvoiceAuditRow`, `InvoiceAuditStatus`,
+  `estimate_break_hours`, and `audit_invoice_row`.
+- `PayrollApiService::audit_invoice_row` evaluates a supplied invoice row,
+  workplace-hours policy, optional ledger record, and optional fixed-hours
+  profile without reading settings stores, workbooks, or rosters.
+- Rust preserves Python compatibility status labels, warning flag wording,
+  break-hour estimation, base-salary formula text, fixed-hours flag composition,
+  and ledger monthly-hour mismatch checks.
+- Python remains responsible for settings lookup, record matching, fixed-profile
+  resolution, batch summary aggregation, and workbook I/O until those slices move
+  to Rust behind parity tests.
+- TypeScript and Python contract metadata now include invoice-audit invoice,
+  record, and row DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo fmt --check`
+- `cargo test --workspace`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_invoice_audit tests.test_payroll_api_contract -v`
+- `npm run typecheck --prefix frontend`
+- `git diff --check`
+- `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
+
+Slice spec: `docs/PAYROLL_RUST_INVOICE_AUDIT_ROW_SLICE.md`.
+
 ## Current implementation checkpoint: Rust payroll workplace-hours application
 
 Implemented on 2026-06-04 as the next payroll monthly-hours behavior slice:

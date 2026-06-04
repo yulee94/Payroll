@@ -8,6 +8,9 @@ use crate::execution_plan::{plan_payroll_execution, PayrollExecutionPlan};
 use crate::fixed_hours::{
     apply_fixed_hours_to_invoice, FixedHoursApplication, FixedHoursInvoice, FixedHoursProfile,
 };
+use crate::invoice_audit::{
+    audit_invoice_row, InvoiceAuditInvoice, InvoiceAuditRecord, InvoiceAuditRow,
+};
 use crate::policy::{AttendancePolicy, OperationPolicySnapshot};
 use crate::policy_resolution::PayrollPolicySettings;
 use crate::request::PayrollRunRequest;
@@ -189,6 +192,20 @@ impl PayrollApiService {
         S: AsRef<str>,
     {
         apply_monthly_hours_to_invoice(invoice, workplace, policy)
+    }
+
+    pub fn audit_invoice_row<S>(
+        &self,
+        invoice: InvoiceAuditInvoice,
+        workplace: S,
+        policy: &WorkplaceHoursPolicy,
+        record: Option<&InvoiceAuditRecord>,
+        fixed_profile: Option<&FixedHoursProfile>,
+    ) -> InvoiceAuditRow
+    where
+        S: AsRef<str>,
+    {
+        audit_invoice_row(invoice, workplace, policy, record, fixed_profile)
     }
 
     pub fn run_response(

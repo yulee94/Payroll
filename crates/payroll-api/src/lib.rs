@@ -3,6 +3,7 @@ pub mod attendance;
 pub mod error;
 pub mod execution_plan;
 pub mod fixed_hours;
+pub mod invoice_audit;
 pub mod policy;
 pub mod policy_resolution;
 pub mod request;
@@ -25,6 +26,10 @@ pub use fixed_hours::{
     apply_fixed_hours_to_invoice, fixed_hours_audit_flags, FixedHoursApplication,
     FixedHoursInvoice, FixedHoursPayType, FixedHoursProfile, FIXED_HOURS_SOURCE_CONTRACT,
     FIXED_HOURS_SOURCE_TEMPLATE, PAY_TYPE_HOURLY, PAY_TYPE_MONTHLY_SALARY,
+};
+pub use invoice_audit::{
+    audit_invoice_row, estimate_break_hours, InvoiceAuditInvoice, InvoiceAuditRecord,
+    InvoiceAuditRow, InvoiceAuditStatus,
 };
 pub use policy::{
     AttendancePolicy, MissingClockPolicy, OperationPolicy, OperationPolicySnapshot,
