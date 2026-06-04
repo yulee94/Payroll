@@ -6460,12 +6460,57 @@
       }
     },
     {
-      "key": "preview.skipLink",
+      "key": "screens.login.actions.enterHomeAccessibility",
       "values": {
-        "ko-KR": "본문으로 건너뛰기",
-        "en-US": "Skip to main content",
-        "zh-Hans-CN": "跳到主要内容",
-        "ja-JP": "本文へスキップ"
+        "ko-KR": "입력한 demo 계정으로 플랫폼 홈 이동",
+        "en-US": "Go to the platform home with the entered demo account",
+        "zh-Hans-CN": "使用已输入的演示账号进入平台首页",
+        "ja-JP": "入力したデモアカウントでプラットフォームホームへ移動"
+      }
+    },
+    {
+      "key": "screens.login.actions.loginAccessibility",
+      "values": {
+        "ko-KR": "로그인 정보 확인",
+        "en-US": "Check sign-in information",
+        "zh-Hans-CN": "检查登录信息",
+        "ja-JP": "ログイン情報を確認"
+      }
+    },
+    {
+      "key": "screens.login.actions.demoAccessibility",
+      "values": {
+        "ko-KR": "법인코드 {companyCode}, 아이디 {userId}, 비밀번호 {password} demo 계정으로 접속",
+        "en-US": "Sign in with demo account company code {companyCode}, user ID {userId}, and password {password}",
+        "zh-Hans-CN": "使用公司代码 {companyCode}、用户 ID {userId}、密码 {password} 的演示账号登录",
+        "ja-JP": "法人コード {companyCode}、ID {userId}、パスワード {password} のデモアカウントでログイン"
+      }
+    },
+    {
+      "key": "screens.login.form.companyCodeHint",
+      "values": {
+        "ko-KR": "Demo 계정은 법인코드 {companyCode}을 사용합니다.",
+        "en-US": "The demo account uses company code {companyCode}.",
+        "zh-Hans-CN": "演示账号使用公司代码 {companyCode}。",
+        "ja-JP": "デモアカウントは法人コード {companyCode} を使用します。"
+      }
+    },
+    {
+      "key": "screens.login.form.userIdHint",
+      "values": {
+        "ko-KR": "Demo 계정은 아이디 {userId}을 사용합니다.",
+        "en-US": "The demo account uses user ID {userId}.",
+        "zh-Hans-CN": "演示账号使用用户 ID {userId}。",
+        "ja-JP": "デモアカウントはID {userId} を使用します。"
+      }
+    },
+    {
+      "key": "screens.login.form.passwordHint",
+      "values": {
+        "ko-KR": "Demo 계정은 비밀번호 {password}을 사용합니다.",
+        "en-US": "The demo account uses password {password}.",
+        "zh-Hans-CN": "演示账号使用密码 {password}。",
+        "ja-JP": "デモアカウントはパスワード {password} を使用します。"
       }
     },
     {
@@ -6529,6 +6574,15 @@
         "en-US": "React Native/Web ready",
         "zh-Hans-CN": "React Native/Web 就绪",
         "ja-JP": "React Native/Web 対応準備済み"
+      }
+    },
+    {
+      "key": "preview.skipLink",
+      "values": {
+        "ko-KR": "본문으로 건너뛰기",
+        "en-US": "Skip to main content",
+        "zh-Hans-CN": "跳到主要内容",
+        "ja-JP": "本文へスキップ"
       }
     }
   ],
