@@ -15,6 +15,13 @@ export type PayrollPermission =
   | "platform.payroll"
   | "platform.payroll.executive"
   | "platform.payroll.settings";
+export type PayrollExecutionBackend = "python_compatibility";
+export type PayrollExecutionStepKind =
+  | "extract_attendance"
+  | "build_attendance_invoice"
+  | "attach_attendance_sheet"
+  | "process_invoice";
+
 export type PayrollAccessReasonCode =
   | ""
   | "missing_principal_tenant"
@@ -89,6 +96,33 @@ export interface PayrollOperationPolicyResolution {
   policy: PayrollOperationPolicy;
   source: Exclude<PayrollOperationPolicySource, "">;
   has_site_override: boolean;
+}
+
+export interface PayrollExecutionStep {
+  kind: PayrollExecutionStepKind;
+  backend: PayrollExecutionBackend;
+  input: string;
+  output: string;
+  description: string;
+}
+
+export interface PayrollExecutionPlan {
+  ok: boolean;
+  scope: string;
+  scope_key: string;
+  affiliate: string;
+  workplace: string;
+  period: string;
+  input_type: Exclude<PayrollInputType, "auto">;
+  requested_input_type: PayrollInputType;
+  backend: PayrollExecutionBackend;
+  compatibility_executor: string;
+  source_paths: Partial<Record<"invoice" | "attendance", string>>;
+  missing_source_paths: Array<"invoice" | "attendance" | string>;
+  steps: PayrollExecutionStep[];
+  operation_policy: PayrollOperationPolicy;
+  operation_policy_source: PayrollOperationPolicySource;
+  warnings: string[];
 }
 
 export interface PayrollApiBaseResponse {

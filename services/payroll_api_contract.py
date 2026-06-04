@@ -203,6 +203,71 @@ def payroll_policy_resolution_example() -> dict[str, Any]:
     }
 
 
+def payroll_execution_plan_example() -> dict[str, Any]:
+    """Return the Rust-owned payroll execution planning contract shape."""
+    return {
+        "rust_entrypoint": "PayrollApiService::plan_run_request(request, policy_snapshot)",
+        "planner_entrypoint": "plan_payroll_execution(request, policy_snapshot)",
+        "backend_values": ["python_compatibility"],
+        "step_kinds": [
+            "extract_attendance",
+            "build_attendance_invoice",
+            "attach_attendance_sheet",
+            "process_invoice",
+        ],
+        "compatibility_executor": "services.payroll_automation.run_payroll_automation",
+        "example_plan": {
+            "ok": True,
+            "scope": "COSS/Site A/2026-05",
+            "scope_key": PayrollScope("COSS", "Site A", "2026-05").key,
+            "affiliate": "COSS",
+            "workplace": "Site A",
+            "period": "2026-05",
+            "input_type": "mixed",
+            "requested_input_type": "auto",
+            "backend": "python_compatibility",
+            "compatibility_executor": "services.payroll_automation.run_payroll_automation",
+            "source_paths": {
+                "invoice": "C:/Bitween/inbox/invoice_2026-05.xlsx",
+                "attendance": "C:/Bitween/inbox/attendance_2026-05.csv",
+            },
+            "missing_source_paths": [],
+            "steps": [
+                {
+                    "kind": "extract_attendance",
+                    "backend": "python_compatibility",
+                    "input": "C:/Bitween/inbox/attendance_2026-05.csv",
+                    "output": "attendance_rows",
+                    "description": "Extract attendance rows before merging them into the invoice workbook.",
+                },
+                {
+                    "kind": "attach_attendance_sheet",
+                    "backend": "python_compatibility",
+                    "input": "C:/Bitween/inbox/invoice_2026-05.xlsx + attendance_rows",
+                    "output": "generated:mixed_invoice",
+                    "description": "Attach the attendance sheet to the supplied invoice workbook.",
+                },
+                {
+                    "kind": "process_invoice",
+                    "backend": "python_compatibility",
+                    "input": "generated:mixed_invoice",
+                    "output": "payroll_outputs",
+                    "description": "Process the merged invoice workbook through the compatibility payroll executor.",
+                },
+            ],
+            "operation_policy": payroll_operation_policy_example(),
+            "operation_policy_source": "tenant",
+            "warnings": [],
+        },
+        "invariants": [
+            "explicit invoice, attendance, and mixed requests keep the caller-requested input type whenever required source paths exist",
+            "auto requests resolve the executable input type from the normalized Rust operation policy",
+            "mixed requests with only an attendance source plan an attendance fallback to match Python compatibility behavior",
+            "the plan names python_compatibility until Rust owns payroll output generation",
+        ],
+    }
+
+
 def payroll_api_authorization_example(*, allowed: bool = True) -> dict[str, Any]:
     """Return the Rust payroll authorization decision shape."""
     if allowed:
@@ -299,6 +364,7 @@ def payroll_api_contract() -> dict[str, Any]:
         },
         "input_types": list(PAYROLL_API_INPUT_TYPES),
         "policy_resolution": payroll_policy_resolution_example(),
+        "execution_plan": payroll_execution_plan_example(),
         "authorization": {
             "rust_entrypoint": "PayrollApiService::authorize_run_request(request, principal, action)",
             "actions": ["validate", "run", "settings"],
@@ -478,6 +544,7 @@ def payroll_api_contract() -> dict[str, Any]:
             ],
             "run_response_entrypoint": "PayrollApiService::run_response(result, request_id)",
             "policy_resolution_entrypoint": "PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)",
+            "execution_plan_entrypoint": "PayrollApiService::plan_run_request(request, policy_snapshot)",
             "never_include": ["exception"],
         },
     }

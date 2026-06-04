@@ -1,6 +1,7 @@
 use crate::access::{
     authorize_payroll_request, PayrollAccessDecision, PayrollAction, PayrollPrincipal,
 };
+use crate::execution_plan::{plan_payroll_execution, PayrollExecutionPlan};
 use crate::policy::OperationPolicySnapshot;
 use crate::policy_resolution::PayrollPolicySettings;
 use crate::request::PayrollRunRequest;
@@ -121,6 +122,14 @@ impl PayrollApiService {
         action: PayrollAction,
     ) -> PayrollAccessDecision {
         authorize_payroll_request(request, principal, action)
+    }
+
+    pub fn plan_run_request(
+        &self,
+        request: &PayrollRunRequest,
+        policy_snapshot: impl Into<OperationPolicySnapshot>,
+    ) -> PayrollExecutionPlan {
+        plan_payroll_execution(request, policy_snapshot)
     }
 
     pub fn run_response(

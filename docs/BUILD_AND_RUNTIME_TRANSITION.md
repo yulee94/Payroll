@@ -249,11 +249,12 @@ cargo test --workspace
 
 **Acceptance criteria:**
 
-- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, authorization, run-result response shaping, health, and readiness.
+- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, execution planning, authorization, run-result response shaping, health, and readiness.
 - [ ] Python adapter is retained only as compatibility fallback while rollout is incomplete.
 - [x] Health/readiness behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [x] Run-result success/error envelope behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [x] Tenant/site/global operation-policy resolution behavior is defined in framework-neutral Rust DTOs and API contracts for supplied settings snapshots.
+- [x] Payroll execution routing/planning behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the compatibility executor.
 - [ ] Service-account permissions and initial latency/error budgets are defined for Kubernetes.
 
 **Verification:**
@@ -343,6 +344,30 @@ Verified commands:
 cargo test -p bitween-payroll-api
 buck2 test //crates/payroll-api:payroll_api_test
 python -m unittest tests.test_payroll_api_contract -v
+npm run typecheck --prefix frontend
+```
+
+
+## Implementation checkpoint: Rust payroll execution planning
+
+Completed on 2026-06-04 as a service-boundary behavior slice:
+
+- `crates/payroll-api` owns execution planning through `plan_payroll_execution`
+  and `PayrollApiService::plan_run_request`.
+- Rust plans invoice, attendance, and mixed compatibility execution steps from a
+  parsed request and normalized operation-policy snapshot.
+- Python remains the compatibility executor, explicitly named as
+  `python_compatibility`, until payroll output generation moves to Rust.
+- Contract docs and TypeScript/Python metadata name the step kinds, backend
+  value, source paths, missing source paths, and compatibility executor.
+- Slice spec: `docs/PAYROLL_RUST_EXECUTION_PLAN_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo test -p bitween-payroll-api execution_plan::tests
+cargo test -p bitween-payroll-api service::tests
+python -m unittest tests.test_payroll_automation tests.test_payroll_api_contract -v
 npm run typecheck --prefix frontend
 ```
 

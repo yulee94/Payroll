@@ -158,6 +158,35 @@ Verification evidence for this checkpoint:
 
 Slice spec: `docs/PAYROLL_RUST_POLICY_RESOLUTION_SLICE.md`.
 
+
+## Current implementation checkpoint: Rust payroll execution planning
+
+Implemented on 2026-06-04 as the next service-boundary behavior slice:
+
+- `crates/payroll-api` now exposes `PayrollExecutionPlan`,
+  `PayrollExecutionStep`, `PayrollExecutionBackend`,
+  `PayrollExecutionStepKind`, and `plan_payroll_execution`.
+- `PayrollApiService::plan_run_request` turns a parsed request plus normalized
+  operation-policy snapshot into deterministic invoice, attendance, or mixed
+  execution steps.
+- Rust preserves Python compatibility routing: explicit caller input types win,
+  `auto` resolves from the policy snapshot, and mixed requests with only an
+  attendance source plan an attendance fallback.
+- Every plan currently names `python_compatibility` as the backend until Rust
+  owns payroll output generation.
+- TypeScript and Python contract metadata now include the execution-plan DTO,
+  step kinds, backend value, and Rust service entrypoint.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-payroll-api execution_plan::tests`
+- `cargo test -p bitween-payroll-api service::tests`
+- Python payroll automation/API contract tests for `tests.test_payroll_automation`
+  and `tests.test_payroll_api_contract`
+- `npm run typecheck --prefix frontend`
+
+Slice spec: `docs/PAYROLL_RUST_EXECUTION_PLAN_SLICE.md`.
+
 ## Required execution disciplines
 
 - **Incremental implementation:** migrate thin vertical slices behind stable contracts; no big-bang rewrite.
