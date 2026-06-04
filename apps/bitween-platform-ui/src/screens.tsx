@@ -56,7 +56,7 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
         <SectionHeader
           eyebrow="Secure sign in"
           title="로그인"
-          description="실제 인증 연결 전까지는 화면 이동만 확인할 수 있는 프론트엔드 프리뷰입니다."
+          description="법인 계정으로 접속하면 권한에 맞는 업무 화면으로 이동합니다."
         />
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">법인 코드</Label>
@@ -89,7 +89,7 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
             style={styles.input}
           />
         </View>
-        <ActionButton onPress={() => onSelect("home")}>{canSubmit ? "플랫폼 홈으로 이동" : "프리뷰로 로그인"}</ActionButton>
+        <ActionButton onPress={() => onSelect("home")}>{canSubmit ? "플랫폼 홈으로 이동" : "로그인"}</ActionButton>
         <View style={styles.inlineNotice}>
           <Badge tone="neutral">관리자 발급</Badge>
           <Label size="sm" muted>계정이 없으면 관리자에게 법인 계정 발급을 요청하세요.</Label>
@@ -155,7 +155,7 @@ export function PayrollScreen({ onSelect }: ScreenProps) {
         <SectionHeader
           eyebrow="Payroll flow"
           title="급여 산출 작업 흐름"
-          description="계산 로직은 건드리지 않고, 사용자가 다음 작업을 파악하는 화면 구조만 정리합니다."
+          description="운영 기준 확인부터 입력 자료 준비, 결과 검토, 자료함 저장까지 순서대로 진행합니다."
           action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">급여 설정 확인</ActionButton>}
         />
         <View style={styles.stepGrid}>
@@ -178,7 +178,7 @@ export function PayrollScreen({ onSelect }: ScreenProps) {
         <SectionHeader
           eyebrow="Settings summary"
           title="급여 산출 설정 요약"
-          description="기존 설정 화면의 핵심 항목을 RN에서 읽기 쉬운 검토 표면으로 옮긴 구조입니다."
+          description="산출 전 확인해야 할 핵심 급여 기준을 한눈에 검토합니다."
           action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">상세 설정</ActionButton>}
         />
         <DataTable rows={payrollSettingsRows} />
@@ -222,7 +222,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
       <Card>
         <SectionHeader
           title="업무 목록"
-          description="필터와 테이블 구조를 먼저 고정해 이후 API 데이터 연결 시 화면 흔들림을 줄입니다."
+          description="필터로 상태를 좁히고 필요한 다음 작업을 확인합니다."
           action={<ActionButton onPress={() => onSelect(dashboard.secondaryAction.target)} variant="secondary">{dashboard.secondaryAction.label}</ActionButton>}
         />
         <FilterBar filters={dashboard.filters} />
@@ -252,7 +252,7 @@ function PayrollReadiness({ onSelect }: Pick<ScreenProps, "onSelect">) {
       <SectionHeader
         eyebrow="Readiness"
         title="급여 자동화 준비 현황"
-        description="기존 backend readiness 결과를 연결할 RN 표시 구조입니다."
+        description="산출 전 필요한 기준과 자료 상태를 먼저 확인합니다."
         action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">설정 확인</ActionButton>}
       />
       <View style={styles.readinessGrid}>
