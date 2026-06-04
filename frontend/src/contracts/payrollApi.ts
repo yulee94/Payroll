@@ -249,6 +249,37 @@ export interface PayrollInvoiceAuditBatchResult {
   warn_count: number;
 }
 
+
+export type PayrollTaxMethod = "preset" | "simplified_table";
+
+export interface PayrollDeductionInput {
+  gross_pay: number;
+  insurance_total: number;
+  preset_income_tax?: number;
+  preset_local_income_tax?: number;
+  identity_guarantee_insurance_deduction: number;
+}
+
+export interface PayrollIncomeTaxResult {
+  income_tax: number;
+  local_income_tax: number;
+  total: number;
+  method: PayrollTaxMethod;
+}
+
+export interface PayrollDeductionResult {
+  gross_pay: number;
+  insurance_total: number;
+  taxable_pay: number;
+  income_tax: number;
+  local_income_tax: number;
+  tax_total: number;
+  identity_guarantee_insurance_deduction: number;
+  total_deduction: number;
+  net_pay: number;
+  method: PayrollTaxMethod;
+}
+
 export type PayrollEi65EligibilityStatus = "exempt" | "liable" | "unknown";
 export type PayrollEi65UnknownDefault = "skip" | "deduct";
 export type PayrollEi65VerificationSource = "manual" | "import" | "api";

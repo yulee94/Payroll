@@ -1,9 +1,9 @@
 use crate::error::PayrollApiError;
 use crate::policy::OperationPolicySnapshot;
-use crate::policy_resolution::{resolve_operation_policy, PayrollPolicySettings};
-use crate::request::{parse_payroll_api_request, request_id_from_payload, PayrollRunRequest};
+use crate::policy_resolution::{PayrollPolicySettings, resolve_operation_policy};
+use crate::request::{PayrollRunRequest, parse_payroll_api_request, request_id_from_payload};
 use serde::Serialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, PartialEq, Serialize)]

@@ -307,8 +307,8 @@ fn clean_ref(value: &str) -> String {
 mod tests {
     use crate::service::{PayrollApiService, ServiceConfig};
     use crate::workplace_hours::{
-        apply_monthly_hours_to_invoice, resolve_monthly_work_hours, WorkplaceHoursInvoice,
-        WorkplaceHoursMode, WorkplaceHoursPolicy,
+        WorkplaceHoursInvoice, WorkplaceHoursMode, WorkplaceHoursPolicy,
+        apply_monthly_hours_to_invoice, resolve_monthly_work_hours,
     };
     use serde_json::json;
 

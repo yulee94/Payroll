@@ -6,7 +6,7 @@ In progress. The Buck2/Reindeer foundation for the first Rust backend contract c
 
 ## Goal
 
-Rewrite backend code in idiomatic Rust while preserving the observable business behavior already covered by compatibility tests. The target runtime is the Kubernetes-native stack documented in `docs/KUBERNETES_NATIVE_STACK.md`.
+Rewrite backend code in idiomatic Rust while preserving the observable business behavior already covered by compatibility tests. The target runtime is the Kubernetes-native stack documented in `docs/KUBERNETES_NATIVE_STACK.md`, and first-party Rust backend work uses Rust 2024 with Rust 1.96.
 
 ## Current implementation checkpoint: Buck2/Reindeer foundation
 
@@ -191,6 +191,41 @@ Verification evidence for this checkpoint:
 Slice spec: `docs/PAYROLL_RUST_INVOICE_AUDIT_BATCH_SLICE.md`.
 
 
+
+
+## Current implementation checkpoint: Rust payroll deduction finalization
+
+Implemented on 2026-06-04 as the next payroll output-generation behavior slice:
+
+- `crates/payroll-api` now exposes `PayrollTaxMethod`,
+  `PayrollDeductionInput`, `PayrollIncomeTaxResult`,
+  `PayrollDeductionResult`, `lookup_simplified_income_tax`,
+  `calculate_payroll_income_tax`, and `finalize_payroll_deductions`.
+- `PayrollApiService::finalize_payroll_deductions` calculates supplied-input
+  taxable pay, income tax, local income tax, tax total, identity-guarantee
+  deduction contribution, total deduction, and net pay without reading
+  workbooks, rosters, settings, social-insurance sources, or tax-table files.
+- Rust preserves Python compatibility for the simplified income-tax brackets,
+  high-income estimate formula, preset income-tax precedence, preset local-tax
+  precedence, automatic local-tax rounding, identity-guarantee deduction absolute
+  value, and net-pay calculation.
+- Python remains responsible for workbook parsing/writing, employee roster
+  matching, social-insurance resolution, EDI/site/fixed-hour application, and
+  final payroll record assembly until those boundaries move behind parity tests.
+- TypeScript and Python contract metadata now include deduction input, income-tax
+  result, and final deduction result DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo fmt --check`
+- `cargo test --workspace`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_payroll_api_contract -v`
+- `npm run typecheck --prefix frontend`
+- `git diff --check`
+- `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
+
+Slice spec: `docs/PAYROLL_RUST_DEDUCTION_FINALIZATION_SLICE.md`.
 
 ## Current implementation checkpoint: Rust payroll EI 65+ decision
 

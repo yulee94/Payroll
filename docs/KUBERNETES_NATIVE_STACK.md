@@ -36,7 +36,7 @@ This document is based on current official Kubernetes documentation for:
 ## Production invariants
 
 - Kubernetes manifests or Helm/Kustomize overlays are release artifacts, not optional local notes.
-- Rust services own backend behavior in production.
+- Rust services own backend behavior in production and build against the repository Rust 2024 / Rust 1.96 baseline.
 - TypeScript frontend owns user-facing frontend delivery.
 - API state is tenant/legal-entity scoped; group-root storage must never bypass legal-tenant authorization.
 - Payroll action authorization is Rust service-owned: request tenants must match trusted principals, action permissions must pass role/position plus effective org-unit platform filtering, and frontend labels are not authorization input.

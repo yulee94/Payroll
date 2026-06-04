@@ -536,6 +536,100 @@ def payroll_invoice_audit_batch_example() -> dict[str, Any]:
     }
 
 
+
+def payroll_deduction_finalization_example() -> dict[str, Any]:
+    """Return the Rust-owned supplied-input final deduction/net-pay shape."""
+    return {
+        "rust_entrypoint": "PayrollApiService::finalize_payroll_deductions(input)",
+        "calculator_entrypoint": "finalize_payroll_deductions(input)",
+        "tax_entrypoint": "calculate_payroll_income_tax(taxable_pay, preset_income_tax, preset_local_income_tax)",
+        "python_compatibility_source": "tax.calculate_tax + payroll_builder.build_payroll_records final deduction block",
+        "resolver_boundary": (
+            "Python compatibility code may still parse workbooks, match employee rosters, "
+            "resolve social insurance, apply EDI/site/fixed-hour rules, and assemble final payroll records "
+            "before or after supplying pure deduction inputs to Rust."
+        ),
+        "method_values": ["preset", "simplified_table"],
+        "input_fields": [
+            "gross_pay",
+            "insurance_total",
+            "preset_income_tax",
+            "preset_local_income_tax",
+            "identity_guarantee_insurance_deduction",
+        ],
+        "tax_result_fields": [
+            "income_tax",
+            "local_income_tax",
+            "total",
+            "method",
+        ],
+        "result_fields": [
+            "gross_pay",
+            "insurance_total",
+            "taxable_pay",
+            "income_tax",
+            "local_income_tax",
+            "tax_total",
+            "identity_guarantee_insurance_deduction",
+            "total_deduction",
+            "net_pay",
+            "method",
+        ],
+        "simplified_tax_brackets": [
+            {"upper_bound": 1_060_000, "income_tax": 0},
+            {"upper_bound": 1_500_000, "income_tax": 8_000},
+            {"upper_bound": 2_000_000, "income_tax": 42_000},
+            {"upper_bound": 2_500_000, "income_tax": 120_000},
+            {"upper_bound": 3_000_000, "income_tax": 210_000},
+            {"upper_bound": 3_500_000, "income_tax": 310_000},
+            {"upper_bound": 4_000_000, "income_tax": 420_000},
+            {"upper_bound": 5_000_000, "income_tax": 650_000},
+            {"upper_bound": 6_000_000, "income_tax": 920_000},
+            {"upper_bound": 8_000_000, "income_tax": 1_450_000},
+            {"upper_bound": 10_000_000, "income_tax": 2_100_000},
+        ],
+        "high_income_estimate_formula": "max(0, taxable_pay - 1500000) * 0.03 rounded to won",
+        "example_input": {
+            "gross_pay": 3_000_000,
+            "insurance_total": 300_000,
+            "identity_guarantee_insurance_deduction": -20_000,
+        },
+        "example_result": {
+            "gross_pay": 3_000_000,
+            "insurance_total": 300_000,
+            "taxable_pay": 2_700_000,
+            "income_tax": 210_000,
+            "local_income_tax": 21_000,
+            "tax_total": 231_000,
+            "identity_guarantee_insurance_deduction": -20_000,
+            "total_deduction": 551_000,
+            "net_pay": 2_449_000,
+            "method": "simplified_table",
+        },
+        "example_preset_result": {
+            "gross_pay": 4_000_000,
+            "insurance_total": 450_000,
+            "taxable_pay": 3_550_000,
+            "income_tax": 123_456,
+            "local_income_tax": 12_350,
+            "tax_total": 135_806,
+            "identity_guarantee_insurance_deduction": 0,
+            "total_deduction": 585_806,
+            "net_pay": 3_414_194,
+            "method": "preset",
+        },
+        "invariants": [
+            "taxable_pay is gross_pay minus insurance_total exactly as supplied",
+            "positive preset_income_tax overrides the simplified tax table",
+            "positive preset_local_income_tax overrides automatic local tax only when preset income tax is used",
+            "automatic local tax for preset income tax is rounded to the nearest 10 won like payroll_builder",
+            "simplified-table local tax is rounded to the nearest won like tax.calculate_tax",
+            "identity_guarantee_insurance_deduction contributes to total_deduction by absolute value",
+            "net_pay is gross_pay minus total_deduction with Python-compatible won rounding",
+            "workbook parsing, roster matching, social-insurance resolution, tax-table persistence, and record assembly remain Python compatibility boundaries in this slice",
+        ],
+    }
+
 def payroll_ei65_decision_example() -> dict[str, Any]:
     """Return the Rust-owned supplied-input EI 65+ payroll decision shape."""
     return {
@@ -1154,6 +1248,7 @@ def payroll_api_contract() -> dict[str, Any]:
         "workplace_hours_application": payroll_workplace_hours_application_example(),
         "invoice_audit_row": payroll_invoice_audit_row_example(),
         "invoice_audit_batch": payroll_invoice_audit_batch_example(),
+        "deduction_finalization": payroll_deduction_finalization_example(),
         "ei65_payroll_decision": payroll_ei65_decision_example(),
         "edi_insurance_application": payroll_edi_insurance_application_example(),
         "site_benefits_application": payroll_site_benefits_application_example(),
@@ -1344,6 +1439,7 @@ def payroll_api_contract() -> dict[str, Any]:
             "workplace_hours_application_entrypoint": "PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)",
             "invoice_audit_row_entrypoint": "PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)",
             "invoice_audit_batch_entrypoint": "PayrollApiService::audit_invoice_batch(items, workplace)",
+            "deduction_finalization_entrypoint": "PayrollApiService::finalize_payroll_deductions(input)",
             "ei65_payroll_decision_entrypoint": "PayrollApiService::resolve_ei_65_for_payroll(input)",
             "edi_insurance_application_entrypoint": "PayrollApiService::apply_edi_premiums_to_invoice(invoice, edi_record, edi_config, payroll_period)",
             "site_benefits_application_entrypoint": "PayrollApiService::apply_site_benefits_to_invoice(invoice, site_benefits_config, payroll_period)",

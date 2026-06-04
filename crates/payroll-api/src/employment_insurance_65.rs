@@ -350,11 +350,7 @@ fn birth_date_from_korean_identity(value: &str, as_of: SimpleDate) -> Option<Sim
 
 fn pivot_year(yy: i32, as_of: SimpleDate) -> i32 {
     let pivot = as_of.year.rem_euclid(100);
-    if yy > pivot {
-        1900 + yy
-    } else {
-        2000 + yy
-    }
+    if yy > pivot { 1900 + yy } else { 2000 + yy }
 }
 
 fn age_years_at(birth: SimpleDate, as_of: SimpleDate) -> i32 {

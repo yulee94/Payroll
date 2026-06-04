@@ -288,8 +288,8 @@ fn clean_source(value: &str) -> String {
 mod tests {
     use crate::service::{PayrollApiService, ServiceConfig};
     use crate::site_benefits::{
-        apply_site_benefits_to_invoice, IdentityInsuranceConfig, SiteBenefitsConfig,
-        SiteBenefitsInvoice, WorkersDayConfig,
+        IdentityInsuranceConfig, SiteBenefitsConfig, SiteBenefitsInvoice, WorkersDayConfig,
+        apply_site_benefits_to_invoice,
     };
     use serde_json::json;
 

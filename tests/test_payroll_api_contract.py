@@ -140,6 +140,26 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertEqual([row["name"] for row in audit["example_result"]["rows"]], ["A", "B", "C"])
         self.assertIn("audit_invoice_batch", response["invoice_audit_batch_entrypoint"])
 
+
+    def test_contract_declares_rust_deduction_finalization(self) -> None:
+        contract = payroll_api_contract()
+        deductions = contract["deduction_finalization"]
+        response = contract["response"]
+
+        self.assertIn("finalize_payroll_deductions", deductions["rust_entrypoint"])
+        self.assertIn("tax.calculate_tax", deductions["python_compatibility_source"])
+        self.assertEqual(deductions["method_values"], ["preset", "simplified_table"])
+        self.assertIn("preset_local_income_tax", deductions["input_fields"])
+        self.assertEqual(deductions["example_result"]["taxable_pay"], 2_700_000)
+        self.assertEqual(deductions["example_result"]["income_tax"], 210_000)
+        self.assertEqual(deductions["example_result"]["local_income_tax"], 21_000)
+        self.assertEqual(deductions["example_result"]["total_deduction"], 551_000)
+        self.assertEqual(deductions["example_result"]["net_pay"], 2_449_000)
+        self.assertIn(
+            "finalize_payroll_deductions",
+            response["deduction_finalization_entrypoint"],
+        )
+
     def test_contract_declares_rust_ei65_payroll_decision(self) -> None:
         contract = payroll_api_contract()
         ei65 = contract["ei65_payroll_decision"]

@@ -453,8 +453,8 @@ fn clean(value: impl Into<String>) -> String {
 #[cfg(test)]
 mod tests {
     use crate::fixed_hours::{
-        apply_fixed_hours_to_invoice, FixedHoursInvoice, FixedHoursPayType, FixedHoursProfile,
-        FIXED_HOURS_SOURCE_CONTRACT,
+        FIXED_HOURS_SOURCE_CONTRACT, FixedHoursInvoice, FixedHoursPayType, FixedHoursProfile,
+        apply_fixed_hours_to_invoice,
     };
     use crate::service::{PayrollApiService, ServiceConfig};
 
@@ -526,18 +526,24 @@ mod tests {
         assert_eq!(result.invoice.invoice_special_ext_hours, Some(2.0));
         assert_eq!(value["_monthly_work_hours"], 209.0);
         assert_eq!(value["_fixed_hours_mode"], true);
-        assert!(result
-            .audit_flags
-            .iter()
-            .any(|flag| flag == "청구서 연장(5h) ≠ 계약 고정(20h)"));
-        assert!(result
-            .audit_flags
-            .iter()
-            .any(|flag| flag == "청구서 특근(3h) ≠ 계약 고정(10h)"));
-        assert!(result
-            .audit_flags
-            .iter()
-            .any(|flag| flag == "청구서 근무시간(150h) ≠ 계약 월시간(209h)"));
+        assert!(
+            result
+                .audit_flags
+                .iter()
+                .any(|flag| flag == "청구서 연장(5h) ≠ 계약 고정(20h)")
+        );
+        assert!(
+            result
+                .audit_flags
+                .iter()
+                .any(|flag| flag == "청구서 특근(3h) ≠ 계약 고정(10h)")
+        );
+        assert!(
+            result
+                .audit_flags
+                .iter()
+                .any(|flag| flag == "청구서 근무시간(150h) ≠ 계약 월시간(209h)")
+        );
     }
 
     #[test]
@@ -552,10 +558,12 @@ mod tests {
         assert_eq!(result.invoice.monthly_work_hours, Some(150.0));
         assert_eq!(result.invoice.base_days, 150.0);
         assert_eq!(result.invoice.work_days, 150.0);
-        assert!(result
-            .audit_flags
-            .iter()
-            .any(|flag| flag == "청구서 근무시간(150h) ≠ 계약 월시간(209h)"));
+        assert!(
+            result
+                .audit_flags
+                .iter()
+                .any(|flag| flag == "청구서 근무시간(150h) ≠ 계약 월시간(209h)")
+        );
     }
 
     #[test]

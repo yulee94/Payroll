@@ -10,7 +10,7 @@ See `docs/decisions/ADR-001-buck2-rust-tauri-react-native-transition.md` for the
 
 | Area | Current state | Target state |
 | --- | --- | --- |
-| Backend | Python compatibility modules plus `crates/payroll-api` Rust contract crate | Idiomatic Rust services/domain crates deployed on Kubernetes |
+| Backend | Python compatibility modules plus `crates/payroll-api` Rust contract crate on Rust 2024 / Rust 1.96 | Idiomatic Rust services/domain crates deployed on Kubernetes |
 | Build | Cargo, npm, Python unittest commands, plus first Buck2/Reindeer Rust target for `crates/payroll-api` | Buck2 target graph for Rust, frontend export, desktop package, and CI target selection; Cargo/npm retained until Buck2 parity |
 | Frontend | Expo / React Native / React Native Web app under `apps/bitween-platform-ui/` | Same React Native source exported for web, Kubernetes frontend, and Tauri desktop |
 | Desktop | No production desktop surface | `apps/bitween-desktop-tauri/` wraps the React Native Web export and adds audited Tauri commands |
@@ -249,7 +249,7 @@ cargo test --workspace
 
 **Acceptance criteria:**
 
-- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, workplace-hours application, invoice audit row/batch evaluation, employment-insurance 65+ decisions, EDI insurance premium application, site-benefits application, fixed-hours application, execution planning, authorization, run-result response shaping, health, and readiness.
+- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, workplace-hours application, invoice audit row/batch evaluation, final deduction/net-pay calculation, employment-insurance 65+ decisions, EDI insurance premium application, site-benefits application, fixed-hours application, execution planning, authorization, run-result response shaping, health, and readiness.
 - [ ] Python adapter is retained only as compatibility fallback while rollout is incomplete.
 - [x] Health/readiness behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [x] Run-result success/error envelope behavior is defined in framework-neutral Rust DTOs and API contracts.
@@ -258,6 +258,7 @@ cargo test --workspace
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
 - [x] Invoice audit row and batch behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/fixed-profile resolver and workbook/UI bridge.
+- [x] Final deduction and net-pay calculation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the workbook/roster/social-insurance/final-record bridge.
 - [x] Employment-insurance 65+ payroll decision behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the KCOMWEL/settings/payroll-row/workbook bridge.
 - [x] EDI insurance premium application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the EDI import/storage/provider/settings/roster/workbook bridge.
 - [x] Site-benefits payroll row application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/workbook/totals bridge.
@@ -419,6 +420,44 @@ Task 4 acceptance status:
 - [x] Supplied-input invoice audit batch summarization is Rust-owned behind
       parity tests.
 
+
+
+## Implementation checkpoint: Rust payroll deduction finalization
+
+Completed on 2026-06-04 as a payroll output-generation behavior slice:
+
+- `crates/payroll-api` owns supplied-input final deduction and net-pay
+  calculation through `finalize_payroll_deductions`,
+  `calculate_payroll_income_tax`, `lookup_simplified_income_tax`,
+  `PayrollTaxMethod`, `PayrollDeductionInput`, `PayrollIncomeTaxResult`,
+  `PayrollDeductionResult`, and
+  `PayrollApiService::finalize_payroll_deductions`.
+- Rust applies Python-compatible simplified tax brackets, high-income estimate
+  fallback, preset income/local tax overrides, local tax rounding,
+  identity-guarantee deduction absolute-value handling, total deduction, and net
+  pay calculation.
+- Python remains the workbook, roster, social-insurance, EDI/site/fixed-hour, and
+  final-record assembly bridge.
+- Contract docs and TypeScript/Python metadata name the deduction input,
+  income-tax result, and final deduction result DTOs.
+- Slice spec: `docs/PAYROLL_RUST_DEDUCTION_FINALIZATION_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo fmt --check
+cargo test --workspace
+buck2 test //crates/payroll-api:payroll_api_test
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_payroll_api_contract -v
+npm run typecheck --prefix frontend
+git diff --check
+cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
+```
+
+Task 4 acceptance status:
+
+- [x] Supplied-input final deduction/net-pay calculation is Rust-owned behind
+      parity tests.
 
 ## Implementation checkpoint: Rust payroll EI 65+ decision
 

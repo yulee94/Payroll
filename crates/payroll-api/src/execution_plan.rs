@@ -267,11 +267,11 @@ fn step(
 #[cfg(test)]
 mod tests {
     use crate::execution_plan::{
-        plan_payroll_execution, PayrollExecutionBackend, PayrollExecutionStepKind,
+        PayrollExecutionBackend, PayrollExecutionStepKind, plan_payroll_execution,
     };
     use crate::policy::{OperationPolicy, OperationPolicySnapshot, PayrollInputBasis};
     use crate::request::{
-        parse_payroll_api_request, PayrollInputType, PayrollRunRequest, PayrollScope,
+        PayrollInputType, PayrollRunRequest, PayrollScope, parse_payroll_api_request,
     };
     use crate::service::{PayrollApiService, ServiceConfig};
     use serde_json::json;
@@ -405,10 +405,11 @@ mod tests {
             plan.steps[0].kind,
             PayrollExecutionStepKind::ExtractAttendance
         );
-        assert!(plan
-            .warnings
-            .iter()
-            .any(|warning| warning.contains("attendance fallback")));
+        assert!(
+            plan.warnings
+                .iter()
+                .any(|warning| warning.contains("attendance fallback"))
+        );
     }
 
     #[test]

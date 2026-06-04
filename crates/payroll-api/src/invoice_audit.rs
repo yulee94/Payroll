@@ -1,8 +1,8 @@
 use crate::fixed_hours::{
-    apply_fixed_hours_to_invoice, FixedHoursInvoice, FixedHoursProfile, FIXED_HOURS_SOURCE_CONTRACT,
+    FIXED_HOURS_SOURCE_CONTRACT, FixedHoursInvoice, FixedHoursProfile, apply_fixed_hours_to_invoice,
 };
 use crate::workplace_hours::{
-    apply_monthly_hours_to_invoice, WorkplaceHoursInvoice, WorkplaceHoursMode, WorkplaceHoursPolicy,
+    WorkplaceHoursInvoice, WorkplaceHoursMode, WorkplaceHoursPolicy, apply_monthly_hours_to_invoice,
 };
 use serde::Serialize;
 
@@ -510,20 +510,17 @@ fn resolved_workplace(
 }
 
 fn selected_base_hourly(invoice: &InvoiceAuditInvoice, record: Option<&InvoiceAuditRecord>) -> f64 {
-    if let Some(record) = record {
-        if record.base_hourly.is_finite() && record.base_hourly != 0.0 {
-            return record.base_hourly;
-        }
+    if let Some(record) = record
+        && record.base_hourly.is_finite()
+        && record.base_hourly != 0.0
+    {
+        return record.base_hourly;
     }
     safe_number(invoice.base_hourly)
 }
 
 fn safe_number(value: f64) -> f64 {
-    if value.is_finite() {
-        value
-    } else {
-        0.0
-    }
+    if value.is_finite() { value } else { 0.0 }
 }
 
 fn round_won(amount: f64) -> i64 {
@@ -588,10 +585,10 @@ fn clean_ref(value: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::fixed_hours::{FixedHoursPayType, FixedHoursProfile, FIXED_HOURS_SOURCE_CONTRACT};
+    use crate::fixed_hours::{FIXED_HOURS_SOURCE_CONTRACT, FixedHoursPayType, FixedHoursProfile};
     use crate::invoice_audit::{
-        audit_invoice_batch, audit_invoice_row, estimate_break_hours, InvoiceAuditBatchItem,
-        InvoiceAuditInvoice, InvoiceAuditRecord, InvoiceAuditStatus,
+        InvoiceAuditBatchItem, InvoiceAuditInvoice, InvoiceAuditRecord, InvoiceAuditStatus,
+        audit_invoice_batch, audit_invoice_row, estimate_break_hours,
     };
     use crate::service::{PayrollApiService, ServiceConfig};
     use crate::workplace_hours::{WorkplaceHoursMode, WorkplaceHoursPolicy};
@@ -618,12 +615,14 @@ mod tests {
         assert_eq!(row.break_hours, Some(9.0));
         assert_eq!(row.calc_base_salary, 2_090_000);
         assert_eq!(row.formula, "기본시급 10,000원 × 209시간 = 2,090,000원");
-        assert!(row
-            .flags
-            .contains(&"기본급 불일치: 산출 2,090,000원 vs 청구서 2,000,000원".to_owned()));
-        assert!(row
-            .flags
-            .contains(&"대장 적용시간(208h)과 재검열(209h) 상이".to_owned()));
+        assert!(
+            row.flags
+                .contains(&"기본급 불일치: 산출 2,090,000원 vs 청구서 2,000,000원".to_owned())
+        );
+        assert!(
+            row.flags
+                .contains(&"대장 적용시간(208h)과 재검열(209h) 상이".to_owned())
+        );
     }
 
     #[test]
@@ -795,15 +794,17 @@ mod tests {
         let policy = WorkplaceHoursPolicy::new()
             .with_mode(WorkplaceHoursMode::Fixed)
             .with_hours(209.0);
-        let items = vec![InvoiceAuditBatchItem::new(
-            InvoiceAuditInvoice::new("A")
-                .with_base_days(209.0)
-                .with_work_days(209.0)
-                .with_base_hourly(10_000.0)
-                .with_base_salary(2_090_000),
-        )
-        .with_workplace("앰코")
-        .with_policy(policy)];
+        let items = vec![
+            InvoiceAuditBatchItem::new(
+                InvoiceAuditInvoice::new("A")
+                    .with_base_days(209.0)
+                    .with_work_days(209.0)
+                    .with_base_hourly(10_000.0)
+                    .with_base_salary(2_090_000),
+            )
+            .with_workplace("앰코")
+            .with_policy(policy),
+        ];
 
         let result = audit_invoice_batch(items, "앰코");
         let value = serde_json::to_value(result).unwrap();
@@ -823,14 +824,16 @@ mod tests {
         let policy = WorkplaceHoursPolicy::new()
             .with_mode(WorkplaceHoursMode::Fixed)
             .with_hours(209.0);
-        let items = vec![InvoiceAuditBatchItem::new(
-            InvoiceAuditInvoice::new("홍길동")
-                .with_base_days(209.0)
-                .with_work_days(209.0)
-                .with_base_hourly(10_000.0)
-                .with_base_salary(2_090_000),
-        )
-        .with_policy(policy)];
+        let items = vec![
+            InvoiceAuditBatchItem::new(
+                InvoiceAuditInvoice::new("홍길동")
+                    .with_base_days(209.0)
+                    .with_work_days(209.0)
+                    .with_base_hourly(10_000.0)
+                    .with_base_salary(2_090_000),
+            )
+            .with_policy(policy),
+        ];
 
         let result = service.audit_invoice_batch(items, "앰코");
 
