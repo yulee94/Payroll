@@ -39,6 +39,7 @@ This document is based on current official Kubernetes documentation for:
 - Rust services own backend behavior in production.
 - TypeScript frontend owns user-facing frontend delivery.
 - API state is tenant/legal-entity scoped; group-root storage must never bypass legal-tenant authorization.
+- Payroll action authorization is Rust service-owned: request tenants must match trusted principals, action permissions must pass role/position plus effective org-unit platform filtering, and frontend labels are not authorization input.
 - Configuration uses ConfigMaps; credentials and API keys use Secrets or an external secret manager.
 - All HTTP workloads expose dedicated startup/readiness/liveness endpoints.
 - Horizontal scaling uses HPA only after resource requests, readiness behavior, and idempotency are verified.

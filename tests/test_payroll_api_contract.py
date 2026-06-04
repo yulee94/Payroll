@@ -74,6 +74,21 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertEqual(response["validation"]["operation_policy_source"], "tenant")
         self.assertEqual(response["validation"]["error_code"], "")
 
+    def test_contract_declares_rust_authorization_decisions(self) -> None:
+        contract = payroll_api_contract()
+        authorization = contract["authorization"]
+        response = contract["response"]["authorization"]
+
+        self.assertIn("authorize_run_request", authorization["rust_entrypoint"])
+        self.assertEqual(authorization["permissions"]["validate"], ["platform.payroll"])
+        self.assertEqual(authorization["permissions"]["run"], ["platform.payroll.executive"])
+        self.assertIn("tenant_mismatch", authorization["deny_reason_codes"])
+        self.assertIn("effective_platform_ids", authorization["abac_attributes"])
+        self.assertTrue(response["allowed"]["allowed"])
+        self.assertEqual(response["allowed"]["required_permissions"], ["platform.payroll.executive"])
+        self.assertFalse(response["denied"]["allowed"])
+        self.assertEqual(response["denied"]["reason_code"], "tenant_mismatch")
+
     def test_contract_declares_rust_service_health_and_readiness(self) -> None:
         response = payroll_api_contract()["response"]
 

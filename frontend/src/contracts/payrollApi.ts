@@ -9,6 +9,18 @@ export type PayrollInputBasis = "invoice" | "attendance" | "hybrid";
 export type PayrollMissingClockPolicy = "warn" | "ignore" | "deduct";
 export type PayrollHealthStatus = "ok";
 export type PayrollReadinessState = "ready" | "degraded" | "not_ready";
+export type PayrollAction = "validate" | "run" | "settings";
+export type PayrollPermission =
+  | "platform.payroll"
+  | "platform.payroll.executive"
+  | "platform.payroll.settings";
+export type PayrollAccessReasonCode =
+  | ""
+  | "missing_principal_tenant"
+  | "tenant_mismatch"
+  | "missing_permission"
+  | "affiliate_not_allowed"
+  | "workplace_not_allowed";
 
 export type PayrollErrorCode =
   | "invalid_payload"
@@ -133,6 +145,19 @@ export type PayrollApiResponse =
   | PayrollSuccessResponse
   | PayrollValidationResponse
   | PayrollErrorResponse;
+
+export interface PayrollAccessDecision {
+  ok: boolean;
+  allowed: boolean;
+  action: PayrollAction;
+  user_id: string;
+  tenant_id: string;
+  scope: string;
+  reason_code: PayrollAccessReasonCode;
+  reason: string;
+  required_permissions: PayrollPermission[];
+  granted_permissions: PayrollPermission[];
+}
 
 export interface PayrollHealthResponse {
   ok: true;

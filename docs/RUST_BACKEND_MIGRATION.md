@@ -78,6 +78,31 @@ Verification evidence for this checkpoint:
 
 Slice spec: `docs/PAYROLL_RUST_SERVICE_BOUNDARY_SLICE.md`.
 
+## Current implementation checkpoint: Rust payroll authorization invariants
+
+Implemented on 2026-06-04 as the next service-boundary hardening slice:
+
+- `crates/payroll-api` now exposes `PayrollPrincipal`, `PayrollAction`,
+  `PayrollPermission`, and `PayrollAccessDecision`.
+- `authorize_payroll_request` and `PayrollApiService::authorize_run_request`
+  evaluate tenant/legal-entity match, role/position permissions, effective org
+  unit platform filtering, and affiliate/workplace ABAC limits in Rust.
+- Rust preserves the Python compatibility rule that CEO position bypasses team
+  platform filtering while non-CEO admin/finance grants remain filtered by
+  `effective_platform_ids`.
+- TypeScript and Python contract metadata now include the authorization decision
+  DTO and stable denial reason codes.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-payroll-api access::tests`
+- `cargo test -p bitween-payroll-api service::tests`
+- Python contract/org access tests for `tests.test_payroll_api_contract` and
+  `tests.test_org_access`
+- `npm run typecheck --prefix frontend`
+
+Slice spec: `docs/PAYROLL_RUST_AUTHORIZATION_SLICE.md`.
+
 ## Required execution disciplines
 
 - **Incremental implementation:** migrate thin vertical slices behind stable contracts; no big-bang rewrite.

@@ -149,6 +149,41 @@ def payroll_api_validation_example() -> dict[str, Any]:
     }
 
 
+def payroll_api_authorization_example(*, allowed: bool = True) -> dict[str, Any]:
+    """Return the Rust payroll authorization decision shape."""
+    if allowed:
+        return {
+            "ok": True,
+            "allowed": True,
+            "action": "run",
+            "user_id": "user-finance",
+            "tenant_id": "coss",
+            "scope": "COSS/Site A/2026-05",
+            "reason_code": "",
+            "reason": "",
+            "required_permissions": ["platform.payroll.executive"],
+            "granted_permissions": [
+                "platform.payroll",
+                "platform.payroll.executive",
+            ],
+        }
+    return {
+        "ok": False,
+        "allowed": False,
+        "action": "run",
+        "user_id": "user-finance",
+        "tenant_id": "other",
+        "scope": "COSS/Site A/2026-05",
+        "reason_code": "tenant_mismatch",
+        "reason": "Payroll request tenant does not match the principal tenant.",
+        "required_permissions": [],
+        "granted_permissions": [
+            "platform.payroll",
+            "platform.payroll.executive",
+        ],
+    }
+
+
 def payroll_api_health_example() -> dict[str, Any]:
     """Return the Rust service health response shape."""
     return {
@@ -209,6 +244,50 @@ def payroll_api_contract() -> dict[str, Any]:
             "readiness_path": PAYROLL_API_READINESS_ENDPOINT,
         },
         "input_types": list(PAYROLL_API_INPUT_TYPES),
+        "authorization": {
+            "rust_entrypoint": "PayrollApiService::authorize_run_request(request, principal, action)",
+            "actions": ["validate", "run", "settings"],
+            "permissions": {
+                "validate": ["platform.payroll"],
+                "run": ["platform.payroll.executive"],
+                "settings": ["platform.payroll.settings"],
+            },
+            "role_families": ["staff", "finance", "admin"],
+            "position_families": [
+                "ceo",
+                "executive",
+                "director",
+                "manager",
+                "team_lead",
+                "senior",
+                "member",
+                "intern",
+            ],
+            "abac_attributes": [
+                "tenant_id",
+                "affiliate",
+                "workplace",
+                "period",
+                "org_unit_id",
+                "effective_platform_ids",
+                "allowed_affiliates",
+                "allowed_workplaces",
+            ],
+            "deny_reason_codes": [
+                "missing_principal_tenant",
+                "tenant_mismatch",
+                "missing_permission",
+                "affiliate_not_allowed",
+                "workplace_not_allowed",
+            ],
+            "invariants": [
+                "request tenant_id must match the trusted principal tenant_id when supplied",
+                "payroll platform permission is evaluated after role/position and effective org-unit platform filtering",
+                "CEO position bypasses team platform filtering for Python compatibility",
+                "non-CEO admin and finance role grants are still filtered by effective org-unit platforms",
+                "allowed affiliate/workplace lists are treated as ABAC scope limits when non-empty",
+            ],
+        },
         "request": {
             "scope": {
                 "forms": [
@@ -295,6 +374,10 @@ def payroll_api_contract() -> dict[str, Any]:
             "success": payroll_api_success_example(),
             "validation": payroll_api_validation_example(),
             "error": payroll_api_error_example(),
+            "authorization": {
+                "allowed": payroll_api_authorization_example(allowed=True),
+                "denied": payroll_api_authorization_example(allowed=False),
+            },
             "health": payroll_api_health_example(),
             "readiness": payroll_api_readiness_example(),
             "error_codes": {
@@ -329,6 +412,11 @@ def payroll_api_contract() -> dict[str, Any]:
                 "operation_policy",
                 "operation_policy_source",
                 "metadata_keys",
+                "allowed",
+                "action",
+                "reason_code",
+                "required_permissions",
+                "granted_permissions",
                 "details",
                 "error",
             ],

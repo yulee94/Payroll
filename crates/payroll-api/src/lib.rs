@@ -1,9 +1,14 @@
+pub mod access;
 pub mod error;
 pub mod policy;
 pub mod request;
 pub mod response;
 pub mod service;
 
+pub use access::{
+    authorize_payroll_request, PayrollAccessDecision, PayrollAction, PayrollPermission,
+    PayrollPosition, PayrollPrincipal, PayrollRole,
+};
 pub use error::PayrollApiError;
 pub use policy::{
     AttendancePolicy, MissingClockPolicy, OperationPolicy, OperationPolicySnapshot,

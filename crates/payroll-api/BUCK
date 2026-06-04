@@ -1,5 +1,6 @@
 PAYROLL_API_SRCS = [
     "src/lib.rs",
+    "src/access.rs",
     "src/error.rs",
     "src/policy.rs",
     "src/request.rs",
