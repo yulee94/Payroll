@@ -4,36 +4,55 @@ const path = require("node:path");
 
 const root = __dirname;
 const port = Number(process.env.PORT || process.argv[2] || 4173);
-const contentTypes = new Map([
-  [".html", "text/html; charset=utf-8"],
-  [".js", "text/javascript; charset=utf-8"],
-  [".css", "text/css; charset=utf-8"]
-]);
+const clients = new Set();
+const types = {
+  ".css": "text/css; charset=utf-8",
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8"
+};
 
-function send(res, status, body, type = "text/plain; charset=utf-8") {
-  res.writeHead(status, { "content-type": type });
-  res.end(body);
+function sendFile(res, filePath) {
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+      res.end("Not found");
+      return;
+    }
+    res.writeHead(200, { "content-type": types[path.extname(filePath)] || "application/octet-stream" });
+    res.end(data);
+  });
 }
 
 const server = http.createServer((req, res) => {
-  const requestedPath = decodeURIComponent((req.url || "/").split("?")[0]);
-  const relativePath = requestedPath === "/" ? "index.html" : requestedPath.replace(/^\/+/, "");
-  const filePath = path.normalize(path.join(root, relativePath));
-
-  if (!filePath.startsWith(root)) {
-    send(res, 403, "Forbidden");
+  if (req.url === "/events") {
+    res.writeHead(200, {
+      "cache-control": "no-cache",
+      "connection": "keep-alive",
+      "content-type": "text/event-stream"
+    });
+    res.write("\n");
+    clients.add(res);
+    req.on("close", () => clients.delete(res));
     return;
   }
 
-  fs.readFile(filePath, (error, data) => {
-    if (error) {
-      send(res, 404, "Not found");
-      return;
-    }
-    send(res, 200, data, contentTypes.get(path.extname(filePath)) || "application/octet-stream");
-  });
+  const urlPath = decodeURIComponent((req.url || "/").split("?")[0]);
+  const safePath = urlPath === "/" ? "/index.html" : urlPath;
+  const filePath = path.normalize(path.join(root, safePath));
+  if (!filePath.startsWith(root)) {
+    res.writeHead(403);
+    res.end("Forbidden");
+    return;
+  }
+  sendFile(res, filePath);
 });
 
+for (const file of ["index.html", "styles.css", "app.js"]) {
+  fs.watch(path.join(root, file), { persistent: false }, () => {
+    for (const client of clients) client.write("event: reload\ndata: now\n\n");
+  });
+}
+
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Bitween UI preview: http://127.0.0.1:${port}`);
+  console.log(`Bitween live preview running at http://127.0.0.1:${port}`);
 });
