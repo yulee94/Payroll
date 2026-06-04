@@ -18,7 +18,7 @@ from core.workflow.form_templates import (
     templates_path,
 )
 from core.workflow.forms import get_form_schema, validate_form_values
-from core.workflow.constants import DOC_TYPE_EXPENSE
+from core.workflow.constants import DOC_TYPE_BUSINESS_TRIP_REQUEST, DOC_TYPE_EXPENSE, DOC_TYPE_GENERAL
 
 
 class TestFormTemplates(unittest.TestCase):
@@ -61,6 +61,38 @@ class TestFormTemplates(unittest.TestCase):
                 keys = {f.key for f in fields}
                 self.assertIn("vehicle", keys)
                 self.assertIn("total_amount", keys)
+
+    def test_business_trip_request_template_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            with mock.patch("core.workflow.form_templates.WORKFLOW_ROOT", base / "workflow"):
+                merge_gw_templates("t_trip")
+                tpl = get_template("t_trip", "coss_출장신청서")
+                self.assertIsNotNone(tpl)
+                assert tpl is not None
+                self.assertEqual(tpl["document_type"], DOC_TYPE_BUSINESS_TRIP_REQUEST)
+                fields = resolve_template_schema("t_trip", tpl["id"])
+                self.assertIsNotNone(fields)
+                assert fields is not None
+                keys = {f.key for f in fields}
+                self.assertIn("destination", keys)
+                self.assertIn("business_trip_purpose", keys)
+                self.assertIn("executor_id", keys)
+
+    def test_trip_report_template_links_to_request(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            with mock.patch("core.workflow.form_templates.WORKFLOW_ROOT", base / "workflow"):
+                merge_gw_templates("t_report")
+                tpl = get_template("t_report", "coss_출장보고서")
+                self.assertIsNotNone(tpl)
+                assert tpl is not None
+                self.assertEqual(tpl["document_type"], DOC_TYPE_GENERAL)
+                fields = resolve_template_schema("t_report", tpl["id"])
+                assert fields is not None
+                keys = {f.key for f in fields}
+                self.assertIn("trip_id", keys)
+                self.assertIn("source_document_id", keys)
 
     def test_validate_with_template(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
