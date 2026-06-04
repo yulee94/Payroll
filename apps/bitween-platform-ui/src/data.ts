@@ -1,6 +1,7 @@
 import type {
   MetricItem,
   ModuleDashboard,
+  ModuleRow,
   NavigationItem,
   PayrollStep,
   ReadinessCard,
@@ -158,6 +159,60 @@ export const payrollSteps: readonly PayrollStep[] = [
     detail: "월별 산출물과 보고서를 저장하고 추후 조회합니다.",
     status: "연결 예정",
     tone: "neutral"
+  }
+];
+
+export const payrollSettingsRows: readonly ModuleRow[] = [
+  {
+    id: "payroll-setting-1",
+    category: "설정 대상",
+    status: "법인 기본",
+    owner: "급여 담당",
+    nextStep: "사업장별 예외 여부 확인",
+    tone: "neutral"
+  },
+  {
+    id: "payroll-setting-2",
+    category: "휴업수당 지급률",
+    status: "법정 기준 확인",
+    owner: "급여 담당",
+    nextStep: "최저 기준 이상 입력값 검토",
+    tone: "attention"
+  },
+  {
+    id: "payroll-setting-3",
+    category: "월 기본근로시간",
+    status: "209시간",
+    owner: "운영 관리자",
+    nextStep: "사업장별 고정/대체 방식 표시",
+    tone: "ready"
+  }
+];
+
+export const previewRows: readonly ModuleRow[] = [
+  {
+    id: "preview-1",
+    category: "Excel 미리보기",
+    status: "시트 선택",
+    owner: "자료함",
+    nextStep: "표/텍스트 보기 전환",
+    tone: "ready"
+  },
+  {
+    id: "preview-2",
+    category: "필터 초기화",
+    status: "지원",
+    owner: "사용자",
+    nextStep: "필터 적용 상태 안내",
+    tone: "neutral"
+  },
+  {
+    id: "preview-3",
+    category: "수정본 업로드",
+    status: "권한 필요",
+    owner: "급여 담당",
+    nextStep: "현재 scope 파일일 때만 노출",
+    tone: "attention"
   }
 ];
 
