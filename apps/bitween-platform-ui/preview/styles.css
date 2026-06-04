@@ -753,6 +753,66 @@ button {
   padding: 14px;
 }
 
+.archive-folder-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.archive-folder-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  border-top: 4px solid var(--muted);
+  color: var(--text);
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  text-align: left;
+}
+
+.archive-preview-grid {
+  align-items: stretch;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(280px, 1fr) minmax(300px, 1fr);
+}
+
+.archive-document-list,
+.archive-preview-pane {
+  display: grid;
+  gap: 10px;
+}
+
+.archive-document-item {
+  align-items: start;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+}
+
+.archive-document-item > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.archive-preview-pane {
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.archive-meta-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
 .metric-card,
 .mini-card,
 .queue-card,
@@ -1026,6 +1086,10 @@ button {
     background: var(--input);
     border: 1px solid var(--border);
     border-radius: 8px;
+    grid-template-columns: 1fr;
+  }
+
+  .archive-preview-grid {
     grid-template-columns: 1fr;
   }
 

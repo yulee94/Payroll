@@ -129,6 +129,19 @@ const payrollIntegrationChecks = [
   ["산출 진입", "대기", "backend API 계약 후 실제 검증 흐름으로 전환합니다.", "ready"]
 ];
 
+const archiveFolders = [
+  ["급여 산출물", "12개", "급여 담당", "ready", "payroll"],
+  ["근태 원본", "4개", "운영팀", "attention", "attendance"],
+  ["결재 첨부", "8개", "승인권자", "neutral", "workflow"],
+  ["출장/업무일지", "7개", "영업팀", "ready", "travel"]
+];
+
+const archiveDocuments = [
+  ["2026년 5월 급여 보고서", "Excel", "급여 담당", "보관됨", "ready"],
+  ["6월 1주차 근태 원본", "CSV", "운영팀", "분류 대기", "attention"],
+  ["부산 출장 업무일지", "PDF", "영업팀", "성과 연결", "neutral"]
+];
+
 const payrollSettingsRows = [
   ["설정 대상", "법인 기본", "급여 담당", "사업장별 예외 여부 확인", "neutral"],
   ["휴업수당 지급률", "법정 기준 확인", "급여 담당", "최저 기준 이상 입력값 검토", "attention"],
@@ -523,6 +536,7 @@ function renderModule(id) {
     ${id === "attendance" ? attendancePhonePanel() : ""}
     ${id === "travel" ? travelWorklogPanel() : ""}
     ${id === "admin" ? adminAccountPanel() : ""}
+    ${id === "archive" ? archiveLibraryPanel() : ""}
     ${id === "settings" ? i18nSettingsPanel() : ""}
     <section class="card">
       ${sectionHead("", "업무 목록", "필터로 상태를 좁히고 필요한 다음 작업을 확인합니다.", button(secondaryLabel(id), secondaryTarget(id), "secondary"))}
@@ -553,6 +567,33 @@ function i18nSettingsPanel() {
         <strong>${label}</strong><span class="helper">${state.selectedLanguage === code ? "선택됨" : status}</span>
       </button>
     `).join("")}</div>
+  </section>`;
+}
+
+function archiveLibraryPanel() {
+  return `<section class="card">
+    ${sectionHead("", "자료함 작업대", "급여 산출물, 근태 원본, 결재 첨부, 출장/업무일지 자료를 폴더별로 확인하고 최근 문서를 바로 미리봅니다.", button("급여 자료 확인", "payroll", "secondary"))}
+    <div class="archive-folder-grid">${archiveFolders.map(([label, count, owner, tone, target]) => `
+      <button class="archive-folder-card" data-target="${target}" style="border-top-color:${toneColor(tone)}">
+        ${badge(count, tone)}
+        <strong>${label}</strong>
+        <span class="helper">${owner}</span>
+      </button>
+    `).join("")}</div>
+    <div class="archive-preview-grid">
+      <div class="archive-document-list">${archiveDocuments.map(([title, type, owner, status, tone]) => `
+        <article class="archive-document-item">${badge(status, tone)}<div><strong>${title}</strong><span class="helper">${type} · ${owner}</span></div></article>
+      `).join("")}</div>
+      <div class="archive-preview-pane">
+        <span class="helper">선택 문서 미리보기</span>
+        <strong>2026년 5월 급여 보고서</strong>
+        <div class="archive-meta-grid">
+          <div class="detail-item"><span class="helper">보안 범위</span><strong>급여 담당 / Branch 관리자</strong></div>
+          <div class="detail-item"><span class="helper">상태</span><strong>보관됨</strong></div>
+        </div>
+        <div class="action-row">${button("급여 화면 열기", "payroll", "secondary")}${button("권한 확인", "admin", "ghost")}</div>
+      </div>
+    </div>
   </section>`;
 }
 

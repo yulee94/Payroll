@@ -76,6 +76,19 @@ const payrollIntegrationChecks = [
   { id: "policy", label: "산출 진입", value: "대기", detail: "backend API 계약 후 실제 검증 흐름으로 전환합니다.", tone: "ready" }
 ] as const;
 
+const archiveFolders = [
+  { id: "folder-payroll", label: "급여 산출물", count: "12개", owner: "급여 담당", tone: "ready", target: "payroll" },
+  { id: "folder-attendance", label: "근태 원본", count: "4개", owner: "운영팀", tone: "attention", target: "attendance" },
+  { id: "folder-approval", label: "결재 첨부", count: "8개", owner: "승인권자", tone: "neutral", target: "workflow" },
+  { id: "folder-travel", label: "출장/업무일지", count: "7개", owner: "영업팀", tone: "ready", target: "travel" }
+] as const;
+
+const archiveDocuments = [
+  { id: "doc-payroll", title: "2026년 5월 급여 보고서", type: "Excel", owner: "급여 담당", status: "보관됨", tone: "ready" },
+  { id: "doc-attendance", title: "6월 1주차 근태 원본", type: "CSV", owner: "운영팀", status: "분류 대기", tone: "attention" },
+  { id: "doc-travel", title: "부산 출장 업무일지", type: "PDF", owner: "영업팀", status: "성과 연결", tone: "neutral" }
+] as const;
+
 function isModuleId(id: PlatformId): id is ModuleId {
   return id !== "home" && id !== "payroll";
 }
@@ -448,6 +461,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
       {active.id === "attendance" ? <AttendancePhonePanel /> : null}
       {active.id === "travel" ? <TravelWorklogPanel /> : null}
       {active.id === "admin" ? <AdminAccountPanel /> : null}
+      {active.id === "archive" ? <ArchiveLibraryPanel onSelect={onSelect} /> : null}
 
       {active.id === "settings" ? (
         <Card>
@@ -589,6 +603,63 @@ function PayrollStepDetail({ step }: { readonly step: PayrollStep }) {
         <ActionButton onPress={() => undefined} variant="ghost">도움말 확인</ActionButton>
       </View>
     </View>
+  );
+}
+
+function ArchiveLibraryPanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
+  return (
+    <Card>
+      <SectionHeader
+        title="자료함 작업대"
+        description="급여 산출물, 근태 원본, 결재 첨부, 출장/업무일지 자료를 폴더별로 확인하고 최근 문서를 바로 미리봅니다."
+        action={<ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 자료 확인</ActionButton>}
+      />
+      <View style={styles.archiveFolderGrid}>
+        {archiveFolders.map((folder) => (
+          <Pressable
+            accessibilityRole="button"
+            key={folder.id}
+            onPress={() => onSelect(folder.target)}
+            style={({ pressed }) => [styles.archiveFolderCard, { borderTopColor: toneColor(folder.tone) }, pressed && styles.buttonPressed]}
+          >
+            <Badge tone={folder.tone}>{folder.count}</Badge>
+            <Label weight="bold">{folder.label}</Label>
+            <Label size="sm" muted>{folder.owner}</Label>
+          </Pressable>
+        ))}
+      </View>
+      <View style={styles.archivePreviewGrid}>
+        <View style={styles.archiveDocumentList}>
+          {archiveDocuments.map((document) => (
+            <View key={document.id} style={styles.archiveDocumentItem}>
+              <Badge tone={document.tone}>{document.status}</Badge>
+              <View style={styles.plannerCopy}>
+                <Label weight="bold">{document.title}</Label>
+                <Label size="sm" muted>{document.type} · {document.owner}</Label>
+              </View>
+            </View>
+          ))}
+        </View>
+        <View style={styles.archivePreviewPane}>
+          <Label size="sm" muted>선택 문서 미리보기</Label>
+          <Label weight="bold">2026년 5월 급여 보고서</Label>
+          <View style={styles.archiveMetaGrid}>
+            <View style={styles.archiveMetaItem}>
+              <Label size="sm" muted>보안 범위</Label>
+              <Label weight="bold">급여 담당 / Branch 관리자</Label>
+            </View>
+            <View style={styles.archiveMetaItem}>
+              <Label size="sm" muted>상태</Label>
+              <Label weight="bold">보관됨</Label>
+            </View>
+          </View>
+          <View style={styles.actionRow}>
+            <ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 화면 열기</ActionButton>
+            <ActionButton onPress={() => onSelect("admin")} variant="ghost">권한 확인</ActionButton>
+          </View>
+        </View>
+      </View>
+    </Card>
   );
 }
 
@@ -857,6 +928,68 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm
+  },
+  archiveDocumentItem: {
+    alignItems: "flex-start",
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  archiveDocumentList: {
+    flexBasis: 300,
+    flexGrow: 1,
+    gap: spacing.sm
+  },
+  archiveFolderCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 190,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  archiveFolderGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  archiveMetaGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  archiveMetaItem: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexBasis: 160,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  archivePreviewGrid: {
+    alignItems: "stretch",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.lg
+  },
+  archivePreviewPane: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 320,
+    flexGrow: 1,
+    gap: spacing.md,
+    padding: spacing.md
   },
   adminBranchCard: {
     backgroundColor: colors.card,
