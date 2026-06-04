@@ -116,6 +116,12 @@ const travelWorkflowStages = [
   ["05", "상급자 view", "view 준비", "on-going과 Completed 상태를 관리자가 나눠 확인합니다.", "ready"]
 ];
 
+const adminPermissionRows = [
+  ["Branch 관리자", "전체", "요청 승인", "전체", "ready"],
+  ["경영진", "열람", "열람", "경영 자료", "neutral"],
+  ["일반 사원", "본인 자료", "차단", "공유 자료", "attention"]
+];
+
 const payrollSettingsRows = [
   ["설정 대상", "법인 기본", "급여 담당", "사업장별 예외 여부 확인", "neutral"],
   ["휴업수당 지급률", "법정 기준 확인", "급여 담당", "최저 기준 이상 입력값 검토", "attention"],
@@ -187,13 +193,15 @@ const dashboards = {
     ["급여 오류 요약", "추천", "AI", "오류 행 설명 생성", "ready"],
     ["결재 의견 초안", "검토 필요", "사용자", "문서 맥락 확인", "attention"]
   ]),
-  admin: dashboard("관리자 콘솔", "사용자, 권한, 법인 운영 설정을 분리해서 관리합니다.", ["전체", "권한", "법인", "감사"], [
-    ["활성 사용자", "14명", "초대 완료 계정", "ready"],
-    ["권한 검토", "2건", "승인권자 확인", "attention"],
+  admin: dashboard("관리자 콘솔", "법인 Branch, 하위계정, 민감 문서 권한, 감사 상태를 분리해서 관리합니다.", ["전체", "권한", "법인", "하위계정", "감사"], [
+    ["Branch", "1개", "Bitween Demo 법인", "ready"],
+    ["하위계정", "14명", "초대 완료 계정", "ready"],
+    ["권한 검토", "2건", "민감 문서 접근 확인", "attention"],
     ["감사 로그", "정상", "최근 오류 없음", "ready"]
   ], [
-    ["신규 사용자 초대", "검토 중", "관리자", "역할 지정", "attention"],
-    ["법인 정보", "정상", "운영 관리자", "정기 검토", "ready"]
+    ["신규 하위계정 초대", "검토 중", "관리자", "Branch 소속과 역할 지정", "attention"],
+    ["법인 Branch 정보", "정상", "운영 관리자", "정기 검토", "ready"],
+    ["급여 민감 문서 권한", "확인 필요", "대표 승인", "경영진 급여/일반 급여 열람 범위 분리", "attention"]
   ]),
   settings: dashboard("설정", "개인 화면, 급여 운영 기준, 알림, 접근 환경을 정리합니다.", ["전체", "개인", "급여", "알림"], [
     ["프로필", "완료", "기본 정보 설정됨", "ready"],
@@ -485,6 +493,7 @@ function renderModule(id) {
     </section>
     ${id === "attendance" ? attendancePhonePanel() : ""}
     ${id === "travel" ? travelWorklogPanel() : ""}
+    ${id === "admin" ? adminAccountPanel() : ""}
     ${id === "settings" ? i18nSettingsPanel() : ""}
     <section class="card">
       ${sectionHead("", "업무 목록", "필터로 상태를 좁히고 필요한 다음 작업을 확인합니다.", button(secondaryLabel(id), secondaryTarget(id), "secondary"))}
@@ -514,6 +523,24 @@ function i18nSettingsPanel() {
       <button class="language-option ${state.selectedLanguage === code ? "selected" : ""}" data-language="${code}">
         <strong>${label}</strong><span class="helper">${state.selectedLanguage === code ? "선택됨" : status}</span>
       </button>
+    `).join("")}</div>
+  </section>`;
+}
+
+function adminAccountPanel() {
+  return `<section class="card">
+    ${sectionHead("", "법인 Branch / 하위계정 권한", "회사 하나를 하나의 Branch로 보고, 하위계정과 민감 문서 접근 범위를 화면에서 분리합니다.")}
+    <div class="admin-branch-grid">
+      <article class="detail-item"><span class="helper">Branch 계정</span><strong>Bitween Demo · 법인코드 0000</strong><span>법인 기본사항 입력, 사업장 정보, 하위계정 생성 권한을 이 화면에서 검토합니다.</span></article>
+      <article class="detail-item"><span class="helper">하위계정 구조</span><strong>관리자 2명 · 경영진 3명 · 일반 사원 9명</strong><span>신규 계정은 Branch 소속, 부서, 역할을 지정한 뒤 초대합니다.</span></article>
+    </div>
+    <div class="permission-matrix">${adminPermissionRows.map(([role, payroll, executive, archive, tone]) => `
+      <article class="permission-row">
+        <div class="permission-role">${badge(role, tone)}</div>
+        <div class="permission-cell"><span class="helper">급여</span><strong>${payroll}</strong></div>
+        <div class="permission-cell"><span class="helper">경영진 급여</span><strong>${executive}</strong></div>
+        <div class="permission-cell"><span class="helper">자료함</span><strong>${archive}</strong></div>
+      </article>
     `).join("")}</div>
   </section>`;
 }

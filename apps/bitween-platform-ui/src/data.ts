@@ -651,29 +651,38 @@ export const moduleDashboards = {
   admin: {
     id: "admin",
     title: "관리자 콘솔",
-    subtitle: "사용자, 권한, 법인 운영 설정을 분리해서 관리합니다.",
-    filters: ["전체", "권한", "법인", "감사"],
+    subtitle: "법인 Branch, 하위계정, 민감 문서 권한, 감사 상태를 분리해서 관리합니다.",
+    filters: ["전체", "권한", "법인", "하위계정", "감사"],
     metrics: [
-      { id: "users", label: "활성 사용자", value: "14명", helper: "초대 완료 계정", tone: "ready" },
-      { id: "roles", label: "권한 검토", value: "2건", helper: "승인권자 확인", tone: "attention" },
+      { id: "branch", label: "Branch", value: "1개", helper: "Bitween Demo 법인", tone: "ready" },
+      { id: "users", label: "하위계정", value: "14명", helper: "초대 완료 계정", tone: "ready" },
+      { id: "roles", label: "권한 검토", value: "2건", helper: "민감 문서 접근 확인", tone: "attention" },
       { id: "audit", label: "감사 로그", value: "정상", helper: "최근 오류 없음", tone: "ready" }
     ],
     rows: [
       {
         id: "ad-1",
-        category: "신규 사용자 초대",
+        category: "신규 하위계정 초대",
         status: "검토 중",
         owner: "관리자",
-        nextStep: "역할 지정",
+        nextStep: "Branch 소속과 역할 지정",
         tone: "attention"
       },
       {
         id: "ad-2",
-        category: "법인 정보",
+        category: "법인 Branch 정보",
         status: "정상",
         owner: "운영 관리자",
         nextStep: "정기 검토",
         tone: "ready"
+      },
+      {
+        id: "ad-3",
+        category: "급여 민감 문서 권한",
+        status: "확인 필요",
+        owner: "대표 승인",
+        nextStep: "경영진 급여/일반 급여 열람 범위 분리",
+        tone: "attention"
       }
     ],
     primaryAction: {

@@ -701,6 +701,42 @@ button {
   padding: 14px;
 }
 
+.admin-branch-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.permission-matrix {
+  display: grid;
+  gap: 10px;
+}
+
+.permission-row {
+  align-items: stretch;
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(140px, 0.9fr) repeat(3, minmax(130px, 1fr));
+  padding: 8px;
+}
+
+.permission-role,
+.permission-cell {
+  align-items: start;
+  display: grid;
+  gap: 4px;
+}
+
+.permission-cell {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+}
+
 .metric-card,
 .mini-card,
 .queue-card,
@@ -974,6 +1010,10 @@ button {
     background: var(--input);
     border: 1px solid var(--border);
     border-radius: 8px;
+    grid-template-columns: 1fr;
+  }
+
+  .permission-row {
     grid-template-columns: 1fr;
   }
 }

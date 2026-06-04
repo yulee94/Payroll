@@ -62,6 +62,12 @@ const travelWorkflowStages = [
   { id: "travel-review", label: "상급자 view", detail: "on-going과 Completed 상태를 관리자가 나눠 확인합니다.", status: "view 준비", tone: "ready" }
 ] as const;
 
+const adminPermissionRows = [
+  { id: "role-owner", role: "Branch 관리자", payroll: "전체", executive: "요청 승인", archive: "전체", tone: "ready" },
+  { id: "role-manager", role: "경영진", payroll: "열람", executive: "열람", archive: "경영 자료", tone: "neutral" },
+  { id: "role-employee", role: "일반 사원", payroll: "본인 자료", executive: "차단", archive: "공유 자료", tone: "attention" }
+] as const;
+
 function isModuleId(id: PlatformId): id is ModuleId {
   return id !== "home" && id !== "payroll";
 }
@@ -406,6 +412,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
 
       {active.id === "attendance" ? <AttendancePhonePanel /> : null}
       {active.id === "travel" ? <TravelWorklogPanel /> : null}
+      {active.id === "admin" ? <AdminAccountPanel /> : null}
 
       {active.id === "settings" ? (
         <Card>
@@ -547,6 +554,47 @@ function PayrollStepDetail({ step }: { readonly step: PayrollStep }) {
         <ActionButton onPress={() => undefined} variant="ghost">도움말 확인</ActionButton>
       </View>
     </View>
+  );
+}
+
+function AdminAccountPanel() {
+  return (
+    <Card>
+      <SectionHeader title="법인 Branch / 하위계정 권한" description="회사 하나를 하나의 Branch로 보고, 하위계정과 민감 문서 접근 범위를 화면에서 분리합니다." />
+      <View style={styles.adminBranchGrid}>
+        <View style={styles.adminBranchCard}>
+          <Label size="sm" muted>Branch 계정</Label>
+          <Label weight="bold">Bitween Demo · 법인코드 0000</Label>
+          <Label size="sm" muted>법인 기본사항 입력, 사업장 정보, 하위계정 생성 권한을 이 화면에서 검토합니다.</Label>
+        </View>
+        <View style={styles.adminBranchCard}>
+          <Label size="sm" muted>하위계정 구조</Label>
+          <Label weight="bold">관리자 2명 · 경영진 3명 · 일반 사원 9명</Label>
+          <Label size="sm" muted>신규 계정은 Branch 소속, 부서, 역할을 지정한 뒤 초대합니다.</Label>
+        </View>
+      </View>
+      <View style={styles.permissionMatrix}>
+        {adminPermissionRows.map((row) => (
+          <View key={row.id} style={styles.permissionRow}>
+            <View style={styles.permissionRole}>
+              <Badge tone={row.tone}>{row.role}</Badge>
+            </View>
+            <View style={styles.permissionCell}>
+              <Label size="sm" muted>급여</Label>
+              <Label weight="bold">{row.payroll}</Label>
+            </View>
+            <View style={styles.permissionCell}>
+              <Label size="sm" muted>경영진 급여</Label>
+              <Label weight="bold">{row.executive}</Label>
+            </View>
+            <View style={styles.permissionCell}>
+              <Label size="sm" muted>자료함</Label>
+              <Label weight="bold">{row.archive}</Label>
+            </View>
+          </View>
+        ))}
+      </View>
+    </Card>
   );
 }
 
@@ -774,6 +822,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm
+  },
+  adminBranchCard: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 260,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  adminBranchGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
   },
   attendanceGrid: {
     alignItems: "stretch",
@@ -1026,6 +1089,34 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: "800",
     lineHeight: 44
+  },
+  permissionCell: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexBasis: 150,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  permissionMatrix: {
+    gap: spacing.sm
+  },
+  permissionRole: {
+    flexBasis: 150,
+    flexGrow: 1
+  },
+  permissionRow: {
+    alignItems: "stretch",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    padding: spacing.sm
   },
   punchActions: {
     flexDirection: "row",
