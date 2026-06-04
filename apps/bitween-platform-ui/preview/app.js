@@ -476,6 +476,8 @@ function field(label, id, placeholder, type = "text", value = "") {
 function renderShell() {
   const items = navigationItems();
   const active = items.find((item) => item.id === state.activeId) || items[0];
+  const themes = sidebarThemes();
+  const activeSidebarTheme = themes.find((theme) => theme.id === state.sidebarTheme) || themes[0];
   const sessionLabel = `${session.tenantName} · ${t("session.roleLabel")} · ${demoAccount.companyCode}`;
   return html`
     <section class="shell sidebar-theme-${state.sidebarTheme}">
@@ -487,12 +489,25 @@ function renderShell() {
         <div class="sidebar-options" aria-label="${t("shell.themePanel.aria")}">
           <span class="sidebar-options-title">${t("shell.themePanel.title")}</span>
           <div class="sidebar-theme-grid">
-            ${sidebarThemes().map((theme) => `
-              <button aria-pressed="${state.sidebarTheme === theme.id}" class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}" data-sidebar-theme="${theme.id}" title="${escapeText(theme.description)}">
+            ${themes.map((theme) => `
+              <button
+                aria-label="${escapeText(t("shell.themePanel.optionLabel", { label: theme.label, description: theme.description }))}"
+                aria-pressed="${state.sidebarTheme === theme.id ? "true" : "false"}"
+                class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}"
+                data-sidebar-theme="${theme.id}"
+                title="${escapeText(theme.description)}"
+              >
                 <span class="sidebar-swatch sidebar-swatch-${theme.id}"></span>
-                <strong>${theme.label}</strong>
+                <strong>${escapeText(theme.label)}</strong>
               </button>
             `).join("")}
+          </div>
+          <div class="sidebar-theme-current" aria-live="polite">
+            <span class="sidebar-theme-current-rail"></span>
+            <span>
+              <strong>${t("shell.themePanel.current", { theme: activeSidebarTheme.label })}</strong>
+              <small>${escapeText(activeSidebarTheme.description)}</small>
+            </span>
           </div>
         </div>
         <nav class="nav" aria-label="${t("shell.navigation.aria")}">

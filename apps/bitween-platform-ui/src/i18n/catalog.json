@@ -6584,6 +6584,24 @@
         "zh-Hans-CN": "跳到主要内容",
         "ja-JP": "本文へスキップ"
       }
+    },
+    {
+      "key": "shell.themePanel.current",
+      "values": {
+        "ko-KR": "현재 적용: {theme}",
+        "en-US": "Current: {theme}",
+        "zh-Hans-CN": "当前应用：{theme}",
+        "ja-JP": "現在適用中: {theme}"
+      }
+    },
+    {
+      "key": "shell.themePanel.optionLabel",
+      "values": {
+        "ko-KR": "{label} 메뉴 색상 옵션. {description}",
+        "en-US": "{label} menu color option. {description}",
+        "zh-Hans-CN": "{label} 菜单颜色选项。{description}",
+        "ja-JP": "{label} メニュー色オプション。{description}"
+      }
     }
   ],
   "languageDisplayNames": [

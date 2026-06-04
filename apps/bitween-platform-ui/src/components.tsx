@@ -272,6 +272,8 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
             const selected = item.id === theme.id;
             return (
               <Pressable
+                accessibilityHint={item.description}
+                accessibilityLabel={t(locale, "shell.themePanel.optionLabel", { label: item.label, description: item.description })}
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 key={item.id}
@@ -289,6 +291,13 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
               </Pressable>
             );
           })}
+        </View>
+        <View style={styles.themeCurrent}>
+          <View style={[styles.themeCurrentRail, { backgroundColor: theme.activeText }]} />
+          <View style={styles.themeCurrentCopy}>
+            <Label size="sm" weight="bold">{t(locale, "shell.themePanel.current", { theme: theme.label })}</Label>
+            <Label size="sm" muted>{theme.description}</Label>
+          </View>
         </View>
       </View>
       <ScrollView
@@ -713,6 +722,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     lineHeight: 16
+  },
+  themeCurrent: {
+    alignItems: "stretch",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.sm,
+    padding: spacing.sm
+  },
+  themeCurrentCopy: {
+    flex: 1,
+    gap: spacing.xs,
+    minWidth: 0
+  },
+  themeCurrentRail: {
+    borderRadius: 999,
+    width: 4
   },
   themePanel: {
     backgroundColor: "rgba(255, 255, 255, 0.54)",
