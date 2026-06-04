@@ -81,7 +81,7 @@ export const platformMetrics: readonly MetricItem[] = [
     id: "ready",
     label: "연동 준비 완료",
     value: "5개",
-    helper: "읽기 전용 API 연결 후보",
+    helper: "연동 준비 항목 포함",
     tone: "ready"
   },
   {
@@ -105,14 +105,14 @@ export const readinessCards: readonly ReadinessCard[] = [
     id: "roster",
     title: "근로자 명부",
     value: "연동 대기",
-    detail: "backend readiness snapshot 연결 전까지 mock 상태로 표시합니다.",
+    detail: "최근 명부 기준과 급여 대상자 상태를 확인하세요.",
     tone: "attention"
   },
   {
     id: "policy",
     title: "운영 기준",
-    value: "API 계약 확인",
-    detail: "지급일, 입력 방식, 근태 반올림 기준을 표시할 슬롯입니다.",
+    value: "기준 검토",
+    detail: "지급일, 입력 방식, 근태 반올림 기준을 확인합니다.",
     tone: "neutral"
   },
   {
@@ -124,9 +124,9 @@ export const readinessCards: readonly ReadinessCard[] = [
   },
   {
     id: "api",
-    title: "API-ready",
-    value: "계약 대기",
-    detail: "payroll API adapter 응답 shape가 확정되면 교체합니다.",
+    title: "자료 연동",
+    value: "확인 필요",
+    detail: "외부 자료 연동 전 입력 누락 여부를 확인합니다.",
     tone: "attention"
   }
 ];
@@ -286,7 +286,7 @@ export const moduleDashboards = {
       target: "payroll"
     },
     emptyTitle: "표시할 HR 업무가 없습니다.",
-    emptyDescription: "명부 또는 근태 API가 연결되면 처리 대기 항목이 표시됩니다."
+    emptyDescription: "명부 또는 근태 업무가 생기면 처리 대기 항목이 표시됩니다."
   },
   workflow: {
     id: "workflow",
@@ -327,7 +327,7 @@ export const moduleDashboards = {
       target: "archive"
     },
     emptyTitle: "대기 중인 결재 문서가 없습니다.",
-    emptyDescription: "결재 API 연결 후 개인 권한에 맞는 문서가 표시됩니다."
+    emptyDescription: "개인 권한에 맞는 결재 문서가 생기면 표시됩니다."
   },
   archive: {
     id: "archive",
@@ -378,7 +378,7 @@ export const moduleDashboards = {
     metrics: [
       { id: "prompts", label: "추천 작업", value: "5개", helper: "현재 화면 기준", tone: "ready" },
       { id: "reviews", label: "검토 대기", value: "2건", helper: "사람 확인 필요", tone: "attention" },
-      { id: "policy", label: "정책 문맥", value: "연결 전", helper: "backend contract 필요", tone: "neutral" }
+      { id: "policy", label: "정책 문맥", value: "확인 전", helper: "업무 기준 확인 후 사용", tone: "neutral" }
     ],
     rows: [
       {
@@ -409,7 +409,7 @@ export const moduleDashboards = {
       target: "settings"
     },
     emptyTitle: "추천할 AI 작업이 없습니다.",
-    emptyDescription: "업무 문맥 API가 연결되면 화면별 추천 작업이 표시됩니다."
+    emptyDescription: "업무 문맥이 준비되면 화면별 추천 작업이 표시됩니다."
   },
   admin: {
     id: "admin",
@@ -468,7 +468,7 @@ export const moduleDashboards = {
         category: "급여 운영 기준",
         status: "확인 필요",
         owner: "급여 담당",
-        nextStep: "정책 스토어 연결 후 표시",
+        nextStep: "지급일과 반올림 기준 확인",
         tone: "attention"
       },
       {
