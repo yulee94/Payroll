@@ -465,7 +465,7 @@ function languageSelector() {
 }
 
 function field(label, id, placeholder, type = "text", value = "") {
-  return `<label class="field" for="${id}"><span>${escapeText(label)}</span><input id="${id}" type="${type}" value="${escapeText(value)}" placeholder="${escapeText(placeholder)}" /></label>`;
+  return `<label class="field" for="${id}"><span>${escapeText(label)}</span><input aria-label="${escapeText(label)}" id="${id}" type="${type}" value="${escapeText(value)}" placeholder="${escapeText(placeholder)}" /></label>`;
 }
 
 function renderShell() {
@@ -510,19 +510,19 @@ function renderShell() {
           </div>
         </header>
         <div class="content">${renderScreen(active.id)}</div>
-        <footer class="shell-status" aria-label="platform status">
+        <footer class="shell-status" aria-label="${t("shell.status.aria")}">
           <div class="shell-status-group">
             <span class="status-dot" aria-hidden="true"></span>
-            <strong>Frontend preview</strong>
-            <span class="helper">Demo 법인 0000</span>
+            <strong>${t("shell.status.previewTitle")}</strong>
+            <span class="helper">${t("shell.status.demoCompany")}</span>
           </div>
           <div class="shell-status-group">
-            ${badge("UI only", "ready")}
-            <span class="helper">급여 계산/저장 로직 미변경</span>
+            ${badge(t("shell.status.uiOnly"), "ready")}
+            <span class="helper">${t("shell.status.logicUnchanged")}</span>
           </div>
           <div class="shell-status-group">
-            ${badge("Strict TS", "neutral")}
-            <span class="helper">React Native/Web 준비</span>
+            ${badge(t("shell.status.strictTs"), "neutral")}
+            <span class="helper">${t("shell.status.reactNativeWebReady")}</span>
           </div>
         </footer>
       </div>

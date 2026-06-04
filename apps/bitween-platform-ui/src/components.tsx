@@ -369,19 +369,19 @@ export function AppShell({
         <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]} style={styles.contentScroll}>
           {children}
         </ScrollView>
-        <View style={[styles.statusFooter, compact && styles.statusFooterCompact]}>
+        <View accessibilityLabel={t(locale, "shell.status.aria")} style={[styles.statusFooter, compact && styles.statusFooterCompact]}>
           <View style={styles.statusFooterGroup}>
             <View style={styles.statusDot} />
-            <Label size="sm" weight="bold">Frontend preview</Label>
-            <Label size="sm" muted>Demo 법인 0000</Label>
+            <Label size="sm" weight="bold">{t(locale, "shell.status.previewTitle")}</Label>
+            <Label size="sm" muted>{t(locale, "shell.status.demoCompany")}</Label>
           </View>
           <View style={styles.statusFooterGroup}>
-            <Badge tone="ready">UI only</Badge>
-            <Label size="sm" muted>급여 계산/저장 로직 미변경</Label>
+            <Badge tone="ready">{t(locale, "shell.status.uiOnly")}</Badge>
+            <Label size="sm" muted>{t(locale, "shell.status.logicUnchanged")}</Label>
           </View>
           <View style={styles.statusFooterGroup}>
-            <Badge tone="neutral">Strict TS</Badge>
-            <Label size="sm" muted>React Native/Web 준비</Label>
+            <Badge tone="neutral">{t(locale, "shell.status.strictTs")}</Badge>
+            <Label size="sm" muted>{t(locale, "shell.status.reactNativeWebReady")}</Label>
           </View>
         </View>
       </View>
