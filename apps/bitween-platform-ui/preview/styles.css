@@ -566,15 +566,26 @@ button {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 8px;
+  color: var(--text);
   display: flex;
   gap: 10px;
   padding: 12px;
+  text-align: left;
 }
 
 .planner-item div {
   display: grid;
   gap: 3px;
   min-width: 0;
+}
+
+.planner-button {
+  cursor: pointer;
+  width: 100%;
+}
+
+.planner-button:hover {
+  border-color: var(--accent);
 }
 
 .attendance-grid {
@@ -866,6 +877,32 @@ button {
   display: grid;
   gap: 8px;
   padding: 12px;
+}
+
+.settings-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.settings-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  border-top: 4px solid var(--muted);
+  color: var(--text);
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  text-align: left;
+}
+
+.settings-card-head {
+  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
 }
 
 .metric-card,
