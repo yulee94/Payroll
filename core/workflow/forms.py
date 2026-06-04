@@ -10,6 +10,7 @@ from typing import Any
 from core.workflow.constants import (
     ATTENDANCE_TYPES,
     DOC_TYPE_ATTENDANCE,
+    DOC_TYPE_BUSINESS_TRIP_REQUEST,
     DOC_TYPE_CLOSING,
     DOC_TYPE_EXPENSE,
     DOC_TYPE_GENERAL,
@@ -27,6 +28,7 @@ APPROVER_ROLES: dict[str, str] = {
 }
 
 EXPENSE_CATEGORIES = ("법인카드", "현금·영수증", "경비정산", "출장비", "기타")
+BUSINESS_TRIP_TRANSPORT_OPTIONS = ("대중교통", "법인차량", "개인차량", "항공", "기차", "기타")
 
 
 @dataclass(frozen=True)
@@ -103,6 +105,20 @@ FORM_SCHEMAS: dict[str, tuple[FormFieldDef, ...]] = {
         FormFieldDef("summary", "실적 요약", "multiline", required=True, maps_to="summary"),
         FormFieldDef("issues", "특이·리스크", "multiline"),
     ),
+    DOC_TYPE_BUSINESS_TRIP_REQUEST: _fields(
+        FormFieldDef("title", "출장 제목", required=True, maps_to="title"),
+        FormFieldDef("period_start", "출장 시작일", "date", required=True, maps_to="period_start"),
+        FormFieldDef("period_end", "출장 종료일", "date", required=True, maps_to="period_end"),
+        FormFieldDef("destination", "출장지", required=True),
+        FormFieldDef("business_trip_purpose", "출장 목적", "multiline", required=True, maps_to="summary"),
+        FormFieldDef("expected_outcome", "기대 성과", "multiline"),
+        FormFieldDef("transportation", "이동 수단", "select", required=True, options=BUSINESS_TRIP_TRANSPORT_OPTIONS),
+        FormFieldDef("estimated_amount", "예상 출장비(원)", "number", maps_to="total_amount"),
+        FormFieldDef("executor_id", "출장 수행자 ID", required=True),
+        FormFieldDef("site_id", "현장/사업장 ID"),
+        FormFieldDef("department_id", "부서 ID"),
+        FormFieldDef("trip_dedupe_key", "출장 중복 방지 키", placeholder="비워두면 문서 ID 기준 자동 연결"),
+    ),
 }
 
 DEFAULT_APPROVAL_TEMPLATES: dict[str, tuple[tuple[str, str], ...]] = {
@@ -125,6 +141,11 @@ DEFAULT_APPROVAL_TEMPLATES: dict[str, tuple[tuple[str, str], ...]] = {
         ("finance", "재무"),
         ("executive", "임원"),
     ),
+    DOC_TYPE_BUSINESS_TRIP_REQUEST: (
+        ("department_manager", "부서장"),
+        ("executive", "임원"),
+        ("finance", "재무"),
+    ),
 }
 
 REQUIRED_HINTS: dict[str, str] = {
@@ -133,6 +154,7 @@ REQUIRED_HINTS: dict[str, str] = {
     DOC_TYPE_PURCHASE: "필수: 건명, 품목, 납기, 금액, 구매 사유",
     DOC_TYPE_EXPENSE: "필수: 건명, 지출 구분, 사용일, 금액, 목적",
     DOC_TYPE_CLOSING: "필수: 제목, 마감 월, 집계 기간, 실적 요약",
+    DOC_TYPE_BUSINESS_TRIP_REQUEST: "필수: 출장 제목, 출장 기간, 출장지, 출장 목적, 이동 수단, 수행자",
 }
 
 
@@ -195,14 +217,15 @@ def build_document_fields(document_type: str, values: dict[str, str]) -> dict[st
     """양식 값 → create_document / update_document 인자."""
     v = {k: str(val or "").strip() for k, val in values.items()}
     title = v.get("title", "")
-    summary = v.get("summary") or v.get("content") or v.get("purpose") or v.get("reason") or ""
+    summary = v.get("summary") or v.get("content") or v.get("business_trip_purpose") or v.get("purpose") or v.get("reason") or ""
     if not summary:
-        parts = [v.get(k) for k in ("purpose", "content", "reason", "item_summary") if v.get(k)]
+        parts = [v.get(k) for k in ("business_trip_purpose", "purpose", "content", "reason", "item_summary") if v.get(k)]
         summary = "\n".join(parts)
     amount = 0
-    if v.get("total_amount"):
+    amount_source = v.get("total_amount") or v.get("estimated_amount")
+    if amount_source:
         try:
-            amount = int(v.get("total_amount", "0").replace(",", ""))
+            amount = int(amount_source.replace(",", ""))
         except ValueError:
             amount = 0
     payload = dict(v)

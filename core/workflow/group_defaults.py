@@ -8,6 +8,7 @@ from typing import Any
 
 from core.workflow.constants import (
     DOC_TYPE_ATTENDANCE,
+    DOC_TYPE_BUSINESS_TRIP_REQUEST,
     DOC_TYPE_CLOSING,
     DOC_TYPE_EXPENSE,
     DOC_TYPE_GENERAL,
@@ -100,6 +101,19 @@ COSS_APPROVAL_TEMPLATES: list[dict[str, Any]] = [
         "steps": [
             {"role_key": "department_manager", "scope": "origin_entity"},
             {"role_key": "hr", "scope": "group_hq"},
+        ],
+    },
+
+    {
+        "template_id": "tpl_business_trip_request",
+        "document_type": DOC_TYPE_BUSINESS_TRIP_REQUEST,
+        "name": "출장신청서 (표준)",
+        "amount_min": 0,
+        "amount_max": 999_999_999_999,
+        "steps": [
+            {"role_key": "department_manager", "scope": "origin_entity"},
+            {"role_key": "executive", "scope": "group_hq"},
+            {"role_key": "finance", "scope": "group_hq", "amount_min": 1},
         ],
     },
     {

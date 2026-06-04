@@ -130,6 +130,22 @@ class TestFormTemplates(unittest.TestCase):
                 schema = get_form_schema(dtype, "t2", template_id=tpl["id"])
                 self.assertGreater(len(schema), 3)
 
+    def test_extra_gw_template_uses_fields_for_inferred_document_type(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            with mock.patch("core.workflow.form_templates.WORKFLOW_ROOT", base / "workflow"):
+                merge_gw_templates("t_extra", extra_names=["구매요청서_프로브", "출장신청_프로브"])
+                purchase = next(t for t in list_templates("t_extra") if t["name"] == "구매요청서_프로브")
+                trip = next(t for t in list_templates("t_extra") if t["name"] == "출장신청_프로브")
+                self.assertNotEqual(purchase["document_type"], DOC_TYPE_BUSINESS_TRIP_REQUEST)
+                purchase_keys = {f.key for f in resolve_template_schema("t_extra", purchase["id"]) or ()}
+                trip_keys = {f.key for f in resolve_template_schema("t_extra", trip["id"]) or ()}
+                self.assertIn("total_amount", purchase_keys)
+                self.assertNotIn("business_trip_purpose", purchase_keys)
+                self.assertNotIn("destination", purchase_keys)
+                self.assertEqual(trip["document_type"], DOC_TYPE_BUSINESS_TRIP_REQUEST)
+                self.assertIn("business_trip_purpose", trip_keys)
+
     def test_affiliate_tenant_resolves_group_workflow_templates(self) -> None:
         """계열사 로그인 ID로 조회해도 루트(coss) 양식함 필드를 불러온다."""
         with tempfile.TemporaryDirectory() as tmp:

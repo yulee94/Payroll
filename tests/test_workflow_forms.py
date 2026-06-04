@@ -11,8 +11,8 @@ from unittest.mock import patch
 import core.session_service as session_service
 from core.session_service import UserSession, logout
 from core.workflow import service as wf_svc
-from core.workflow.constants import DOC_TYPE_EXPENSE, DOC_TYPE_GENERAL
-from core.workflow.forms import build_document_fields, validate_form_values
+from core.workflow.constants import DOC_TYPE_BUSINESS_TRIP_REQUEST, DOC_TYPE_EXPENSE, DOC_TYPE_GENERAL
+from core.workflow.forms import build_document_fields, get_form_schema, validate_form_values
 from core.workflow.seed import seed_tenant_if_empty
 from services import workspace_store as ws
 
@@ -36,6 +36,46 @@ class WorkflowFormTests(unittest.TestCase):
         )
         self.assertEqual(built["total_amount"], 12000)
         self.assertEqual(built["period_start"], "2026-05-01")
+
+    def test_business_trip_request_schema_is_first_class(self) -> None:
+        schema = get_form_schema(DOC_TYPE_BUSINESS_TRIP_REQUEST)
+        keys = {field.key for field in schema}
+        self.assertIn("destination", keys)
+        self.assertIn("business_trip_purpose", keys)
+        self.assertIn("executor_id", keys)
+        errors = validate_form_values(
+            DOC_TYPE_BUSINESS_TRIP_REQUEST,
+            {
+                "title": "부산 고객사 출장",
+                "period_start": "2026-06-10",
+                "period_end": "2026-06-09",
+                "destination": "부산",
+                "business_trip_purpose": "고객사 미팅",
+                "transportation": "기차",
+                "executor_id": "u-exec",
+            },
+        )
+        self.assertTrue(any("시작일" in e for e in errors))
+
+    def test_build_business_trip_request_fields(self) -> None:
+        built = build_document_fields(
+            DOC_TYPE_BUSINESS_TRIP_REQUEST,
+            {
+                "title": "부산 고객사 출장",
+                "period_start": "2026-06-10",
+                "period_end": "2026-06-11",
+                "destination": "부산",
+                "business_trip_purpose": "고객사 미팅",
+                "transportation": "기차",
+                "estimated_amount": "150,000",
+                "executor_id": "u-exec",
+                "trip_dedupe_key": "trip:doc-1",
+            },
+        )
+        self.assertEqual(built["summary"], "고객사 미팅")
+        self.assertEqual(built["total_amount"], 150000)
+        self.assertEqual(built["payload"]["document_type"], DOC_TYPE_BUSINESS_TRIP_REQUEST)
+        self.assertEqual(built["payload"]["trip_dedupe_key"], "trip:doc-1")
 
 
 class WorkflowFollowUpTests(unittest.TestCase):
