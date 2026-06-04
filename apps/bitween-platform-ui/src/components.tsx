@@ -139,6 +139,7 @@ export function FilterBar({ active, filters, onSelect }: FilterBarProps) {
         return (
           <Pressable
             accessibilityRole="button"
+            accessibilityState={{ selected }}
             key={filter}
             onPress={() => onSelect?.(filter)}
             style={({ pressed }) => [styles.filterChip, selected && styles.filterChipActive, pressed && styles.buttonPressed]}
@@ -185,6 +186,7 @@ export function DataTable({ locale, onRowPress, rows, selectedRowId }: Localized
         {rows.map((row) => (
           <Pressable
             accessibilityRole={onRowPress ? "button" : undefined}
+            accessibilityState={selectedRowId === row.id ? { selected: true } : undefined}
             key={row.id}
             onPress={() => onRowPress?.(row)}
             style={({ pressed }) => [
@@ -217,6 +219,7 @@ export function DataTable({ locale, onRowPress, rows, selectedRowId }: Localized
       {rows.map((row) => (
         <Pressable
           accessibilityRole={onRowPress ? "button" : undefined}
+          accessibilityState={selectedRowId === row.id ? { selected: true } : undefined}
           key={row.id}
           onPress={() => onRowPress?.(row)}
           style={({ pressed }) => [
@@ -270,6 +273,7 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
             return (
               <Pressable
                 accessibilityRole="button"
+                accessibilityState={{ selected }}
                 key={item.id}
                 onPress={() => onThemeChange(item.id)}
                 style={({ pressed }) => [
@@ -298,6 +302,7 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
           return (
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ selected: active }}
               key={item.id}
               onPress={() => onSelect(item.id)}
               style={[

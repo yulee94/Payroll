@@ -483,7 +483,7 @@ function renderShell() {
           <span class="sidebar-options-title">${t("shell.themePanel.title")}</span>
           <div class="sidebar-theme-grid">
             ${sidebarThemes().map((theme) => `
-              <button class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}" data-sidebar-theme="${theme.id}" title="${escapeText(theme.description)}">
+              <button aria-pressed="${state.sidebarTheme === theme.id}" class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}" data-sidebar-theme="${theme.id}" title="${escapeText(theme.description)}">
                 <span class="sidebar-swatch sidebar-swatch-${theme.id}"></span>
                 <strong>${theme.label}</strong>
               </button>
@@ -492,7 +492,7 @@ function renderShell() {
         </div>
         <nav class="nav" aria-label="${t("shell.navigation.aria")}">
             ${items.map((item) => `
-            <button class="nav-button ${item.id === active.id ? "active" : ""}" data-target="${item.id}" style="${item.id === active.id ? `border-left-color:${item.accent}` : ""}">
+            <button aria-current="${item.id === active.id ? "page" : "false"}" class="nav-button ${item.id === active.id ? "active" : ""}" data-target="${item.id}" style="${item.id === active.id ? `border-left-color:${item.accent}` : ""}">
               <strong>${item.label}</strong>
             </button>
           `).join("")}
@@ -565,7 +565,7 @@ function renderHome() {
     <section class="card">
       ${sectionHead("", t("screens.launcher.workQueue.title"), t("screens.launcher.workQueue.description"))}
       <div class="queue-grid">${queueItems.map((item) => `
-        <button class="queue-card select-card ${state.selectedQueueKey === item.id ? "selected" : ""}" data-queue-key="${item.id}">
+        <button aria-pressed="${state.selectedQueueKey === item.id}" class="queue-card select-card ${state.selectedQueueKey === item.id ? "selected" : ""}" data-queue-key="${item.id}">
           <div class="queue-head">${badge(item.status, item.tone)}<span class="helper">${item.due}</span></div>
           <strong>${item.title}</strong>
           <span class="helper">${t("screens.launcher.workQueue.metaOwner", { meta: item.meta, owner: item.owner })}</span>
@@ -608,7 +608,7 @@ function renderPayroll() {
     <section class="card">
       ${sectionHead(t("screens.payroll.readiness.eyebrow"), t("screens.payroll.readiness.title"), t("screens.payroll.readiness.description"), button(t("screens.payroll.readiness.action"), "settings", "secondary"))}
       <div class="card-grid">${cards.map((item) => `
-        <button class="mini-card readiness-card select-card ${state.selectedPayrollCardKey === item.id ? "selected" : ""}" data-payroll-card-key="${item.id}" style="border-top-color:${toneColor(item.tone)}">
+        <button aria-pressed="${state.selectedPayrollCardKey === item.id}" class="mini-card readiness-card select-card ${state.selectedPayrollCardKey === item.id ? "selected" : ""}" data-payroll-card-key="${item.id}" style="border-top-color:${toneColor(item.tone)}">
           <span class="helper">${item.title}</span>
           <strong class="metric-value" style="color:${toneColor(item.tone)}">${item.value}</strong>
           <span>${item.detail}</span>
@@ -620,7 +620,7 @@ function renderPayroll() {
     <section class="card">
       ${sectionHead(t("screens.payroll.flow.eyebrow"), t("screens.payroll.flow.title"), t("screens.payroll.flow.description"), button(t("screens.payroll.flow.action"), "settings", "secondary"))}
       <div class="step-grid">${steps.map((item) => `
-        <button class="step-card select-card ${state.selectedPayrollStepKey === item.id ? "selected" : ""}" data-payroll-step-key="${item.id}" style="border-top-color:${toneColor(item.tone)}">
+        <button aria-pressed="${state.selectedPayrollStepKey === item.id}" class="step-card select-card ${state.selectedPayrollStepKey === item.id ? "selected" : ""}" data-payroll-step-key="${item.id}" style="border-top-color:${toneColor(item.tone)}">
           <span class="eyebrow">${item.index}</span>
           ${badge(item.status, item.tone)}
           <strong>${item.title}</strong>
@@ -693,7 +693,7 @@ function renderModule(id) {
     <section class="card">
       ${sectionHead("", t("screens.module.list.title"), t("screens.module.list.description"), button(data.secondaryAction.label, data.secondaryAction.target, "secondary"))}
       <div class="list-toolbar">
-        <div class="filters">${data.filters.map((filter) => `<button class="filter-chip ${state.filter === filter.id ? "active" : ""}" data-filter="${filter.id}">${filter.label}</button>`).join("")}</div>
+        <div class="filters">${data.filters.map((filter) => `<button aria-pressed="${state.filter === filter.id}" class="filter-chip ${state.filter === filter.id ? "active" : ""}" data-filter="${filter.id}">${filter.label}</button>`).join("")}</div>
         <label class="search-box" for="work-search"><span>${t("screens.module.search.label")}</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="${t("screens.module.search.placeholder")}" /></label>
       </div>
       <div class="list-summary"><strong>${t("screens.module.list.count", { count: rows.length })}</strong><span class="helper">${state.search ? t("screens.module.list.filteredWithSearch", { filter: filterLabel, search: state.search }) : t("screens.module.list.filtered", { filter: filterLabel })}</span></div>
@@ -715,7 +715,7 @@ function i18nSettingsPanel() {
   return `<section class="card">
     ${sectionHead("", t("settings.i18n.title"), t("settings.i18n.description"))}
     <div class="language-grid">${supportedLocales.map((locale) => `
-      <button class="language-option ${state.locale === locale ? "selected" : ""}" data-language="${locale}">
+      <button aria-pressed="${state.locale === locale}" class="language-option ${state.locale === locale ? "selected" : ""}" data-language="${locale}">
         <strong>${languageName(locale)}</strong><span class="helper">${state.locale === locale ? t("settings.i18n.status.selected") : t("settings.i18n.status.available")}</span>
       </button>
     `).join("")}</div>
@@ -862,7 +862,7 @@ function table(rows, selectable = false) {
     ${rows.map((row) => {
       const content = `<span><strong>${row.category}</strong></span><span>${badge(row.status, row.tone)}</span><span>${row.owner}</span><span>${row.next}</span>`;
       return selectable ? `
-      <button class="table-row row-button ${state.selectedRowKey === row.id ? "selected" : ""}" data-row-key="${row.id}" style="border-left-color:${toneColor(row.tone)}">
+      <button aria-pressed="${state.selectedRowKey === row.id}" class="table-row row-button ${state.selectedRowKey === row.id ? "selected" : ""}" data-row-key="${row.id}" style="border-left-color:${toneColor(row.tone)}">
         ${content}
       </button>
     ` : `
