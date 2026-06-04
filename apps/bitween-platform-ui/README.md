@@ -34,9 +34,12 @@ The package is aligned to Expo SDK 54, which targets React Native 0.81, React 19
 
 ```powershell
 npm install
+npm run check:strict-config
 npm run typecheck
 npm run web
 ```
+
+`check:strict-config` verifies that the frontend keeps `strict`, `noUncheckedIndexedAccess`, `noImplicitReturns`, and `noImplicitOverride` enabled in `tsconfig.json`, and that `typecheck` remains wired to `tsc --noEmit`. `typecheck` still performs the full TypeScript compile check after dependencies are installed.
 
 Dependency-free UI preview:
 
