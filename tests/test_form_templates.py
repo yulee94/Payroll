@@ -90,8 +90,11 @@ class TestFormTemplates(unittest.TestCase):
                 self.assertEqual(tpl["document_type"], DOC_TYPE_GENERAL)
                 fields = resolve_template_schema("t_report", tpl["id"])
                 assert fields is not None
+                trip_fields = [f for f in fields if f.key == "trip_id"]
+                self.assertEqual(len(trip_fields), 1)
+                self.assertFalse(trip_fields[0].required)
+                self.assertEqual(trip_fields[0].maps_to, "trip_id")
                 keys = {f.key for f in fields}
-                self.assertIn("trip_id", keys)
                 self.assertIn("source_document_id", keys)
 
     def test_validate_with_template(self) -> None:

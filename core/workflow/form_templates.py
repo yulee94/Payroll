@@ -17,6 +17,7 @@ from typing import Any
 from core.paths import app_data_dir
 from core.workflow.constants import (
     DOC_TYPE_ATTENDANCE,
+    DOC_TYPE_BUSINESS_TRIP_REQUEST,
     DOC_TYPE_EXPENSE,
     DOC_TYPE_GENERAL,
     DOC_TYPE_PURCHASE,
@@ -77,6 +78,25 @@ def _field(
 # COSS GW 양식함 — 필드 정의 (GW 명칭 기준)
 COSS_BUILTIN_TEMPLATES: list[dict[str, Any]] = [
     {
+        "name": "출장신청서",
+        "category": "출장",
+        "document_type": DOC_TYPE_BUSINESS_TRIP_REQUEST,
+        "fields": [
+            _field("title", "출장 제목", required=True, maps_to="title"),
+            _field("period_start", "출장 시작일", "date", required=True, maps_to="period_start"),
+            _field("period_end", "출장 종료일", "date", required=True, maps_to="period_end"),
+            _field("destination", "출장지", required=True),
+            _field("business_trip_purpose", "출장 목적", "multiline", required=True, maps_to="summary"),
+            _field("expected_outcome", "기대 성과", "multiline"),
+            _field("transportation", "이동 수단", "select", required=True, options=("대중교통", "법인차량", "개인차량", "항공", "기차", "기타")),
+            _field("estimated_amount", "예상 출장비(원)", "number", maps_to="total_amount"),
+            _field("executor_id", "출장 수행자 ID", required=True),
+            _field("site_id", "현장/사업장 ID"),
+            _field("department_id", "부서 ID"),
+            _field("trip_dedupe_key", "출장 중복 방지 키"),
+        ],
+    },
+    {
         "name": "기안서",
         "category": "일반",
         "document_type": DOC_TYPE_GENERAL,
@@ -108,6 +128,7 @@ COSS_BUILTIN_TEMPLATES: list[dict[str, Any]] = [
         "document_type": DOC_TYPE_GENERAL,
         "fields": [
             _field("title", "제목", required=True, maps_to="title"),
+            _field("trip_id", "연계 출장 ID", placeholder="출장 lifecycle ID", maps_to="trip_id"),
             _field("work_date", "업무일", "date", required=True, maps_to="period_start"),
             _field("department", "부서/팀"),
             _field("content", "금일 업무", "multiline", required=True, maps_to="summary"),
@@ -191,8 +212,10 @@ COSS_BUILTIN_TEMPLATES: list[dict[str, Any]] = [
         "document_type": DOC_TYPE_GENERAL,
         "fields": [
             _field("title", "제목", required=True, maps_to="title"),
+            _field("trip_id", "연계 출장 ID", placeholder="출장 lifecycle ID", maps_to="trip_id"),
             _field("period_start", "출장 시작", "date", required=True, maps_to="period_start"),
             _field("period_end", "출장 종료", "date", required=True, maps_to="period_end"),
+            _field("source_document_id", "출장신청 문서 ID"),
             _field("destination", "출장지", required=True),
             _field("content", "출장 내용", "multiline", required=True, maps_to="summary"),
         ],
@@ -505,14 +528,20 @@ def merge_gw_templates(
             doc_type = DOC_TYPE_PURCHASE
         elif any(k in nm for k in ("지출", "품의", "결의")):
             doc_type = DOC_TYPE_EXPENSE
+        elif "출장신청" in nm:
+            doc_type = DOC_TYPE_BUSINESS_TRIP_REQUEST
         elif any(k in nm for k in ("연차", "휴가", "근무", "출근", "부재")):
             doc_type = DOC_TYPE_ATTENDANCE
+        default_fields = next(
+            (deepcopy(t.get("fields") or []) for t in COSS_BUILTIN_TEMPLATES if t.get("document_type") == doc_type),
+            deepcopy(next((t.get("fields") or [] for t in COSS_BUILTIN_TEMPLATES if t.get("document_type") == DOC_TYPE_GENERAL), COSS_BUILTIN_TEMPLATES[0]["fields"])),
+        )
         by_name[nm] = _normalize_builtin(
             {
                 "name": nm,
                 "category": "GW",
                 "document_type": doc_type,
-                "fields": deepcopy(COSS_BUILTIN_TEMPLATES[0]["fields"]),
+                "fields": default_fields,
             }
         )
         added += 1
