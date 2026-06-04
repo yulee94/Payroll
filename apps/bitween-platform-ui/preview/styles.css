@@ -908,6 +908,22 @@ input:focus-visible {
   border-color: var(--accent);
 }
 
+.settings-status-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.settings-status-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px;
+}
+
 .language-option:focus-visible {
   background: var(--card);
   border-color: var(--accent);

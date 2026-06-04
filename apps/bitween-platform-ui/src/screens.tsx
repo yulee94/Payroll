@@ -609,6 +609,20 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
       {active.id === "settings" ? (
         <Card>
           <SectionHeader title={t(locale, "settings.i18n.title")} description={t(locale, "settings.i18n.description")} />
+          <View style={styles.settingsStatusGrid}>
+            <View style={styles.settingsStatusItem}>
+              <Label size="sm" muted>{t(locale, "settings.i18n.status.selected")}</Label>
+              <Label weight="bold">{languageOptions.find((option) => option.locale === locale)?.label ?? locale}</Label>
+            </View>
+            <View style={styles.settingsStatusItem}>
+              <Label size="sm" muted>{t(locale, "settings.i18n.status.available")}</Label>
+              <Label weight="bold">{languageOptions.length}</Label>
+            </View>
+            <View style={styles.settingsStatusItem}>
+              <Label size="sm" muted>{t(locale, "settings.i18n.catalogRule.title")}</Label>
+              <Label size="sm">{t(locale, "settings.i18n.catalogRule.description")}</Label>
+            </View>
+          </View>
           <View style={styles.languageGrid}>
             {languageOptions.map((option) => {
               const selected = option.locale === locale;
@@ -1429,6 +1443,21 @@ const styles = StyleSheet.create({
   languageOptionSelected: {
     backgroundColor: colors.accentSoft,
     borderColor: colors.accent
+  },
+  settingsStatusGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  settingsStatusItem: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 180,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
   },
   listSummary: {
     alignItems: "center",

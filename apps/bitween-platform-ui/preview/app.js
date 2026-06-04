@@ -749,8 +749,14 @@ function sectionHead(eyebrow, title, desc, action = "") {
 }
 
 function i18nSettingsPanel() {
+  const selectedLanguage = languageName(state.locale);
   return `<section class="card">
     ${sectionHead("", t("settings.i18n.title"), t("settings.i18n.description"))}
+    <div class="settings-status-grid">
+      <div class="settings-status-item"><span class="helper">${t("settings.i18n.status.selected")}</span><strong>${selectedLanguage}</strong></div>
+      <div class="settings-status-item"><span class="helper">${t("settings.i18n.status.available")}</span><strong>${supportedLocales.length}</strong></div>
+      <div class="settings-status-item"><span class="helper">${t("settings.i18n.catalogRule.title")}</span><span>${t("settings.i18n.catalogRule.description")}</span></div>
+    </div>
     <div class="language-grid">${supportedLocales.map((locale) => `
       <button aria-pressed="${state.locale === locale}" class="language-option ${state.locale === locale ? "selected" : ""}" data-language="${locale}">
         <strong>${languageName(locale)}</strong><span class="helper">${state.locale === locale ? t("settings.i18n.status.selected") : t("settings.i18n.status.available")}</span>
