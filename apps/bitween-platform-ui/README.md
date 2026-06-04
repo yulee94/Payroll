@@ -20,6 +20,7 @@ This app is intentionally added in parallel to the existing Python/Tkinter deskt
 - `src/components.tsx`: shared RN UI primitives
 - `src/screens.tsx`: login, launcher, payroll, and module screens
 - `src/data.ts`: typed safe mock data for frontend preview
+- `src/viewModel.ts`: frontend read-only view-model boundary and adapter shape
 - `src/types.ts`: strict frontend domain types
 - `src/theme.ts`: color, spacing, radius, and status-tone tokens
 - `preview/index.html`: dependency-free interactive browser preview for design review
@@ -44,6 +45,10 @@ node preview/server.js
 ```
 
 Then open `http://127.0.0.1:4173/` in a browser. This preview mirrors the current screen structure and interactions without requiring Expo dependencies.
+
+## View Model Boundary
+
+`src/viewModel.ts` is the frontend integration seam. During the preview phase it exports `previewPlatformViewModel`; later, backend/API data should be mapped into the same read-only `PlatformViewModel` shape without changing payroll calculation or service internals.
 
 ## Review Checklist
 
