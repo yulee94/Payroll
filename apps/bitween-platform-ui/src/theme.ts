@@ -1,3 +1,4 @@
+import { defaultLocale, t, type SupportedLocale } from "./i18n";
 import type { ReadinessTone, SidebarTheme, SidebarThemeId } from "./types";
 
 export const colors = {
@@ -35,65 +36,63 @@ export const radius = {
   lg: 8
 } as const;
 
-const steelSidebarTheme = {
-  activeBackground: "#DBEAFE",
-  activeText: "#1F3864",
-  description: "현재 톤보다 선명한 업무형 파랑",
-  id: "steel",
-  label: "스틸 블루",
-  sidebar: "#EDF3FA",
-  swatchEnd: "#DBEAFE",
-  swatchStart: "#EDF3FA"
-} as const satisfies SidebarTheme;
+type SidebarThemeDefinition = Omit<SidebarTheme, "label" | "description">;
 
-const graphiteSidebarTheme = {
-  activeBackground: "#111827",
-  activeText: "#FFFFFF",
-  description: "차분하고 밀도 있는 관리자형",
-  id: "graphite",
-  label: "그래파이트",
-  sidebar: "#F3F4F6",
-  swatchEnd: "#111827",
-  swatchStart: "#F3F4F6"
-} as const satisfies SidebarTheme;
-
-const tealSidebarTheme = {
-  activeBackground: "#CCFBF1",
-  activeText: "#0F766E",
-  description: "신뢰감 있는 HR/운영형",
-  id: "teal",
-  label: "틸 그린",
-  sidebar: "#E8F5F3",
-  swatchEnd: "#CCFBF1",
-  swatchStart: "#E8F5F3"
-} as const satisfies SidebarTheme;
-
-const navySidebarTheme = {
-  activeBackground: "#1F3864",
-  activeText: "#FFFFFF",
-  description: "가장 강한 기업용 대비",
-  id: "navy",
-  label: "딥 네이비",
-  sidebar: "#E8EEF7",
-  swatchEnd: "#1F3864",
-  swatchStart: "#E8EEF7"
-} as const satisfies SidebarTheme;
+const sidebarThemeDefinitions = [
+  {
+    activeBackground: "#DBEAFE",
+    activeText: "#1F3864",
+    id: "steel",
+    sidebar: "#EDF3FA",
+    swatchEnd: "#DBEAFE",
+    swatchStart: "#EDF3FA"
+  },
+  {
+    activeBackground: "#111827",
+    activeText: "#FFFFFF",
+    id: "graphite",
+    sidebar: "#F3F4F6",
+    swatchEnd: "#111827",
+    swatchStart: "#F3F4F6"
+  },
+  {
+    activeBackground: "#CCFBF1",
+    activeText: "#0F766E",
+    id: "teal",
+    sidebar: "#E8F5F3",
+    swatchEnd: "#CCFBF1",
+    swatchStart: "#E8F5F3"
+  },
+  {
+    activeBackground: "#1F3864",
+    activeText: "#FFFFFF",
+    id: "navy",
+    sidebar: "#E8EEF7",
+    swatchEnd: "#1F3864",
+    swatchStart: "#E8EEF7"
+  }
+] as const satisfies readonly SidebarThemeDefinition[];
 
 export const defaultSidebarThemeId: SidebarThemeId = "steel";
 
-export const sidebarThemes = [steelSidebarTheme, graphiteSidebarTheme, tealSidebarTheme, navySidebarTheme] as const;
+const localizeSidebarTheme = (locale: SupportedLocale, theme: SidebarThemeDefinition): SidebarTheme => ({
+  ...theme,
+  label: t(locale, `sidebarThemes.${theme.id}.label`),
+  description: t(locale, `sidebarThemes.${theme.id}.description`)
+});
 
-export function getSidebarTheme(id: SidebarThemeId): SidebarTheme {
-  switch (id) {
-    case "steel":
-      return steelSidebarTheme;
-    case "graphite":
-      return graphiteSidebarTheme;
-    case "teal":
-      return tealSidebarTheme;
-    case "navy":
-      return navySidebarTheme;
+export const getSidebarThemes = (locale: SupportedLocale): readonly SidebarTheme[] =>
+  sidebarThemeDefinitions.map((theme) => localizeSidebarTheme(locale, theme));
+
+export const sidebarThemes = getSidebarThemes(defaultLocale);
+
+export function getSidebarTheme(id: SidebarThemeId, locale: SupportedLocale = defaultLocale): SidebarTheme {
+  const themes = getSidebarThemes(locale);
+  const fallback = themes[0];
+  if (!fallback) {
+    throw new Error("No sidebar themes configured");
   }
+  return themes.find((theme) => theme.id === id) ?? fallback;
 }
 
 export const toneColor = (tone: ReadinessTone): string => {
