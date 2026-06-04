@@ -587,6 +587,34 @@ Verification evidence for this checkpoint:
 
 Slice spec: `docs/PAYROLL_RUST_EXECUTION_PLAN_SLICE.md`.
 
+
+## Current implementation checkpoint: Rust business-trip lifecycle core
+
+Implemented on 2026-06-04 as the first workflow-domain Rust slice:
+
+- New `crates/workflow-core` Rust 2024 / Rust 1.96 crate exposes pure
+  business-trip lifecycle constants and helpers in `business_trip`.
+- Rust owns deterministic lifecycle taxonomy, KPI reflection taxonomy, source
+  normalization, migration/view-model shaping, source dedupe matching, transition
+  validation, and timestamp/KPI status side effects for supplied records.
+- Rust preserves Python compatibility for invalid-status fallback to `draft`,
+  invalid KPI fallback to `blocked`, cancellation `not_applicable`, completed
+  `ready`, unknown-field preservation, source `manual` fallback, and transition
+  adjacency.
+- Python remains responsible for workflow JSON persistence, document approval
+  sync, execution task/report prerequisite checks, overdue escalation, KPI
+  reflection writes, authorization profile lookup, notifications, calendar/To-Do
+  links, and UI bridge behavior until those slices move behind parity tests.
+- Workflow contract metadata now names the Rust crate, entrypoints, status/source
+  values, transition edges, and remaining compatibility boundary.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-workflow-core business_trip --lib`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_business_trip_contracts.BusinessTripLifecycleContractTests.test_contract_declares_rust_business_trip_lifecycle -v`
+
+Slice spec: `docs/WORKFLOW_RUST_BUSINESS_TRIP_LIFECYCLE_SLICE.md`.
+
 ## Required execution disciplines
 
 - **Incremental implementation:** migrate thin vertical slices behind stable contracts; no big-bang rewrite.
