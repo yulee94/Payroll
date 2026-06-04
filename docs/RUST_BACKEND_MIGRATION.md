@@ -588,6 +588,33 @@ Verification evidence for this checkpoint:
 Slice spec: `docs/PAYROLL_RUST_EXECUTION_PLAN_SLICE.md`.
 
 
+## Current implementation checkpoint: Rust business-trip permission core
+
+Implemented on 2026-06-04 as the next workflow-domain Rust slice:
+
+- `crates/workflow-core::business_trip_permissions` now exposes pure
+  supplied-profile permission DTOs and predicates for business-trip lifecycle
+  legal scope, visibility, and manage authority.
+- Rust owns deterministic workflow-role expansion for base admin/finance roles,
+  tenant/legal-entity scope checks, direct requester/executor access, explicit
+  approver access, requester-manager access, site/department manager scope, and
+  viewer scoped-only access.
+- Rust preserves the Python compatibility boundary by requiring callers to
+  supply resolved user and requester/traveler profiles; Python still owns
+  `UserSession` conversion, `get_user_profile`, workflow JSON persistence,
+  document/task/report/KPI side effects, overdue evaluation, notifications,
+  calendar/To-Do links, and UI bridge behavior.
+- Workflow contract metadata now names the Rust permission module, entrypoints,
+  DTOs, role expansions, legal-scope invariants, visibility invariants, and
+  manage invariants.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-workflow-core business_trip_permissions --lib`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_business_trip_contracts.BusinessTripLifecycleContractTests.test_contract_declares_rust_business_trip_permissions -v`
+
+Slice spec: `docs/WORKFLOW_RUST_BUSINESS_TRIP_PERMISSIONS_SLICE.md`.
+
 ## Current implementation checkpoint: Rust business-trip lifecycle core
 
 Implemented on 2026-06-04 as the first workflow-domain Rust slice:
