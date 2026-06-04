@@ -28,6 +28,31 @@ Verification evidence for this checkpoint:
 
 Runbook: `docs/BUCK2_REINDEER_RUST_TRANSITION.md`.
 
+## Current implementation checkpoint: payroll operation policy invariants
+
+Implemented on 2026-06-04 as the next backend behavior slice:
+
+- Rust now owns the normalized payroll operation policy DTO for known fields in
+  `crates/payroll-api/src/policy.rs`.
+- The Rust policy model preserves Python-compatible safe defaults for payroll
+  input basis, payday, setup-guide visibility, policy notes, and attendance
+  settings.
+- Attendance minute fields are clamped to the Python compatibility ranges:
+  rounding and overtime rounding `1..=60`, late/early-leave grace `0..=240`.
+- Missing clock handling is typed as `warn`, `ignore`, or `deduct`, with invalid
+  values normalized to `warn`.
+- Rust validation responses normalize the supplied operation policy before
+  serializing it to frontend/API clients.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-payroll-api`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- Python compatibility tests for `tests.test_payroll_operation_policy` and
+  `tests.test_payroll_api_adapter`
+
+Slice spec: `docs/PAYROLL_OPERATION_POLICY_RUST_SLICE.md`.
+
 ## Required execution disciplines
 
 - **Incremental implementation:** migrate thin vertical slices behind stable contracts; no big-bang rewrite.

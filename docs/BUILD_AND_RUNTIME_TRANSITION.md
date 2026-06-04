@@ -223,14 +223,14 @@ cargo test --workspace
 
 **Acceptance criteria:**
 
-- [ ] Public request/response DTOs are documented.
-- [ ] Tenant/legal-entity authorization invariants, RBAC role families, and ABAC attributes are explicit.
-- [ ] Existing Python behavior has characterization tests before Rust code is added.
+- [x] Public request/response DTOs are documented for payroll validation and operation policy normalization.
+- [ ] Tenant/legal-entity authorization invariants, RBAC role families, and ABAC attributes are explicit for the eventual service boundary.
+- [x] Existing Python behavior has characterization tests before Rust code is added for payroll operation policy normalization.
 
 **Verification:**
 
-- [ ] Targeted Python characterization tests pass.
-- [ ] Rust contract tests fail first for missing implementation, then pass after the slice lands.
+- [x] Targeted Python characterization tests pass for payroll operation policy and API adapter behavior.
+- [x] Rust contract tests fail first for missing implementation, then pass after the slice lands.
 
 **Dependencies:** Task 1
 
@@ -269,6 +269,31 @@ cargo test --workspace
 - `tests/`
 
 **Estimated scope:** Medium
+
+## Implementation checkpoint: payroll operation policy Rust invariants
+
+Completed on 2026-06-04 as the first backend behavior-invariant slice after the
+Buck2/Reindeer foundation:
+
+- `crates/payroll-api` now has a typed `OperationPolicy` and `AttendancePolicy`
+  matching the Python compatibility policy shape.
+- Rust normalizes invalid input basis values to `hybrid`, clamps attendance
+  minute settings to Python-compatible safe ranges, and types missing-clock
+  handling as `warn`, `ignore`, or `deduct`.
+- Rust validation responses serialize normalized policy fields before frontend or
+  future HTTP clients consume them.
+- The TypeScript contract in `frontend/src/contracts/payrollApi.ts` names the
+  full normalized policy shape.
+- Slice spec: `docs/PAYROLL_OPERATION_POLICY_RUST_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo test -p bitween-payroll-api
+buck2 test //crates/payroll-api:payroll_api_test
+python -m unittest tests.test_payroll_operation_policy tests.test_payroll_api_adapter -v
+npm run typecheck --prefix frontend
+```
 
 ## Phase 3: React Native and Tauri desktop transition
 

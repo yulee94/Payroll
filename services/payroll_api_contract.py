@@ -21,6 +21,26 @@ PAYROLL_API_VALIDATE_ENTRYPOINT = "services.payroll_api_adapter.validate_payroll
 PAYROLL_API_INPUT_TYPES: tuple[str, ...] = ("auto", "invoice", "attendance", "mixed")
 
 
+def payroll_operation_policy_example() -> dict[str, Any]:
+    """Return the normalized operation policy shape emitted by Rust validation."""
+    return {
+        "input_basis": "hybrid",
+        "payday": "25일",
+        "show_setup_guide": True,
+        "policy_note": "",
+        "attendance": {
+            "enabled": True,
+            "source": "biometric",
+            "rounding_minutes": 1,
+            "late_grace_minutes": 0,
+            "early_leave_grace_minutes": 0,
+            "overtime_rounding_minutes": 1,
+            "missing_clock_policy": "warn",
+            "holiday_source": "invoice",
+        },
+    }
+
+
 def payroll_api_request_example(*, input_type: str = "mixed") -> dict[str, Any]:
     """Return a JSON-serializable example payload accepted by run_payroll_api."""
     if input_type not in PAYROLL_API_INPUT_TYPES:
@@ -70,17 +90,7 @@ def payroll_api_success_example() -> dict[str, Any]:
         },
         "payroll_audit": {},
         "roster": {"source": "templates", "updated_at": "2026-06-01 09:47"},
-        "operation_policy": {
-            "input_basis": "hybrid",
-            "payday": "25일",
-            "attendance": {
-                "enabled": True,
-                "rounding_minutes": 1,
-                "late_grace_minutes": 0,
-                "early_leave_grace_minutes": 0,
-                "missing_clock_policy": "warn",
-            },
-        },
+        "operation_policy": payroll_operation_policy_example(),
         "operation_policy_source": "tenant",
         "error_code": "",
         "details": {},
@@ -128,17 +138,7 @@ def payroll_api_validation_example() -> dict[str, Any]:
             "attendance": "C:/Bitween/inbox/attendance_2026-05.csv",
         },
         "metadata_keys": ["requested_by", "source_system"],
-        "operation_policy": {
-            "input_basis": "hybrid",
-            "payday": "25일",
-            "attendance": {
-                "enabled": True,
-                "rounding_minutes": 1,
-                "late_grace_minutes": 0,
-                "early_leave_grace_minutes": 0,
-                "missing_clock_policy": "warn",
-            },
-        },
+        "operation_policy": payroll_operation_policy_example(),
         "operation_policy_source": "tenant",
         "warnings": [],
         "error_code": "",
