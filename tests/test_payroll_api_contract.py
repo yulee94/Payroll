@@ -45,6 +45,7 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertIn("exception", response["never_include"])
         self.assertNotIn("exception", response["success"])
         self.assertNotIn("exception", response["error"])
+        self.assertNotIn("exception", response["run_error"])
 
     def test_response_contract_declares_frontend_error_codes(self) -> None:
         response = payroll_api_contract()["response"]
@@ -58,6 +59,10 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertIn("operation_policy_source", response["stable_fields"])
         self.assertEqual(response["success"]["error_code"], "")
         self.assertEqual(response["error"]["error_code"], "invalid_period")
+        self.assertEqual(response["run_error"]["error_code"], "payroll_run_failed")
+        self.assertTrue(response["run_error"]["will_run"])
+        self.assertFalse(response["run_error"]["can_run"])
+        self.assertIn("run_response", response["run_response_entrypoint"])
         self.assertIn("missing_input_path", response["error_codes"])
 
     def test_contract_declares_validation_only_response(self) -> None:

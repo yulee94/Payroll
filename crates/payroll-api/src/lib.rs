@@ -3,6 +3,7 @@ pub mod error;
 pub mod policy;
 pub mod request;
 pub mod response;
+pub mod run;
 pub mod service;
 
 pub use access::{
@@ -22,6 +23,7 @@ pub use response::{
     validate_payroll_api_payload, PayrollApiErrorResponse, PayrollApiResponse,
     PayrollValidationResponse,
 };
+pub use run::{run_response_from_result, PayrollRunResponse, PayrollRunResult};
 pub use service::{
     HealthResponse, HealthStatus, PayrollApiService, ReadinessCheck, ReadinessResponse,
     ReadinessState, ServiceConfig,
