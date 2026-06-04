@@ -4246,6 +4246,78 @@
       }
     },
     {
+      "key": "screens.login.demo.panel.helper",
+      "values": {
+        "ko-KR": "테스트 접속 정보로 플랫폼 흐름을 바로 확인합니다.",
+        "en-US": "Use these test credentials to review the platform flow immediately.",
+        "zh-Hans-CN": "使用这些测试登录信息即可立即查看平台流程。",
+        "ja-JP": "このテスト用ログイン情報で、すぐにプラットフォームの流れを確認できます。"
+      }
+    },
+    {
+      "key": "screens.login.demo.panel.disclaimer",
+      "values": {
+        "ko-KR": "실제 직원 명부, 급여 파일, 운영 설정과 분리된 frontend 미리보기 계정입니다.",
+        "en-US": "This frontend preview account is separated from real employee rosters, payroll files, and operating settings.",
+        "zh-Hans-CN": "此前端预览账号与真实员工名册、工资文件和运营设置相互隔离。",
+        "ja-JP": "実際の社員名簿、給与ファイル、運用設定とは分離された frontend プレビュー用アカウントです。"
+      }
+    },
+    {
+      "key": "screens.login.demo.credentials.company.label",
+      "values": {
+        "ko-KR": "법인 코드",
+        "en-US": "Company code",
+        "zh-Hans-CN": "法人代码",
+        "ja-JP": "法人コード"
+      }
+    },
+    {
+      "key": "screens.login.demo.credentials.company.helper",
+      "values": {
+        "ko-KR": "Bitween Demo 법인",
+        "en-US": "Bitween Demo tenant",
+        "zh-Hans-CN": "Bitween Demo 法人",
+        "ja-JP": "Bitween Demo 法人"
+      }
+    },
+    {
+      "key": "screens.login.demo.credentials.user.label",
+      "values": {
+        "ko-KR": "아이디",
+        "en-US": "User ID",
+        "zh-Hans-CN": "用户 ID",
+        "ja-JP": "ID"
+      }
+    },
+    {
+      "key": "screens.login.demo.credentials.user.helper",
+      "values": {
+        "ko-KR": "관리자 권한 화면 확인",
+        "en-US": "Review administrator screens",
+        "zh-Hans-CN": "查看管理员权限页面",
+        "ja-JP": "管理者権限画面を確認"
+      }
+    },
+    {
+      "key": "screens.login.demo.credentials.password.label",
+      "values": {
+        "ko-KR": "비밀번호",
+        "en-US": "Password",
+        "zh-Hans-CN": "密码",
+        "ja-JP": "パスワード"
+      }
+    },
+    {
+      "key": "screens.login.demo.credentials.password.helper",
+      "values": {
+        "ko-KR": "미리보기 전용",
+        "en-US": "Preview only",
+        "zh-Hans-CN": "仅限预览",
+        "ja-JP": "プレビュー専用"
+      }
+    },
+    {
       "key": "screens.launcher.platformStatus.title",
       "values": {
         "ko-KR": "오늘의 플랫폼 상태",
@@ -6214,6 +6286,258 @@
         "en-US": "Signed out.",
         "zh-Hans-CN": "已退出登录。",
         "ja-JP": "ログアウトしました。"
+      }
+    },
+    {
+      "key": "screens.settingsControl.title",
+      "values": {
+        "ko-KR": "업무 환경 설정",
+        "en-US": "Workspace settings",
+        "zh-Hans-CN": "工作环境设置",
+        "ja-JP": "業務環境設定"
+      }
+    },
+    {
+      "key": "screens.settingsControl.description",
+      "values": {
+        "ko-KR": "화면 밀도, 업무 알림, 보안 세션, 급여 기준 확인을 사용자 화면 안에서 빠르게 점검합니다.",
+        "en-US": "Review display density, work alerts, security sessions, and payroll standards from the user workspace.",
+        "zh-Hans-CN": "在用户工作区快速检查显示密度、工作通知、安全会话和工资标准。",
+        "ja-JP": "画面密度、業務通知、セキュリティセッション、給与基準をユーザー画面内で素早く確認します。"
+      }
+    },
+    {
+      "key": "screens.settingsControl.action",
+      "values": {
+        "ko-KR": "권한 설정 확인",
+        "en-US": "Check permissions",
+        "zh-Hans-CN": "检查权限设置",
+        "ja-JP": "権限設定を確認"
+      }
+    },
+    {
+      "key": "screens.settingsControl.cards.density.label",
+      "values": {
+        "ko-KR": "화면 밀도",
+        "en-US": "Display density",
+        "zh-Hans-CN": "显示密度",
+        "ja-JP": "画面密度"
+      }
+    },
+    {
+      "key": "screens.settingsControl.cards.density.value",
+      "values": {
+        "ko-KR": "업무형",
+        "en-US": "Work mode",
+        "zh-Hans-CN": "工作模式",
+        "ja-JP": "業務型"
+      }
+    },
+    {
+      "key": "screens.settingsControl.cards.density.detail",
+      "values": {
+        "ko-KR": "카드와 테이블을 한 화면에서 더 많이 스캔하도록 유지합니다.",
+        "en-US": "Keeps cards and tables dense enough to scan more on one screen.",
+        "zh-Hans-CN": "保持卡片和表格的信息密度，便于在一个屏幕中查看更多内容。",
+        "ja-JP": "カードとテーブルを1画面でより多く確認できる密度に保ちます。"
+      }
+    },
+    {
+      "key": "screens.settingsControl.cards.notice.label",
+      "values": {
+        "ko-KR": "알림",
+        "en-US": "Notifications",
+        "zh-Hans-CN": "通知",
+        "ja-JP": "通知"
+      }
+    },
+    {
+      "key": "screens.settingsControl.cards.notice.value",
+      "values": {
+        "ko-KR": "4개 켜짐",
+        "en-US": "4 on",
+        "zh-Hans-CN": "已开启 4 项",
+        "ja-JP": "4件オン"
+      }
+    },
+    {
+      "key": "screens.settingsControl.cards.notice.detail",
+      "values": {
+        "ko-KR": "급여, 결재, 자료함, 출장 업무 알림을 업무별로 관리합니다.",
+        "en-US": "Manage payroll, approval, archive, and travel alerts by workflow.",
+        "zh-Hans-CN": "按业务流程管理工资、审批、资料库和出差通知。",
+        "ja-JP": "給与、承認、資料箱、出張業務の通知を業務別に管理します。"
+      }
+    },
+    {
+      "key": "screens.settingsControl.cards.security.label",
+      "values": {
+        "ko-KR": "보안 세션",
+        "en-US": "Security session",
+        "zh-Hans-CN": "安全会话",
+        "ja-JP": "セキュリティセッション"
+      }
+    },
+    {
+      "key": "screens.settingsControl.cards.security.value",
+      "values": {
+        "ko-KR": "관리 필요",
+        "en-US": "Needs review",
+        "zh-Hans-CN": "需要管理",
+        "ja-JP": "管理が必要"
+      }
+    },
+    {
+      "key": "screens.settingsControl.cards.security.detail",
+      "values": {
+        "ko-KR": "민감 문서 접근과 세션 만료 안내를 관리자 권한과 함께 확인합니다.",
+        "en-US": "Review sensitive-document access and session-expiry guidance with administrator permissions.",
+        "zh-Hans-CN": "结合管理员权限检查敏感文档访问和会话过期提示。",
+        "ja-JP": "機密文書アクセスとセッション期限案内を管理者権限とあわせて確認します。"
+      }
+    },
+    {
+      "key": "screens.settingsControl.cards.payroll.label",
+      "values": {
+        "ko-KR": "급여 기준",
+        "en-US": "Payroll standards",
+        "zh-Hans-CN": "工资标准",
+        "ja-JP": "給与基準"
+      }
+    },
+    {
+      "key": "screens.settingsControl.cards.payroll.value",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs review",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "screens.settingsControl.cards.payroll.detail",
+      "values": {
+        "ko-KR": "지급일, 반올림, 사업장별 입력 기준을 산출 전 다시 봅니다.",
+        "en-US": "Review pay date, rounding, and workplace-specific input standards before calculation.",
+        "zh-Hans-CN": "在计算前复查发薪日、舍入规则和各营业场所输入标准。",
+        "ja-JP": "支給日、端数処理、事業場別の入力基準を算出前に再確認します。"
+      }
+    },
+    {
+      "key": "screens.settingsControl.notice.badge",
+      "values": {
+        "ko-KR": "Frontend 설정",
+        "en-US": "Frontend settings",
+        "zh-Hans-CN": "前端设置",
+        "ja-JP": "Frontend 設定"
+      }
+    },
+    {
+      "key": "screens.settingsControl.notice.description",
+      "values": {
+        "ko-KR": "이 화면은 실제 저장 없이 표시 상태만 구성합니다. 운영 설정 저장은 backend/API 계약 후 연결합니다.",
+        "en-US": "This screen only shapes display state without saving. Persisted operating settings can connect after the backend/API contract is approved.",
+        "zh-Hans-CN": "此画面仅构成显示状态，不执行实际保存。运营设置保存将在 backend/API 契约确认后连接。",
+        "ja-JP": "この画面は実保存を行わず表示状態のみ構成します。運用設定の保存は backend/API 契約後に接続します。"
+      }
+    },
+    {
+      "key": "screens.module.filteredEmpty.title",
+      "values": {
+        "ko-KR": "검색 결과가 없습니다.",
+        "en-US": "No search results.",
+        "zh-Hans-CN": "没有搜索结果。",
+        "ja-JP": "検索結果がありません。"
+      }
+    },
+    {
+      "key": "screens.module.filteredEmpty.description",
+      "values": {
+        "ko-KR": "필터나 검색어를 조정하면 업무 목록을 다시 확인할 수 있습니다.",
+        "en-US": "Adjust the filter or search term to check the work list again.",
+        "zh-Hans-CN": "调整筛选或搜索词后，可以重新查看工作列表。",
+        "ja-JP": "フィルターや検索語を調整すると、業務一覧を再確認できます。"
+      }
+    },
+    {
+      "key": "screens.module.filteredEmpty.reset",
+      "values": {
+        "ko-KR": "필터 초기화",
+        "en-US": "Reset filters",
+        "zh-Hans-CN": "重置筛选",
+        "ja-JP": "フィルター初期化"
+      }
+    },
+    {
+      "key": "preview.toast.filtersReset",
+      "values": {
+        "ko-KR": "필터와 검색어를 초기화했습니다.",
+        "en-US": "Reset the filter and search term.",
+        "zh-Hans-CN": "已重置筛选和搜索词。",
+        "ja-JP": "フィルターと検索語を初期化しました。"
+      }
+    },
+    {
+      "key": "shell.status.aria",
+      "values": {
+        "ko-KR": "플랫폼 상태",
+        "en-US": "Platform status",
+        "zh-Hans-CN": "平台状态",
+        "ja-JP": "プラットフォーム状態"
+      }
+    },
+    {
+      "key": "shell.status.previewTitle",
+      "values": {
+        "ko-KR": "프론트엔드 미리보기",
+        "en-US": "Frontend preview",
+        "zh-Hans-CN": "前端预览",
+        "ja-JP": "フロントエンドプレビュー"
+      }
+    },
+    {
+      "key": "shell.status.demoCompany",
+      "values": {
+        "ko-KR": "Demo 법인 0000",
+        "en-US": "Demo company 0000",
+        "zh-Hans-CN": "演示法人 0000",
+        "ja-JP": "デモ法人 0000"
+      }
+    },
+    {
+      "key": "shell.status.uiOnly",
+      "values": {
+        "ko-KR": "UI 전용",
+        "en-US": "UI only",
+        "zh-Hans-CN": "仅 UI",
+        "ja-JP": "UI のみ"
+      }
+    },
+    {
+      "key": "shell.status.logicUnchanged",
+      "values": {
+        "ko-KR": "급여 계산/저장 로직 미변경",
+        "en-US": "Payroll calculation/storage logic unchanged",
+        "zh-Hans-CN": "薪资计算/保存逻辑未更改",
+        "ja-JP": "給与計算/保存ロジックは未変更"
+      }
+    },
+    {
+      "key": "shell.status.strictTs",
+      "values": {
+        "ko-KR": "엄격한 TypeScript",
+        "en-US": "Strict TypeScript",
+        "zh-Hans-CN": "严格 TypeScript",
+        "ja-JP": "厳格な TypeScript"
+      }
+    },
+    {
+      "key": "shell.status.reactNativeWebReady",
+      "values": {
+        "ko-KR": "React Native/Web 준비",
+        "en-US": "React Native/Web ready",
+        "zh-Hans-CN": "React Native/Web 就绪",
+        "ja-JP": "React Native/Web 対応準備済み"
       }
     }
   ],

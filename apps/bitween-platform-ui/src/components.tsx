@@ -189,6 +189,7 @@ export function DataTable({ locale, onRowPress, rows, selectedRowId }: Localized
             onPress={() => onRowPress?.(row)}
             style={({ pressed }) => [
               styles.rowCard,
+              { borderLeftColor: toneColor(row.tone) },
               selectedRowId === row.id && styles.rowSelected,
               pressed && onRowPress && styles.buttonPressed
             ]}
@@ -220,6 +221,7 @@ export function DataTable({ locale, onRowPress, rows, selectedRowId }: Localized
           onPress={() => onRowPress?.(row)}
           style={({ pressed }) => [
             styles.tableRow,
+            { borderLeftColor: toneColor(row.tone) },
             selectedRowId === row.id && styles.tableRowSelected,
             pressed && onRowPress && styles.buttonPressed
           ]}
@@ -374,7 +376,24 @@ export function AppShell({
             {onLogout ? <ActionButton onPress={onLogout} variant="ghost">{logoutLabel}</ActionButton> : null}
           </View>
         </View>
-        <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]}>{children}</ScrollView>
+        <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]} style={styles.contentScroll}>
+          {children}
+        </ScrollView>
+        <View accessibilityLabel={t(locale, "shell.status.aria")} style={[styles.statusFooter, compact && styles.statusFooterCompact]}>
+          <View style={styles.statusFooterGroup}>
+            <View style={styles.statusDot} />
+            <Label size="sm" weight="bold">{t(locale, "shell.status.previewTitle")}</Label>
+            <Label size="sm" muted>{t(locale, "shell.status.demoCompany")}</Label>
+          </View>
+          <View style={styles.statusFooterGroup}>
+            <Badge tone="ready">{t(locale, "shell.status.uiOnly")}</Badge>
+            <Label size="sm" muted>{t(locale, "shell.status.logicUnchanged")}</Label>
+          </View>
+          <View style={styles.statusFooterGroup}>
+            <Badge tone="neutral">{t(locale, "shell.status.strictTs")}</Badge>
+            <Label size="sm" muted>{t(locale, "shell.status.reactNativeWebReady")}</Label>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -462,6 +481,9 @@ const styles = StyleSheet.create({
   },
   contentCompact: {
     padding: spacing.md
+  },
+  contentScroll: {
+    flex: 1
   },
   emptyMark: {
     color: colors.muted,
@@ -588,6 +610,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radius.lg,
     borderWidth: 1,
+    borderLeftWidth: 4,
     gap: spacing.sm,
     padding: spacing.md
   },
@@ -643,6 +666,35 @@ const styles = StyleSheet.create({
     borderRightWidth: 0,
     padding: spacing.md,
     width: "100%"
+  },
+  statusDot: {
+    backgroundColor: colors.success,
+    borderRadius: 999,
+    height: 8,
+    width: 8
+  },
+  statusFooter: {
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md,
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md
+  },
+  statusFooterCompact: {
+    alignItems: "flex-start",
+    paddingHorizontal: spacing.md
+  },
+  statusFooterGroup: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    minHeight: 30
   },
   themeChip: {
     alignItems: "center",
@@ -741,6 +793,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderTopColor: colors.divider,
     borderTopWidth: 1,
+    borderLeftWidth: 4,
     flexDirection: "row",
     gap: spacing.md,
     padding: spacing.md
