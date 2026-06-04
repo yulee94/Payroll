@@ -8,6 +8,12 @@ Bitween 급여 자동화는 현재 데스크톱 앱 내부 서비스로 구현�
 - 예정 HTTP 엔드포인트: `POST /api/payroll/v1/runs`
 - Content-Type: `application/json`
 
+실행 전 검증:
+
+- 내부 진입점: `services.payroll_api_adapter.validate_payroll_api_payload(payload)`
+- 예정 HTTP 엔드포인트: `POST /api/payroll/v1/runs/validate`
+- 대안: `run_payroll_api(payload)`에 `validate_only: true` 또는 `dry_run: true`를 넣으면 산출 없이 검증 응답만 반환합니다.
+
 관련 준비상태 조회:
 
 - 내부 진입점: `services.payroll_readiness.payroll_readiness_snapshot(tenant_id=...)`
@@ -60,6 +66,7 @@ Bitween 급여 자동화는 현재 데스크톱 앱 내부 서비스로 구현�
 | `attendance_path` | `attendancePath` | 입력 방식에 따라 | 근태 CSV/XLSX 경로입니다. |
 | `tenant_id` | `tenantId` | No | 테넌트/법인별 급여 운영 기준을 해석할 때 사용합니다. |
 | `metadata` | - | No | 호출 측에서 보관할 부가 정보입니다. |
+| `validate_only` | `validateOnly`, `dry_run`, `dryRun` | No | `true`이면 급여 산출 없이 요청 검증만 수행합니다. |
 
 ## Mixed Example
 
@@ -88,6 +95,8 @@ Bitween 급여 자동화는 현재 데스크톱 앱 내부 서비스로 구현�
 {
   "ok": true,
   "status": "success",
+  "will_run": true,
+  "can_run": true,
   "request_id": "payroll-run-2026-05-coss-site-a",
   "scope": "COSS/Site A/2026-05",
   "scope_key": "COSS\\u001fSite A\\u001f2026-05",
@@ -109,6 +118,47 @@ Bitween 급여 자동화는 현재 데스크톱 앱 내부 서비스로 구현�
 }
 ```
 
+## Validation Response
+
+```json
+{
+  "ok": true,
+  "status": "validated",
+  "will_run": false,
+  "can_run": true,
+  "request_id": "payroll-run-2026-05-coss-site-a",
+  "scope": "COSS/Site A/2026-05",
+  "scope_key": "COSS\\u001fSite A\\u001f2026-05",
+  "affiliate": "COSS",
+  "workplace": "Site A",
+  "period": "2026-05",
+  "input_type": "mixed",
+  "requested_input_type": "mixed",
+  "tenant_id": "coss",
+  "paths": {
+    "invoice": "C:/Bitween/inbox/invoice_2026-05.xlsx",
+    "attendance": "C:/Bitween/inbox/attendance_2026-05.csv"
+  },
+  "metadata_keys": ["requested_by", "source_system"],
+  "operation_policy": {
+    "input_basis": "hybrid",
+    "payday": "25일",
+    "attendance": {
+      "enabled": true,
+      "rounding_minutes": 1,
+      "late_grace_minutes": 0,
+      "early_leave_grace_minutes": 0,
+      "missing_clock_policy": "warn"
+    }
+  },
+  "operation_policy_source": "tenant",
+  "warnings": [],
+  "error_code": "",
+  "details": {},
+  "error": ""
+}
+```
+
 ## Error Response
 
 검증 오류도 예외를 그대로 노출하지 않고 안정적인 JSON으로 반환합니다.
@@ -117,6 +167,8 @@ Bitween 급여 자동화는 현재 데스크톱 앱 내부 서비스로 구현�
 {
   "ok": false,
   "status": "error",
+  "will_run": false,
+  "can_run": false,
   "request_id": "payroll-run-2026-05-coss-site-a",
   "error_code": "invalid_period",
   "error": "period는 YYYY-MM 형식이어야 합니다.",
@@ -150,6 +202,9 @@ Bitween 급여 자동화는 현재 데스크톱 앱 내부 서비스로 구현�
 
 - `input_type=auto`는 테넌트/사업장 운영 기준이 있으면 그 기준을 우선 해석합니다.
 - `auto`는 `invoice_path` 또는 `attendance_path` 중 최소 하나가 필요하고, 명시적인 `mixed`는 두 경로가 모두 필요합니다.
+- `validate_only`/`dry_run`은 파일 경로와 요청 구조를 검증하지만 급여 파일을 생성하지 않습니다.
+- 프론트는 검증 응답의 `can_run`으로 실행 버튼 활성화 여부를 판단할 수 있습니다.
+- 검증 응답의 `input_type`은 실제 실행 시 적용될 입력 방식이고, `requested_input_type`은 호출자가 보낸 원래 값입니다.
 - 명시적인 `invoice`, `attendance`, `mixed` 요청은 호출자가 고른 입력 방식을 유지합니다.
 - 결과에는 `operation_policy`와 `operation_policy_source`가 포함되어, 산출 당시 어떤 급여 운영 기준이 적용됐는지 API에서도 확인할 수 있습니다.
 - 실제 직원 명부, 급여 파일, 사용자 데이터, API 키, 그룹웨어 쿠키는 GitHub에 커밋하지 않습니다.

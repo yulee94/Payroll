@@ -6,6 +6,7 @@ import unittest
 from services.payroll_api_adapter import build_payroll_api_request
 from services.payroll_api_contract import (
     PAYROLL_API_ENDPOINT,
+    PAYROLL_API_VALIDATE_ENDPOINT,
     payroll_api_contract,
     payroll_api_request_example,
 )
@@ -20,6 +21,7 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertEqual(contract["version"], "v1")
         self.assertEqual(contract["http"]["method"], "POST")
         self.assertEqual(contract["http"]["path"], PAYROLL_API_ENDPOINT)
+        self.assertEqual(contract["http"]["validation_path"], PAYROLL_API_VALIDATE_ENDPOINT)
         self.assertIn("mixed", contract["input_types"])
 
     def test_contract_examples_build_internal_requests(self) -> None:
@@ -45,9 +47,28 @@ class PayrollApiContractTests(unittest.TestCase):
 
         self.assertIn("error_code", response["stable_fields"])
         self.assertIn("details", response["stable_fields"])
+        self.assertIn("will_run", response["stable_fields"])
+        self.assertIn("can_run", response["stable_fields"])
+        self.assertIn("requested_input_type", response["stable_fields"])
+        self.assertIn("operation_policy", response["stable_fields"])
+        self.assertIn("operation_policy_source", response["stable_fields"])
         self.assertEqual(response["success"]["error_code"], "")
         self.assertEqual(response["error"]["error_code"], "invalid_period")
         self.assertIn("missing_input_path", response["error_codes"])
+
+    def test_contract_declares_validation_only_response(self) -> None:
+        contract = payroll_api_contract()
+        fields = contract["request"]["fields"]
+        response = contract["response"]
+
+        self.assertIn("validate_payroll_api_payload", contract["validation_entrypoint"])
+        self.assertTrue(any(field["name"] == "validate_only" for field in fields))
+        self.assertEqual(response["validation"]["status"], "validated")
+        self.assertFalse(response["validation"]["will_run"])
+        self.assertTrue(response["validation"]["can_run"])
+        self.assertEqual(response["validation"]["requested_input_type"], "mixed")
+        self.assertEqual(response["validation"]["operation_policy_source"], "tenant")
+        self.assertEqual(response["validation"]["error_code"], "")
 
 
 if __name__ == "__main__":

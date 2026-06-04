@@ -40,6 +40,7 @@ python main.py
 
 - `services/payroll_automation.py`가 청구서/근태/혼합 입력을 받는 공통 백엔드 진입점입니다.
 - `services/payroll_api_adapter.py`가 JSON에 가까운 API 요청/응답 형태를 내부 급여 자동화 요청으로 변환합니다.
+- `services.payroll_api_adapter.validate_payroll_api_payload()`로 산출 전 요청 검증만 수행할 수 있습니다.
 - `services/payroll_api_contract.py`와 `docs/PAYROLL_API_CONTRACT.md`가 향후 HTTP 래퍼/외부 연동에서 사용할 요청·응답 계약을 고정합니다.
 - `services/payroll_readiness.py`가 명부, 운영 기준, 산출 자료, API 계약 준비 상태를 UI/API 공통 스냅샷으로 제공합니다.
 - `services/payroll_policy_store.py`가 법인 기본값과 사업장별 운영 기준을 저장하고 해석합니다.
