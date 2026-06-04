@@ -19,9 +19,24 @@ from core.workflow.business_trip import (
     transition_trip_status,
 )
 from core.workflow.permissions import can_view_business_trip_lifecycle
+from services.workflow_api_contract import workflow_api_contract
 
 
 class BusinessTripLifecycleContractTests(unittest.TestCase):
+
+    def test_contract_declares_rust_business_trip_lifecycle(self) -> None:
+        contract = workflow_api_contract()
+        lifecycle = contract["business_trip_lifecycle"]
+
+        self.assertIn("transition_trip_status", lifecycle["rust_entrypoints"])
+        self.assertEqual(lifecycle["trip_statuses"], list(c.TRIP_STATUSES))
+        self.assertEqual(lifecycle["kpi_reflection_statuses"], list(c.KPI_REFLECTION_STATUSES))
+        self.assertEqual(lifecycle["source_kinds"], list(c.TRIP_SOURCE_KINDS))
+        self.assertEqual(lifecycle["view_model_keys"], list(TRIP_VIEW_MODEL_KEYS))
+        self.assertIn("document/task/report/KPI side effects", lifecycle["python_boundary"])
+        self.assertIn("draft -> planned", lifecycle["transition_edges"])
+        self.assertIn("diary_due -> completed", lifecycle["transition_edges"])
+
     def test_status_taxonomy_is_frozen_and_separate_from_kpi_reflection(self) -> None:
         self.assertEqual(
             c.TRIP_STATUSES,

@@ -249,12 +249,13 @@ cargo test --workspace
 
 **Acceptance criteria:**
 
-- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, workplace-hours application, invoice audit row/batch evaluation, supplied-input earnings/gross/taxable-pay calculation, supplied-input salary calculation, final deduction/net-pay calculation, employment-insurance 65+ decisions, EDI insurance premium application, site-benefits application, fixed-hours application, execution planning, authorization, run-result response shaping, health, and readiness.
+- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, workplace-hours application, invoice audit row/batch evaluation, supplied-input earnings/gross/taxable-pay calculation, supplied-input salary calculation, final deduction/net-pay calculation, employment-insurance 65+ decisions, EDI insurance premium application, site-benefits application, fixed-hours application, execution planning, business-trip lifecycle normalization/transitions, authorization, run-result response shaping, health, and readiness.
 - [ ] Python adapter is retained only as compatibility fallback while rollout is incomplete.
 - [x] Health/readiness behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [x] Run-result success/error envelope behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [x] Tenant/site/global operation-policy resolution behavior is defined in framework-neutral Rust DTOs and API contracts for supplied settings snapshots.
 - [x] Payroll execution routing/planning behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the compatibility executor.
+- [x] Business-trip lifecycle normalization and status-transition behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the workflow persistence/document/task/report/KPI side-effect bridge.
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
 - [x] Invoice audit row and batch behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/fixed-profile resolver and workbook/UI bridge.
@@ -721,6 +722,36 @@ npm run typecheck --prefix frontend
 git diff --check
 cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
 ```
+
+
+## Implementation checkpoint: Rust business-trip lifecycle core
+
+Completed on 2026-06-04 as the first workflow-domain Rust backend slice:
+
+- `crates/workflow-core` owns pure business-trip lifecycle constants, source
+  normalization, migration/view-model shaping, source matching, transition
+  validation, and transition timestamp/KPI effects.
+- Rust preserves compatibility with `core.workflow.business_trip` for status
+  strings/order, KPI reflection values, source kinds, dedupe fallback, unknown
+  field preservation, invalid transition rejection, cancellation, and completed
+  KPI-ready behavior.
+- Python remains the workflow JSON store, document approval sync, execution task
+  and report prerequisite checker, overdue escalation worker, KPI reflection
+  writer, authorization profile resolver, notification/calendar/To-Do producer,
+  and UI bridge.
+- Slice spec: `docs/WORKFLOW_RUST_BUSINESS_TRIP_LIFECYCLE_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo test -p bitween-workflow-core business_trip --lib
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_business_trip_contracts.BusinessTripLifecycleContractTests.test_contract_declares_rust_business_trip_lifecycle -v
+```
+
+Task 5 acceptance status:
+
+- [x] Business-trip lifecycle normalization and transitions are Rust-owned behind
+      parity tests.
 
 ## Implementation checkpoint: Rust payroll execution planning
 
