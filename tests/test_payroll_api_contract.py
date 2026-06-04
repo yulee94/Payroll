@@ -125,6 +125,21 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertIn("기본급 불일치", audit["example_row"]["flags"][0])
         self.assertIn("audit_invoice_row", response["invoice_audit_row_entrypoint"])
 
+    def test_contract_declares_rust_invoice_audit_batch(self) -> None:
+        contract = payroll_api_contract()
+        audit = contract["invoice_audit_batch"]
+        response = contract["response"]
+
+        self.assertIn("audit_invoice_batch", audit["rust_entrypoint"])
+        self.assertIn("core.payroll.invoice_audit.audit_invoice_payroll", audit["python_compatibility_source"])
+        self.assertIn("fixed_profile", audit["item_fields"])
+        self.assertEqual(audit["summary_fields"], ["total", "pass", "warn"])
+        self.assertEqual(audit["example_result"]["summary"], {"total": 3, "pass": 2, "warn": 1})
+        self.assertEqual(audit["example_result"]["pass_count"], 2)
+        self.assertEqual(audit["example_result"]["warn_count"], 1)
+        self.assertEqual([row["name"] for row in audit["example_result"]["rows"]], ["A", "B", "C"])
+        self.assertIn("audit_invoice_batch", response["invoice_audit_batch_entrypoint"])
+
     def test_contract_declares_rust_fixed_hours_application(self) -> None:
         contract = payroll_api_contract()
         fixed = contract["fixed_hours_application"]

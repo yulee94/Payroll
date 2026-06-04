@@ -10,7 +10,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from core.payroll.invoice_audit import audit_invoice_payroll, audit_invoice_row
+from core.payroll.invoice_audit import (
+    audit_invoice_payroll,
+    audit_invoice_row,
+    format_audit_summary_text,
+)
 from core.payroll.fixed_hours import (
     FIXED_HOURS_SOURCE_CONTRACT,
     PAY_TYPE_MONTHLY_SALARY,
@@ -68,6 +72,54 @@ class InvoiceAuditTests(unittest.TestCase):
         row = audit_invoice_row(inv, workplace="앰코")
         self.assertEqual(row["status"], "warn")
         self.assertTrue(any("근무시간" in f for f in row["flags"]))
+
+    def test_audit_batch_summary_shape_for_rust_parity(self) -> None:
+        save_workplace_hours_policy("앰코", mode=MODE_FIXED, hours=209)
+        invoices = [
+            {
+                "name": "A",
+                "base_days": 209,
+                "work_days": 209,
+                "base_hourly": 10_000,
+                "base_salary": 2_090_000,
+            },
+            {
+                "name": "B",
+                "base_days": 209,
+                "work_days": 209,
+                "base_hourly": 10_000,
+                "base_salary": 1_000,
+            },
+            {
+                "name": "C",
+                "base_days": 209,
+                "work_days": 209,
+                "base_salary": 2_090_000,
+            },
+        ]
+        records = [
+            {"name": "A", "base_hourly": 10_000, "workplace": "앰코"},
+            {"name": "B", "base_hourly": 10_000, "workplace": "앰코"},
+            {"name": "C", "base_hourly": 0, "workplace": "앰코"},
+        ]
+
+        result = audit_invoice_payroll(invoices, records, workplace="앰코")
+
+        self.assertEqual(result["workplace"], "앰코")
+        self.assertEqual(result["summary"], {"total": 3, "pass": 2, "warn": 1})
+        self.assertEqual(result["pass_count"], 2)
+        self.assertEqual(result["warn_count"], 1)
+        self.assertEqual([row["name"] for row in result["rows"]], ["A", "B", "C"])
+        self.assertEqual(result["rows"][0]["status"], "pass")
+        self.assertEqual(result["rows"][1]["status"], "warn")
+        self.assertEqual(result["rows"][2]["status"], "pass")
+        self.assertIn("명부 기본시급 없음", result["rows"][2]["flags"][0])
+
+        summary_text = format_audit_summary_text(result)
+        self.assertIn("자동검열 — 3명", summary_text)
+        self.assertIn("사업장: 앰코", summary_text)
+        self.assertIn("정상 2명 / 확인 필요 1명", summary_text)
+        self.assertIn("B: 기본급 불일치", summary_text)
 
     def test_audit_batch_summary(self) -> None:
         save_workplace_hours_policy("앰코", mode=MODE_FIXED, hours=209)

@@ -382,6 +382,40 @@ cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy:
 ```
 
 
+## Implementation checkpoint: Rust payroll invoice audit batch
+
+Completed on 2026-06-04 as a payroll audit behavior slice:
+
+- `crates/payroll-api` owns supplied-input invoice audit batch summarization
+  through `audit_invoice_batch`, `InvoiceAuditBatchItem`,
+  `InvoiceAuditSummary`, `InvoiceAuditBatchResult`, and
+  `PayrollApiService::audit_invoice_batch`.
+- Rust preserves supplied row order, Python-compatible summary counts, top-level
+  pass/warn counts, batch workplace labels, and row-auditor output.
+- Python remains the resolver/UI bridge for settings lookup, ledger record
+  matching, fixed-hours profile resolution, workbook I/O, and summary text
+  rendering.
+- Contract docs and TypeScript/Python metadata name the invoice-audit batch
+  item, summary, and result DTOs.
+- Slice spec: `docs/PAYROLL_RUST_INVOICE_AUDIT_BATCH_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo fmt --check
+cargo test --workspace
+buck2 test //crates/payroll-api:payroll_api_test
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_invoice_audit tests.test_payroll_api_contract -v
+npm run typecheck --prefix frontend
+git diff --check
+cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
+```
+
+Task 4 acceptance status:
+
+- [x] Supplied-input invoice audit batch summarization is Rust-owned behind
+      parity tests.
+
 ## Implementation checkpoint: Rust payroll invoice audit row
 
 Completed on 2026-06-04 as a payroll audit behavior slice:
@@ -393,7 +427,7 @@ Completed on 2026-06-04 as a payroll audit behavior slice:
   warning flags/status labels, estimates break hours, and calculates base-salary
   formula output for a single supplied row.
 - Python remains the resolver bridge for settings, ledger record matching,
-  fixed-hours profile resolution, batch summaries, and workbook I/O.
+  fixed-hours profile resolution, workbook I/O, and UI text rendering.
 - Contract docs and TypeScript/Python metadata name the invoice-audit invoice,
   record, and row DTOs.
 - Slice spec: `docs/PAYROLL_RUST_INVOICE_AUDIT_ROW_SLICE.md`.

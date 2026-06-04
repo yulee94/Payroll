@@ -160,6 +160,37 @@ Verification evidence for this checkpoint:
 Slice spec: `docs/PAYROLL_RUST_ATTENDANCE_AGGREGATION_SLICE.md`.
 
 
+## Current implementation checkpoint: Rust payroll invoice audit batch
+
+Implemented on 2026-06-04 as the next payroll audit behavior slice:
+
+- `crates/payroll-api` now exposes `InvoiceAuditBatchItem`,
+  `InvoiceAuditSummary`, `InvoiceAuditBatchResult`, and
+  `audit_invoice_batch`.
+- `PayrollApiService::audit_invoice_batch` evaluates a supplied batch of
+  invoice-audit items without reading settings stores, matching ledgers,
+  resolving fixed-hours profiles, parsing workbooks, or rendering UI text.
+- Rust preserves Python compatibility row order, `summary.total/pass/warn`,
+  `pass_count`, `warn_count`, batch workplace labeling, and row-auditor output.
+- Python remains responsible for settings lookup, record matching,
+  fixed-profile resolution, workbook I/O, and UI summary text until those
+  resolver/I/O slices move to Rust behind parity tests.
+- TypeScript and Python contract metadata now include invoice-audit batch item,
+  summary, and result DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo fmt --check`
+- `cargo test --workspace`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_invoice_audit tests.test_payroll_api_contract -v`
+- `npm run typecheck --prefix frontend`
+- `git diff --check`
+- `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
+
+Slice spec: `docs/PAYROLL_RUST_INVOICE_AUDIT_BATCH_SLICE.md`.
+
+
 ## Current implementation checkpoint: Rust payroll invoice audit row
 
 Implemented on 2026-06-04 as the next payroll audit behavior slice:
@@ -174,8 +205,8 @@ Implemented on 2026-06-04 as the next payroll audit behavior slice:
   break-hour estimation, base-salary formula text, fixed-hours flag composition,
   and ledger monthly-hour mismatch checks.
 - Python remains responsible for settings lookup, record matching, fixed-profile
-  resolution, batch summary aggregation, and workbook I/O until those slices move
-  to Rust behind parity tests.
+  resolution, workbook I/O, and UI text rendering until those slices move to
+  Rust behind parity tests.
 - TypeScript and Python contract metadata now include invoice-audit invoice,
   record, and row DTO shapes.
 
