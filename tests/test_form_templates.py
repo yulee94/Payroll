@@ -18,7 +18,7 @@ from core.workflow.form_templates import (
     templates_path,
 )
 from core.workflow.forms import get_form_schema, validate_form_values
-from core.workflow.constants import DOC_TYPE_EXPENSE
+from core.workflow.constants import DOC_TYPE_BUSINESS_TRIP_REQUEST, DOC_TYPE_EXPENSE, DOC_TYPE_GENERAL
 
 
 class TestFormTemplates(unittest.TestCase):
@@ -62,6 +62,56 @@ class TestFormTemplates(unittest.TestCase):
                 self.assertIn("vehicle", keys)
                 self.assertIn("total_amount", keys)
 
+    def test_business_trip_request_template_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            with mock.patch("core.workflow.form_templates.WORKFLOW_ROOT", base / "workflow"):
+                merge_gw_templates("t_trip")
+                tpl = get_template("t_trip", "coss_출장신청서")
+                self.assertIsNotNone(tpl)
+                assert tpl is not None
+                self.assertEqual(tpl["document_type"], DOC_TYPE_BUSINESS_TRIP_REQUEST)
+                fields = resolve_template_schema("t_trip", tpl["id"])
+                self.assertIsNotNone(fields)
+                assert fields is not None
+                keys = {f.key for f in fields}
+                self.assertIn("destination", keys)
+                self.assertIn("business_trip_purpose", keys)
+                self.assertIn("executor_id", keys)
+
+    def test_trip_report_template_links_to_request(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            with mock.patch("core.workflow.form_templates.WORKFLOW_ROOT", base / "workflow"):
+                merge_gw_templates("t_report")
+                tpl = get_template("t_report", "coss_출장보고서")
+                self.assertIsNotNone(tpl)
+                assert tpl is not None
+                self.assertEqual(tpl["document_type"], DOC_TYPE_GENERAL)
+                fields = resolve_template_schema("t_report", tpl["id"])
+                assert fields is not None
+                trip_fields = [f for f in fields if f.key == "trip_id"]
+                self.assertEqual(len(trip_fields), 1)
+                self.assertTrue(trip_fields[0].required)
+                self.assertEqual(trip_fields[0].maps_to, "trip_id")
+                keys = {f.key for f in fields}
+                self.assertIn("source_document_id", keys)
+
+    def test_trip_linked_diary_template_keeps_optional_trip_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            with mock.patch("core.workflow.form_templates.WORKFLOW_ROOT", base / "workflow"):
+                merge_gw_templates("t_diary")
+                tpl = get_template("t_diary", "coss_일일업무일지")
+                self.assertIsNotNone(tpl)
+                assert tpl is not None
+                fields = resolve_template_schema("t_diary", tpl["id"])
+                assert fields is not None
+                trip_fields = [f for f in fields if f.key == "trip_id"]
+                self.assertEqual(len(trip_fields), 1)
+                self.assertFalse(trip_fields[0].required)
+                self.assertEqual(trip_fields[0].maps_to, "trip_id")
+
     def test_validate_with_template(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
@@ -79,6 +129,22 @@ class TestFormTemplates(unittest.TestCase):
                 self.assertTrue(any("금액" in e for e in errors))
                 schema = get_form_schema(dtype, "t2", template_id=tpl["id"])
                 self.assertGreater(len(schema), 3)
+
+    def test_extra_gw_template_uses_fields_for_inferred_document_type(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            with mock.patch("core.workflow.form_templates.WORKFLOW_ROOT", base / "workflow"):
+                merge_gw_templates("t_extra", extra_names=["구매요청서_프로브", "출장신청_프로브"])
+                purchase = next(t for t in list_templates("t_extra") if t["name"] == "구매요청서_프로브")
+                trip = next(t for t in list_templates("t_extra") if t["name"] == "출장신청_프로브")
+                self.assertNotEqual(purchase["document_type"], DOC_TYPE_BUSINESS_TRIP_REQUEST)
+                purchase_keys = {f.key for f in resolve_template_schema("t_extra", purchase["id"]) or ()}
+                trip_keys = {f.key for f in resolve_template_schema("t_extra", trip["id"]) or ()}
+                self.assertIn("total_amount", purchase_keys)
+                self.assertNotIn("business_trip_purpose", purchase_keys)
+                self.assertNotIn("destination", purchase_keys)
+                self.assertEqual(trip["document_type"], DOC_TYPE_BUSINESS_TRIP_REQUEST)
+                self.assertIn("business_trip_purpose", trip_keys)
 
     def test_affiliate_tenant_resolves_group_workflow_templates(self) -> None:
         """계열사 로그인 ID로 조회해도 루트(coss) 양식함 필드를 불러온다."""

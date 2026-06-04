@@ -43,6 +43,7 @@ def _empty_db() -> dict[str, Any]:
         "purchase_request_items": [],
         "expense_reports": [],
         "execution_tasks": [],
+        "business_trips": [],
         "notifications": [],
         "audit_logs": [],
         "attachments": [],
@@ -50,6 +51,7 @@ def _empty_db() -> dict[str, Any]:
         "profit_loss": [],
         "comments": [],
         "document_seq": 0,
+        "business_trip_seq": 0,
     }
 
 
@@ -60,8 +62,15 @@ def _load_raw(tenant_id: str) -> dict[str, Any]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         if isinstance(data, dict):
-            for key in _empty_db():
-                data.setdefault(key, deepcopy(_empty_db()[key]) if isinstance(_empty_db()[key], list) else _empty_db()[key])
+            original = deepcopy(data)
+            empty = _empty_db()
+            for key in empty:
+                data.setdefault(key, deepcopy(empty[key]) if isinstance(empty[key], list) else empty[key])
+            from core.workflow.business_trip import migrate_business_trips
+
+            migrate_business_trips(data, tenant_id)
+            if data != original:
+                _save_raw(tenant_id, data)
             return data
     except (OSError, json.JSONDecodeError):
         pass
@@ -131,8 +140,8 @@ def append_audit(
             "action": action,
             "entity_type": entity_type,
             "entity_id": entity_id,
-            "before_json": before,
-            "after_json": after,
+            "before_json": deepcopy(before),
+            "after_json": deepcopy(after),
             "ip_address": "",
             "user_agent": "desktop",
             "created_at": _now_iso(),

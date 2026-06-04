@@ -73,6 +73,7 @@ TEMPLATE_UI: dict[str, tuple[str, str, str]] = {
     "EXPENSE_REPORT": ("지출 결의", "💳", "#059669"),
     "PURCHASE_REQUEST": ("구매 요청", "📦", "#D97706"),
     "CLOSING_REPORT": ("마감 보고", "📊", "#7C3AED"),
+    "BUSINESS_TRIP_REQUEST": ("출장 신청", "🧳", "#0F766E"),
 }
 
 TAB_ITEMS: tuple[tuple[str, str], ...] = (

@@ -157,6 +157,27 @@ def add_todo_for_user(
     path = _user_file_for(user_id, tenant_id, "todos.json")
     raw = _load_json(path, {"items": []})
     items: list[dict[str, Any]] = list(raw.get("items") or [])
+    extra_payload = dict(extra or {})
+    source_key = str(extra_payload.get("source_key") or "").strip()
+    if not source_key and source and document_id:
+        source_key = f"{source}:{document_id}:{title}"
+    if source_key:
+        for it in items:
+            if str(it.get("source_key") or "") != source_key:
+                continue
+            it.update(
+                {
+                    "title": title,
+                    "due_date": str(due_date or "").strip(),
+                    "source": source,
+                    "document_id": document_id,
+                    "source_key": source_key,
+                    "updated_at": _now_iso(),
+                }
+            )
+            it.update(extra_payload)
+            _save_json(path, {"items": items})
+            return it
     item = {
         "id": uuid.uuid4().hex[:12],
         "title": title,
@@ -166,8 +187,10 @@ def add_todo_for_user(
         "source": source,
         "document_id": document_id,
     }
-    if extra:
-        item.update(extra)
+    if source_key:
+        item["source_key"] = source_key
+    if extra_payload:
+        item.update(extra_payload)
     items.append(item)
     _save_json(path, {"items": items})
     return item
@@ -182,6 +205,7 @@ def add_calendar_event_for_user(
     end_date: str = "",
     source: str = "",
     document_id: str = "",
+    source_key: str = "",
 ) -> dict[str, Any]:
     title = str(title or "").strip()
     event_date = str(event_date or "").strip()[:10]
@@ -190,6 +214,27 @@ def add_calendar_event_for_user(
     path = _user_file_for(user_id, tenant_id, "calendar.json")
     raw = _load_json(path, {"events": []})
     events: list[dict[str, Any]] = list(raw.get("events") or [])
+    source_key = str(source_key or "").strip()
+    if not source_key and source and document_id:
+        source_key = f"{source}:{document_id}:{title}:{event_date}"
+    if source_key:
+        for ev in events:
+            if str(ev.get("source_key") or "") != source_key:
+                continue
+            ev.update(
+                {
+                    "title": title,
+                    "date": event_date,
+                    "end_date": str(end_date or "").strip()[:10],
+                    "all_day": True,
+                    "source": source,
+                    "document_id": document_id,
+                    "source_key": source_key,
+                    "updated_at": _now_iso(),
+                }
+            )
+            _save_json(path, {"events": events})
+            return ev
     ev = {
         "id": uuid.uuid4().hex[:12],
         "title": title,
@@ -200,6 +245,8 @@ def add_calendar_event_for_user(
         "source": source,
         "document_id": document_id,
     }
+    if source_key:
+        ev["source_key"] = source_key
     events.append(ev)
     _save_json(path, {"events": events})
     return ev

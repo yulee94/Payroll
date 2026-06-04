@@ -205,6 +205,7 @@ def ensure_seed(tenant_id: str | None = None) -> None:
         if changed:
             save_module_db(MODULE, tid, db)
         return
+    existing_individual = list(db.get("individual") or [])
     period = date.today().strftime("%Y-%m")
     db["entities"] = _default_entities(period)
     db["sites"] = [
@@ -285,7 +286,7 @@ def ensure_seed(tenant_id: str | None = None) -> None:
         },
     ]
     db["sites"].extend(_bulk_demo_sites(date.today().month))
-    db["individual"] = [
+    default_individual = [
         {
             "id": _new_id(),
             "employee_name": "김민수",
@@ -323,6 +324,15 @@ def ensure_seed(tenant_id: str | None = None) -> None:
             "status": STATUS_OK,
         },
     ]
+    seen_keys = {str(row.get("source_key") or row.get("id") or "") for row in default_individual}
+    for row in existing_individual:
+        key = str(row.get("source_key") or row.get("id") or "")
+        if key and key in seen_keys:
+            continue
+        default_individual.append(row)
+        if key:
+            seen_keys.add(key)
+    db["individual"] = default_individual
     db["alerts"] = [
         {
             "id": _new_id(),
@@ -362,11 +372,12 @@ def dashboard_kpis() -> list[tuple[str, str, str]]:
     profit = sum(int(s.get("profit") or 0) for s in sites)
     margin = (profit / rev * 100) if rev else 0
     issues = sum(1 for s in sites if s.get("status") in (STATUS_WARN, STATUS_CRITICAL))
+    trip_reflections = sum(1 for row in db.get("individual") or [] if row.get("source") == "business_trip")
     return [
         ("총 매출", _won_short(rev), f"사업장 {len(sites)}곳"),
         ("총 이익", _won_short(profit), f"평균 마진 {margin:.1f}%"),
         ("이슈 사업장", str(issues), f"알림 {len(alerts)}건"),
-        ("개인 KPI", str(len(db.get("individual") or [])), "인사·급여 연동 예정"),
+        ("개인 KPI", str(len(db.get("individual") or [])), f"출장 실적 {trip_reflections}건 반영"),
     ]
 
 
@@ -404,6 +415,46 @@ def list_records(tab_id: str) -> list[dict[str, Any]]:
                 item["margin_pct"] = f"{_parse_margin_pct(item.get('margin_pct')):+.1f}%"
         rows.append(item)
     return rows
+
+
+def upsert_business_trip_reflection(tenant_id: str, trip: dict[str, Any]) -> dict[str, Any]:
+    """Reflect one completed business trip into the individual KPI dataset.
+
+    The source key makes the adapter idempotent: repeated workflow reflection
+    updates the same KPI row instead of duplicating 실적 records.
+    """
+    tid = tenant_id or _tid()
+    db = load_module_db(MODULE, tid, _EMPTY)
+    rows: list[dict[str, Any]] = list(db.get("individual") or [])
+    trip_id = str(trip.get("trip_id") or trip.get("id") or "").strip()
+    source_key = f"business_trip:{trip_id}"
+    existing = next((row for row in rows if row.get("source_key") == source_key), None)
+    now = date.today().isoformat()
+    row = {
+        "id": str((existing or {}).get("id") or _new_id()),
+        "employee_name": str(trip.get("executor_id") or trip.get("requester_id") or ""),
+        "org_unit": str(trip.get("department_id") or ""),
+        "site_name": str(trip.get("site_id") or ""),
+        "kpi_name": "출장 실적 반영",
+        "target": "출장 완료",
+        "actual": str(trip.get("title") or trip_id),
+        "score": 100,
+        "payroll_link": "연동",
+        "status": STATUS_OK,
+        "source": "business_trip",
+        "source_key": source_key,
+        "trip_id": trip_id,
+        "document_id": str(trip.get("approved_document_id") or ""),
+        "reflected_at": now,
+    }
+    if existing is None:
+        rows.append(row)
+    else:
+        existing.update(row)
+        row = dict(existing)
+    db["individual"] = rows
+    save_module_db(MODULE, tid, db)
+    return dict(row)
 
 
 def list_sites() -> list[dict[str, Any]]:
