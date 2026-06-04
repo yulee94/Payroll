@@ -257,6 +257,89 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         self.assertEqual(unchanged_trip["status"], TRIP_STATUS_DIARY_DUE)
         self.assertEqual(unchanged_trip["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
 
+    def test_unrelated_report_approver_cannot_complete_another_users_trip(self) -> None:
+        owner = self._session("owner", role="admin")
+        doc = self._create_business_trip_document(session=owner)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": owner.user_id, "approver_role": "admin"}],
+            session=owner,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=owner)
+        task = wf_svc.list_execution_tasks(self._tenant, session=owner)[0]
+        wf_svc.complete_execution_task(self._tenant, task["id"], session=owner)
+
+        report = wf_svc.create_document(
+            self._tenant,
+            document_type=DOC_TYPE_GENERAL,
+            title="출장보고서",
+            summary="출장 결과 보고",
+            payload={
+                "trip_id": trip_id,
+                "source_document_id": doc["id"],
+                "template_name": "출장보고서",
+                "business_trip_artifact": "trip_report",
+            },
+            session=owner,
+        )
+        wf_svc.submit_document(
+            self._tenant,
+            report["id"],
+            [{"approver_id": "unrelated-approver", "approver_role": "approver"}],
+            session=owner,
+        )
+
+        with self.assertRaises(PermissionError):
+            wf_svc.approve_document(
+                self._tenant,
+                report["id"],
+                session=self._session("unrelated-approver", role="staff"),
+            )
+
+        blocked_report = wf_svc.get_document(self._tenant, report["id"], session=owner)
+        unchanged_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=owner)
+        self.assertEqual(blocked_report["status"], DOC_STATUS_IN_REVIEW)
+        self.assertEqual(unchanged_trip["status"], TRIP_STATUS_DIARY_DUE)
+        self.assertEqual(unchanged_trip["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
+
+    def test_cross_tenant_admin_cannot_read_dashboard_or_reflect_trip(self) -> None:
+        owner = self._session("owner", role="admin")
+        doc = self._create_business_trip_document(session=owner)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": owner.user_id, "approver_role": "admin"}],
+            session=owner,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=owner)
+        task = wf_svc.list_execution_tasks(self._tenant, session=owner)[0]
+        wf_svc.complete_execution_task(self._tenant, task["id"], session=owner)
+        self._approve_trip_report(trip_id, doc["id"], session=owner)
+
+        other_admin = UserSession(
+            user_id="other-admin",
+            tenant_id="other-tenant",
+            username="other-admin",
+            display_name="other-admin",
+            role="admin",
+        )
+        with self.assertRaises(PermissionError):
+            wf_svc.list_business_trips(self._tenant, session=other_admin)
+        with self.assertRaises(PermissionError):
+            wf_svc.get_business_trip(self._tenant, trip_id, session=other_admin)
+        with self.assertRaises(PermissionError):
+            wf_svc.list_business_trip_kpi_reflections(self._tenant, session=other_admin)
+        with self.assertRaises(PermissionError):
+            wf_svc.business_trip_manager_dashboard(self._tenant, session=other_admin)
+        with self.assertRaises(PermissionError):
+            wf_svc.reflect_business_trip_kpi(self._tenant, trip_id, session=other_admin)
+
+        ready_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=owner)
+        self.assertEqual(ready_trip["kpi_reflection_status"], KPI_REFLECTION_READY)
+
     def test_reject_and_cancel_paths_update_lifecycle_without_duplicate_rows(self) -> None:
         sess = self._session()
         rejected_doc = self._create_business_trip_document(session=sess)

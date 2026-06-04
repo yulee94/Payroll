@@ -76,6 +76,11 @@ def _uid(sess: UserSession) -> str:
     return sess.user_id
 
 
+def _assert_session_tenant(sess: UserSession, tenant_id: str, message: str) -> None:
+    if _resolve_tenant(sess.tenant_id) != tenant_id:
+        raise PermissionError(message)
+
+
 def _is_business_trip_document(doc: dict[str, Any]) -> bool:
     return doc.get("document_type") == DOC_TYPE_BUSINESS_TRIP_REQUEST
 
@@ -187,7 +192,7 @@ def _assert_business_trip_report_approval_allowed(
     if not target:
         return
     artifact_kind, trip = target
-    _assert_business_trip_artifact_link_allowed(tenant_id, doc, trip, session=session)
+    _assert_business_trip_artifact_approval_allowed(tenant_id, trip, session=session)
     if artifact_kind != "report":
         return
     _assert_business_trip_execution_task_completed(db, trip)
@@ -211,11 +216,17 @@ def _assert_business_trip_execution_task_completed(db: dict[str, Any], trip: dic
 
 
 def _business_trip_report_document_is_approved(db: dict[str, Any], trip: dict[str, Any]) -> bool:
+    trip_id = str(trip.get("trip_id") or trip.get("id") or "").strip()
     report_document_id = str(trip.get("report_document_id") or "").strip()
-    if not report_document_id:
+    if not report_document_id or not trip_id:
         return False
     report = next((doc for doc in db.get("documents") or [] if doc.get("id") == report_document_id), None)
-    return bool(report and report.get("status") == DOC_STATUS_APPROVED)
+    if not report or report.get("status") != DOC_STATUS_APPROVED:
+        return False
+    payload = report.get("content_json") if isinstance(report.get("content_json"), dict) else {}
+    if str(payload.get("trip_id") or "").strip() != trip_id:
+        return False
+    return _trip_artifact_kind_from_document(report) == "report"
 
 
 def _assert_business_trip_completion_prerequisites(db: dict[str, Any], trip: dict[str, Any]) -> None:
@@ -249,6 +260,17 @@ def _assert_business_trip_artifact_link_allowed(
     ):
         return
     raise PermissionError("출장 lifecycle에 업무일지/출장보고서를 연결할 권한이 없습니다.")
+
+
+def _assert_business_trip_artifact_approval_allowed(
+    tenant_id: str,
+    trip: dict[str, Any],
+    *,
+    session: UserSession,
+) -> None:
+    if wf_perm.can_manage_business_trip_lifecycle(session, trip, tenant_id=tenant_id):
+        return
+    raise PermissionError("출장보고서를 승인해 lifecycle을 완료할 권한이 없습니다.")
 
 
 def _sync_business_trip_artifact_for_document(
@@ -1171,7 +1193,9 @@ def list_execution_tasks(
     mine_only: bool = False,
     status: str | None = None,
 ) -> list[dict[str, Any]]:
+    tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "실행업무를 조회할 권한이 없습니다.")
     db = _load_raw(tenant_id)
     tasks = list(db.get("execution_tasks") or [])
     profile = get_user_profile(tenant_id, _uid(sess))
@@ -1298,6 +1322,7 @@ def list_business_trips(
     """List tenant-bound business-trip lifecycle view models."""
     tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "출장 lifecycle을 조회할 권한이 없습니다.")
     db = _load_raw(tenant_id)
     from core.workflow.business_trip import business_trip_view_model, normalize_trip_status
 
@@ -1318,6 +1343,7 @@ def get_business_trip(
     """Return a single tenant-bound business-trip lifecycle view model."""
     tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "출장 lifecycle을 조회할 권한이 없습니다.")
     db = _load_raw(tenant_id)
     from core.workflow.business_trip import business_trip_view_model
 
@@ -1590,6 +1616,7 @@ def reflect_business_trip_kpi(
     """Reflect a READY business trip into KPI and mark it REFLECTED idempotently."""
     tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "출장 실적을 반영할 권한이 없습니다.")
 
     def mut(db: dict[str, Any]) -> dict[str, Any]:
         from core.kpi import service as kpi_svc

@@ -13,11 +13,13 @@ from core.module_store import load_module_db
 from core.session_service import UserSession, logout
 from core.workflow import service as wf_svc
 from core.workflow.constants import (
+    DOC_STATUS_APPROVED,
     DOC_TYPE_BUSINESS_TRIP_REQUEST,
     DOC_TYPE_GENERAL,
     KPI_REFLECTION_BLOCKED,
     KPI_REFLECTION_READY,
     KPI_REFLECTION_REFLECTED,
+    TASK_COMPLETED,
     TASK_DELAYED,
     TRIP_STATUS_COMPLETED,
     TRIP_STATUS_DIARY_DUE,
@@ -293,6 +295,77 @@ class BusinessTripFollowUpKpiManagerTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             wf_svc.reflect_business_trip_kpi(self._tenant, "manual-direct-row", session=admin)
+
+        db = _load_raw(self._tenant)
+        db["documents"].append(
+            {
+                "id": "unrelated-approved-doc",
+                "document_no": "WF-999",
+                "document_type": DOC_TYPE_GENERAL,
+                "title": "무관 승인 문서",
+                "summary": "",
+                "content": "",
+                "status": DOC_STATUS_APPROVED,
+                "site_id": "site-a",
+                "department_id": "dept-a",
+                "requester_id": "requester-a",
+                "origin_tenant_id": self._tenant,
+                "legal_entity_id": "",
+                "total_amount": 0,
+                "currency": "KRW",
+                "category": "",
+                "requested_date": "2026-06-01",
+                "due_date": "2026-06-03",
+                "period_start": "2026-06-01",
+                "period_end": "2026-06-03",
+                "approved_at": "2026-06-04T00:00:00",
+                "rejected_at": "",
+                "completed_at": "",
+                "closed_at": "",
+                "created_at": "2026-06-04T00:00:00",
+                "updated_at": "2026-06-04T00:00:00",
+                "content_json": {"trip_id": "other-trip"},
+                "cc_user_ids": [],
+            }
+        )
+        db["execution_tasks"].append(
+            {
+                "id": "task-manual-unrelated-doc",
+                "document_id": "",
+                "trip_id": "manual-unrelated-doc",
+                "title": "실행: 무관 문서 증빙 수기 출장",
+                "description": "",
+                "executor_id": "executor-a",
+                "site_id": "site-a",
+                "department_id": "dept-a",
+                "due_date": "2026-06-03",
+                "priority": "normal",
+                "status": TASK_COMPLETED,
+                "ai_recommended_action": "",
+                "completed_at": "2026-06-04T00:00:00",
+                "created_at": "2026-06-04T00:00:00",
+                "updated_at": "2026-06-04T00:00:00",
+            }
+        )
+        _save_raw(self._tenant, db)
+
+        with self.assertRaises(ValueError):
+            wf_svc.upsert_business_trip_lifecycle(
+                self._tenant,
+                fields={
+                    "trip_id": "manual-unrelated-doc",
+                    "title": "무관 문서 증빙 수기 완료 출장",
+                    "status": TRIP_STATUS_COMPLETED,
+                    "kpi_reflection_status": KPI_REFLECTION_READY,
+                    "requester_id": "requester-a",
+                    "executor_id": "executor-a",
+                    "site_id": "site-a",
+                    "department_id": "dept-a",
+                    "report_document_id": "unrelated-approved-doc",
+                    "source": {"kind": "manual", "dedupe_key": "manual:unrelated-doc"},
+                },
+                session=admin,
+            )
 
     def test_manager_dashboard_filters_visible_trips_and_sections(self) -> None:
         admin = self._session("admin", role="admin")
