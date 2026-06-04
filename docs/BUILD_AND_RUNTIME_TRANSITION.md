@@ -257,6 +257,7 @@ cargo test --workspace
 - [x] Payroll execution routing/planning behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the compatibility executor.
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
+- [x] Invoice audit row behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/fixed-profile resolver and batch/workbook bridge.
 - [x] Fixed-hours payroll row application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the HR contract/settings resolver.
 - [ ] Service-account permissions and initial latency/error budgets are defined for Kubernetes.
 
@@ -375,6 +376,35 @@ cargo fmt --check
 cargo test --workspace
 buck2 test //crates/payroll-api:payroll_api_test
 /tmp/payroll-policy-venv/bin/python -m unittest tests.test_attendance_import tests.test_payroll_api_contract -v
+npm run typecheck --prefix frontend
+git diff --check
+cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
+```
+
+
+## Implementation checkpoint: Rust payroll invoice audit row
+
+Completed on 2026-06-04 as a payroll audit behavior slice:
+
+- `crates/payroll-api` owns supplied-input invoice audit row evaluation through
+  `audit_invoice_row`, `estimate_break_hours`, and
+  `PayrollApiService::audit_invoice_row`.
+- Rust composes workplace-hours and fixed-hours Rust rules, emits Python-compatible
+  warning flags/status labels, estimates break hours, and calculates base-salary
+  formula output for a single supplied row.
+- Python remains the resolver bridge for settings, ledger record matching,
+  fixed-hours profile resolution, batch summaries, and workbook I/O.
+- Contract docs and TypeScript/Python metadata name the invoice-audit invoice,
+  record, and row DTOs.
+- Slice spec: `docs/PAYROLL_RUST_INVOICE_AUDIT_ROW_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo fmt --check
+cargo test --workspace
+buck2 test //crates/payroll-api:payroll_api_test
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_invoice_audit tests.test_payroll_api_contract -v
 npm run typecheck --prefix frontend
 git diff --check
 cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant

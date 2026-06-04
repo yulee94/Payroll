@@ -365,6 +365,92 @@ def payroll_workplace_hours_application_example() -> dict[str, Any]:
     }
 
 
+
+def payroll_invoice_audit_row_example() -> dict[str, Any]:
+    """Return the Rust-owned supplied-input invoice audit row contract shape."""
+    return {
+        "rust_entrypoint": "PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)",
+        "auditor_entrypoint": "audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)",
+        "python_compatibility_source": "core.payroll.invoice_audit.audit_invoice_row",
+        "resolver_boundary": "Python compatibility code may still resolve settings, match ledger records, resolve fixed-hours profiles, and aggregate batch summaries before supplying row inputs to Rust.",
+        "status_values": ["pass", "warn"],
+        "invoice_fields": [
+            "name",
+            "workplace",
+            "base_days",
+            "work_days",
+            "leave_days",
+            "ot_hours",
+            "special_hours",
+            "special_ext_hours",
+            "base_hourly",
+            "base_salary",
+            "_preserve_reference_hours",
+        ],
+        "record_fields": ["name", "workplace", "base_hourly", "_monthly_work_hours"],
+        "row_fields": [
+            "name",
+            "workplace",
+            "status",
+            "status_label",
+            "flags",
+            "base_days",
+            "work_days",
+            "break_hours",
+            "applied_monthly_hours",
+            "hours_source",
+            "policy_mode",
+            "policy_fixed_hours",
+            "base_hourly",
+            "invoice_base_salary",
+            "calc_base_salary",
+            "formula",
+            "fixed_hours_mode",
+            "fixed_hours_source",
+        ],
+        "example_invoice": {
+            "name": "박감사",
+            "base_days": 209,
+            "work_days": 200,
+            "base_salary": 2_000_000,
+        },
+        "example_record": {
+            "name": "박감사",
+            "base_hourly": 10_000,
+            "_monthly_work_hours": 208,
+        },
+        "example_row": {
+            "name": "박감사",
+            "workplace": "앰코",
+            "status": "warn",
+            "status_label": "확인",
+            "flags": [
+                "기본급 불일치: 산출 2,090,000원 vs 청구서 2,000,000원",
+                "대장 적용시간(208h)과 재검열(209h) 상이",
+            ],
+            "base_days": 209,
+            "work_days": 200,
+            "break_hours": 9,
+            "applied_monthly_hours": 209,
+            "hours_source": "앰코: 고정 209시간",
+            "policy_mode": "fixed",
+            "policy_fixed_hours": 209,
+            "base_hourly": 10_000,
+            "invoice_base_salary": 2_000_000,
+            "calc_base_salary": 2_090_000,
+            "formula": "기본시급 10,000원 × 209시간 = 2,090,000원",
+            "fixed_hours_mode": False,
+            "fixed_hours_source": "",
+        },
+        "invariants": [
+            "single-row auditing is pure once invoice, workplace policy, optional ledger record, and optional fixed-hours profile are supplied",
+            "break_hours uses policy break_minutes first, then the base/work/leave gap fallback",
+            "base-salary mismatches, missing invoice hours, missing base hourly, fixed-hour mismatches, and ledger monthly-hour mismatches preserve Python Korean flag wording",
+            "fixed-hours profile application composes the Rust fixed-hours audit flags before row-level warnings",
+            "batch summary aggregation, settings lookup, record matching, and workbook I/O remain Python compatibility boundaries in this slice",
+        ],
+    }
+
 def payroll_fixed_hours_application_example() -> dict[str, Any]:
     """Return the Rust-owned fixed-hours application contract shape."""
     return {
@@ -657,6 +743,7 @@ def payroll_api_contract() -> dict[str, Any]:
         "input_types": list(PAYROLL_API_INPUT_TYPES),
         "attendance_aggregation": payroll_attendance_aggregation_example(),
         "workplace_hours_application": payroll_workplace_hours_application_example(),
+        "invoice_audit_row": payroll_invoice_audit_row_example(),
         "fixed_hours_application": payroll_fixed_hours_application_example(),
         "policy_resolution": payroll_policy_resolution_example(),
         "execution_plan": payroll_execution_plan_example(),
@@ -842,6 +929,7 @@ def payroll_api_contract() -> dict[str, Any]:
             "execution_plan_entrypoint": "PayrollApiService::plan_run_request(request, policy_snapshot)",
             "attendance_aggregation_entrypoint": "PayrollApiService::aggregate_attendance_records(records, workplace, attendance_policy)",
             "workplace_hours_application_entrypoint": "PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)",
+            "invoice_audit_row_entrypoint": "PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)",
             "fixed_hours_application_entrypoint": "PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)",
             "never_include": ["exception"],
         },

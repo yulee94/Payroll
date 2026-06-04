@@ -182,6 +182,51 @@ export interface PayrollWorkplaceMonthlyHoursApplication {
   policy: PayrollWorkplaceHoursPolicy;
 }
 
+
+export type PayrollInvoiceAuditStatus = "pass" | "warn";
+
+export interface PayrollInvoiceAuditInvoice {
+  name: string;
+  workplace?: string;
+  base_days: number;
+  work_days: number;
+  leave_days?: number;
+  ot_hours?: number;
+  special_hours?: number;
+  special_ext_hours?: number;
+  base_hourly?: number;
+  base_salary?: number;
+  _preserve_reference_hours?: boolean;
+}
+
+export interface PayrollInvoiceAuditRecord {
+  name: string;
+  workplace?: string;
+  base_hourly?: number;
+  _monthly_work_hours?: number;
+}
+
+export interface PayrollInvoiceAuditRow {
+  name: string;
+  workplace: string;
+  status: PayrollInvoiceAuditStatus;
+  status_label: string;
+  flags: string[];
+  base_days: number;
+  work_days: number;
+  break_hours: number | null;
+  applied_monthly_hours: number;
+  hours_source: string;
+  policy_mode: PayrollWorkplaceHoursMode;
+  policy_fixed_hours: number;
+  base_hourly: number;
+  invoice_base_salary: number;
+  calc_base_salary: number;
+  formula: string;
+  fixed_hours_mode: boolean;
+  fixed_hours_source: string;
+}
+
 export type PayrollFixedHoursPayType = "hourly" | "monthly_salary";
 
 export interface PayrollFixedHoursProfile {
