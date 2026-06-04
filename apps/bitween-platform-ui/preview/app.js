@@ -521,7 +521,9 @@ function renderShell() {
       <div class="main">
         <header class="topbar">
           <div class="topbar-copy">
+            <span class="topbar-eyebrow">${active.eyebrow}</span>
             <h1>${active.label}</h1>
+            <p>${active.description}</p>
           </div>
           <div class="top-actions">
             ${badge(sessionLabel, "neutral")}
