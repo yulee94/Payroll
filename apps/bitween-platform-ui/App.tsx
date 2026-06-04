@@ -23,6 +23,11 @@ export default function App() {
     setActiveId(id);
   };
 
+  const logout = () => {
+    setAuthenticated(false);
+    setActiveId("home");
+  };
+
   if (!authenticated) {
     return (
       <SafeAreaView style={styles.root}>
@@ -40,7 +45,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.root}>
       <StatusBar style="dark" />
-      <AppShell active={active} items={navigationItems} onSelect={select} sessionLabel={sessionLabel}>
+      <AppShell active={active} items={navigationItems} onLogout={logout} onSelect={select} sessionLabel={sessionLabel}>
         {activeId === "home" ? (
           <LauncherScreen active={active} onSelect={select} />
         ) : activeId === "payroll" ? (

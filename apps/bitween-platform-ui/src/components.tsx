@@ -249,11 +249,12 @@ export function Sidebar({ activeId, compact, items, onSelect }: SidebarProps) {
 type ShellProps = PropsWithChildren<{
   readonly active: NavigationItem;
   readonly items: readonly NavigationItem[];
+  readonly onLogout?: () => void;
   readonly onSelect: (id: NavigationItem["id"]) => void;
   readonly sessionLabel?: string;
 }>;
 
-export function AppShell({ active, children, items, onSelect, sessionLabel = "법인 운영 콘솔" }: ShellProps) {
+export function AppShell({ active, children, items, onLogout, onSelect, sessionLabel = "법인 운영 콘솔" }: ShellProps) {
   const { width } = useWindowDimensions();
   const compact = width < 980;
 
@@ -267,7 +268,10 @@ export function AppShell({ active, children, items, onSelect, sessionLabel = "�
             <Label size="xl" weight="bold">{active.label}</Label>
             <Label muted>{active.description}</Label>
           </View>
-          <Badge tone="neutral">{sessionLabel}</Badge>
+          <View style={styles.headerActions}>
+            <Badge tone="neutral">{sessionLabel}</Badge>
+            {onLogout ? <ActionButton onPress={onLogout} variant="ghost">로그아웃</ActionButton> : null}
+          </View>
         </View>
         <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]}>{children}</ScrollView>
       </View>
@@ -400,6 +404,13 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
     justifyContent: "space-between",
     padding: spacing.xl
+  },
+  headerActions: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "flex-end"
   },
   headerCompact: {
     flexDirection: "column",

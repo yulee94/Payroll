@@ -283,6 +283,19 @@ button {
   padding: 24px;
 }
 
+.top-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.compact-btn {
+  min-height: 36px;
+  padding: 8px 10px;
+}
+
 .topbar-copy {
   display: grid;
   gap: 4px;

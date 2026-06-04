@@ -212,7 +212,10 @@ function renderShell() {
             <h1>${active.label}</h1>
             <span class="muted">${active.description}</span>
           </div>
-          ${badge(sessionLabel, "neutral")}
+          <div class="top-actions">
+            ${badge(sessionLabel, "neutral")}
+            <button class="btn ghost compact-btn" data-logout="true">로그아웃</button>
+          </div>
         </header>
         <div class="content">${renderScreen(active.id)}</div>
       </div>
@@ -415,6 +418,19 @@ function bindEvents() {
       state.filter = el.dataset.filter;
       render();
       toast(`${state.filter} 필터가 선택되었습니다.`);
+    });
+  });
+
+  document.querySelectorAll("[data-logout]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.authed = false;
+      state.activeId = "home";
+      state.filter = "전체";
+      state.loginFeedback = "";
+      state.password = "";
+      state.search = "";
+      render();
+      toast("로그아웃했습니다.");
     });
   });
 
