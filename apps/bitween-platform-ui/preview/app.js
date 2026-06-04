@@ -563,6 +563,10 @@ function renderHome() {
   const queueItems = workQueue();
   const selectedQueue = queueItems.find((row) => row.id === state.selectedQueueKey) || queueItems[0];
   const items = navigationItems();
+  const todos = todayTodos();
+  const completedTodos = todos.filter((item) => item.done).length;
+  const pendingTodos = todos.length - completedTodos;
+  const completionPercent = todos.length > 0 ? Math.round((completedTodos / todos.length) * 100) : 0;
 
   return html`
     <section class="card">
@@ -579,7 +583,11 @@ function renderHome() {
       </div>
       <div class="card planner-card">
         ${sectionHead("", t("screens.todo.title"), t("screens.todo.description"))}
-        <div class="planner-list">${todayTodos().map((item) => `
+        <div class="todo-progress">
+          <div class="todo-progress-head"><strong>${t("screens.todo.progress.title", { done: completedTodos, total: todos.length })}</strong><span class="helper">${t("screens.todo.progress.pending", { count: pendingTodos })}</span></div>
+          <div class="todo-progress-track"><span style="width: ${completionPercent}%"></span></div>
+        </div>
+        <div class="planner-list">${todos.map((item) => `
           <button class="planner-item planner-button todo-item ${item.done ? "done" : ""}" data-target="${item.target}">${badge(item.timeLabel, item.tone)}<div><strong>${item.title}</strong><span class="helper">${item.owner} · ${t("screens.workDetail.actions.openRelated")}</span></div></button>
         `).join("")}</div>
       </div>

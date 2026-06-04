@@ -6638,6 +6638,24 @@
         "zh-Hans-CN": "已清除搜索词。",
         "ja-JP": "検索語をクリアしました。"
       }
+    },
+    {
+      "key": "screens.todo.progress.title",
+      "values": {
+        "ko-KR": "오늘 업무 {done}/{total} 완료",
+        "en-US": "Today tasks {done}/{total} complete",
+        "zh-Hans-CN": "今日任务已完成 {done}/{total}",
+        "ja-JP": "本日の業務 {done}/{total} 完了"
+      }
+    },
+    {
+      "key": "screens.todo.progress.pending",
+      "values": {
+        "ko-KR": "남은 업무 {count}건",
+        "en-US": "{count} tasks remaining",
+        "zh-Hans-CN": "剩余 {count} 项任务",
+        "ja-JP": "残り {count} 件"
+      }
     }
   ],
   "languageDisplayNames": [
