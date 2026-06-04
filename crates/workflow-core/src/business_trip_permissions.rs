@@ -200,6 +200,57 @@ pub fn can_manage_business_trip_lifecycle(input: &BusinessTripPermissionInput) -
     uid == requester_id || uid == executor_id
 }
 
+pub fn can_administer_business_trip_lifecycle(
+    principal: &BusinessTripPrincipal,
+    profile: Option<&BusinessTripProfile>,
+) -> bool {
+    let roles = workflow_roles(principal, profile);
+    has_admin_view_role(&roles)
+}
+
+pub fn can_run_business_trip_overdue_evaluator(
+    principal: &BusinessTripPrincipal,
+    profile: Option<&BusinessTripProfile>,
+) -> bool {
+    let roles = workflow_roles(principal, profile);
+    has_admin_view_role(&roles)
+        || roles.contains(WF_ROLE_SITE_MANAGER)
+        || roles.contains(WF_ROLE_DEPT_MANAGER)
+        || roles.contains(WF_ROLE_HR)
+}
+
+pub fn can_evaluate_business_trip_overdue(input: &BusinessTripPermissionInput) -> bool {
+    if !is_business_trip_legal_scope_allowed(&input.principal, &input.trip, &input.tenant_id) {
+        return false;
+    }
+
+    let roles = workflow_roles(&input.principal, input.profile.as_ref());
+    if has_admin_view_role(&roles) {
+        return true;
+    }
+
+    let Some(profile) = input.profile.as_ref() else {
+        return false;
+    };
+
+    let site_id = clean(&input.trip.site_id);
+    let dept_id = trip_department_id(&input.trip);
+    let allowed_sites = &profile.site_ids;
+    let allowed_departments = profile_department_ids(profile);
+    if !site_id.is_empty()
+        && contains_id(allowed_sites, &site_id)
+        && (roles.contains(WF_ROLE_SITE_MANAGER) || roles.contains(WF_ROLE_HR))
+    {
+        return true;
+    }
+
+    !dept_id.is_empty()
+        && contains_id(allowed_departments, &dept_id)
+        && (roles.contains(WF_ROLE_DEPT_MANAGER)
+            || roles.contains(WF_ROLE_SITE_MANAGER)
+            || roles.contains(WF_ROLE_HR))
+}
+
 fn has_admin_view_role(roles: &BTreeSet<String>) -> bool {
     roles.contains(WF_ROLE_ADMIN)
         || roles.contains(WF_ROLE_EXECUTIVE)
@@ -432,6 +483,77 @@ mod tests {
 
         assert!(can_view_business_trip_lifecycle(&permission));
         assert!(!can_manage_business_trip_lifecycle(&permission));
+    }
+
+    #[test]
+    fn administration_and_overdue_runner_authority_match_python_roles() {
+        assert!(can_administer_business_trip_lifecycle(
+            &principal("admin-1", "tenant-a", "staff"),
+            Some(&profile(&["admin"]))
+        ));
+        assert!(!can_administer_business_trip_lifecycle(
+            &principal("site-manager-1", "tenant-a", "staff"),
+            Some(&profile(&["site_manager"]))
+        ));
+
+        assert!(can_run_business_trip_overdue_evaluator(
+            &principal("finance-1", "tenant-a", "staff"),
+            Some(&profile(&["finance"]))
+        ));
+        assert!(can_run_business_trip_overdue_evaluator(
+            &principal("site-manager-1", "tenant-a", "staff"),
+            Some(&profile(&["site_manager"]))
+        ));
+        assert!(can_run_business_trip_overdue_evaluator(
+            &principal("dept-manager-1", "tenant-a", "staff"),
+            Some(&profile(&["department_manager"]))
+        ));
+        assert!(can_run_business_trip_overdue_evaluator(
+            &principal("hr-1", "tenant-a", "staff"),
+            Some(&profile(&["hr"]))
+        ));
+        assert!(!can_run_business_trip_overdue_evaluator(
+            &principal("viewer-1", "tenant-a", "staff"),
+            Some(&profile(&["viewer"]))
+        ));
+        assert!(!can_run_business_trip_overdue_evaluator(
+            &principal("approver-1", "tenant-a", "staff"),
+            Some(&profile(&["approver"]))
+        ));
+    }
+
+    #[test]
+    fn overdue_evaluation_is_scoped_and_excludes_direct_travelers() {
+        let admin_input = input("admin-1", "tenant-a", "staff", Some(profile(&["admin"])));
+        assert!(can_evaluate_business_trip_overdue(&admin_input));
+
+        let mut site_manager = profile(&["site_manager"]);
+        site_manager.site_ids = vec!["site-1".to_string()];
+        let site_input = input("site-manager-1", "tenant-a", "staff", Some(site_manager));
+        assert!(can_evaluate_business_trip_overdue(&site_input));
+
+        let mut dept_manager = profile(&["department_manager"]);
+        dept_manager.department_ids = vec!["dept-1".to_string()];
+        let dept_input = input("dept-manager-1", "tenant-a", "staff", Some(dept_manager));
+        assert!(can_evaluate_business_trip_overdue(&dept_input));
+
+        let direct_requester = input("requester-1", "tenant-a", "staff", None);
+        assert!(can_view_business_trip_lifecycle(&direct_requester));
+        assert!(!can_evaluate_business_trip_overdue(&direct_requester));
+
+        let scoped_viewer = {
+            let mut profile = profile(&["viewer"]);
+            profile.viewer_site_ids = vec!["site-1".to_string()];
+            input("viewer-1", "tenant-a", "staff", Some(profile))
+        };
+        assert!(can_view_business_trip_lifecycle(&scoped_viewer));
+        assert!(!can_evaluate_business_trip_overdue(&scoped_viewer));
+
+        let mut sibling_admin = input("admin-1", "tenant-b", "staff", Some(profile(&["admin"])));
+        sibling_admin.trip.tenant_id = "workflow-root".to_string();
+        sibling_admin.trip.origin_tenant_id = "tenant-a".to_string();
+        sibling_admin.tenant_id = "workflow-root".to_string();
+        assert!(!can_evaluate_business_trip_overdue(&sibling_admin));
     }
 
     #[test]

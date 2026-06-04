@@ -50,6 +50,17 @@ class BusinessTripLifecycleContractTests(unittest.TestCase):
         self.assertIn("Manage authority is narrower than visibility", permissions["manage_invariants"])
         self.assertIn("admin -> admin/executive/approver/finance/hr", permissions["role_expansions"])
 
+    def test_contract_declares_rust_business_trip_overdue_permissions(self) -> None:
+        contract = workflow_api_contract()
+        permissions = contract["business_trip_permissions"]
+
+        self.assertIn("can_administer_business_trip_lifecycle", permissions["rust_entrypoints"])
+        self.assertIn("can_run_business_trip_overdue_evaluator", permissions["rust_entrypoints"])
+        self.assertIn("can_evaluate_business_trip_overdue", permissions["rust_entrypoints"])
+        self.assertIn("Overdue evaluation applies legal-scope isolation", permissions["overdue_invariants"])
+        self.assertIn("Requester/executor ownership does not imply overdue evaluation authority", permissions["overdue_invariants"])
+        self.assertIn("admin/executive/finance", permissions["administer_invariants"][0])
+
     def test_status_taxonomy_is_frozen_and_separate_from_kpi_reflection(self) -> None:
         self.assertEqual(
             c.TRIP_STATUSES,

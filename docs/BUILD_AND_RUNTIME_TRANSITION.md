@@ -257,6 +257,7 @@ cargo test --workspace
 - [x] Payroll execution routing/planning behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the compatibility executor.
 - [x] Business-trip lifecycle normalization and status-transition behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the workflow persistence/document/task/report/KPI side-effect bridge.
 - [x] Business-trip lifecycle legal-scope, visibility, and manage permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile resolver and side-effect bridge.
+- [x] Business-trip lifecycle administration and overdue-evaluator permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile resolver and side-effect bridge.
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
 - [x] Invoice audit row and batch behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/fixed-profile resolver and workbook/UI bridge.
@@ -724,6 +725,34 @@ git diff --check
 cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
 ```
 
+
+## Implementation checkpoint: Rust business-trip overdue permission core
+
+Completed on 2026-06-04 as a follow-up supplied-profile workflow authorization slice:
+
+- `crates/workflow-core::business_trip_permissions` owns pure tenant-wide
+  administration, overdue-evaluator invocation, and scoped overdue-evaluation
+  predicates for supplied principal/profile/trip DTOs.
+- Rust preserves admin/executive/finance tenant-wide authority, manager/HR
+  evaluator invocation, legal-scope isolation, site/department scoped overdue
+  evaluation, and the exclusion of direct requester/executor/viewer/approver
+  grants from overdue side-effect authority.
+- Python remains the `UserSession` adapter, workflow profile resolver, workflow
+  JSON store, overdue escalation side-effect owner, document/task/report/KPI
+  writer, notification/calendar/To-Do producer, and UI bridge.
+- Slice spec: `docs/WORKFLOW_RUST_BUSINESS_TRIP_OVERDUE_PERMISSIONS_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo test -p bitween-workflow-core business_trip_permissions --lib
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_business_trip_contracts.BusinessTripLifecycleContractTests.test_contract_declares_rust_business_trip_overdue_permissions -v
+```
+
+Task 5 acceptance status:
+
+- [x] Business-trip lifecycle administration and overdue permission predicates
+      are Rust-owned behind parity contract tests.
 
 ## Implementation checkpoint: Rust business-trip permission core
 
