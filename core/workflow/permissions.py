@@ -18,11 +18,13 @@ from core.workflow.constants import (
     STEP_PENDING,
     WF_ROLE_ADMIN,
     WF_ROLE_APPROVER,
+    WF_ROLE_DEPT_MANAGER,
     WF_ROLE_EXECUTIVE,
     WF_ROLE_EXECUTOR,
     WF_ROLE_FINANCE,
     WF_ROLE_HR,
     WF_ROLE_SITE_MANAGER,
+    WF_ROLE_VIEWER,
 )
 from core.workflow.store import get_user_profile
 
@@ -136,3 +138,50 @@ def can_manage_execution_task(
     if task.get("executor_id") == uid:
         return True
     return WF_ROLE_EXECUTOR in roles and task.get("executor_id") == uid
+
+
+def can_view_business_trip_lifecycle(
+    user: dict[str, Any] | UserSession, trip: dict[str, Any], *, tenant_id: str
+) -> bool:
+    """Tenant-bound lifecycle visibility predicate for business trips.
+
+    Viewer role is intentionally not global access. A user can see a trip only
+    inside the requested tenant boundary and through admin/executive/finance,
+    direct ownership, or manager site/department scope.
+    """
+    if str(trip.get("tenant_id") or "").strip() != str(tenant_id or "").strip():
+        return False
+    uid = _user_id(user)
+    profile = get_user_profile(tenant_id, uid)
+    roles = _workflow_roles(user, profile)
+    if WF_ROLE_ADMIN in roles or WF_ROLE_EXECUTIVE in roles or WF_ROLE_FINANCE in roles:
+        return True
+    requester_id = str(trip.get("requester_id") or trip.get("traveler_user_id") or "")
+    executor_id = str(trip.get("executor_id") or "")
+    if uid in {requester_id, executor_id}:
+        return True
+    explicit_approvers = {str(v) for v in (trip.get("approver_ids") or trip.get("approval_user_ids") or [])}
+    if WF_ROLE_APPROVER in roles and uid in explicit_approvers:
+        return True
+    if not profile:
+        return False
+    if requester_id:
+        traveler_profile = get_user_profile(tenant_id, requester_id)
+        if traveler_profile and str(traveler_profile.get("manager_user_id") or "") == uid:
+            return True
+    site_id = str(trip.get("site_id") or "")
+    dept_id = str(trip.get("department_id") or trip.get("org_unit_id") or "")
+    allowed_sites = {str(v) for v in (profile.get("site_ids") or [])}
+    allowed_departments = {str(v) for v in (profile.get("department_ids") or profile.get("org_unit_ids") or [])}
+    if site_id and site_id in allowed_sites and (WF_ROLE_SITE_MANAGER in roles or WF_ROLE_HR in roles):
+        return True
+    if dept_id and dept_id in allowed_departments and (
+        WF_ROLE_DEPT_MANAGER in roles or WF_ROLE_SITE_MANAGER in roles or WF_ROLE_HR in roles
+    ):
+        return True
+    if WF_ROLE_VIEWER in roles:
+        scoped_sites = {str(v) for v in (profile.get("viewer_site_ids") or [])}
+        scoped_departments = {str(v) for v in (profile.get("viewer_department_ids") or [])}
+        if (site_id and site_id in scoped_sites) or (dept_id and dept_id in scoped_departments):
+            return True
+    return False
