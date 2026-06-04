@@ -13,6 +13,7 @@ pub mod policy_resolution;
 pub mod request;
 pub mod response;
 pub mod run;
+pub mod salary;
 pub mod service;
 pub mod site_benefits;
 pub mod social_insurance;
@@ -73,6 +74,10 @@ pub use response::{
     validate_payroll_api_payload, validate_payroll_api_payload_with_policy_settings,
 };
 pub use run::{PayrollRunResponse, PayrollRunResult, run_response_from_result};
+pub use salary::{
+    PayrollSalaryDeductions, PayrollSalaryInput, PayrollSalaryResult, PayrollSalaryTaxMethod,
+    calculate_payroll_salary,
+};
 pub use service::{
     HealthResponse, HealthStatus, PayrollApiService, ReadinessCheck, ReadinessResponse,
     ReadinessState, ServiceConfig,

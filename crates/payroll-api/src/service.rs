@@ -31,6 +31,7 @@ use crate::response::{
     validate_payroll_api_payload_with_policy_settings,
 };
 use crate::run::{PayrollRunResponse, PayrollRunResult, run_response_from_result};
+use crate::salary::{PayrollSalaryInput, PayrollSalaryResult, calculate_payroll_salary};
 use crate::site_benefits::{
     SiteBenefitsApplication, SiteBenefitsConfig, SiteBenefitsInvoice,
     apply_site_benefits_to_invoice,
@@ -254,6 +255,10 @@ impl PayrollApiService {
         calculate_payroll_earnings(input)
     }
 
+    pub fn calculate_payroll_salary(&self, input: PayrollSalaryInput) -> PayrollSalaryResult {
+        calculate_payroll_salary(input)
+    }
+
     pub fn apply_edi_premiums_to_invoice<S>(
         &self,
         invoice: EdiInsuranceInvoice,
@@ -398,6 +403,7 @@ mod tests {
     };
     use crate::policy::{OperationPolicy, OperationPolicySnapshot, PayrollInputBasis};
     use crate::request::parse_payroll_api_request;
+    use crate::salary::PayrollSalaryInput;
     use crate::service::{
         HealthStatus, PayrollApiService, ReadinessCheck, ReadinessState, ServiceConfig,
     };
@@ -493,6 +499,25 @@ mod tests {
         assert_eq!(result.earnings.weekly_holiday, 73_349);
         assert_eq!(result.gross_pay, 2_709_182);
         assert_eq!(result.taxable_pay, 2_588_182);
+    }
+
+    #[test]
+    fn service_calculates_payroll_salary() {
+        let service = PayrollApiService::new(ServiceConfig::default());
+        let result = service.calculate_payroll_salary(
+            PayrollSalaryInput::new()
+                .with_base_salary(2_090_000.0)
+                .with_fixed_allowance(100_000.0)
+                .with_overtime_hours(10.0)
+                .with_night_hours(4.0)
+                .with_holiday_hours(8.0)
+                .with_meal_days(22.0)
+                .with_weekly_work_hours(35.0),
+        );
+
+        assert_eq!(result.taxable_pay, 2_588_182);
+        assert_eq!(result.total_deductions, 474_391);
+        assert_eq!(result.net_pay, 2_234_791);
     }
 
     #[test]

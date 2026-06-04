@@ -249,7 +249,7 @@ cargo test --workspace
 
 **Acceptance criteria:**
 
-- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, workplace-hours application, invoice audit row/batch evaluation, supplied-input earnings/gross/taxable-pay calculation, final deduction/net-pay calculation, employment-insurance 65+ decisions, EDI insurance premium application, site-benefits application, fixed-hours application, execution planning, authorization, run-result response shaping, health, and readiness.
+- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, workplace-hours application, invoice audit row/batch evaluation, supplied-input earnings/gross/taxable-pay calculation, supplied-input salary calculation, final deduction/net-pay calculation, employment-insurance 65+ decisions, EDI insurance premium application, site-benefits application, fixed-hours application, execution planning, authorization, run-result response shaping, health, and readiness.
 - [ ] Python adapter is retained only as compatibility fallback while rollout is incomplete.
 - [x] Health/readiness behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [x] Run-result success/error envelope behavior is defined in framework-neutral Rust DTOs and API contracts.
@@ -259,6 +259,7 @@ cargo test --workspace
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
 - [x] Invoice audit row and batch behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/fixed-profile resolver and workbook/UI bridge.
 - [x] Supplied-input earnings, gross-pay, non-taxable-pay, and taxable-pay calculation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the invoice/master/insurance/tax/deduction/final-record bridge.
+- [x] Supplied-input one-employee salary calculation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the invoice/master/age/EDI/workbook/final-record bridge.
 - [x] Final deduction and net-pay calculation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the workbook/roster/social-insurance/final-record bridge.
 - [x] Employment-insurance 65+ payroll decision behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the KCOMWEL/settings/payroll-row/workbook bridge.
 - [x] EDI insurance premium application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the EDI import/storage/provider/settings/roster/workbook bridge.
@@ -496,6 +497,40 @@ Task 4 acceptance status:
 
 - [x] Supplied-input earnings/gross/non-taxable/taxable-pay calculation is
       Rust-owned behind parity tests.
+
+## Implementation checkpoint: Rust payroll salary calculation
+
+Completed on 2026-06-04 as a payroll calculation behavior slice:
+
+- `crates/payroll-api` owns supplied-input one-employee salary calculation
+  through `calculate_payroll_salary`, `PayrollSalaryInput`,
+  `PayrollSalaryDeductions`, `PayrollSalaryTaxMethod`,
+  `PayrollSalaryResult`, and
+  `PayrollApiService::calculate_payroll_salary`.
+- Rust composes earnings and social-insurance Rust modules with
+  calculator-compatible income/local tax handling to produce deductions, total
+  deductions, and net pay.
+- Python remains the invoice parser, employee master merger, cell normalizer,
+  age/KCOMWEL/EDI resolver, workbook bridge, and final-record assembly layer.
+- Contract docs and TypeScript/Python metadata name the salary input,
+  deductions, tax-method, and result DTOs.
+- Slice spec: `docs/PAYROLL_RUST_SALARY_CALCULATION_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo fmt --check
+cargo test --workspace
+buck2 test //crates/payroll-api:payroll_api_test
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_payroll_api_contract -v
+npm run typecheck --prefix frontend
+git diff --check
+cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
+```
+
+Task 4 acceptance status:
+
+- [x] Supplied-input salary calculation is Rust-owned behind parity tests.
 
 ## Implementation checkpoint: Rust payroll EI 65+ decision
 

@@ -295,6 +295,46 @@ export interface PayrollEarningsResult {
   non_taxable_pay: number;
 }
 
+export type PayrollSalaryTaxMethod = "PRESET" | "SIMPLIFIED_TABLE";
+
+export interface PayrollSalaryInput extends PayrollEarningsInput {
+  name: string;
+  emp_no: string;
+  department: string;
+  account_no: string;
+  preset_national_pension?: number;
+  preset_health_insurance?: number;
+  preset_income_tax?: number;
+  insurance_exempt: boolean;
+}
+
+export interface PayrollSalaryDeductions {
+  national_pension: number;
+  health_insurance: number;
+  long_term_care: number;
+  employment_insurance: number;
+  income_tax: number;
+  local_income_tax: number;
+  total: number;
+}
+
+export interface PayrollSalaryResult {
+  name: string;
+  emp_no: string;
+  department: string;
+  account_no: string;
+  ordinary_hourly: number;
+  hours: PayrollEarningsHours;
+  earnings: PayrollEarningsBreakdown;
+  deductions: PayrollSalaryDeductions;
+  gross_pay: number;
+  taxable_pay: number;
+  non_taxable_pay: number;
+  total_deductions: number;
+  net_pay: number;
+  tax_method: PayrollSalaryTaxMethod;
+}
+
 export interface PayrollSocialInsuranceInput {
   taxable_pay: number;
   preset_national_pension?: number;
