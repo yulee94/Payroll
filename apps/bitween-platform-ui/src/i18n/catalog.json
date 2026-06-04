@@ -4210,24 +4210,6 @@
       }
     },
     {
-      "key": "screens.login.actions.showPassword",
-      "values": {
-        "ko-KR": "비밀번호 보기",
-        "en-US": "Show password",
-        "zh-Hans-CN": "显示密码",
-        "ja-JP": "パスワードを表示"
-      }
-    },
-    {
-      "key": "screens.login.actions.hidePassword",
-      "values": {
-        "ko-KR": "비밀번호 숨기기",
-        "en-US": "Hide password",
-        "zh-Hans-CN": "隐藏密码",
-        "ja-JP": "パスワードを隠す"
-      }
-    },
-    {
       "key": "screens.login.demo.badge",
       "values": {
         "ko-KR": "Demo 계정",
@@ -6478,6 +6460,60 @@
       }
     },
     {
+      "key": "screens.login.actions.enterHomeAccessibility",
+      "values": {
+        "ko-KR": "입력한 demo 계정으로 플랫폼 홈 이동",
+        "en-US": "Go to the platform home with the entered demo account",
+        "zh-Hans-CN": "使用已输入的演示账号进入平台首页",
+        "ja-JP": "入力したデモアカウントでプラットフォームホームへ移動"
+      }
+    },
+    {
+      "key": "screens.login.actions.loginAccessibility",
+      "values": {
+        "ko-KR": "로그인 정보 확인",
+        "en-US": "Check sign-in information",
+        "zh-Hans-CN": "检查登录信息",
+        "ja-JP": "ログイン情報を確認"
+      }
+    },
+    {
+      "key": "screens.login.actions.demoAccessibility",
+      "values": {
+        "ko-KR": "법인코드 {companyCode}, 아이디 {userId}, 비밀번호 {password} demo 계정으로 접속",
+        "en-US": "Sign in with demo account company code {companyCode}, user ID {userId}, and password {password}",
+        "zh-Hans-CN": "使用公司代码 {companyCode}、用户 ID {userId}、密码 {password} 的演示账号登录",
+        "ja-JP": "法人コード {companyCode}、ID {userId}、パスワード {password} のデモアカウントでログイン"
+      }
+    },
+    {
+      "key": "screens.login.form.companyCodeHint",
+      "values": {
+        "ko-KR": "Demo 계정은 법인코드 {companyCode}을 사용합니다.",
+        "en-US": "The demo account uses company code {companyCode}.",
+        "zh-Hans-CN": "演示账号使用公司代码 {companyCode}。",
+        "ja-JP": "デモアカウントは法人コード {companyCode} を使用します。"
+      }
+    },
+    {
+      "key": "screens.login.form.userIdHint",
+      "values": {
+        "ko-KR": "Demo 계정은 아이디 {userId}을 사용합니다.",
+        "en-US": "The demo account uses user ID {userId}.",
+        "zh-Hans-CN": "演示账号使用用户 ID {userId}。",
+        "ja-JP": "デモアカウントはID {userId} を使用します。"
+      }
+    },
+    {
+      "key": "screens.login.form.passwordHint",
+      "values": {
+        "ko-KR": "Demo 계정은 비밀번호 {password}을 사용합니다.",
+        "en-US": "The demo account uses password {password}.",
+        "zh-Hans-CN": "演示账号使用密码 {password}。",
+        "ja-JP": "デモアカウントはパスワード {password} を使用します。"
+      }
+    },
+    {
       "key": "shell.status.aria",
       "values": {
         "ko-KR": "플랫폼 상태",
@@ -6538,6 +6574,816 @@
         "en-US": "React Native/Web ready",
         "zh-Hans-CN": "React Native/Web 就绪",
         "ja-JP": "React Native/Web 対応準備済み"
+      }
+    },
+    {
+      "key": "preview.skipLink",
+      "values": {
+        "ko-KR": "본문으로 건너뛰기",
+        "en-US": "Skip to main content",
+        "zh-Hans-CN": "跳到主要内容",
+        "ja-JP": "本文へスキップ"
+      }
+    },
+    {
+      "key": "shell.themePanel.current",
+      "values": {
+        "ko-KR": "현재 적용: {theme}",
+        "en-US": "Current: {theme}",
+        "zh-Hans-CN": "当前应用：{theme}",
+        "ja-JP": "現在適用中: {theme}"
+      }
+    },
+    {
+      "key": "shell.themePanel.optionLabel",
+      "values": {
+        "ko-KR": "{label} 메뉴 색상 옵션. {description}",
+        "en-US": "{label} menu color option. {description}",
+        "zh-Hans-CN": "{label} 菜单颜色选项。{description}",
+        "ja-JP": "{label} メニュー色オプション。{description}"
+      }
+    },
+    {
+      "key": "screens.module.search.clear",
+      "values": {
+        "ko-KR": "검색 초기화",
+        "en-US": "Clear search",
+        "zh-Hans-CN": "清除搜索",
+        "ja-JP": "検索をクリア"
+      }
+    },
+    {
+      "key": "screens.module.search.accessibilityLabel",
+      "values": {
+        "ko-KR": "업무 목록 검색",
+        "en-US": "Search work list",
+        "zh-Hans-CN": "搜索工作列表",
+        "ja-JP": "業務一覧を検索"
+      }
+    },
+    {
+      "key": "screens.module.search.clearAccessibilityLabel",
+      "values": {
+        "ko-KR": "업무 목록 검색어 초기화",
+        "en-US": "Clear work list search text",
+        "zh-Hans-CN": "清除工作列表搜索词",
+        "ja-JP": "業務一覧の検索語をクリア"
+      }
+    },
+    {
+      "key": "preview.toast.searchClear",
+      "values": {
+        "ko-KR": "검색어를 초기화했습니다.",
+        "en-US": "Cleared the search text.",
+        "zh-Hans-CN": "已清除搜索词。",
+        "ja-JP": "検索語をクリアしました。"
+      }
+    },
+    {
+      "key": "screens.todo.progress.title",
+      "values": {
+        "ko-KR": "오늘 업무 {done}/{total} 완료",
+        "en-US": "Today tasks {done}/{total} complete",
+        "zh-Hans-CN": "今日任务已完成 {done}/{total}",
+        "ja-JP": "本日の業務 {done}/{total} 完了"
+      }
+    },
+    {
+      "key": "screens.todo.progress.pending",
+      "values": {
+        "ko-KR": "남은 업무 {count}건",
+        "en-US": "{count} tasks remaining",
+        "zh-Hans-CN": "剩余 {count} 项任务",
+        "ja-JP": "残り {count} 件"
+      }
+    },
+    {
+      "key": "screens.admin.review.title",
+      "values": {
+        "ko-KR": "관리자 검토 요약",
+        "en-US": "Admin review summary",
+        "zh-Hans-CN": "管理员复核摘要",
+        "ja-JP": "管理者確認サマリー"
+      }
+    },
+    {
+      "key": "screens.admin.review.description",
+      "values": {
+        "ko-KR": "급여 권한, 자료 접근, Branch 계정 상태를 한 번에 보고 관련 화면으로 이동합니다.",
+        "en-US": "Review payroll permissions, archive access, and Branch account status at once, then jump to the related workspace.",
+        "zh-Hans-CN": "一次查看工资权限、资料访问和 Branch 账户状态，然后跳转到相关工作区。",
+        "ja-JP": "給与権限、資料アクセス、Branch アカウント状態をまとめて確認し、関連画面へ移動します。"
+      }
+    },
+    {
+      "key": "screens.admin.review.cards.payrollPermission.label",
+      "values": {
+        "ko-KR": "급여 권한",
+        "en-US": "Payroll permission",
+        "zh-Hans-CN": "工资权限",
+        "ja-JP": "給与権限"
+      }
+    },
+    {
+      "key": "screens.admin.review.cards.payrollPermission.status",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs review",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "screens.admin.review.cards.payrollPermission.title",
+      "values": {
+        "ko-KR": "산출 전 열람 범위 점검",
+        "en-US": "Check view scope before calculation",
+        "zh-Hans-CN": "计算前检查查看范围",
+        "ja-JP": "算出前に閲覧範囲を確認"
+      }
+    },
+    {
+      "key": "screens.admin.review.cards.payrollPermission.detail",
+      "values": {
+        "ko-KR": "경영진과 일반 사원의 급여 열람 범위를 급여 화면에서 이어서 확인합니다.",
+        "en-US": "Continue to Payroll to review executive and employee payroll visibility ranges.",
+        "zh-Hans-CN": "前往工资画面，继续检查管理层和员工的工资可见范围。",
+        "ja-JP": "給与画面で経営陣と一般社員の給与閲覧範囲を続けて確認します。"
+      }
+    },
+    {
+      "key": "screens.admin.review.cards.archiveAccess.label",
+      "values": {
+        "ko-KR": "자료 접근",
+        "en-US": "Archive access",
+        "zh-Hans-CN": "资料访问",
+        "ja-JP": "資料アクセス"
+      }
+    },
+    {
+      "key": "screens.admin.review.cards.archiveAccess.status",
+      "values": {
+        "ko-KR": "정리 중",
+        "en-US": "In review",
+        "zh-Hans-CN": "整理中",
+        "ja-JP": "整理中"
+      }
+    },
+    {
+      "key": "screens.admin.review.cards.archiveAccess.title",
+      "values": {
+        "ko-KR": "민감 문서 공유 범위",
+        "en-US": "Sensitive document sharing scope",
+        "zh-Hans-CN": "敏感文档共享范围",
+        "ja-JP": "機密文書の共有範囲"
+      }
+    },
+    {
+      "key": "screens.admin.review.cards.archiveAccess.detail",
+      "values": {
+        "ko-KR": "결재 첨부, 급여 산출물, 보관 자료의 접근 범위를 자료함에서 함께 점검합니다.",
+        "en-US": "Review approval attachments, payroll outputs, and stored document access from Archive.",
+        "zh-Hans-CN": "在资料库中一起检查审批附件、工资结果和存档资料的访问范围。",
+        "ja-JP": "承認添付、給与算出物、保管資料のアクセス範囲を資料箱で確認します。"
+      }
+    },
+    {
+      "key": "screens.admin.review.cards.branchAccounts.label",
+      "values": {
+        "ko-KR": "Branch 계정",
+        "en-US": "Branch accounts",
+        "zh-Hans-CN": "Branch 账户",
+        "ja-JP": "Branch アカウント"
+      }
+    },
+    {
+      "key": "screens.admin.review.cards.branchAccounts.status",
+      "values": {
+        "ko-KR": "정상",
+        "en-US": "On track",
+        "zh-Hans-CN": "正常",
+        "ja-JP": "正常"
+      }
+    },
+    {
+      "key": "screens.admin.review.cards.branchAccounts.title",
+      "values": {
+        "ko-KR": "하위계정 초대 흐름",
+        "en-US": "Subaccount invitation flow",
+        "zh-Hans-CN": "子账户邀请流程",
+        "ja-JP": "サブアカウント招待フロー"
+      }
+    },
+    {
+      "key": "screens.admin.review.cards.branchAccounts.detail",
+      "values": {
+        "ko-KR": "법인 기본정보와 하위계정 운영 기준을 설정 화면에서 이어서 확인합니다.",
+        "en-US": "Continue to Settings to review company basics and subaccount operating standards.",
+        "zh-Hans-CN": "前往设置画面，继续确认公司基本信息和子账户运营标准。",
+        "ja-JP": "設定画面で法人基本情報とサブアカウント運用基準を続けて確認します。"
+      }
+    },
+    {
+      "key": "screens.archive.review.title",
+      "values": {
+        "ko-KR": "자료 검토 요약",
+        "en-US": "Archive review summary",
+        "zh-Hans-CN": "资料复核摘要",
+        "ja-JP": "資料確認サマリー"
+      }
+    },
+    {
+      "key": "screens.archive.review.description",
+      "values": {
+        "ko-KR": "보관 상태, 접근 권한, 결재 첨부 자료를 먼저 점검하고 관련 업무로 이동합니다.",
+        "en-US": "Review storage status, access permissions, and approval attachments first, then jump to the related workflow.",
+        "zh-Hans-CN": "先检查存档状态、访问权限和审批附件，然后跳转到相关业务。",
+        "ja-JP": "保管状態、アクセス権限、承認添付資料を先に確認し、関連業務へ移動します。"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.payrollOutputs.label",
+      "values": {
+        "ko-KR": "급여 산출물",
+        "en-US": "Payroll outputs",
+        "zh-Hans-CN": "工资结果",
+        "ja-JP": "給与算出物"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.payrollOutputs.status",
+      "values": {
+        "ko-KR": "보관됨",
+        "en-US": "Stored",
+        "zh-Hans-CN": "已存档",
+        "ja-JP": "保管済み"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.payrollOutputs.title",
+      "values": {
+        "ko-KR": "월별 보고서 연결",
+        "en-US": "Monthly report linkage",
+        "zh-Hans-CN": "月度报告连接",
+        "ja-JP": "月別レポート連携"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.payrollOutputs.detail",
+      "values": {
+        "ko-KR": "급여 화면에서 산출 흐름과 보관 상태를 이어서 확인합니다.",
+        "en-US": "Continue to Payroll to review calculation flow and storage status together.",
+        "zh-Hans-CN": "前往工资画面，继续同时检查计算流程和存档状态。",
+        "ja-JP": "給与画面で算出フローと保管状態を続けて確認します。"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.accessReview.label",
+      "values": {
+        "ko-KR": "접근 권한",
+        "en-US": "Access permissions",
+        "zh-Hans-CN": "访问权限",
+        "ja-JP": "アクセス権限"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.accessReview.status",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs review",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.accessReview.title",
+      "values": {
+        "ko-KR": "민감 자료 열람 범위",
+        "en-US": "Sensitive document visibility",
+        "zh-Hans-CN": "敏感资料可见范围",
+        "ja-JP": "機密資料の閲覧範囲"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.accessReview.detail",
+      "values": {
+        "ko-KR": "관리자 화면에서 Branch, 경영진, 일반 사원의 열람 범위를 확인합니다.",
+        "en-US": "Continue to Admin to review Branch, executive, and employee visibility ranges.",
+        "zh-Hans-CN": "前往管理员画面，检查 Branch、管理层和员工的可见范围。",
+        "ja-JP": "管理者画面で Branch、経営陣、一般社員の閲覧範囲を確認します。"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.approvalFiles.label",
+      "values": {
+        "ko-KR": "결재 첨부",
+        "en-US": "Approval files",
+        "zh-Hans-CN": "审批附件",
+        "ja-JP": "承認添付"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.approvalFiles.status",
+      "values": {
+        "ko-KR": "연결 중",
+        "en-US": "Linked",
+        "zh-Hans-CN": "已连接",
+        "ja-JP": "連携中"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.approvalFiles.title",
+      "values": {
+        "ko-KR": "전자결재 문서 첨부",
+        "en-US": "Approval document attachments",
+        "zh-Hans-CN": "电子审批文档附件",
+        "ja-JP": "電子承認文書添付"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.approvalFiles.detail",
+      "values": {
+        "ko-KR": "전자결재 화면으로 이동해 대기 문서와 첨부자료 상태를 이어서 봅니다.",
+        "en-US": "Continue to Workflow to review pending documents and attachment status.",
+        "zh-Hans-CN": "前往电子审批画面，继续查看待处理文档和附件状态。",
+        "ja-JP": "電子承認画面へ移動し、待機文書と添付資料の状態を続けて確認します。"
+      }
+    },
+    {
+      "key": "screens.hrPeople.title",
+      "values": {
+        "ko-KR": "인사 문서 / 배치 요약",
+        "en-US": "People documents / placement summary",
+        "zh-Hans-CN": "人事文档 / 配置摘要",
+        "ja-JP": "人事文書 / 配置サマリー"
+      }
+    },
+    {
+      "key": "screens.hrPeople.description",
+      "values": {
+        "ko-KR": "직원명부, 각종 증명서, 이력서/사직서, 채용 후보 배치를 HR 화면에서 먼저 정리합니다.",
+        "en-US": "Review roster, certificates, resumes/resignations, and candidate placement from the HR workspace first.",
+        "zh-Hans-CN": "先在 HR 工作区整理员工名册、各类证明、简历/离职书和候选人配置。",
+        "ja-JP": "HR 画面で社員名簿、各種証明書、履歴書/退職届、採用候補の配置を先に整理します。"
+      }
+    },
+    {
+      "key": "screens.hrPeople.action",
+      "values": {
+        "ko-KR": "채용 배치 보기",
+        "en-US": "View recruiting placement",
+        "zh-Hans-CN": "查看招聘配置",
+        "ja-JP": "採用配置を見る"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.roster.label",
+      "values": {
+        "ko-KR": "직원명부",
+        "en-US": "Employee roster",
+        "zh-Hans-CN": "员工名册",
+        "ja-JP": "社員名簿"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.roster.status",
+      "values": {
+        "ko-KR": "최신",
+        "en-US": "Current",
+        "zh-Hans-CN": "最新",
+        "ja-JP": "最新"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.roster.title",
+      "values": {
+        "ko-KR": "근태 확인과 명부 연결",
+        "en-US": "Connect roster with attendance checks",
+        "zh-Hans-CN": "将名册与考勤检查连接",
+        "ja-JP": "名簿と勤怠確認を連携"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.roster.detail",
+      "values": {
+        "ko-KR": "직원명부와 출퇴근 상태를 같이 보려면 출퇴근 화면으로 이동합니다.",
+        "en-US": "Open Attendance to review employee roster context with check-in/out status.",
+        "zh-Hans-CN": "前往考勤画面，将员工名册与上下班状态一起查看。",
+        "ja-JP": "勤怠画面で社員名簿と出退勤状態をあわせて確認します。"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.certificates.label",
+      "values": {
+        "ko-KR": "증명서",
+        "en-US": "Certificates",
+        "zh-Hans-CN": "证明文件",
+        "ja-JP": "証明書"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.certificates.status",
+      "values": {
+        "ko-KR": "정리 필요",
+        "en-US": "Needs sorting",
+        "zh-Hans-CN": "需要整理",
+        "ja-JP": "整理が必要"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.certificates.title",
+      "values": {
+        "ko-KR": "재직/경력 증명서 보관",
+        "en-US": "Employment/career certificate storage",
+        "zh-Hans-CN": "在职/经历证明存档",
+        "ja-JP": "在職/経歴証明書の保管"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.certificates.detail",
+      "values": {
+        "ko-KR": "증명서와 인사 첨부문서를 자료함에서 함께 검토합니다.",
+        "en-US": "Review certificates and HR attachments together in Archive.",
+        "zh-Hans-CN": "在资料库中一起复核证明文件和人事附件。",
+        "ja-JP": "資料箱で証明書と人事添付文書をまとめて確認します。"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.placement.label",
+      "values": {
+        "ko-KR": "인재 배치",
+        "en-US": "Talent placement",
+        "zh-Hans-CN": "人才配置",
+        "ja-JP": "人材配置"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.placement.status",
+      "values": {
+        "ko-KR": "공유 중",
+        "en-US": "Shared",
+        "zh-Hans-CN": "共享中",
+        "ja-JP": "共有中"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.placement.title",
+      "values": {
+        "ko-KR": "경력/자격 기반 배치",
+        "en-US": "Career/credential-based placement",
+        "zh-Hans-CN": "基于经历/资格的配置",
+        "ja-JP": "経歴/資格ベースの配置"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.placement.detail",
+      "values": {
+        "ko-KR": "채용 화면에서 지원자 경력, 자격, 부서 필요도를 이어서 봅니다.",
+        "en-US": "Continue to Recruit to compare applicant careers, credentials, and department needs.",
+        "zh-Hans-CN": "前往招聘画面，继续比较申请人经历、资格和部门需求。",
+        "ja-JP": "採用画面で応募者の経歴、資格、部門ニーズを続けて比較します。"
+      }
+    },
+    {
+      "key": "screens.hrPeople.notice.badge",
+      "values": {
+        "ko-KR": "HR 표시 흐름",
+        "en-US": "HR display flow",
+        "zh-Hans-CN": "HR 显示流程",
+        "ja-JP": "HR 表示フロー"
+      }
+    },
+    {
+      "key": "screens.hrPeople.notice.description",
+      "values": {
+        "ko-KR": "이 패널은 실제 인사 데이터를 저장하지 않고, 관련 업무 화면으로 이동하는 UI 안내만 제공합니다.",
+        "en-US": "This panel does not store HR data; it only guides users to related workspaces.",
+        "zh-Hans-CN": "此面板不存储人事数据，仅引导用户前往相关工作区。",
+        "ja-JP": "このパネルは人事データを保存せず、関連画面への移動を案内するだけです。"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.title",
+      "values": {
+        "ko-KR": "채용 후보 / 부서 배치 요약",
+        "en-US": "Recruiting candidate / department placement summary",
+        "zh-Hans-CN": "招聘候选人 / 部门配置摘要",
+        "ja-JP": "採用候補 / 部門配置サマリー"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.description",
+      "values": {
+        "ko-KR": "지원자 경력, 자격사항, 부서 필요도를 업무 화면과 연결해 인재를 적재적소에 배치하는 흐름을 정리합니다.",
+        "en-US": "Connect applicant careers, credentials, and department needs to related workspaces for better placement decisions.",
+        "zh-Hans-CN": "将申请人经历、资格和部门需求连接到相关工作区，以支持更好的配置决策。",
+        "ja-JP": "応募者の経歴、資格、部門ニーズを関連画面と連携し、適材適所の配置を整理します。"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.action",
+      "values": {
+        "ko-KR": "HR 문서 확인",
+        "en-US": "Check HR documents",
+        "zh-Hans-CN": "检查 HR 文档",
+        "ja-JP": "HR 文書を確認"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.applicantFit.label",
+      "values": {
+        "ko-KR": "지원자 경력",
+        "en-US": "Applicant career",
+        "zh-Hans-CN": "申请人经历",
+        "ja-JP": "応募者経歴"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.applicantFit.status",
+      "values": {
+        "ko-KR": "검토 필요",
+        "en-US": "Needs review",
+        "zh-Hans-CN": "需要复核",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.applicantFit.title",
+      "values": {
+        "ko-KR": "이력서와 인사 문서 연결",
+        "en-US": "Connect resumes with HR documents",
+        "zh-Hans-CN": "将简历与人事文档连接",
+        "ja-JP": "履歴書と人事文書を連携"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.applicantFit.detail",
+      "values": {
+        "ko-KR": "HR 화면에서 이력서, 사직서, 직원명부 흐름과 함께 후보 적합도를 확인합니다.",
+        "en-US": "Open HR to compare candidate fit with resumes, resignations, and roster context.",
+        "zh-Hans-CN": "打开 HR 画面，结合简历、离职书和名册上下文检查候选人匹配度。",
+        "ja-JP": "HR 画面で履歴書、退職届、名簿の文脈とあわせて候補者の適合度を確認します。"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.credentialCheck.label",
+      "values": {
+        "ko-KR": "자격사항",
+        "en-US": "Credentials",
+        "zh-Hans-CN": "资格信息",
+        "ja-JP": "資格情報"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.credentialCheck.status",
+      "values": {
+        "ko-KR": "자료 확인",
+        "en-US": "File check",
+        "zh-Hans-CN": "文件检查",
+        "ja-JP": "資料確認"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.credentialCheck.title",
+      "values": {
+        "ko-KR": "자격 첨부와 보관 상태",
+        "en-US": "Credential attachments and storage",
+        "zh-Hans-CN": "资格附件和存档状态",
+        "ja-JP": "資格添付と保管状態"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.credentialCheck.detail",
+      "values": {
+        "ko-KR": "자료함에서 자격증, 경력증명, 채용 첨부문서 보관 상태를 확인합니다.",
+        "en-US": "Open Archive to review certificates, career proof, and recruiting attachment storage.",
+        "zh-Hans-CN": "打开资料库，检查资格证书、经历证明和招聘附件存档状态。",
+        "ja-JP": "資料箱で資格証、経歴証明、採用添付文書の保管状態を確認します。"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.departmentMatch.label",
+      "values": {
+        "ko-KR": "부서 배치",
+        "en-US": "Department match",
+        "zh-Hans-CN": "部门匹配",
+        "ja-JP": "部門マッチ"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.departmentMatch.status",
+      "values": {
+        "ko-KR": "공유 준비",
+        "en-US": "Ready to share",
+        "zh-Hans-CN": "可共享",
+        "ja-JP": "共有準備"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.departmentMatch.title",
+      "values": {
+        "ko-KR": "필요 부서와 권한 연결",
+        "en-US": "Connect target department and permissions",
+        "zh-Hans-CN": "连接目标部门和权限",
+        "ja-JP": "対象部門と権限を連携"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.departmentMatch.detail",
+      "values": {
+        "ko-KR": "관리자 화면에서 Branch, 부서, 하위계정 권한을 이어서 점검합니다.",
+        "en-US": "Open Admin to review Branch, department, and subaccount permission alignment.",
+        "zh-Hans-CN": "打开管理员画面，继续检查 Branch、部门和子账户权限对齐。",
+        "ja-JP": "管理者画面で Branch、部門、サブアカウント権限の整合を確認します。"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.notice.badge",
+      "values": {
+        "ko-KR": "채용 UI 흐름",
+        "en-US": "Recruiting UI flow",
+        "zh-Hans-CN": "招聘 UI 流程",
+        "ja-JP": "採用 UI フロー"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.notice.description",
+      "values": {
+        "ko-KR": "이 패널은 실제 지원자 데이터를 저장하지 않고, 관련 업무 화면으로 이동하는 UI 안내만 제공합니다.",
+        "en-US": "This panel does not store applicant data; it only guides users to related workspaces.",
+        "zh-Hans-CN": "此面板不存储申请人数据，仅引导用户前往相关工作区。",
+        "ja-JP": "このパネルは応募者データを保存せず、関連画面への移動を案内するだけです。"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.title",
+      "values": {
+        "ko-KR": "전자결재 처리 요약",
+        "en-US": "Approval workflow summary",
+        "zh-Hans-CN": "审批流程摘要",
+        "ja-JP": "承認ワークフローサマリー"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.description",
+      "values": {
+        "ko-KR": "결재 대기, 반려 보완, 첨부 보관 상태를 먼저 확인하고 관련 업무로 이동합니다.",
+        "en-US": "Review pending approvals, returned-draft fixes, and attachment storage before moving to the related workspace.",
+        "zh-Hans-CN": "先检查待审批、退回补正和附件存档状态，然后跳转到相关业务。",
+        "ja-JP": "承認待ち、差し戻し修正、添付保管状態を先に確認し、関連業務へ移動します。"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.action",
+      "values": {
+        "ko-KR": "첨부 자료 보기",
+        "en-US": "View attachments",
+        "zh-Hans-CN": "查看附件",
+        "ja-JP": "添付資料を見る"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.pendingApproval.label",
+      "values": {
+        "ko-KR": "결재 대기",
+        "en-US": "Pending approvals",
+        "zh-Hans-CN": "待审批",
+        "ja-JP": "承認待ち"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.pendingApproval.status",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs review",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.pendingApproval.title",
+      "values": {
+        "ko-KR": "승인권자와 위임 흐름",
+        "en-US": "Approver and delegation flow",
+        "zh-Hans-CN": "审批人和委托流程",
+        "ja-JP": "承認者と委任フロー"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.pendingApproval.detail",
+      "values": {
+        "ko-KR": "관리자 화면에서 결재 권한, 위임, Branch 계정 범위를 이어서 확인합니다.",
+        "en-US": "Open Admin to review approval permissions, delegation, and Branch account scope.",
+        "zh-Hans-CN": "打开管理员画面，继续检查审批权限、委托和 Branch 账户范围。",
+        "ja-JP": "管理者画面で承認権限、委任、Branch アカウント範囲を確認します。"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.returnedDraft.label",
+      "values": {
+        "ko-KR": "반려 보완",
+        "en-US": "Returned draft",
+        "zh-Hans-CN": "退回补正",
+        "ja-JP": "差し戻し修正"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.returnedDraft.status",
+      "values": {
+        "ko-KR": "초안 준비",
+        "en-US": "Draft ready",
+        "zh-Hans-CN": "草稿就绪",
+        "ja-JP": "下書き準備"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.returnedDraft.title",
+      "values": {
+        "ko-KR": "보완 의견 초안",
+        "en-US": "Correction comment draft",
+        "zh-Hans-CN": "补正意见草稿",
+        "ja-JP": "修正コメント下書き"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.returnedDraft.detail",
+      "values": {
+        "ko-KR": "AI 화면에서 반려 사유, 보완 요청, 결재 의견 초안을 이어서 점검합니다.",
+        "en-US": "Open AI to review return reasons, correction requests, and approval comment drafts.",
+        "zh-Hans-CN": "打开 AI 画面，继续检查退回原因、补正请求和审批意见草稿。",
+        "ja-JP": "AI 画面で差し戻し理由、修正依頼、承認コメント下書きを確認します。"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.attachments.label",
+      "values": {
+        "ko-KR": "첨부 보관",
+        "en-US": "Attachment storage",
+        "zh-Hans-CN": "附件存档",
+        "ja-JP": "添付保管"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.attachments.status",
+      "values": {
+        "ko-KR": "연결됨",
+        "en-US": "Linked",
+        "zh-Hans-CN": "已连接",
+        "ja-JP": "連携済み"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.attachments.title",
+      "values": {
+        "ko-KR": "결재 첨부문서 보관",
+        "en-US": "Approval attachment archive",
+        "zh-Hans-CN": "审批附件归档",
+        "ja-JP": "承認添付文書の保管"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.attachments.detail",
+      "values": {
+        "ko-KR": "자료함에서 결재 첨부, 급여 품의, 보관 상태를 이어서 확인합니다.",
+        "en-US": "Open Archive to review approval attachments, payroll requests, and storage status.",
+        "zh-Hans-CN": "打开资料库，继续检查审批附件、工资请求和存档状态。",
+        "ja-JP": "資料箱で承認添付、給与稟議、保管状態を確認します。"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.notice.badge",
+      "values": {
+        "ko-KR": "결재 UI 흐름",
+        "en-US": "Approval UI flow",
+        "zh-Hans-CN": "审批 UI 流程",
+        "ja-JP": "承認 UI フロー"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.notice.description",
+      "values": {
+        "ko-KR": "이 패널은 실제 결재 처리를 수행하지 않고, 관련 업무 화면으로 이동하는 UI 안내만 제공합니다.",
+        "en-US": "This panel does not process approvals; it only guides users to related workspaces.",
+        "zh-Hans-CN": "此面板不执行实际审批处理，仅引导用户前往相关工作区。",
+        "ja-JP": "このパネルは実際の承認処理を行わず、関連画面への移動を案内するだけです。"
+      }
+    },
+    {
+      "key": "screens.login.actions.showPassword",
+      "values": {
+        "ko-KR": "비밀번호 보기",
+        "en-US": "Show password",
+        "zh-Hans-CN": "显示密码",
+        "ja-JP": "パスワードを表示"
+      }
+    },
+    {
+      "key": "screens.login.actions.hidePassword",
+      "values": {
+        "ko-KR": "비밀번호 숨기기",
+        "en-US": "Hide password",
+        "zh-Hans-CN": "隐藏密码",
+        "ja-JP": "パスワードを隠す"
       }
     }
   ],
