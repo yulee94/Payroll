@@ -256,6 +256,7 @@ cargo test --workspace
 - [x] Tenant/site/global operation-policy resolution behavior is defined in framework-neutral Rust DTOs and API contracts for supplied settings snapshots.
 - [x] Payroll execution routing/planning behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the compatibility executor.
 - [x] Business-trip lifecycle normalization and status-transition behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the workflow persistence/document/task/report/KPI side-effect bridge.
+- [x] Business-trip lifecycle legal-scope, visibility, and manage permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile resolver and side-effect bridge.
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
 - [x] Invoice audit row and batch behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/fixed-profile resolver and workbook/UI bridge.
@@ -723,6 +724,34 @@ git diff --check
 cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
 ```
 
+
+## Implementation checkpoint: Rust business-trip permission core
+
+Completed on 2026-06-04 as a supplied-profile workflow authorization slice:
+
+- `crates/workflow-core::business_trip_permissions` owns pure business-trip
+  lifecycle legal-scope, visibility, and manage predicates for supplied
+  principal/trip/profile DTOs.
+- Rust preserves the workflow role matrix for admin/finance expansion, direct
+  requester/executor ownership, explicit approver visibility, requester manager
+  visibility, site/department scoped manager visibility, viewer scoped-only
+  visibility, and narrower manage authority.
+- Python remains the `UserSession` adapter, workflow profile resolver, workflow
+  JSON store, document/task/report/KPI side-effect owner, overdue evaluator,
+  notification/calendar/To-Do producer, and UI bridge.
+- Slice spec: `docs/WORKFLOW_RUST_BUSINESS_TRIP_PERMISSIONS_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo test -p bitween-workflow-core business_trip_permissions --lib
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_business_trip_contracts.BusinessTripLifecycleContractTests.test_contract_declares_rust_business_trip_permissions -v
+```
+
+Task 5 acceptance status:
+
+- [x] Business-trip lifecycle permission predicates are Rust-owned behind parity
+      contract tests.
 
 ## Implementation checkpoint: Rust business-trip lifecycle core
 

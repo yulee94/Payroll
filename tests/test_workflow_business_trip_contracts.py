@@ -37,6 +37,19 @@ class BusinessTripLifecycleContractTests(unittest.TestCase):
         self.assertIn("draft -> planned", lifecycle["transition_edges"])
         self.assertIn("diary_due -> completed", lifecycle["transition_edges"])
 
+    def test_contract_declares_rust_business_trip_permissions(self) -> None:
+        contract = workflow_api_contract()
+        permissions = contract["business_trip_permissions"]
+
+        self.assertEqual(permissions["rust_crate"], "bitween-workflow-core")
+        self.assertEqual(permissions["rust_module"], "business_trip_permissions")
+        self.assertIn("can_view_business_trip_lifecycle", permissions["rust_entrypoints"])
+        self.assertIn("can_manage_business_trip_lifecycle", permissions["rust_entrypoints"])
+        self.assertIn("get_user_profile lookup", permissions["python_boundary"])
+        self.assertIn("Viewer role is scoped-only access", permissions["visibility_invariants"])
+        self.assertIn("Manage authority is narrower than visibility", permissions["manage_invariants"])
+        self.assertIn("admin -> admin/executive/approver/finance/hr", permissions["role_expansions"])
+
     def test_status_taxonomy_is_frozen_and_separate_from_kpi_reflection(self) -> None:
         self.assertEqual(
             c.TRIP_STATUSES,

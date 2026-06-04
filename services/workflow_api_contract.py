@@ -85,11 +85,80 @@ def workflow_business_trip_lifecycle_example() -> dict[str, Any]:
     }
 
 
+def workflow_business_trip_permissions_example() -> dict[str, Any]:
+    """Return the Rust-owned supplied-profile business-trip permission contract."""
+    return {
+        "rust_crate": "bitween-workflow-core",
+        "rust_module": "business_trip_permissions",
+        "rust_entrypoints": [
+            "workflow_roles",
+            "is_business_trip_legal_scope_allowed",
+            "can_view_business_trip_lifecycle",
+            "can_manage_business_trip_lifecycle",
+        ],
+        "python_compatibility_source": "core.workflow.permissions",
+        "python_boundary": (
+            "Python compatibility code may still own UserSession conversion, get_user_profile lookup, "
+            "workflow JSON persistence, document/task/report/KPI side effects, overdue evaluation, "
+            "notifications, calendar/To-Do links, and UI bridges. Rust permission predicates expect "
+            "supplied principal, trip, user profile, and optional requester/traveler profile DTOs."
+        ),
+        "role_values": [
+            c.WF_ROLE_ADMIN,
+            c.WF_ROLE_EXECUTIVE,
+            c.WF_ROLE_SITE_MANAGER,
+            c.WF_ROLE_DEPT_MANAGER,
+            c.WF_ROLE_APPROVER,
+            c.WF_ROLE_REQUESTER,
+            c.WF_ROLE_EXECUTOR,
+            c.WF_ROLE_FINANCE,
+            c.WF_ROLE_HR,
+            c.WF_ROLE_VIEWER,
+        ],
+        "role_expansions": [
+            "admin -> admin/executive/approver/finance/hr",
+            "finance -> finance/approver/executive",
+            "empty workflow role set -> requester",
+        ],
+        "permission_dtos": [
+            "BusinessTripPrincipal",
+            "BusinessTripProfile",
+            "BusinessTripPermissionTrip",
+            "BusinessTripPermissionInput",
+        ],
+        "legal_scope_invariants": [
+            "row tenant_id must match requested workflow storage tenant when present",
+            "missing principal tenant_id preserves legacy legal-scope compatibility",
+            "origin/legal tenant users pass the legal-scope gate",
+            "workflow-root tenant users can pass when storage tenant differs from origin/legal tenant",
+            "sibling legal-tenant admins are rejected through shared workflow-root storage",
+        ],
+        "visibility_invariants": [
+            "Admin/executive/finance can view within legal scope",
+            "Requester or executor can view within legal scope",
+            "traveler_user_id is used as owner fallback when requester_id is absent",
+            "Explicit approver can view only when approver role is present",
+            "Supplied requester manager can view",
+            "Site manager/HR can view scoped site trips",
+            "Department manager/site manager/HR can view scoped department trips",
+            "Viewer role is scoped-only access",
+        ],
+        "manage_invariants": [
+            "Manage authority is narrower than visibility",
+            "Admin/executive/finance can manage within legal scope",
+            "Requester or executor can manage within legal scope",
+            "Manager, site, department, viewer, and approver grants do not imply manage authority",
+        ],
+    }
+
+
 def workflow_api_contract() -> dict[str, Any]:
     """Return workflow API contract metadata for Rust migration slices."""
     return {
         "business_trip_lifecycle": workflow_business_trip_lifecycle_example(),
+        "business_trip_permissions": workflow_business_trip_permissions_example(),
         "response": {
             "business_trip_lifecycle_entrypoint": "bitween_workflow_core::business_trip::transition_trip_status(record, target, now_iso)",
+            "business_trip_permissions_entrypoint": "bitween_workflow_core::business_trip_permissions::can_view_business_trip_lifecycle(input)",
         },
     }
