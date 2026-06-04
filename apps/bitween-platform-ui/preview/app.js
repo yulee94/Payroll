@@ -11,6 +11,12 @@ const demoAccount = {
   userId: "admin"
 };
 
+const demoCredentialCards = [
+  ["company", demoAccount.companyCode],
+  ["user", demoAccount.userId],
+  ["password", demoAccount.password]
+];
+
 const employeeNumber = "BW-0001";
 const session = {
   roleLabel: "admin",
@@ -90,18 +96,18 @@ const workQueueDefs = [
 ].map(([id, tone, target]) => ({ id, tone, target }));
 
 const calendarEventDefs = [
-  ["calendar-payroll", "2026.06.04", "10:00", "attention"],
-  ["calendar-approval", "2026.06.04", "14:00", "neutral"],
-  ["calendar-recruit", "2026.06.05", "09:30", "ready"],
-  ["calendar-travel", "2026.06.05", "16:00", "attention"]
-].map(([id, date, time, tone]) => ({ id, date, time, tone }));
+  ["calendar-payroll", "2026.06.04", "10:00", "attention", "payroll"],
+  ["calendar-approval", "2026.06.04", "14:00", "neutral", "workflow"],
+  ["calendar-recruit", "2026.06.05", "09:30", "ready", "recruit"],
+  ["calendar-travel", "2026.06.05", "16:00", "attention", "travel"]
+].map(([id, date, time, tone, target]) => ({ id, date, target, time, tone }));
 
 const todayTodoDefs = [
-  ["todo-payroll", "attention", false],
-  ["todo-approval", "neutral", false],
-  ["todo-travel", "attention", false],
-  ["todo-archive", "ready", true]
-].map(([id, tone, done]) => ({ id, tone, done }));
+  ["todo-payroll", "attention", false, "payroll"],
+  ["todo-approval", "neutral", false, "workflow"],
+  ["todo-travel", "attention", false, "travel"],
+  ["todo-archive", "ready", true, "archive"]
+].map(([id, tone, done, target]) => ({ id, done, target, tone }));
 
 const attendanceLogDefs = [
   ["att-log-1", "09:02", "ready"],
@@ -148,6 +154,13 @@ const aiDraftDefs = [
   ["draft-comment", "neutral"]
 ].map(([id, tone]) => ({ id, tone }));
 
+const settingsPreferenceDefs = [
+  ["density", "ready", "home"],
+  ["notice", "neutral", "workflow"],
+  ["security", "attention", "admin"],
+  ["payroll", "attention", "payroll"]
+].map(([id, tone, target]) => ({ id, target, tone }));
+
 const moduleDefs = {
   hr: {
     filters: ["all", "roster", "resume", "resignation", "certificate"],
@@ -170,25 +183,25 @@ const moduleDefs = {
   travel: {
     filters: ["all", "plan", "run", "diary", "result", "review"],
     metrics: [["plans", "neutral"], ["diary", "attention"], ["completed", "ready"]],
-    rows: [["travel-1", "attention", "travel", ["plan", "run", "diary"]], ["travel-2", "neutral", "travel", ["review", "result"]], ["travel-3", "ready", "travel", ["result"]]],
+    rows: [["travel-1", "attention", "travel", ["plan", "run", "diary"]], ["travel-2", "neutral", "travel", ["review", "result"]], ["travel-3", "ready", "archive", ["result"]]],
     secondaryTarget: "workflow"
   },
   workflow: {
     filters: ["all", "pending", "ongoing", "returned"],
     metrics: [["pending", "attention"], ["drafts", "neutral"], ["done", "ready"]],
-    rows: [["wf-1", "attention", "workflow", ["pending"]], ["wf-2", "neutral", "workflow", ["ongoing"]]],
+    rows: [["wf-1", "attention", "workflow", ["pending"]], ["wf-2", "neutral", "archive", ["ongoing"]]],
     secondaryTarget: "archive"
   },
   archive: {
     filters: ["all", "payroll", "contract", "report"],
     metrics: [["reports", "ready"], ["missing", "attention"], ["shared", "ready"]],
-    rows: [["ar-1", "ready", "archive", ["payroll", "report"]], ["ar-2", "attention", "archive", ["report"]]],
+    rows: [["ar-1", "ready", "archive", ["payroll", "report"]], ["ar-2", "attention", "attendance", ["report"]]],
     secondaryTarget: "payroll"
   },
   ai: {
     filters: ["all", "summary", "draft", "review"],
     metrics: [["prompts", "ready"], ["reviews", "attention"], ["policy", "neutral"]],
-    rows: [["ai-1", "ready", "ai", ["summary"]], ["ai-2", "attention", "ai", ["draft", "review"]]],
+    rows: [["ai-1", "ready", "payroll", ["summary"]], ["ai-2", "attention", "workflow", ["draft", "review"]]],
     secondaryTarget: "settings"
   },
   admin: {
@@ -200,7 +213,7 @@ const moduleDefs = {
   settings: {
     filters: ["all", "personal", "payroll", "notification"],
     metrics: [["profile", "ready"], ["payroll", "attention"], ["notice", "neutral"]],
-    rows: [["st-1", "attention", "settings", ["payroll"]], ["st-2", "ready", "settings", ["personal"]]],
+    rows: [["st-1", "attention", "payroll", ["payroll"]], ["st-2", "ready", "settings", ["personal"]]],
     secondaryTarget: "payroll"
   }
 };
@@ -418,6 +431,13 @@ function renderLogin() {
         </div>
         <form class="card login-card" id="login-form">
           ${sectionHead(t("screens.login.form.eyebrow"), t("screens.login.form.title"), t("screens.login.form.description"))}
+          <div class="login-credential-panel">
+            <div class="login-credential-head">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.panel.helper")}</span></div>
+            <div class="login-credential-grid">${demoCredentialCards.map(([id, value]) => `
+              <div class="login-credential-item"><span class="helper">${t(`screens.login.demo.credentials.${id}.label`)}</span><strong>${escapeText(value)}</strong><span class="helper">${t(`screens.login.demo.credentials.${id}.helper`)}</span></div>
+            `).join("")}</div>
+            <span class="helper">${t("screens.login.demo.panel.disclaimer")}</span>
+          </div>
           ${languageSelector()}
           ${field(t("screens.login.form.companyCode"), "company-code", demoAccount.companyCode, "text", state.companyCode)}
           ${field(t("screens.login.form.userId"), "user-id", demoAccount.userId, "text", state.userId)}
@@ -427,7 +447,6 @@ function renderLogin() {
             <button class="btn primary" type="submit">${t("screens.login.actions.enterHome")}</button>
             <button class="btn secondary" type="button" data-demo-login="true">${t("screens.login.actions.demo")}</button>
           </div>
-          <div class="notice">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.summary")}</span></div>
         </form>
       </div>
     </section>
@@ -491,6 +510,21 @@ function renderShell() {
           </div>
         </header>
         <div class="content">${renderScreen(active.id)}</div>
+        <footer class="shell-status" aria-label="${t("shell.status.aria")}">
+          <div class="shell-status-group">
+            <span class="status-dot" aria-hidden="true"></span>
+            <strong>${t("shell.status.previewTitle")}</strong>
+            <span class="helper">${t("shell.status.demoCompany")}</span>
+          </div>
+          <div class="shell-status-group">
+            ${badge(t("shell.status.uiOnly"), "ready")}
+            <span class="helper">${t("shell.status.logicUnchanged")}</span>
+          </div>
+          <div class="shell-status-group">
+            ${badge(t("shell.status.strictTs"), "neutral")}
+            <span class="helper">${t("shell.status.reactNativeWebReady")}</span>
+          </div>
+        </footer>
       </div>
     </section>
     <div class="toast" id="toast">${t("preview.toast.default")}</div>
@@ -522,7 +556,7 @@ function renderHome() {
         ${sectionHead("", t("screens.calendar.title"), t("screens.calendar.description"))}
         <div class="calendar-day"><span>2026.06</span><strong>04</strong><em>${t("screens.calendar.weekday")}</em></div>
         <div class="planner-list">${calendarEvents().map((event) => `
-          <div class="planner-item">${badge(event.time, event.tone)}<div><strong>${event.title}</strong><span class="helper">${event.date}</span></div></div>
+          <button class="planner-item planner-button" data-target="${event.target}">${badge(event.time, event.tone)}<div><strong>${event.title}</strong><span class="helper">${event.date} · ${t("screens.workDetail.actions.openRelated")}</span></div></button>
         `).join("")}</div>
       </div>
       <div class="card planner-card">
@@ -532,7 +566,7 @@ function renderHome() {
           <div class="todo-progress-track"><span style="width: ${completionPercent}%"></span></div>
         </div>
         <div class="planner-list">${todos.map((item) => `
-          <div class="planner-item todo-item ${item.done ? "done" : ""}">${badge(item.timeLabel, item.tone)}<div><strong>${item.title}</strong><span class="helper">${item.owner}</span></div></div>
+          <button class="planner-item planner-button todo-item ${item.done ? "done" : ""}" data-target="${item.target}">${badge(item.timeLabel, item.tone)}<div><strong>${item.title}</strong><span class="helper">${item.owner} · ${t("screens.workDetail.actions.openRelated")}</span></div></button>
         `).join("")}</div>
       </div>
     </section>
@@ -663,6 +697,7 @@ function renderModule(id) {
     ${id === "archive" ? archiveLibraryPanel() : ""}
     ${id === "ai" ? aiWorkspacePanel() : ""}
     ${id === "settings" ? i18nSettingsPanel() : ""}
+    ${id === "settings" ? settingsControlPanel() : ""}
     <section class="card">
       ${sectionHead("", t("screens.module.list.title"), t("screens.module.list.description"), button(data.secondaryAction.label, data.secondaryAction.target, "secondary"))}
       <div class="list-toolbar">
@@ -670,7 +705,7 @@ function renderModule(id) {
         <label class="search-box" for="work-search"><span>${t("screens.module.search.label")}</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="${t("screens.module.search.placeholder")}" /></label>
       </div>
       <div class="list-summary"><strong>${t("screens.module.list.count", { count: rows.length })}</strong><span class="helper">${state.search ? t("screens.module.list.filteredWithSearch", { filter: filterLabel, search: state.search }) : t("screens.module.list.filtered", { filter: filterLabel })}</span></div>
-      ${table(rows, true)}
+      ${data.rows.length === 0 ? empty(t("table.empty.title"), t("table.empty.description")) : rows.length ? table(rows, true) : filteredEmpty()}
       ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
     <div class="action-panels">
@@ -693,6 +728,19 @@ function i18nSettingsPanel() {
       </button>
     `).join("")}</div>
     <div class="notice">${badge(t("settings.i18n.catalogRule.title"), "neutral")}<span class="helper">${t("settings.i18n.catalogRule.description")}</span></div>
+  </section>`;
+}
+
+function settingsControlPanel() {
+  return `<section class="card">
+    ${sectionHead("", t("screens.settingsControl.title"), t("screens.settingsControl.description"), button(t("screens.settingsControl.action"), "admin", "secondary"))}
+    <div class="settings-grid">${settingsPreferenceDefs.map((item) => `
+      <button class="settings-card" data-target="${item.target}" style="border-top-color:${toneColor(item.tone)}">
+        <div class="settings-card-head"><span class="helper">${t(`screens.settingsControl.cards.${item.id}.label`)}</span>${badge(t(`screens.settingsControl.cards.${item.id}.value`), item.tone)}</div>
+        <span>${t(`screens.settingsControl.cards.${item.id}.detail`)}</span>
+      </button>
+    `).join("")}</div>
+    <div class="notice">${badge(t("screens.settingsControl.notice.badge"), "neutral")}<span class="helper">${t("screens.settingsControl.notice.description")}</span></div>
   </section>`;
 }
 
@@ -822,11 +870,11 @@ function table(rows, selectable = false) {
     ${rows.map((row) => {
       const content = `<span><strong>${row.category}</strong></span><span>${badge(row.status, row.tone)}</span><span>${row.owner}</span><span>${row.next}</span>`;
       return selectable ? `
-      <button class="table-row row-button ${state.selectedRowKey === row.id ? "selected" : ""}" data-row-key="${row.id}">
+      <button class="table-row row-button ${state.selectedRowKey === row.id ? "selected" : ""}" data-row-key="${row.id}" style="border-left-color:${toneColor(row.tone)}">
         ${content}
       </button>
     ` : `
-      <div class="table-row">
+      <div class="table-row" style="border-left-color:${toneColor(row.tone)}">
         ${content}
       </div>
     `;
@@ -857,6 +905,13 @@ function filterRows(rows) {
 
 function empty(title, desc) {
   return `<div class="empty"><strong>${title}</strong><span class="helper">${desc}</span></div>`;
+}
+
+function filteredEmpty() {
+  return `<div class="filtered-empty">
+    ${empty(t("screens.module.filteredEmpty.title"), t("screens.module.filteredEmpty.description"))}
+    <button class="btn secondary" data-reset-list>${t("screens.module.filteredEmpty.reset")}</button>
+  </div>`;
 }
 
 function toneColor(tone) {
@@ -919,6 +974,16 @@ function bindEvents() {
       state.filter = "all";
       render();
       toast(t("preview.toast.languageSelected"));
+    });
+  });
+
+  document.querySelectorAll("[data-reset-list]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.filter = "all";
+      state.search = "";
+      state.selectedRowKey = "";
+      render();
+      toast(t("preview.toast.filtersReset"));
     });
   });
 
