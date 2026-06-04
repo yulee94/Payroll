@@ -92,10 +92,25 @@ class TestFormTemplates(unittest.TestCase):
                 assert fields is not None
                 trip_fields = [f for f in fields if f.key == "trip_id"]
                 self.assertEqual(len(trip_fields), 1)
-                self.assertFalse(trip_fields[0].required)
+                self.assertTrue(trip_fields[0].required)
                 self.assertEqual(trip_fields[0].maps_to, "trip_id")
                 keys = {f.key for f in fields}
                 self.assertIn("source_document_id", keys)
+
+    def test_trip_linked_diary_template_keeps_optional_trip_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            with mock.patch("core.workflow.form_templates.WORKFLOW_ROOT", base / "workflow"):
+                merge_gw_templates("t_diary")
+                tpl = get_template("t_diary", "coss_일일업무일지")
+                self.assertIsNotNone(tpl)
+                assert tpl is not None
+                fields = resolve_template_schema("t_diary", tpl["id"])
+                assert fields is not None
+                trip_fields = [f for f in fields if f.key == "trip_id"]
+                self.assertEqual(len(trip_fields), 1)
+                self.assertFalse(trip_fields[0].required)
+                self.assertEqual(trip_fields[0].maps_to, "trip_id")
 
     def test_validate_with_template(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

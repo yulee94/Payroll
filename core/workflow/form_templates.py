@@ -212,7 +212,7 @@ COSS_BUILTIN_TEMPLATES: list[dict[str, Any]] = [
         "document_type": DOC_TYPE_GENERAL,
         "fields": [
             _field("title", "제목", required=True, maps_to="title"),
-            _field("trip_id", "연계 출장 ID", placeholder="출장 lifecycle ID", maps_to="trip_id"),
+            _field("trip_id", "연계 출장 ID", required=True, placeholder="출장 lifecycle ID", maps_to="trip_id"),
             _field("period_start", "출장 시작", "date", required=True, maps_to="period_start"),
             _field("period_end", "출장 종료", "date", required=True, maps_to="period_end"),
             _field("source_document_id", "출장신청 문서 ID"),
