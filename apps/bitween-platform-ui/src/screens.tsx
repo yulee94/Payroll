@@ -50,7 +50,7 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
           ))}
         </View>
       </View>
-      <Card>
+      <Card style={styles.loginCard}>
         <SectionHeader
           eyebrow="Secure sign in"
           title="로그인"
@@ -215,7 +215,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
 
       <View style={styles.actionPanels}>
         {[dashboard.primaryAction, dashboard.secondaryAction].map((action) => (
-          <Card key={action.label} compact>
+          <Card key={action.label} compact style={styles.actionPanelCard}>
             <Label weight="bold">{action.label}</Label>
             <Label size="sm" muted>{action.description}</Label>
             <ActionButton onPress={() => onSelect(action.target)} variant="ghost">이동</ActionButton>
@@ -253,6 +253,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.md
+  },
+  actionPanelCard: {
+    flexBasis: 220,
+    flexGrow: 1
   },
   actionRow: {
     flexDirection: "row",
@@ -333,10 +337,15 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: spacing.md
   },
+  loginCard: {
+    flexBasis: 360,
+    flexGrow: 1
+  },
   loginHero: {
     backgroundColor: colors.accent,
     borderRadius: radius.lg,
-    flex: 1,
+    flexBasis: 420,
+    flexGrow: 1,
     gap: spacing.xxl,
     justifyContent: "space-between",
     minHeight: 420,
@@ -347,9 +356,12 @@ const styles = StyleSheet.create({
   },
   loginLayout: {
     alignItems: "stretch",
+    alignSelf: "center",
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.xl
+    gap: spacing.xl,
+    maxWidth: 1120,
+    width: "100%"
   },
   queueGrid: {
     flexDirection: "row",
