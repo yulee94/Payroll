@@ -20,6 +20,10 @@ use crate::response::{
     PayrollApiResponse,
 };
 use crate::run::{run_response_from_result, PayrollRunResponse, PayrollRunResult};
+use crate::site_benefits::{
+    apply_site_benefits_to_invoice, SiteBenefitsApplication, SiteBenefitsConfig,
+    SiteBenefitsInvoice,
+};
 use crate::workplace_hours::{
     apply_monthly_hours_to_invoice, resolve_monthly_work_hours, WorkplaceHoursInvoice,
     WorkplaceHoursPolicy, WorkplaceMonthlyHoursApplication, WorkplaceMonthlyHoursResolution,
@@ -215,6 +219,18 @@ impl PayrollApiService {
         S: AsRef<str>,
     {
         audit_invoice_batch(items, workplace)
+    }
+
+    pub fn apply_site_benefits_to_invoice<S>(
+        &self,
+        invoice: SiteBenefitsInvoice,
+        config: &SiteBenefitsConfig,
+        payroll_period: S,
+    ) -> SiteBenefitsApplication
+    where
+        S: AsRef<str>,
+    {
+        apply_site_benefits_to_invoice(invoice, config, payroll_period)
     }
 
     pub fn run_response(

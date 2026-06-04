@@ -191,6 +191,40 @@ Verification evidence for this checkpoint:
 Slice spec: `docs/PAYROLL_RUST_INVOICE_AUDIT_BATCH_SLICE.md`.
 
 
+## Current implementation checkpoint: Rust payroll site-benefits application
+
+Implemented on 2026-06-04 as the next payroll row-application behavior slice:
+
+- `crates/payroll-api` now exposes `WorkersDayConfig`,
+  `IdentityInsuranceConfig`, `SiteBenefitsConfig`, `SiteBenefitsInvoice`,
+  `SiteBenefitsApplication`, and `apply_site_benefits_to_invoice`.
+- `PayrollApiService::apply_site_benefits_to_invoice` applies supplied
+  site-benefits config to one invoice-compatible row without reading settings,
+  canonical workplace maps, identity-insurance ledgers, workbooks, or payroll
+  totals.
+- Rust preserves Python compatibility normalization, Workers' Day allowance
+  rules, identity-guarantee insurance billing-month and already-applied
+  suppression rules, source fields, and `_workers_day_source` /
+  `_identity_insurance_source` compatibility keys.
+- Python remains responsible for settings lookup, workplace canonicalization,
+  identity-insurance ledger read/write, workbook I/O, and payroll subtotal/gross
+  recalculation until those slices move to Rust behind parity tests.
+- TypeScript and Python contract metadata now include site-benefits config,
+  invoice, and application DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo fmt --check`
+- `cargo test --workspace`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_site_benefits tests.test_payroll_api_contract -v`
+- `npm run typecheck --prefix frontend`
+- `git diff --check`
+- `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
+
+Slice spec: `docs/PAYROLL_RUST_SITE_BENEFITS_SLICE.md`.
+
+
 ## Current implementation checkpoint: Rust payroll invoice audit row
 
 Implemented on 2026-06-04 as the next payroll audit behavior slice:

@@ -10,6 +10,7 @@ pub mod request;
 pub mod response;
 pub mod run;
 pub mod service;
+pub mod site_benefits;
 pub mod workplace_hours;
 
 pub use access::{
@@ -51,6 +52,10 @@ pub use run::{run_response_from_result, PayrollRunResponse, PayrollRunResult};
 pub use service::{
     HealthResponse, HealthStatus, PayrollApiService, ReadinessCheck, ReadinessResponse,
     ReadinessState, ServiceConfig,
+};
+pub use site_benefits::{
+    apply_site_benefits_to_invoice, IdentityInsuranceConfig, SiteBenefitsApplication,
+    SiteBenefitsConfig, SiteBenefitsInvoice, WorkersDayConfig,
 };
 pub use workplace_hours::{
     apply_monthly_hours_to_invoice, resolve_monthly_work_hours, WorkplaceHoursInvoice,

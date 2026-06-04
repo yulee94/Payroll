@@ -447,7 +447,7 @@ def payroll_invoice_audit_row_example() -> dict[str, Any]:
             "break_hours uses policy break_minutes first, then the base/work/leave gap fallback",
             "base-salary mismatches, missing invoice hours, missing base hourly, fixed-hour mismatches, and ledger monthly-hour mismatches preserve Python Korean flag wording",
             "fixed-hours profile application composes the Rust fixed-hours audit flags before row-level warnings",
-            "batch summary aggregation, settings lookup, record matching, and workbook I/O remain Python compatibility boundaries in this slice",
+            "settings lookup, record matching, fixed-profile resolution, workbook I/O, and UI text rendering remain Python compatibility boundaries in this slice",
         ],
     }
 
@@ -532,6 +532,100 @@ def payroll_invoice_audit_batch_example() -> dict[str, Any]:
             "summary.total, summary.pass, summary.warn, pass_count, and warn_count are derived from Rust row statuses",
             "empty item workplace falls back to the batch workplace before the row auditor resolves record or invoice workplace",
             "settings lookup, ledger matching, fixed-profile resolution, workbook I/O, and UI text rendering remain Python compatibility boundaries in this slice",
+        ],
+    }
+
+
+def payroll_site_benefits_application_example() -> dict[str, Any]:
+    """Return the Rust-owned supplied-config site-benefits application shape."""
+    return {
+        "rust_entrypoint": "PayrollApiService::apply_site_benefits_to_invoice(invoice, site_benefits_config, payroll_period)",
+        "calculator_entrypoint": "apply_site_benefits_to_invoice(invoice, site_benefits_config, payroll_period)",
+        "python_compatibility_source": "core.payroll.site_benefits.apply_site_benefits_to_invoice",
+        "resolver_boundary": (
+            "Python compatibility code may still resolve site/tenant/global settings, "
+            "canonicalize workplace aliases, inspect and persist identity-insurance "
+            "ledgers, parse workbooks, and recalculate payroll totals before or after "
+            "supplying pure inputs to Rust."
+        ),
+        "source_values": ["site", "tenant", "global"],
+        "workers_day_config_fields": [
+            "enabled",
+            "default_amount",
+            "auto_from_invoice",
+        ],
+        "identity_insurance_config_fields": [
+            "enabled",
+            "annual_amount",
+            "billing_month",
+        ],
+        "config_fields": [
+            "workers_day_allowance",
+            "workers_day_source",
+            "identity_guarantee_insurance",
+            "identity_insurance_source",
+            "identity_insurance_already_applied",
+        ],
+        "invoice_fields": [
+            "name",
+            "workplace",
+            "base_salary",
+            "workers_day_pay",
+            "workers_day_allowance",
+            "identity_guarantee_insurance_deduction",
+            "_workers_day_source",
+            "_identity_insurance_source",
+        ],
+        "application_fields": [
+            "workers_day_allowance",
+            "identity_guarantee_insurance_deduction",
+            "workers_day_source",
+            "identity_insurance_source",
+            "invoice",
+        ],
+        "example_config": {
+            "workers_day_allowance": {
+                "enabled": True,
+                "default_amount": 12_000,
+                "auto_from_invoice": False,
+            },
+            "workers_day_source": "site",
+            "identity_guarantee_insurance": {
+                "enabled": True,
+                "annual_amount": 20_000,
+                "billing_month": 5,
+            },
+            "identity_insurance_source": "site",
+            "identity_insurance_already_applied": False,
+        },
+        "example_invoice": {
+            "name": "박민수",
+            "workplace": "한국앰코",
+            "base_salary": 2_090_000,
+            "workers_day_pay": 99_999,
+        },
+        "example_application": {
+            "workers_day_allowance": 12_000,
+            "identity_guarantee_insurance_deduction": -20_000,
+            "workers_day_source": "site",
+            "identity_insurance_source": "site",
+            "invoice": {
+                "name": "박민수",
+                "workplace": "한국앰코",
+                "base_salary": 2_090_000,
+                "workers_day_pay": 99_999,
+                "workers_day_allowance": 12_000,
+                "identity_guarantee_insurance_deduction": -20_000,
+                "_workers_day_source": "site",
+                "_identity_insurance_source": "site",
+            },
+        },
+        "invariants": [
+            "Workers' Day invoice-driven mode uses a positive supplied workers_day_pay regardless of period month",
+            "Workers' Day fixed default mode applies only in May when the default amount is positive",
+            "identity insurance applies as a negative annual amount only in the configured billing month",
+            "identity_insurance_already_applied suppresses the yearly deduction without reading or writing ledgers in Rust",
+            "settings lookup, workplace canonicalization, ledger persistence, workbook I/O, and payroll total recalculation remain Python compatibility boundaries in this slice",
         ],
     }
 
@@ -829,6 +923,7 @@ def payroll_api_contract() -> dict[str, Any]:
         "workplace_hours_application": payroll_workplace_hours_application_example(),
         "invoice_audit_row": payroll_invoice_audit_row_example(),
         "invoice_audit_batch": payroll_invoice_audit_batch_example(),
+        "site_benefits_application": payroll_site_benefits_application_example(),
         "fixed_hours_application": payroll_fixed_hours_application_example(),
         "policy_resolution": payroll_policy_resolution_example(),
         "execution_plan": payroll_execution_plan_example(),
@@ -1016,6 +1111,7 @@ def payroll_api_contract() -> dict[str, Any]:
             "workplace_hours_application_entrypoint": "PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)",
             "invoice_audit_row_entrypoint": "PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)",
             "invoice_audit_batch_entrypoint": "PayrollApiService::audit_invoice_batch(items, workplace)",
+            "site_benefits_application_entrypoint": "PayrollApiService::apply_site_benefits_to_invoice(invoice, site_benefits_config, payroll_period)",
             "fixed_hours_application_entrypoint": "PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)",
             "never_include": ["exception"],
         },
