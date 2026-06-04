@@ -45,6 +45,32 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
+.skip-link {
+  background: var(--accent);
+  border-radius: 6px;
+  color: var(--card);
+  font-size: 14px;
+  font-weight: 800;
+  left: 16px;
+  padding: 10px 14px;
+  position: fixed;
+  text-decoration: none;
+  top: 12px;
+  transform: translateY(-160%);
+  transition: transform 120ms ease;
+  z-index: 20;
+}
+
+.skip-link:focus {
+  outline: 3px solid rgba(31, 56, 100, 0.32);
+  outline-offset: 2px;
+  transform: translateY(0);
+}
+
+#main-content:focus {
+  outline: none;
+}
+
 .login-page {
   align-items: center;
   display: flex;
@@ -386,6 +412,43 @@ input:focus-visible {
 
 .sidebar-theme-chip strong {
   font-size: 12px;
+}
+
+.sidebar-theme-current {
+  align-items: stretch;
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 4px minmax(0, 1fr);
+  padding: 8px;
+}
+
+.sidebar-theme-current-rail {
+  background: var(--nav-active-text);
+  border-radius: 999px;
+}
+
+.sidebar-theme-current strong,
+.sidebar-theme-current small {
+  display: block;
+  min-width: 0;
+}
+
+.sidebar-theme-current strong {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.sidebar-theme-current small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-top: 2px;
 }
 
 .sidebar-swatch {
