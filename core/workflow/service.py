@@ -13,6 +13,7 @@ from core.session_service import UserSession, require_session
 from core.workflow import permissions as wf_perm
 from core.workflow.constants import (
     DOC_STATUS_APPROVED,
+    DOC_STATUS_CANCELLED,
     DOC_STATUS_COMPLETED,
     DOC_STATUS_DRAFT,
     DOC_STATUS_IN_REVIEW,
@@ -20,6 +21,7 @@ from core.workflow.constants import (
     DOC_STATUS_REQUESTED_CHANGES,
     DOC_STATUS_SUBMITTED,
     DOC_TYPE_ATTENDANCE,
+    DOC_TYPE_BUSINESS_TRIP_REQUEST,
     DOC_TYPE_EXPENSE,
     DOC_TYPE_GENERAL,
     DOC_TYPE_PURCHASE,
@@ -27,7 +29,15 @@ from core.workflow.constants import (
     STEP_PENDING,
     STEP_REJECTED,
     STEP_REQUESTED_CHANGES,
+    TASK_COMPLETED,
     TASK_PENDING,
+    TRIP_SOURCE_KIND_WORKFLOW,
+    TRIP_STATUS_APPROVED,
+    TRIP_STATUS_CANCELLED,
+    TRIP_STATUS_COMPLETED,
+    TRIP_STATUS_DRAFT,
+    TRIP_STATUS_IN_PROGRESS,
+    TRIP_STATUS_PLANNED,
     WF_ROLE_ADMIN,
     WF_ROLE_EXECUTIVE,
     WF_ROLE_FINANCE,
@@ -52,6 +62,190 @@ def _resolve_tenant(tenant_id: str) -> str:
 
 def _uid(sess: UserSession) -> str:
     return sess.user_id
+
+
+def _is_business_trip_document(doc: dict[str, Any]) -> bool:
+    return doc.get("document_type") == DOC_TYPE_BUSINESS_TRIP_REQUEST
+
+
+def _business_trip_source_for_document(doc: dict[str, Any]) -> dict[str, str]:
+    document_id = str(doc.get("id") or "").strip()
+    return {
+        "kind": TRIP_SOURCE_KIND_WORKFLOW,
+        "document_id": document_id,
+        "dedupe_key": f"business-trip:{document_id}" if document_id else "",
+    }
+
+
+def _business_trip_fields_from_document(
+    tenant_id: str,
+    doc: dict[str, Any],
+    *,
+    status: str | None = None,
+    trip_id: str = "",
+) -> dict[str, Any]:
+    payload = doc.get("content_json") if isinstance(doc.get("content_json"), dict) else {}
+    source = _business_trip_source_for_document(doc)
+    title = str(doc.get("title") or payload.get("title") or "").strip()
+    return {
+        "trip_id": trip_id or str(payload.get("trip_id") or "").strip(),
+        "tenant_id": tenant_id,
+        "status": status or TRIP_STATUS_DRAFT,
+        "title": title,
+        "requester_id": str(doc.get("requester_id") or payload.get("traveler_user_id") or "").strip(),
+        "executor_id": str(payload.get("recommended_executor_id") or payload.get("executor_id") or "").strip(),
+        "site_id": str(doc.get("site_id") or payload.get("site_id") or "").strip(),
+        "department_id": str(doc.get("department_id") or payload.get("department_id") or "").strip(),
+        "period_start": str(doc.get("period_start") or payload.get("period_start") or "").strip(),
+        "period_end": str(doc.get("period_end") or payload.get("period_end") or "").strip(),
+        "approved_document_id": str(doc.get("id") or "").strip(),
+        "source": source,
+        "dedupe_key": source["dedupe_key"],
+    }
+
+
+def _link_document_to_trip(doc: dict[str, Any], trip: dict[str, Any]) -> None:
+    payload = doc.setdefault("content_json", {})
+    if not isinstance(payload, dict):
+        payload = {}
+        doc["content_json"] = payload
+    payload["trip_id"] = trip.get("trip_id") or trip.get("id") or ""
+    payload["business_trip_source"] = deepcopy(trip.get("source") or _business_trip_source_for_document(doc))
+    doc["updated_at"] = _now_iso()
+
+
+def _sync_business_trip_lifecycle_for_document(
+    db: dict[str, Any],
+    tenant_id: str,
+    doc: dict[str, Any],
+    *,
+    target_status: str,
+    actor_id: str,
+    audit_action: str,
+) -> dict[str, Any] | None:
+    """Create/update one lifecycle row for a business-trip workflow document.
+
+    The lifecycle status intentionally remains separate from document status and
+    KPI reflection status; only the business-trip row is transitioned here.
+    """
+    if not _is_business_trip_document(doc):
+        return None
+
+    from core.workflow.business_trip import (
+        default_business_trip_record,
+        find_business_trip_by_source,
+        migrate_business_trip_record,
+        transition_trip_status,
+    )
+
+    source = _business_trip_source_for_document(doc)
+    rows = db.setdefault("business_trips", [])
+    payload_trip_id = ""
+    content_json = doc.get("content_json")
+    if isinstance(content_json, dict):
+        payload_trip_id = str(content_json.get("trip_id") or "").strip()
+    existing = find_business_trip_by_source(db, source=source)
+    if existing is None and payload_trip_id:
+        existing = next((row for row in rows if row.get("trip_id") == payload_trip_id or row.get("id") == payload_trip_id), None)
+
+    if existing is None:
+        record = default_business_trip_record(
+            tenant_id,
+            **_business_trip_fields_from_document(tenant_id, doc, status=target_status or TRIP_STATUS_DRAFT),
+        )
+        rows.append(record)
+        _link_document_to_trip(doc, record)
+        append_audit(
+            db,
+            actor_id=actor_id,
+            action=audit_action,
+            entity_type="BusinessTripLifecycle",
+            entity_id=record["trip_id"],
+            after=record,
+        )
+        return record
+
+    before = deepcopy(existing)
+    updated = migrate_business_trip_record(
+        tenant_id,
+        {
+            **existing,
+            **_business_trip_fields_from_document(
+                tenant_id,
+                doc,
+                status=existing.get("status") or TRIP_STATUS_DRAFT,
+                trip_id=str(existing.get("trip_id") or existing.get("id") or ""),
+            ),
+        },
+    )
+    if target_status and target_status != updated.get("status"):
+        updated = transition_trip_status(updated, target_status)
+    existing.clear()
+    existing.update(updated)
+    _link_document_to_trip(doc, updated)
+    append_audit(
+        db,
+        actor_id=actor_id,
+        action=audit_action,
+        entity_type="BusinessTripLifecycle",
+        entity_id=updated["trip_id"],
+        before=before,
+        after=updated,
+    )
+    return updated
+
+
+def _complete_business_trip_lifecycle_for_task(
+    db: dict[str, Any],
+    tenant_id: str,
+    doc: dict[str, Any],
+    task: dict[str, Any],
+    *,
+    actor_id: str,
+) -> None:
+    if not _is_business_trip_document(doc):
+        return
+    trip_id = str(task.get("trip_id") or "").strip()
+    if not trip_id and isinstance(doc.get("content_json"), dict):
+        trip_id = str(doc["content_json"].get("trip_id") or "").strip()
+    if not trip_id:
+        trip = _sync_business_trip_lifecycle_for_document(
+            db,
+            tenant_id,
+            doc,
+            target_status=TRIP_STATUS_APPROVED,
+            actor_id=actor_id,
+            audit_action="business_trip_lifecycle_relinked_from_task",
+        )
+        trip_id = str((trip or {}).get("trip_id") or "")
+    if not trip_id:
+        return
+
+    from core.workflow.business_trip import transition_trip_status
+
+    for row in db.get("business_trips") or []:
+        if row.get("trip_id") != trip_id and row.get("id") != trip_id:
+            continue
+        before = deepcopy(row)
+        updated = row
+        if row.get("status") == TRIP_STATUS_APPROVED:
+            updated = transition_trip_status(updated, TRIP_STATUS_IN_PROGRESS)
+        if updated.get("status") == TRIP_STATUS_IN_PROGRESS:
+            updated = transition_trip_status(updated, TRIP_STATUS_COMPLETED)
+        if updated == before:
+            return
+        row.clear()
+        row.update(updated)
+        append_audit(
+            db,
+            actor_id=actor_id,
+            action="business_trip_lifecycle_completed_from_task",
+            entity_type="BusinessTripLifecycle",
+            entity_id=str(row.get("trip_id") or trip_id),
+            before=before,
+            after=row,
+        )
+        return
 
 
 def _attach_steps(db: dict[str, Any], doc: dict[str, Any]) -> dict[str, Any]:
@@ -206,6 +400,14 @@ def create_document(
             entity_id=doc_id,
             after=doc,
         )
+        _sync_business_trip_lifecycle_for_document(
+            db,
+            wf_tid,
+            doc,
+            target_status=TRIP_STATUS_DRAFT,
+            actor_id=_uid(sess),
+            audit_action="business_trip_lifecycle_created_from_document",
+        )
         return doc
 
     doc = with_db(wf_tid)(mut)
@@ -255,6 +457,14 @@ def update_document(
                 entity_id=document_id,
                 before=before,
                 after=d,
+            )
+            _sync_business_trip_lifecycle_for_document(
+                db,
+                tenant_id,
+                d,
+                target_status="",
+                actor_id=_uid(sess),
+                audit_action="business_trip_lifecycle_updated_from_document",
             )
             return
         raise LookupError("문서를 찾을 수 없습니다.")
@@ -360,6 +570,14 @@ def submit_document(
             related_document_id=document_id,
         )
         append_audit(db, actor_id=_uid(sess), action="document_submitted", entity_type="WorkflowDocument", entity_id=document_id)
+        _sync_business_trip_lifecycle_for_document(
+            db,
+            tenant_id,
+            doc,
+            target_status=TRIP_STATUS_PLANNED,
+            actor_id=_uid(sess),
+            audit_action="business_trip_lifecycle_planned_from_submit",
+        )
 
     with_db(tenant_id)(mut)
     doc = get_document(tenant_id, document_id, session=sess)
@@ -416,7 +634,20 @@ def approve_document(
         else:
             doc["status"] = DOC_STATUS_APPROVED
             doc["approved_at"] = _now_iso()
-            executor_id = _spawn_execution_tasks(db, doc, actor_id=_uid(sess))
+            trip = _sync_business_trip_lifecycle_for_document(
+                db,
+                tenant_id,
+                doc,
+                target_status=TRIP_STATUS_APPROVED,
+                actor_id=_uid(sess),
+                audit_action="business_trip_lifecycle_approved_from_document",
+            )
+            executor_id = _spawn_execution_tasks(
+                db,
+                doc,
+                actor_id=_uid(sess),
+                trip_id=str((trip or {}).get("trip_id") or ""),
+            )
             from core.workflow.follow_up import sync_approval_complete_follow_up
 
             try:
@@ -463,6 +694,66 @@ def reject_document(
             related_document_id=document_id,
         )
         append_audit(db, actor_id=_uid(sess), action="document_rejected", entity_type="WorkflowDocument", entity_id=document_id)
+        _sync_business_trip_lifecycle_for_document(
+            db,
+            tenant_id,
+            doc,
+            target_status=TRIP_STATUS_CANCELLED,
+            actor_id=_uid(sess),
+            audit_action="business_trip_lifecycle_cancelled_from_reject",
+        )
+
+    with_db(tenant_id)(mut)
+    return get_document(tenant_id, document_id, session=sess)
+
+
+def cancel_document(
+    tenant_id: str,
+    document_id: str,
+    *,
+    comment: str = "",
+    session: UserSession | None = None,
+) -> dict[str, Any]:
+    tenant_id = _resolve_tenant(tenant_id)
+    sess = session or require_session()
+
+    def mut(db: dict[str, Any]) -> None:
+        doc = next((d for d in db.get("documents") or [] if d.get("id") == document_id), None)
+        if not doc:
+            raise LookupError("문서를 찾을 수 없습니다.")
+        if not wf_perm.can_edit_document(sess, _attach_steps(db, doc), tenant_id=tenant_id):
+            raise PermissionError("문서를 취소할 권한이 없습니다.")
+        before = deepcopy(doc)
+        doc["status"] = DOC_STATUS_CANCELLED
+        doc["closed_at"] = _now_iso()
+        doc["updated_at"] = _now_iso()
+        if comment:
+            db.setdefault("comments", []).append(
+                {
+                    "id": _new_id(),
+                    "document_id": document_id,
+                    "author_id": _uid(sess),
+                    "comment": comment,
+                    "created_at": _now_iso(),
+                }
+            )
+        append_audit(
+            db,
+            actor_id=_uid(sess),
+            action="document_cancelled",
+            entity_type="WorkflowDocument",
+            entity_id=document_id,
+            before=before,
+            after=doc,
+        )
+        _sync_business_trip_lifecycle_for_document(
+            db,
+            tenant_id,
+            doc,
+            target_status=TRIP_STATUS_CANCELLED,
+            actor_id=_uid(sess),
+            audit_action="business_trip_lifecycle_cancelled_from_document",
+        )
 
     with_db(tenant_id)(mut)
     return get_document(tenant_id, document_id, session=sess)
@@ -503,7 +794,7 @@ def request_changes(
     return get_document(tenant_id, document_id, session=sess)
 
 
-def _spawn_execution_tasks(db: dict[str, Any], doc: dict[str, Any], *, actor_id: str) -> str:
+def _spawn_execution_tasks(db: dict[str, Any], doc: dict[str, Any], *, actor_id: str, trip_id: str = "") -> str:
     """승인 후 기본 실행업무 생성. executor_id 반환."""
     doc_id = doc.get("id")
     dtype = doc.get("document_type")
@@ -520,6 +811,7 @@ def _spawn_execution_tasks(db: dict[str, Any], doc: dict[str, Any], *, actor_id:
     task = {
         "id": _new_id(),
         "document_id": doc_id,
+        "trip_id": trip_id,
         "title": f"실행: {doc.get('title', '')}",
         "description": doc.get("summary", ""),
         "executor_id": executor_id or doc.get("requester_id", ""),
@@ -573,6 +865,9 @@ def complete_execution_task(
     session: UserSession | None = None,
 ) -> dict[str, Any]:
     sess = session or require_session()
+    tenant_id = _resolve_tenant(tenant_id)
+    if _resolve_tenant(sess.tenant_id) != tenant_id:
+        raise PermissionError("실행업무를 완료할 권한이 없습니다.")
 
     def mut(db: dict[str, Any]) -> dict[str, Any]:
         for t in db.get("execution_tasks") or []:
@@ -580,7 +875,9 @@ def complete_execution_task(
                 continue
             if not wf_perm.can_manage_execution_task(sess, t, tenant_id=tenant_id):
                 raise PermissionError("실행업무를 완료할 권한이 없습니다.")
-            t["status"] = "completed"
+            if t.get("status") == TASK_COMPLETED:
+                return t
+            t["status"] = TASK_COMPLETED
             t["completed_at"] = _now_iso()
             t["updated_at"] = _now_iso()
             doc_id = t.get("document_id", "")
@@ -588,6 +885,8 @@ def complete_execution_task(
                 if d.get("id") == doc_id:
                     d["status"] = DOC_STATUS_COMPLETED
                     d["completed_at"] = _now_iso()
+                    d["updated_at"] = _now_iso()
+                    _complete_business_trip_lifecycle_for_task(db, tenant_id, d, t, actor_id=_uid(sess))
             append_audit(db, actor_id=_uid(sess), action="execution_task_completed", entity_type="ExecutionTask", entity_id=task_id)
             return t
         raise LookupError("실행업무를 찾을 수 없습니다.")
@@ -663,3 +962,139 @@ def ensure_tenant_seeded(tenant_id: str) -> bool:
     from core.workflow.seed import seed_tenant_if_empty
 
     return seed_tenant_if_empty(tenant_id)
+
+
+def list_business_trips(
+    tenant_id: str,
+    *,
+    session: UserSession | None = None,
+    status: str | None = None,
+) -> list[dict[str, Any]]:
+    """List tenant-bound business-trip lifecycle view models."""
+    tenant_id = _resolve_tenant(tenant_id)
+    sess = session or require_session()
+    db = _load_raw(tenant_id)
+    from core.workflow.business_trip import business_trip_view_model, normalize_trip_status
+
+    rows = [
+        business_trip_view_model(row)
+        for row in db.get("business_trips") or []
+        if wf_perm.can_view_business_trip_lifecycle(sess, row, tenant_id=tenant_id)
+    ]
+    if status:
+        expected = normalize_trip_status(status)
+        rows = [row for row in rows if row.get("status") == expected]
+    return sorted(rows, key=lambda row: row.get("updated_at") or "", reverse=True)
+
+
+def get_business_trip(
+    tenant_id: str, trip_id: str, *, session: UserSession | None = None
+) -> dict[str, Any]:
+    """Return a single tenant-bound business-trip lifecycle view model."""
+    tenant_id = _resolve_tenant(tenant_id)
+    sess = session or require_session()
+    db = _load_raw(tenant_id)
+    from core.workflow.business_trip import business_trip_view_model
+
+    for row in db.get("business_trips") or []:
+        if row.get("trip_id") == trip_id or row.get("id") == trip_id:
+            if not wf_perm.can_view_business_trip_lifecycle(sess, row, tenant_id=tenant_id):
+                raise PermissionError("출장 lifecycle을 조회할 권한이 없습니다.")
+            return business_trip_view_model(row)
+    raise LookupError("출장 lifecycle을 찾을 수 없습니다.")
+
+
+def upsert_business_trip_lifecycle(
+    tenant_id: str,
+    *,
+    fields: dict[str, Any],
+    session: UserSession | None = None,
+) -> dict[str, Any]:
+    """Create/update the foundation lifecycle record idempotently by source/dedupe key."""
+    tenant_id = _resolve_tenant(tenant_id)
+    sess = session or require_session()
+
+    def mut(db: dict[str, Any]) -> dict[str, Any]:
+        from core.workflow.business_trip import (
+            default_business_trip_record,
+            find_business_trip_by_source,
+            migrate_business_trip_record,
+        )
+
+        payload = dict(fields or {})
+        payload["tenant_id"] = tenant_id
+        payload.setdefault("requester_id", _uid(sess))
+        existing = find_business_trip_by_source(db, source=payload.get("source") or {})
+        rows = db.setdefault("business_trips", [])
+        if existing is None and payload.get("trip_id"):
+            existing = next((row for row in rows if row.get("trip_id") == payload.get("trip_id")), None)
+        if existing is None:
+            record = default_business_trip_record(tenant_id, **payload)
+            rows.append(record)
+            append_audit(
+                db,
+                actor_id=_uid(sess),
+                action="business_trip_lifecycle_created",
+                entity_type="BusinessTripLifecycle",
+                entity_id=record["trip_id"],
+                after=record,
+            )
+            return record
+        before = deepcopy(existing)
+        updated = migrate_business_trip_record(tenant_id, {**existing, **payload})
+        existing.clear()
+        existing.update(updated)
+        append_audit(
+            db,
+            actor_id=_uid(sess),
+            action="business_trip_lifecycle_updated",
+            entity_type="BusinessTripLifecycle",
+            entity_id=updated["trip_id"],
+            before=before,
+            after=updated,
+        )
+        return updated
+
+    record = with_db(tenant_id)(mut)
+    return get_business_trip(tenant_id, record["trip_id"], session=sess)
+
+
+def transition_business_trip_lifecycle(
+    tenant_id: str,
+    trip_id: str,
+    status: str,
+    *,
+    session: UserSession | None = None,
+) -> dict[str, Any]:
+    """Advance a business-trip lifecycle through the frozen state machine."""
+    tenant_id = _resolve_tenant(tenant_id)
+    sess = session or require_session()
+
+    def mut(db: dict[str, Any]) -> dict[str, Any]:
+        from core.workflow.business_trip import transition_trip_status
+
+        for row in db.get("business_trips") or []:
+            if row.get("trip_id") != trip_id and row.get("id") != trip_id:
+                continue
+            if not wf_perm.can_manage_business_trip_lifecycle(sess, row, tenant_id=tenant_id):
+                raise PermissionError("출장 lifecycle을 변경할 권한이 없습니다.")
+            before = deepcopy(row)
+            updated = transition_trip_status(row, status)
+            if updated == before:
+                return updated
+            row.clear()
+            row.update(updated)
+            append_audit(
+                db,
+                actor_id=_uid(sess),
+                action="business_trip_lifecycle_status_changed",
+                entity_type="BusinessTripLifecycle",
+                entity_id=updated["trip_id"],
+                before=before,
+                after=updated,
+            )
+            return updated
+        raise LookupError("출장 lifecycle을 찾을 수 없습니다.")
+
+    record = with_db(tenant_id)(mut)
+    return get_business_trip(tenant_id, record["trip_id"], session=sess)
