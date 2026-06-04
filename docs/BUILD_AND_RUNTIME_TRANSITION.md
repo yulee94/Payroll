@@ -259,6 +259,7 @@ cargo test --workspace
 - [x] Business-trip lifecycle legal-scope, visibility, and manage permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile resolver and side-effect bridge.
 - [x] Business-trip lifecycle administration and overdue-evaluator permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile resolver and side-effect bridge.
 - [x] Business-trip document relatedness and legal-scope predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the document/content resolver and side-effect bridge.
+- [x] Workflow document view/edit/submit/approve permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile/org-capability resolver and approval mutation bridge.
 - [x] Workflow site-report, month-close, and execution-task management permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile/task/site resolver and side-effect bridge.
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
@@ -727,6 +728,36 @@ git diff --check
 cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
 ```
 
+
+## Implementation checkpoint: Rust workflow document permissions core
+
+Completed on 2026-06-04 as a workflow document authorization slice:
+
+- `crates/workflow-core::business_trip_permissions` owns pure supplied
+  workflow-document view, edit, submit, and approve predicates.
+- Rust preserves the business-trip document legal-scope gate, admin/executive/
+  finance document visibility, requester visibility, approval-step visibility,
+  site-manager/HR site-scoped visibility, requester-only edit/submit for
+  `draft` and `requested_changes`, terminal `approved`/`closed` edit denial,
+  current-pending-step approval, and supplied org workflow-approval override
+  only for admin/executive/finance workflow authority.
+- Python remains the `UserSession` adapter, workflow profile resolver,
+  document/content resolver, org-position workflow-approval capability resolver,
+  workflow store, approval mutation owner, document/task/report/KPI side-effect
+  owner, notification/calendar/To-Do producer, and UI bridge.
+- Slice spec: `docs/WORKFLOW_RUST_DOCUMENT_PERMISSIONS_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo test -p bitween-workflow-core business_trip_permissions --lib
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_document_permissions_contracts -v
+```
+
+Task 5 acceptance status:
+
+- [x] Workflow document permission predicates are Rust-owned behind parity
+      contract tests.
 
 ## Implementation checkpoint: Rust workflow operational permissions core
 

@@ -5,6 +5,16 @@ pub const ROLE_STAFF: &str = "staff";
 pub const ROLE_FINANCE: &str = "finance";
 pub const ROLE_ADMIN: &str = "admin";
 
+pub const DOC_STATUS_DRAFT: &str = "draft";
+pub const DOC_STATUS_SUBMITTED: &str = "submitted";
+pub const DOC_STATUS_IN_REVIEW: &str = "in_review";
+pub const DOC_STATUS_APPROVED: &str = "approved";
+pub const DOC_STATUS_REQUESTED_CHANGES: &str = "requested_changes";
+pub const DOC_STATUS_CLOSED: &str = "closed";
+
+pub const STEP_PENDING: &str = "pending";
+pub const STEP_APPROVED: &str = "approved";
+
 pub const WF_ROLE_ADMIN: &str = "admin";
 pub const WF_ROLE_EXECUTIVE: &str = "executive";
 pub const WF_ROLE_SITE_MANAGER: &str = "site_manager";
@@ -65,12 +75,43 @@ pub struct BusinessTripPermissionDocument {
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WorkflowApprovalStep {
+    pub approver_id: String,
+    pub status: String,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WorkflowPermissionDocument {
+    pub document_type: String,
+    pub origin_tenant_id: String,
+    pub legal_tenant_id: String,
+    pub legal_entity_id: String,
+    pub content_trip_id: String,
+    pub content_origin_tenant_id: String,
+    pub content_legal_tenant_id: String,
+    pub content_legal_entity_id: String,
+    pub status: String,
+    pub requester_id: String,
+    pub site_id: String,
+    pub approval_steps: Vec<WorkflowApprovalStep>,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BusinessTripPermissionInput {
     pub principal: BusinessTripPrincipal,
     pub profile: Option<BusinessTripProfile>,
     pub requester_profile: Option<BusinessTripProfile>,
     pub trip: BusinessTripPermissionTrip,
     pub tenant_id: String,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WorkflowDocumentPermissionInput {
+    pub principal: BusinessTripPrincipal,
+    pub profile: Option<BusinessTripProfile>,
+    pub document: WorkflowPermissionDocument,
+    pub tenant_id: String,
+    pub can_approve_workflow: bool,
 }
 
 pub fn workflow_roles(
@@ -167,6 +208,102 @@ pub fn is_business_trip_document_legal_scope_allowed(
         ..BusinessTripPermissionTrip::default()
     };
     is_business_trip_legal_scope_allowed(principal, &trip, &storage_tenant)
+}
+
+pub fn can_view_document(input: &WorkflowDocumentPermissionInput) -> bool {
+    if !workflow_permission_document_legal_scope_allowed(
+        &input.principal,
+        &input.document,
+        &input.tenant_id,
+    ) {
+        return false;
+    }
+
+    let uid = clean(&input.principal.user_id);
+    let roles = workflow_roles(&input.principal, input.profile.as_ref());
+    if has_admin_view_role(&roles) {
+        return true;
+    }
+
+    if !uid.is_empty() && clean(&input.document.requester_id) == uid {
+        return true;
+    }
+
+    if !uid.is_empty()
+        && input
+            .document
+            .approval_steps
+            .iter()
+            .any(|step| clean(&step.approver_id) == uid)
+    {
+        return true;
+    }
+
+    let Some(profile) = input.profile.as_ref() else {
+        return false;
+    };
+    let site_id = clean(&input.document.site_id);
+    !site_id.is_empty()
+        && contains_id(&profile.site_ids, &site_id)
+        && (roles.contains(WF_ROLE_SITE_MANAGER) || roles.contains(WF_ROLE_HR))
+}
+
+pub fn can_edit_document(input: &WorkflowDocumentPermissionInput) -> bool {
+    if !workflow_permission_document_legal_scope_allowed(
+        &input.principal,
+        &input.document,
+        &input.tenant_id,
+    ) {
+        return false;
+    }
+
+    let status = clean(&input.document.status);
+    if status == DOC_STATUS_CLOSED || status == DOC_STATUS_APPROVED {
+        return false;
+    }
+
+    let uid = clean(&input.principal.user_id);
+    if uid.is_empty() || clean(&input.document.requester_id) != uid {
+        return false;
+    }
+
+    status == DOC_STATUS_DRAFT || status == DOC_STATUS_REQUESTED_CHANGES
+}
+
+pub fn can_submit_document(input: &WorkflowDocumentPermissionInput) -> bool {
+    can_edit_document(input)
+}
+
+pub fn can_approve_document(input: &WorkflowDocumentPermissionInput) -> bool {
+    if !workflow_permission_document_legal_scope_allowed(
+        &input.principal,
+        &input.document,
+        &input.tenant_id,
+    ) {
+        return false;
+    }
+
+    let status = clean(&input.document.status);
+    if status != DOC_STATUS_SUBMITTED && status != DOC_STATUS_IN_REVIEW {
+        return false;
+    }
+
+    let Some(current) = input
+        .document
+        .approval_steps
+        .iter()
+        .find(|step| clean(&step.status) == STEP_PENDING)
+    else {
+        return false;
+    };
+
+    let uid = clean(&input.principal.user_id);
+    if !uid.is_empty() && clean(&current.approver_id) == uid {
+        return true;
+    }
+
+    let roles = workflow_roles(&input.principal, input.profile.as_ref());
+    input.can_approve_workflow && has_admin_view_role(&roles)
 }
 
 pub fn can_view_business_trip_lifecycle(input: &BusinessTripPermissionInput) -> bool {
@@ -344,6 +481,27 @@ fn has_admin_view_role(roles: &BTreeSet<String>) -> bool {
     roles.contains(WF_ROLE_ADMIN)
         || roles.contains(WF_ROLE_EXECUTIVE)
         || roles.contains(WF_ROLE_FINANCE)
+}
+
+fn workflow_permission_document_legal_scope_allowed(
+    principal: &BusinessTripPrincipal,
+    document: &WorkflowPermissionDocument,
+    tenant_id: &str,
+) -> bool {
+    is_business_trip_document_legal_scope_allowed(
+        principal,
+        &BusinessTripPermissionDocument {
+            document_type: document.document_type.clone(),
+            origin_tenant_id: document.origin_tenant_id.clone(),
+            legal_tenant_id: document.legal_tenant_id.clone(),
+            legal_entity_id: document.legal_entity_id.clone(),
+            content_trip_id: document.content_trip_id.clone(),
+            content_origin_tenant_id: document.content_origin_tenant_id.clone(),
+            content_legal_tenant_id: document.content_legal_tenant_id.clone(),
+            content_legal_entity_id: document.content_legal_entity_id.clone(),
+        },
+        tenant_id,
+    )
 }
 
 fn normalize_role(value: &str) -> String {
@@ -803,5 +961,128 @@ mod tests {
         let visible_only = input("site-manager-1", "tenant-a", "staff", Some(site_manager));
         assert!(can_view_business_trip_lifecycle(&visible_only));
         assert!(!can_manage_business_trip_lifecycle(&visible_only));
+    }
+
+    #[test]
+    fn document_view_edit_submit_permissions_match_python_boundary() {
+        let mut site_manager = profile(&["site_manager"]);
+        site_manager.site_ids = vec!["site-1".to_string()];
+
+        let document = WorkflowPermissionDocument {
+            document_type: DOC_TYPE_BUSINESS_TRIP_REQUEST.to_string(),
+            origin_tenant_id: "tenant-a".to_string(),
+            requester_id: "requester-1".to_string(),
+            site_id: "site-1".to_string(),
+            status: DOC_STATUS_DRAFT.to_string(),
+            approval_steps: vec![WorkflowApprovalStep {
+                approver_id: "approver-1".to_string(),
+                status: STEP_PENDING.to_string(),
+            }],
+            ..WorkflowPermissionDocument::default()
+        };
+
+        let requester = WorkflowDocumentPermissionInput {
+            principal: principal("requester-1", "tenant-a", "staff"),
+            profile: None,
+            document: document.clone(),
+            tenant_id: "tenant-a".to_string(),
+            can_approve_workflow: false,
+        };
+        assert!(can_view_document(&requester));
+        assert!(can_edit_document(&requester));
+        assert!(can_submit_document(&requester));
+
+        let site_scoped_viewer = WorkflowDocumentPermissionInput {
+            principal: principal("site-manager-1", "tenant-a", "staff"),
+            profile: Some(site_manager),
+            document: document.clone(),
+            tenant_id: "tenant-a".to_string(),
+            can_approve_workflow: false,
+        };
+        assert!(can_view_document(&site_scoped_viewer));
+        assert!(!can_edit_document(&site_scoped_viewer));
+        assert!(!can_submit_document(&site_scoped_viewer));
+
+        let mut terminal = requester.clone();
+        terminal.document.status = DOC_STATUS_APPROVED.to_string();
+        assert!(!can_edit_document(&terminal));
+        assert!(!can_submit_document(&terminal));
+
+        let blank_principal = WorkflowDocumentPermissionInput {
+            principal: principal("", "tenant-a", "staff"),
+            profile: None,
+            document: WorkflowPermissionDocument {
+                document_type: DOC_TYPE_BUSINESS_TRIP_REQUEST.to_string(),
+                origin_tenant_id: "tenant-a".to_string(),
+                status: DOC_STATUS_DRAFT.to_string(),
+                ..WorkflowPermissionDocument::default()
+            },
+            tenant_id: "tenant-a".to_string(),
+            can_approve_workflow: false,
+        };
+        assert!(!can_view_document(&blank_principal));
+        assert!(!can_edit_document(&blank_principal));
+        assert!(!can_submit_document(&blank_principal));
+    }
+
+    #[test]
+    fn document_approval_requires_current_pending_step_or_supplied_org_override() {
+        let document = WorkflowPermissionDocument {
+            document_type: DOC_TYPE_BUSINESS_TRIP_REQUEST.to_string(),
+            origin_tenant_id: "tenant-a".to_string(),
+            requester_id: "requester-1".to_string(),
+            status: DOC_STATUS_SUBMITTED.to_string(),
+            approval_steps: vec![
+                WorkflowApprovalStep {
+                    approver_id: "already-approved".to_string(),
+                    status: STEP_APPROVED.to_string(),
+                },
+                WorkflowApprovalStep {
+                    approver_id: "current-approver".to_string(),
+                    status: STEP_PENDING.to_string(),
+                },
+            ],
+            ..WorkflowPermissionDocument::default()
+        };
+
+        let current_approver = WorkflowDocumentPermissionInput {
+            principal: principal("current-approver", "tenant-a", "staff"),
+            profile: Some(profile(&["approver"])),
+            document: document.clone(),
+            tenant_id: "tenant-a".to_string(),
+            can_approve_workflow: false,
+        };
+        assert!(can_view_document(&current_approver));
+        assert!(can_approve_document(&current_approver));
+
+        let prior_step_approver = WorkflowDocumentPermissionInput {
+            principal: principal("already-approved", "tenant-a", "staff"),
+            profile: Some(profile(&["approver"])),
+            document: document.clone(),
+            tenant_id: "tenant-a".to_string(),
+            can_approve_workflow: false,
+        };
+        assert!(can_view_document(&prior_step_approver));
+        assert!(!can_approve_document(&prior_step_approver));
+
+        let org_override = WorkflowDocumentPermissionInput {
+            principal: principal("finance-1", "tenant-a", "staff"),
+            profile: Some(profile(&["finance"])),
+            document: document.clone(),
+            tenant_id: "tenant-a".to_string(),
+            can_approve_workflow: true,
+        };
+        assert!(can_approve_document(&org_override));
+
+        let scoped_manager_without_admin_authority = WorkflowDocumentPermissionInput {
+            principal: principal("site-manager-1", "tenant-a", "staff"),
+            profile: Some(profile(&["site_manager"])),
+            document,
+            tenant_id: "tenant-a".to_string(),
+            can_approve_workflow: true,
+        };
+        assert!(!can_approve_document(
+            &scoped_manager_without_admin_authority
+        ));
     }
 }
