@@ -18,6 +18,7 @@ from ui.theme import COLORS, FONT, FONT_BODY
 from services.ai_assistant import load_chat_history
 from services.openai_settings_store import has_api_key
 from ui.ai_assistant_dialog import AiAssistantDialog
+from ui.workspace_labels import workspace_source_label
 from ui.workspace_dialogs import CalendarDialog, MailDialog, MessengerDialog
 
 OnSessionAction = Callable[[], None]
@@ -365,7 +366,11 @@ class WorkspaceHub(tk.Frame):
                 ).grid(row=r, column=c)
         upcoming = [e for e in events if str(e.get("date", "")) >= self._today.isoformat()][:3]
         if upcoming:
-            lines = [f"· {e.get('date', '')} {e.get('title', '')}" for e in upcoming]
+            lines = []
+            for e in upcoming:
+                badge = workspace_source_label(e)
+                suffix = f" · {badge}" if badge else ""
+                lines.append(f"· {e.get('date', '')} {e.get('title', '')}{suffix}")
             self._cal_events_lbl.configure(text="\n".join(lines))
         else:
             self._cal_events_lbl.configure(text="이번 달 등록된 일정 없음")
@@ -394,9 +399,11 @@ class WorkspaceHub(tk.Frame):
                 command=lambda i=tid: self._toggle_todo(i),
             ).pack(side=tk.LEFT)
             due = f" ({t.get('due_date')})" if t.get("due_date") else ""
+            badge = workspace_source_label(t)
+            suffix = f" · {badge}" if badge else ""
             tk.Label(
                 row,
-                text=f"{t.get('title', '')}{due}",
+                text=f"{t.get('title', '')}{due}{suffix}",
                 bg=COLORS["card"],
                 font=FONT_BODY,
                 anchor=tk.W,

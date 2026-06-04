@@ -21,6 +21,12 @@ from core.workflow.constants import (
     DOC_STATUS_LABELS,
     DOC_TEMPLATES,
     DOC_TYPE_LABELS,
+    KPI_REFLECTION_BLOCKED,
+    KPI_REFLECTION_NOT_APPLICABLE,
+    KPI_REFLECTION_READY,
+    KPI_REFLECTION_REFLECTED,
+    TASK_STATUS_LABELS,
+    TRIP_STATUS_LABELS,
 )
 from core.workflow.inbox import GW_INBOX_QUICK_TABS, INBOX_DEFINITIONS, INBOX_LABELS
 from core.workflow import service as wf_svc
@@ -39,6 +45,52 @@ from ui.workflow_theme import (
     flat_button,
     setup_workflow_ttk_style,
 )
+
+KPI_REFLECTION_LABELS = {
+    KPI_REFLECTION_BLOCKED: "대기",
+    KPI_REFLECTION_READY: "반영 가능",
+    KPI_REFLECTION_REFLECTED: "반영 완료",
+    KPI_REFLECTION_NOT_APPLICABLE: "대상 아님",
+}
+
+
+def format_business_trip_dashboard_lines(dashboard: dict[str, Any]) -> list[str]:
+    """Format manager-scoped business-trip dashboard rows for Tk text panes."""
+    counts = dashboard.get("counts") or {}
+    kpi_summary = dashboard.get("kpi_summary") or {}
+    lines = [
+        "출장 lifecycle 현황",
+        "=" * 40,
+        (
+            f"진행 {counts.get('ongoing', 0)}건 · 완료 {counts.get('completed', 0)}건 · "
+            f"지연 {counts.get('overdue', 0)}건"
+        ),
+        (
+            "실적반영: "
+            f"대기 {kpi_summary.get(KPI_REFLECTION_BLOCKED, 0)} · "
+            f"가능 {kpi_summary.get(KPI_REFLECTION_READY, 0)} · "
+            f"완료 {kpi_summary.get(KPI_REFLECTION_REFLECTED, 0)}"
+        ),
+    ]
+    sections = dashboard.get("sections") or {}
+    for key, label in (("overdue", "지연"), ("ongoing", "진행"), ("completed", "완료")):
+        rows = list(sections.get(key) or [])
+        lines.append(f"\n[{label}] {len(rows)}건")
+        if not rows:
+            lines.append("  · 없음")
+            continue
+        for row in rows[:12]:
+            status = TRIP_STATUS_LABELS.get(str(row.get("status") or ""), row.get("status") or "")
+            kpi = KPI_REFLECTION_LABELS.get(str(row.get("kpi_reflection_status") or ""), "")
+            lines.append(
+                "  · "
+                f"{row.get('title') or row.get('trip_id')} "
+                f"({status} / 실적 {kpi}) "
+                f"{row.get('period_start') or ''}~{row.get('period_end') or ''}"
+            )
+        if len(rows) > 12:
+            lines.append(f"  · 외 {len(rows) - 12}건")
+    return lines
 
 
 class WorkflowHubPanel(tk.Frame):
@@ -150,6 +202,7 @@ class WorkflowHubPanel(tk.Frame):
             self._reload_home()
             self._reload_inbox()
             self._reload_tasks()
+            self._reload_trip_dashboard()
             self._reload_site_dashboard()
             self._reload_exec_dashboard()
             self._reload_closing()
@@ -166,6 +219,7 @@ class WorkflowHubPanel(tk.Frame):
         elif tab == "tasks":
             self._reload_tasks()
         elif tab == "reports":
+            self._reload_trip_dashboard()
             self._reload_site_dashboard()
             self._reload_exec_dashboard()
         elif tab == "new":
@@ -233,8 +287,15 @@ class WorkflowHubPanel(tk.Frame):
             c = wf_svc.inbox_counts(self._tenant())
             pending = c.get("to_approve", 0)
             prog = c.get("in_progress", 0)
+            trip_counts = wf_svc.business_trip_manager_dashboard(
+                self._tenant(),
+                session=require_session(),
+            ).get("counts", {})
             self._header_stats.configure(
-                text=f"결재 대기 {pending}건  ·  진행 {prog}건"
+                text=(
+                    f"결재 대기 {pending}건  ·  진행 {prog}건\n"
+                    f"출장 진행 {trip_counts.get('ongoing', 0)}건  ·  지연 {trip_counts.get('overdue', 0)}건"
+                )
             )
         except Exception:
             self._header_stats.configure(text="")
@@ -1040,22 +1101,47 @@ class WorkflowHubPanel(tk.Frame):
     def _build_reports_tab(self, parent: tk.Frame) -> None:
         sub_bar = tk.Frame(parent, bg=WF["page_bg"])
         sub_bar.pack(fill=tk.X, pady=(0, 8))
-        self._report_tab = tk.StringVar(value="site")
-        for val, label in (("site", "사업장 현황"), ("exec", "임원 통합")):
+        self._report_tab = tk.StringVar(value="trip")
+        for val, label in (("trip", "출장 현황"), ("site", "사업장 현황"), ("exec", "임원 통합")):
             flat_button(
                 sub_bar,
                 label,
                 command=lambda v=val: self._show_report_pane(v),
-                bg=COLORS["accent"] if val == "site" else WF["tab_inactive"],
-                fg="#FFFFFF" if val == "site" else COLORS["text"],
+                bg=COLORS["accent"] if val == "trip" else WF["tab_inactive"],
+                fg="#FFFFFF" if val == "trip" else COLORS["text"],
                 padx=14,
                 pady=6,
             ).pack(side=tk.LEFT, padx=(0, 6))
 
         self._report_stack = tk.Frame(parent, bg=WF["page_bg"])
         self._report_stack.pack(fill=tk.X, anchor=tk.NW)
+        self._report_trip = self._card(self._report_stack)
         self._report_site = self._card(self._report_stack)
         self._report_exec = self._card(self._report_stack)
+        trip_top = tk.Frame(self._report_trip, bg=WF["card"], padx=12, pady=8)
+        trip_top.pack(fill=tk.X)
+        flat_button(
+            trip_top,
+            "지연 평가 · 새로고침",
+            command=self._reload_trip_dashboard,
+            bg="#0F766E",
+            fg="#FFFFFF",
+            padx=10,
+            pady=5,
+        ).pack(side=tk.RIGHT)
+        self._trip_text = tk.Text(
+            self._report_trip,
+            font=FONT_BODY,
+            wrap=tk.WORD,
+            bg=WF["card"],
+            fg=COLORS["text"],
+            relief=tk.FLAT,
+            padx=16,
+            pady=12,
+            height=18,
+            state=tk.DISABLED,
+        )
+        self._trip_text.pack(fill=tk.X, anchor=tk.NW)
         self._site_text = tk.Text(
             self._report_site,
             font=FONT_BODY,
@@ -1087,16 +1173,18 @@ class WorkflowHubPanel(tk.Frame):
             state=tk.DISABLED,
         )
         self._exec_text.pack(fill=tk.X, anchor=tk.NW)
-        self._show_report_pane("site")
+        self._show_report_pane("trip")
 
     def _show_report_pane(self, pane: str) -> None:
         self._report_tab.set(pane)
-        if pane == "site":
-            self._report_site.pack(fill=tk.X, anchor=tk.NW)
-            self._report_exec.pack_forget()
-        else:
+        for frame in (self._report_trip, self._report_site, self._report_exec):
+            frame.pack_forget()
+        if pane == "exec":
             self._report_exec.pack(fill=tk.X, anchor=tk.NW)
-            self._report_site.pack_forget()
+        elif pane == "site":
+            self._report_site.pack(fill=tk.X, anchor=tk.NW)
+        else:
+            self._report_trip.pack(fill=tk.X, anchor=tk.NW)
         self.after_idle(self._on_tab_scrolled)
 
     def _build_closing_tab(self, parent: tk.Frame) -> None:
@@ -1250,6 +1338,7 @@ class WorkflowHubPanel(tk.Frame):
 
     def _reload_tasks(self) -> None:
         try:
+            wf_svc.evaluate_business_trip_overdues(self._tenant(), session=require_session())
             tasks = wf_svc.list_execution_tasks(self._tenant(), mine_only=True)
         except Exception as exc:
             messagebox.showerror("오류", str(exc), parent=self.winfo_toplevel())
@@ -1266,7 +1355,7 @@ class WorkflowHubPanel(tk.Frame):
                 iid=t["id"],
                 values=(
                     t.get("title", ""),
-                    t.get("status", ""),
+                    TASK_STATUS_LABELS.get(t.get("status", ""), t.get("status", "")),
                     t.get("due_date", ""),
                     sites.get(t.get("site_id", ""), ""),
                 ),
@@ -1280,8 +1369,20 @@ class WorkflowHubPanel(tk.Frame):
             wf_svc.complete_execution_task(self._tenant(), sel[0])
             messagebox.showinfo("완료", "실행업무를 완료 처리했습니다.", parent=self.winfo_toplevel())
             self._reload_tasks()
+            self._reload_trip_dashboard()
         except Exception as exc:
             messagebox.showerror("오류", str(exc), parent=self.winfo_toplevel())
+
+    def _reload_trip_dashboard(self) -> None:
+        if not hasattr(self, "_trip_text"):
+            return
+        try:
+            wf_svc.evaluate_business_trip_overdues(self._tenant(), session=require_session())
+            dashboard = wf_svc.business_trip_manager_dashboard(self._tenant(), session=require_session())
+        except Exception as exc:
+            self._set_text(self._trip_text, str(exc))
+            return
+        self._set_text(self._trip_text, "\n".join(format_business_trip_dashboard_lines(dashboard)))
 
     def _reload_site_dashboard(self) -> None:
         month = date.today().strftime("%Y-%m")

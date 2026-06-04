@@ -1,6 +1,6 @@
-# Bitween ERP / 워크플로우 MVP
+# Bitween ERP / 워크플로우
 
-Python 3 + Tkinter 데스크톱 앱에 확장 가능한 **전자결재·업무 허브** MVP가 추가되었습니다.  
+Python 3 + Tkinter 데스크톱 앱에 확장 가능한 **전자결재·업무 허브**가 추가되었습니다.
 (프롬프트의 Next.js/Prisma 경로는 별도 `packages/payroll-engine` 스캐폴드용이며, **운영 UI는 급여프로그램**입니다.)
 
 ## 접속 경로 (데스크톱)
@@ -9,6 +9,8 @@ Python 3 + Tkinter 데스크톱 앱에 확장 가능한 **전자결재·업무 �
 |------|-----------|
 | 플랫폼 홈 | 사이드바 **플랫폼 홈** → 카드 **업무 · 전자결재** |
 | 워크플로우 허브 | 사이드바 **업무 · 전자결재** (탭: 홈 / 결재함 / 작성 / 실행업무 / 보고 / 월마감) |
+| 출장 lifecycle | 워크플로우 **양식함 → 출장 신청**, **실행업무**, **보고 → 출장 현황** |
+| 연동 표면 | 플랫폼 홈 **캘린더 / Daily To-Do**, KPI 허브 **개인 KPI** |
 
 ## 결재함 (시장 표준 MVP)
 
@@ -25,6 +27,24 @@ Python 3 + Tkinter 데스크톱 앱에 확장 가능한 **전자결재·업무 �
 | 전체 | 열람 가능 문서 전체 |
 
 REST API (`/api/workflow/...`)는 **서비스 함수**로 구현되어 있으며, 향후 HTTP 서버 레이어를 붙일 수 있습니다.
+
+## 출장 lifecycle (production scope)
+
+출장은 문서 상태와 별도의 lifecycle 상태를 유지합니다. 결재문서, 실행업무, 업무일지/출장보고서,
+캘린더/To-Do, KPI 실적반영이 같은 `trip_id`로 추적됩니다.
+
+| 단계 | 상태 / 표면 | 구현 |
+|------|-------------|------|
+| 출장계획 | `draft → planned` | `출장신청서` 작성·상신 시 lifecycle 1건 생성/갱신 |
+| 출장승인 | `approved` | 최종 승인 시 실행업무 자동 생성, 캘린더·To-Do source link 생성 |
+| 출장실행 | `in_progress / overdue` | 실행업무 완료 또는 지연 평가로 상태 전이, 지연 시 상급자 escalation |
+| 업무일지/보고 | `일일업무일지`, `출장보고서` | 양식함 필드에 `trip_id` 연결, 보고서는 필수 연결 |
+| 실적반영 | `blocked → ready → reflected` | 실행 완료 후 KPI 반영 가능, KPI 개인 실적 row로 idempotent 반영 |
+
+관리자/상급자 조회는 `core/workflow/permissions.py`의 site/department/manager access matrix를 통과한
+출장만 표시합니다. Workflow Hub 보고 탭의 **출장 현황**은 진행/완료/지연 섹션과 KPI 반영 상태를 표시합니다.
+Workspace Hub는 workflow에서 생성된 캘린더/To-Do 항목에 `전자결재`, `결재`, `실행업무`, `출장 지연`
+라벨을 붙입니다. KPI Hub의 개인 KPI 카드에는 출장 실적 반영 건수가 표시됩니다.
 
 ## 데이터 저장
 
@@ -53,15 +73,19 @@ python main.py
 
 ```powershell
 python -m unittest tests.test_workflow -v
+python -m unittest tests.test_business_trip_lifecycle tests.test_business_trip_workflow_integration tests.test_business_trip_followup_kpi_manager tests.test_business_trip_ui_surfaces -v
 ```
 
-## 구현 완료 (MVP)
+## 구현 완료
 
 - 공통 문서 상태·유형·결재 단계 모델
 - 문서 CRUD, 상신, 승인/반려/보완요청
 - 승인 후 실행업무 자동 생성·완료 처리
+- 출장 lifecycle: 출장신청서 → 승인/실행업무 → 지연 escalation → KPI 실적반영
+- 캘린더·To-Do source link idempotency
 - 근태/구매/지출 payload 저장 (문서별 확장 테이블)
 - 사업장·임원 대시보드 집계
+- 관리자 출장 현황 대시보드 (진행/완료/지연/KPI 상태)
 - 감사로그·알림 구조
 - AI 기안 초안 (`services/workflow_ai.py`)
 - 샘플 시드 (본사·밀양·부산·경남, 샘플 기안/구매/지출/연차)

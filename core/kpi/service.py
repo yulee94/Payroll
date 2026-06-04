@@ -205,6 +205,7 @@ def ensure_seed(tenant_id: str | None = None) -> None:
         if changed:
             save_module_db(MODULE, tid, db)
         return
+    existing_individual = list(db.get("individual") or [])
     period = date.today().strftime("%Y-%m")
     db["entities"] = _default_entities(period)
     db["sites"] = [
@@ -285,7 +286,7 @@ def ensure_seed(tenant_id: str | None = None) -> None:
         },
     ]
     db["sites"].extend(_bulk_demo_sites(date.today().month))
-    db["individual"] = [
+    default_individual = [
         {
             "id": _new_id(),
             "employee_name": "김민수",
@@ -323,6 +324,15 @@ def ensure_seed(tenant_id: str | None = None) -> None:
             "status": STATUS_OK,
         },
     ]
+    seen_keys = {str(row.get("source_key") or row.get("id") or "") for row in default_individual}
+    for row in existing_individual:
+        key = str(row.get("source_key") or row.get("id") or "")
+        if key and key in seen_keys:
+            continue
+        default_individual.append(row)
+        if key:
+            seen_keys.add(key)
+    db["individual"] = default_individual
     db["alerts"] = [
         {
             "id": _new_id(),
@@ -362,11 +372,12 @@ def dashboard_kpis() -> list[tuple[str, str, str]]:
     profit = sum(int(s.get("profit") or 0) for s in sites)
     margin = (profit / rev * 100) if rev else 0
     issues = sum(1 for s in sites if s.get("status") in (STATUS_WARN, STATUS_CRITICAL))
+    trip_reflections = sum(1 for row in db.get("individual") or [] if row.get("source") == "business_trip")
     return [
         ("총 매출", _won_short(rev), f"사업장 {len(sites)}곳"),
         ("총 이익", _won_short(profit), f"평균 마진 {margin:.1f}%"),
         ("이슈 사업장", str(issues), f"알림 {len(alerts)}건"),
-        ("개인 KPI", str(len(db.get("individual") or [])), "인사·급여 연동 예정"),
+        ("개인 KPI", str(len(db.get("individual") or [])), f"출장 실적 {trip_reflections}건 반영"),
     ]
 
 
