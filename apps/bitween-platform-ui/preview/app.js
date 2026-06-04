@@ -442,7 +442,7 @@ function renderLogin() {
           ${field(t("screens.login.form.companyCode"), "company-code", demoAccount.companyCode, "text", state.companyCode)}
           ${field(t("screens.login.form.userId"), "user-id", demoAccount.userId, "text", state.userId)}
           ${field(t("screens.login.form.password"), "password", demoAccount.password, "password", state.password)}
-          ${state.loginFeedbackKey ? `<div class="inline-warning">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey)}</span></div>` : ""}
+          ${state.loginFeedbackKey ? `<div aria-live="assertive" class="inline-warning" role="alert">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey)}</span></div>` : ""}
           <div class="login-actions">
             <button class="btn primary" type="submit">${t("screens.login.actions.enterHome")}</button>
             <button class="btn secondary" type="button" data-demo-login="true">${t("screens.login.actions.demo")}</button>
@@ -527,7 +527,7 @@ function renderShell() {
         </footer>
       </div>
     </section>
-    <div class="toast" id="toast">${t("preview.toast.default")}</div>
+    <div aria-atomic="true" aria-live="polite" class="toast" id="toast" role="status">${t("preview.toast.default")}</div>
   `;
 }
 
@@ -696,7 +696,7 @@ function renderModule(id) {
         <div class="filters">${data.filters.map((filter) => `<button aria-pressed="${state.filter === filter.id}" class="filter-chip ${state.filter === filter.id ? "active" : ""}" data-filter="${filter.id}">${filter.label}</button>`).join("")}</div>
         <label class="search-box" for="work-search"><span>${t("screens.module.search.label")}</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="${t("screens.module.search.placeholder")}" /></label>
       </div>
-      <div class="list-summary"><strong>${t("screens.module.list.count", { count: rows.length })}</strong><span class="helper">${state.search ? t("screens.module.list.filteredWithSearch", { filter: filterLabel, search: state.search }) : t("screens.module.list.filtered", { filter: filterLabel })}</span></div>
+      <div aria-atomic="true" aria-live="polite" class="list-summary" role="status"><strong>${t("screens.module.list.count", { count: rows.length })}</strong><span class="helper">${state.search ? t("screens.module.list.filteredWithSearch", { filter: filterLabel, search: state.search }) : t("screens.module.list.filtered", { filter: filterLabel })}</span></div>
       ${data.rows.length === 0 ? empty(t("table.empty.title"), t("table.empty.description")) : rows.length ? table(rows, true) : filteredEmpty()}
       ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
@@ -896,7 +896,7 @@ function filterRows(rows) {
 }
 
 function empty(title, desc) {
-  return `<div class="empty"><strong>${title}</strong><span class="helper">${desc}</span></div>`;
+  return `<div aria-live="polite" class="empty" role="status"><strong>${title}</strong><span class="helper">${desc}</span></div>`;
 }
 
 function filteredEmpty() {
