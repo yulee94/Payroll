@@ -1160,6 +1160,7 @@ input:focus-visible {
 
 .table-row {
   align-items: center;
+  border-left: 4px solid transparent;
   border-top: 1px solid var(--divider);
   display: grid;
   gap: 12px;
@@ -1169,7 +1170,6 @@ input:focus-visible {
 
 .row-button {
   background: transparent;
-  border-left: 0;
   border-right: 0;
   border-bottom: 0;
   color: inherit;
@@ -1193,6 +1193,7 @@ input:focus-visible {
 
 .table-row.header {
   background: var(--accent-soft);
+  border-left-color: transparent;
   border-top: 0;
   color: var(--accent);
   font-size: 13px;
@@ -1339,6 +1340,8 @@ input:focus-visible {
   .table-row {
     background: var(--input);
     border: 1px solid var(--border);
+    border-left-style: solid;
+    border-left-width: 4px;
     border-radius: 8px;
     grid-template-columns: 1fr;
   }

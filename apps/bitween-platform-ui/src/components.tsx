@@ -189,6 +189,7 @@ export function DataTable({ locale, onRowPress, rows, selectedRowId }: Localized
             onPress={() => onRowPress?.(row)}
             style={({ pressed }) => [
               styles.rowCard,
+              { borderLeftColor: toneColor(row.tone) },
               selectedRowId === row.id && styles.rowSelected,
               pressed && onRowPress && styles.buttonPressed
             ]}
@@ -220,6 +221,7 @@ export function DataTable({ locale, onRowPress, rows, selectedRowId }: Localized
           onPress={() => onRowPress?.(row)}
           style={({ pressed }) => [
             styles.tableRow,
+            { borderLeftColor: toneColor(row.tone) },
             selectedRowId === row.id && styles.tableRowSelected,
             pressed && onRowPress && styles.buttonPressed
           ]}
@@ -598,6 +600,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radius.lg,
     borderWidth: 1,
+    borderLeftWidth: 4,
     gap: spacing.sm,
     padding: spacing.md
   },
@@ -761,6 +764,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderTopColor: colors.divider,
     borderTopWidth: 1,
+    borderLeftWidth: 4,
     flexDirection: "row",
     gap: spacing.md,
     padding: spacing.md

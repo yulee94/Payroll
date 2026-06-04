@@ -862,11 +862,11 @@ function table(rows, selectable = false) {
     ${rows.map((row) => {
       const content = `<span><strong>${row.category}</strong></span><span>${badge(row.status, row.tone)}</span><span>${row.owner}</span><span>${row.next}</span>`;
       return selectable ? `
-      <button class="table-row row-button ${state.selectedRowKey === row.id ? "selected" : ""}" data-row-key="${row.id}">
+      <button class="table-row row-button ${state.selectedRowKey === row.id ? "selected" : ""}" data-row-key="${row.id}" style="border-left-color:${toneColor(row.tone)}">
         ${content}
       </button>
     ` : `
-      <div class="table-row">
+      <div class="table-row" style="border-left-color:${toneColor(row.tone)}">
         ${content}
       </div>
     `;
