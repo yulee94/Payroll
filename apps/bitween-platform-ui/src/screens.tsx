@@ -272,7 +272,7 @@ export function LauncherScreen({ locale, onSelect }: ScreenProps) {
         <MetricGrid items={platformMetrics} />
       </Card>
 
-      <CalendarTodoPanel events={calendarEvents} locale={locale} todos={todayTodos} />
+      <CalendarTodoPanel events={calendarEvents} locale={locale} onSelect={onSelect} todos={todayTodos} />
 
       <Card>
         <SectionHeader title={tScreen(locale, "launcher.workQueue.title")} description={tScreen(locale, "launcher.workQueue.description")} />
@@ -419,7 +419,17 @@ function PayrollIntegrationPanel({ locale, onSelect }: Pick<ScreenProps, "locale
   );
 }
 
-function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonly CalendarEvent[]; readonly locale: SupportedLocale; readonly todos: readonly TodoItem[] }) {
+function CalendarTodoPanel({
+  events,
+  locale,
+  onSelect,
+  todos
+}: {
+  readonly events: readonly CalendarEvent[];
+  readonly locale: SupportedLocale;
+  readonly onSelect: (id: PlatformId) => void;
+  readonly todos: readonly TodoItem[];
+}) {
   return (
     <View style={styles.homePlannerGrid}>
       <Card style={styles.homePlannerCard}>
@@ -445,13 +455,18 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
         <SectionHeader title={tScreen(locale, "todo.title")} description={tScreen(locale, "todo.description")} />
         <View style={styles.plannerList}>
           {todos.map((todo) => (
-            <View key={todo.id} style={[styles.todoItem, todo.completed && styles.todoItemDone]}>
+            <Pressable
+              accessibilityRole="button"
+              key={todo.id}
+              onPress={() => onSelect(todo.target)}
+              style={({ pressed }) => [styles.todoItem, todo.completed && styles.todoItemDone, pressed && styles.buttonPressed]}
+            >
               <Badge tone={todo.tone}>{todo.timeLabel}</Badge>
               <View style={styles.plannerCopy}>
                 <Label weight="bold">{todo.title}</Label>
                 <Label size="sm" muted>{todo.owner}</Label>
               </View>
-            </View>
+            </Pressable>
           ))}
         </View>
       </Card>
