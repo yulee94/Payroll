@@ -7,6 +7,7 @@ use crate::attendance::{
 use crate::deductions::{
     PayrollDeductionInput, PayrollDeductionResult, finalize_payroll_deductions,
 };
+use crate::earnings::{PayrollEarningsInput, PayrollEarningsResult, calculate_payroll_earnings};
 use crate::edi_insurance::{
     EdiInsuranceApplication, EdiInsuranceConfig, EdiInsuranceInvoice, EdiInsurancePremiumRecord,
     apply_edi_premiums_to_invoice,
@@ -249,6 +250,10 @@ impl PayrollApiService {
         finalize_payroll_deductions(input)
     }
 
+    pub fn calculate_payroll_earnings(&self, input: PayrollEarningsInput) -> PayrollEarningsResult {
+        calculate_payroll_earnings(input)
+    }
+
     pub fn apply_edi_premiums_to_invoice<S>(
         &self,
         invoice: EdiInsuranceInvoice,
@@ -384,6 +389,7 @@ fn readiness_state(checks: &[ReadinessCheck]) -> ReadinessState {
 mod tests {
     use crate::access::{PayrollAction, PayrollPosition, PayrollPrincipal, PayrollRole};
     use crate::deductions::PayrollDeductionInput;
+    use crate::earnings::PayrollEarningsInput;
     use crate::edi_insurance::{
         EdiInsuranceConfig, EdiInsuranceInvoice, EdiInsurancePremiumRecord,
     };
@@ -468,6 +474,25 @@ mod tests {
 
         assert_eq!(result.total_deduction, 551_000);
         assert_eq!(result.net_pay, 2_449_000);
+    }
+
+    #[test]
+    fn service_calculates_payroll_earnings() {
+        let service = PayrollApiService::new(ServiceConfig::default());
+        let result = service.calculate_payroll_earnings(
+            PayrollEarningsInput::new()
+                .with_base_salary(2_090_000.0)
+                .with_fixed_allowance(100_000.0)
+                .with_overtime_hours(10.0)
+                .with_night_hours(4.0)
+                .with_holiday_hours(8.0)
+                .with_meal_days(22.0)
+                .with_weekly_work_hours(35.0),
+        );
+
+        assert_eq!(result.earnings.weekly_holiday, 73_349);
+        assert_eq!(result.gross_pay, 2_709_182);
+        assert_eq!(result.taxable_pay, 2_588_182);
     }
 
     #[test]

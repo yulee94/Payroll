@@ -249,7 +249,51 @@ export interface PayrollInvoiceAuditBatchResult {
   warn_count: number;
 }
 
+export interface PayrollEarningsInput {
+  base_salary: number;
+  fixed_allowance: number;
+  ordinary_hourly: number;
+  overtime_hours: number;
+  night_hours: number;
+  holiday_hours: number;
+  overtime_amount_raw: number;
+  night_amount_raw: number;
+  holiday_amount_raw: number;
+  meal_days: number;
+  transport_allowance: number;
+  other_pay: number;
+  additional_pay: number;
+  weekly_work_hours: number;
+}
 
+export interface PayrollEarningsHours {
+  overtime: number;
+  night: number;
+  holiday: number;
+}
+
+export interface PayrollEarningsBreakdown {
+  base_salary: number;
+  fixed_allowance: number;
+  overtime: number;
+  night: number;
+  holiday: number;
+  overlap_premium: number;
+  weekly_holiday: number;
+  meal: number;
+  transport: number;
+  other: number;
+  additional: number;
+}
+
+export interface PayrollEarningsResult {
+  ordinary_hourly: number;
+  hours: PayrollEarningsHours;
+  earnings: PayrollEarningsBreakdown;
+  gross_pay: number;
+  taxable_pay: number;
+  non_taxable_pay: number;
+}
 
 export interface PayrollSocialInsuranceInput {
   taxable_pay: number;

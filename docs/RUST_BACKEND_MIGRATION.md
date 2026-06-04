@@ -261,6 +261,43 @@ Verification evidence for this checkpoint:
 
 Slice spec: `docs/PAYROLL_RUST_DEDUCTION_FINALIZATION_SLICE.md`.
 
+## Current implementation checkpoint: Rust payroll earnings calculation
+
+Implemented on 2026-06-04 as the next payroll calculation behavior slice:
+
+- `crates/payroll-api` now exposes `PayrollEarningsInput`,
+  `PayrollEarningsBreakdown`, `PayrollEarningsHours`,
+  `PayrollEarningsResult`, `calculate_ordinary_hourly`,
+  `calculate_weekly_holiday_pay`, `calculate_overlap_premium`, and
+  `calculate_payroll_earnings`.
+- `PayrollApiService::calculate_payroll_earnings` calculates supplied-input
+  ordinary hourly wage, adjusted overtime hours, earnings breakdown, gross pay,
+  non-taxable meal cap, and taxable pay without parsing invoices, reading
+  employee masters, calculating insurance/tax/deductions, writing workbooks, or
+  assembling final payroll records.
+- Rust preserves Python compatibility for the 209 standard monthly hours,
+  5,500 won/day meal allowance, overtime/night/holiday/overlap premium factors,
+  weekly-holiday proration, raw amount fallback heuristics, base-salary fallback,
+  200,000 won meal non-taxable cap, and Python-compatible won rounding.
+- Python remains responsible for invoice parsing, employee master merge,
+  string/cell normalization, social-insurance/tax/deduction orchestration,
+  workbook parsing/writing, and final payroll record assembly until those
+  boundaries move behind parity tests.
+- TypeScript and Python contract metadata now include earnings input, hours,
+  breakdown, and result DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo fmt --check`
+- `cargo test --workspace`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_payroll_api_contract -v`
+- `npm run typecheck --prefix frontend`
+- `git diff --check`
+- `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
+
+Slice spec: `docs/PAYROLL_RUST_EARNINGS_CALCULATION_SLICE.md`.
+
 ## Current implementation checkpoint: Rust payroll EI 65+ decision
 
 Implemented on 2026-06-04 as the next payroll decision behavior slice:
