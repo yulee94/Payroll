@@ -53,6 +53,12 @@ const demoAccount = {
   userId: "admin"
 } as const;
 
+const demoCredentialCards = [
+  { id: "company", value: demoAccount.companyCode },
+  { id: "user", value: demoAccount.userId },
+  { id: "password", value: demoAccount.password }
+] as const;
+
 const heroStatusIds = ["roleMenu", "workflowStatus", "dataProtection"] as const;
 
 const attendanceLogDefinitions = [
@@ -178,6 +184,22 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
           title={tScreen(locale, "login.form.title")}
           description={tScreen(locale, "login.form.description")}
         />
+        <View style={styles.loginCredentialPanel}>
+          <View style={styles.loginCredentialHeader}>
+            <Badge tone="neutral">{tScreen(locale, "login.demo.badge")}</Badge>
+            <Label size="sm" muted>{tScreen(locale, "login.demo.panel.helper")}</Label>
+          </View>
+          <View style={styles.loginCredentialGrid}>
+            {demoCredentialCards.map((item) => (
+              <View key={item.id} style={styles.loginCredentialItem}>
+                <Label size="sm" muted>{tScreen(locale, `login.demo.credentials.${item.id}.label`)}</Label>
+                <Label weight="bold">{item.value}</Label>
+                <Label size="sm" muted>{tScreen(locale, `login.demo.credentials.${item.id}.helper`)}</Label>
+              </View>
+            ))}
+          </View>
+          <Label size="sm" muted>{tScreen(locale, "login.demo.panel.disclaimer")}</Label>
+        </View>
         <View style={styles.languageGrid}>
           {languageOptions.map((option) => {
             const selected = option.locale === locale;
@@ -242,10 +264,6 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.loginActions}>
           <ActionButton onPress={handleLogin}>{tScreen(locale, canSubmit ? "login.actions.enterHome" : "login.actions.login")}</ActionButton>
           <ActionButton onPress={handleDemoLogin} variant="secondary">{tScreen(locale, "login.actions.demo")}</ActionButton>
-        </View>
-        <View style={styles.inlineNotice}>
-          <Badge tone="neutral">{tScreen(locale, "login.demo.badge")}</Badge>
-          <Label size="sm" muted>{tScreen(locale, "login.demo.summary", demoParams)}</Label>
         </View>
       </Card>
     </View>
@@ -1590,6 +1608,35 @@ const styles = StyleSheet.create({
   loginCard: {
     flexBasis: 360,
     flexGrow: 1
+  },
+  loginCredentialGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  loginCredentialHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  loginCredentialItem: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexBasis: 120,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.sm
+  },
+  loginCredentialPanel: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.sm,
+    padding: spacing.md
   },
   searchGroup: {
     flexBasis: 240,

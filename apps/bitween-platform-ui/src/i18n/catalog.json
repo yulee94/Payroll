@@ -4228,6 +4228,78 @@
       }
     },
     {
+      "key": "screens.login.demo.panel.helper",
+      "values": {
+        "ko-KR": "테스트 접속 정보로 플랫폼 흐름을 바로 확인합니다.",
+        "en-US": "Use these test credentials to review the platform flow immediately.",
+        "zh-Hans-CN": "使用这些测试登录信息即可立即查看平台流程。",
+        "ja-JP": "このテスト用ログイン情報で、すぐにプラットフォームの流れを確認できます。"
+      }
+    },
+    {
+      "key": "screens.login.demo.panel.disclaimer",
+      "values": {
+        "ko-KR": "실제 직원 명부, 급여 파일, 운영 설정과 분리된 frontend 미리보기 계정입니다.",
+        "en-US": "This frontend preview account is separated from real employee rosters, payroll files, and operating settings.",
+        "zh-Hans-CN": "此前端预览账号与真实员工名册、工资文件和运营设置相互隔离。",
+        "ja-JP": "実際の社員名簿、給与ファイル、運用設定とは分離された frontend プレビュー用アカウントです。"
+      }
+    },
+    {
+      "key": "screens.login.demo.credentials.company.label",
+      "values": {
+        "ko-KR": "법인 코드",
+        "en-US": "Company code",
+        "zh-Hans-CN": "法人代码",
+        "ja-JP": "法人コード"
+      }
+    },
+    {
+      "key": "screens.login.demo.credentials.company.helper",
+      "values": {
+        "ko-KR": "Bitween Demo 법인",
+        "en-US": "Bitween Demo tenant",
+        "zh-Hans-CN": "Bitween Demo 法人",
+        "ja-JP": "Bitween Demo 法人"
+      }
+    },
+    {
+      "key": "screens.login.demo.credentials.user.label",
+      "values": {
+        "ko-KR": "아이디",
+        "en-US": "User ID",
+        "zh-Hans-CN": "用户 ID",
+        "ja-JP": "ID"
+      }
+    },
+    {
+      "key": "screens.login.demo.credentials.user.helper",
+      "values": {
+        "ko-KR": "관리자 권한 화면 확인",
+        "en-US": "Review administrator screens",
+        "zh-Hans-CN": "查看管理员权限页面",
+        "ja-JP": "管理者権限画面を確認"
+      }
+    },
+    {
+      "key": "screens.login.demo.credentials.password.label",
+      "values": {
+        "ko-KR": "비밀번호",
+        "en-US": "Password",
+        "zh-Hans-CN": "密码",
+        "ja-JP": "パスワード"
+      }
+    },
+    {
+      "key": "screens.login.demo.credentials.password.helper",
+      "values": {
+        "ko-KR": "미리보기 전용",
+        "en-US": "Preview only",
+        "zh-Hans-CN": "仅限预览",
+        "ja-JP": "プレビュー専用"
+      }
+    },
+    {
       "key": "screens.launcher.platformStatus.title",
       "values": {
         "ko-KR": "오늘의 플랫폼 상태",

@@ -11,6 +11,12 @@ const demoAccount = {
   userId: "admin"
 };
 
+const demoCredentialCards = [
+  ["company", demoAccount.companyCode],
+  ["user", demoAccount.userId],
+  ["password", demoAccount.password]
+];
+
 const employeeNumber = "BW-0001";
 const session = {
   roleLabel: "admin",
@@ -425,6 +431,13 @@ function renderLogin() {
         </div>
         <form class="card login-card" id="login-form">
           ${sectionHead(t("screens.login.form.eyebrow"), t("screens.login.form.title"), t("screens.login.form.description"))}
+          <div class="login-credential-panel">
+            <div class="login-credential-head">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.panel.helper")}</span></div>
+            <div class="login-credential-grid">${demoCredentialCards.map(([id, value]) => `
+              <div class="login-credential-item"><span class="helper">${t(`screens.login.demo.credentials.${id}.label`)}</span><strong>${escapeText(value)}</strong><span class="helper">${t(`screens.login.demo.credentials.${id}.helper`)}</span></div>
+            `).join("")}</div>
+            <span class="helper">${t("screens.login.demo.panel.disclaimer")}</span>
+          </div>
           ${languageSelector()}
           ${field(t("screens.login.form.companyCode"), "company-code", demoAccount.companyCode, "text", state.companyCode)}
           ${field(t("screens.login.form.userId"), "user-id", demoAccount.userId, "text", state.userId)}
@@ -434,7 +447,6 @@ function renderLogin() {
             <button class="btn primary" type="submit">${t("screens.login.actions.enterHome")}</button>
             <button class="btn secondary" type="button" data-demo-login="true">${t("screens.login.actions.demo")}</button>
           </div>
-          <div class="notice">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.summary")}</span></div>
         </form>
       </div>
     </section>
