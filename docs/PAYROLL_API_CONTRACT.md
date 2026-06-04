@@ -16,12 +16,13 @@ Rust transition entry point:
 - Service facade: `bitween_payroll_api::PayrollApiService`
 - Validation function: `bitween_payroll_api::validate_payroll_api_payload(payload, policy_snapshot)`
 - Policy-resolved validation function: `PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)`
+- Attendance aggregation function: `PayrollApiService::aggregate_attendance_records(records, workplace, attendance_policy)`
 - Execution plan function: `PayrollApiService::plan_run_request(request, policy_snapshot)`
 - Run-result response function: `PayrollApiService::run_response(result, request_id)`
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -48,6 +49,70 @@ Readiness endpoint:
 
 - `GET /api/payroll/v1/readiness`
 - Purpose: expose Rust service readiness checks for policy, persistence, compatibility fallback, and future tenant dependencies.
+
+
+## Attendance Aggregation
+
+Python compatibility code may still parse `.csv`, `.txt`, `.xlsx`, and `.xlsm` attendance uploads and may still build invoice-compatible workbooks. Once attendance rows are normalized, Rust owns the payroll-domain aggregation rule through `aggregate_attendance_records(records, workplace, attendance_policy)` and `PayrollApiService::aggregate_attendance_records(records, workplace, attendance_policy)`.
+
+Aggregation invariants:
+
+1. Records are grouped by supplied `name_key`, or by a whitespace-normalized employee name when `name_key` is absent.
+2. `late_grace_minutes` and `early_leave_grace_minutes` are applied per source record before totals are rounded.
+3. Work, late/early, overtime, night, and special hours are rounded with Python-compatible half-even rounding.
+4. Invoice rows are sorted by employee name and keep zero-valued payroll amount fields until the payroll calculator fills them.
+5. Compatibility invoice fields `_attendance_days` and `_attendance_input` remain present for downstream invoice/workbook bridges.
+
+Example normalized input records:
+
+```json
+[
+  {
+    "name": "홍 길동",
+    "dept": "Payroll",
+    "workplace": "Site A",
+    "work_hours": 4.0,
+    "late_hours": 0.1667,
+    "overtime_hours": 0.5,
+    "night_hours": 1.0
+  },
+  {
+    "name": "홍길동",
+    "name_key": "홍길동",
+    "dept": "Payroll",
+    "workplace": "Site A",
+    "work_hours": 4.0,
+    "early_leave_hours": 0.0833,
+    "overtime_hours": 0.5,
+    "special_hours": 2.0,
+    "leave_days": 1.0,
+    "unpaid_days": 0.5
+  }
+]
+```
+
+Example invoice-compatible output row:
+
+```json
+{
+  "row": 0,
+  "name": "홍 길동",
+  "dept": "Payroll",
+  "hire_date": "",
+  "workplace": "Site A",
+  "base_days": 8.0,
+  "work_days": 8.0,
+  "unpaid_days": 0.5,
+  "leave_days": 1.0,
+  "ot_hours": 1.0,
+  "night_hours": 1.0,
+  "special_hours": 2.0,
+  "early_leave_hours": 0.25,
+  "subtotal": 0,
+  "_attendance_days": 2,
+  "_attendance_input": true
+}
+```
 
 ## Operation Policy Resolution
 

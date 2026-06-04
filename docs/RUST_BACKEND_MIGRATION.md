@@ -130,6 +130,35 @@ Verification evidence for this checkpoint:
 
 Slice spec: `docs/PAYROLL_RUST_RUN_RESPONSE_SLICE.md`.
 
+
+## Current implementation checkpoint: Rust payroll attendance aggregation
+
+Implemented on 2026-06-04 as the next payroll-domain behavior slice:
+
+- `crates/payroll-api` now exposes `AttendanceSourceRecord`,
+  `AttendanceInvoiceRow`, and `aggregate_attendance_records`.
+- `PayrollApiService::aggregate_attendance_records` turns normalized attendance
+  records plus an `AttendancePolicy` into invoice-compatible payroll rows.
+- Rust preserves Python compatibility grouping, per-record late/early grace
+  handling, half-even hour rounding, sorted employee rows, and the
+  `_attendance_days` / `_attendance_input` compatibility fields.
+- Python remains responsible for CSV/XLSX parsing and workbook bridge output
+  until those I/O-heavy slices are ported separately.
+- TypeScript and Python contract metadata now include the attendance source and
+  invoice-row DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo fmt --check`
+- `cargo test --workspace`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_attendance_import tests.test_payroll_api_contract -v`
+- `npm run typecheck --prefix frontend`
+- `git diff --check`
+- `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
+
+Slice spec: `docs/PAYROLL_RUST_ATTENDANCE_AGGREGATION_SLICE.md`.
+
 ## Current implementation checkpoint: Rust payroll policy resolution
 
 Implemented on 2026-06-04 as the next service-boundary behavior slice:

@@ -91,6 +91,61 @@ export interface PayrollOperationPolicy {
   [key: string]: unknown;
 }
 
+export interface PayrollAttendanceSourceRecord {
+  name: string;
+  name_key?: string;
+  dept?: string;
+  workplace?: string;
+  work_hours?: number;
+  late_hours?: number;
+  early_leave_hours?: number;
+  overtime_hours?: number;
+  night_hours?: number;
+  special_hours?: number;
+  leave_days?: number;
+  unpaid_days?: number;
+}
+
+export interface PayrollAttendanceInvoiceRow {
+  row: number;
+  name: string;
+  dept: string;
+  hire_date: string;
+  workplace: string;
+  base_hourly: number;
+  ordinary_hourly: number;
+  base_days: number;
+  work_days: number;
+  unpaid_days: number;
+  leave_days: number;
+  ot_hours: number;
+  shift_hours: number;
+  night_hours: number;
+  special_hours: number;
+  special_ext_hours: number;
+  early_leave_hours: number;
+  base_salary: number;
+  base_deduction: number;
+  ot_pay: number;
+  night_pay: number;
+  special_pay: number;
+  special_ext_pay: number;
+  position_pay: number;
+  shift_pay: number;
+  workers_day_pay: number;
+  annual_pay: number;
+  transport: number;
+  subtotal: number;
+  gross_pay: number;
+  health_insurance: number;
+  long_term_care: number;
+  national_pension: number;
+  employment_insurance: number;
+  insurance_total: number;
+  _attendance_days: number;
+  _attendance_input: true;
+}
+
 export interface PayrollOperationPolicyResolution {
   workplace: string;
   policy: PayrollOperationPolicy;

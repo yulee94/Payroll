@@ -1,8 +1,11 @@
 use crate::access::{
     authorize_payroll_request, PayrollAccessDecision, PayrollAction, PayrollPrincipal,
 };
+use crate::attendance::{
+    aggregate_attendance_records, AttendanceInvoiceRow, AttendanceSourceRecord,
+};
 use crate::execution_plan::{plan_payroll_execution, PayrollExecutionPlan};
-use crate::policy::OperationPolicySnapshot;
+use crate::policy::{AttendancePolicy, OperationPolicySnapshot};
 use crate::policy_resolution::PayrollPolicySettings;
 use crate::request::PayrollRunRequest;
 use crate::response::{
@@ -122,6 +125,19 @@ impl PayrollApiService {
         action: PayrollAction,
     ) -> PayrollAccessDecision {
         authorize_payroll_request(request, principal, action)
+    }
+
+    pub fn aggregate_attendance_records<I, S>(
+        &self,
+        records: I,
+        workplace: S,
+        policy: &AttendancePolicy,
+    ) -> Vec<AttendanceInvoiceRow>
+    where
+        I: IntoIterator<Item = AttendanceSourceRecord>,
+        S: Into<String>,
+    {
+        aggregate_attendance_records(records, workplace, policy)
     }
 
     pub fn plan_run_request(
