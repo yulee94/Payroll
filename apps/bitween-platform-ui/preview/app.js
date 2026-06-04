@@ -90,11 +90,11 @@ const workQueueDefs = [
 ].map(([id, tone, target]) => ({ id, tone, target }));
 
 const calendarEventDefs = [
-  ["calendar-payroll", "2026.06.04", "10:00", "attention"],
-  ["calendar-approval", "2026.06.04", "14:00", "neutral"],
-  ["calendar-recruit", "2026.06.05", "09:30", "ready"],
-  ["calendar-travel", "2026.06.05", "16:00", "attention"]
-].map(([id, date, time, tone]) => ({ id, date, time, tone }));
+  ["calendar-payroll", "2026.06.04", "10:00", "attention", "payroll"],
+  ["calendar-approval", "2026.06.04", "14:00", "neutral", "workflow"],
+  ["calendar-recruit", "2026.06.05", "09:30", "ready", "recruit"],
+  ["calendar-travel", "2026.06.05", "16:00", "attention", "travel"]
+].map(([id, date, time, tone, target]) => ({ id, date, time, tone, target }));
 
 const todayTodoDefs = [
   ["todo-payroll", "attention", false],
@@ -518,7 +518,7 @@ function renderHome() {
         ${sectionHead("", t("screens.calendar.title"), t("screens.calendar.description"))}
         <div class="calendar-day"><span>2026.06</span><strong>04</strong><em>${t("screens.calendar.weekday")}</em></div>
         <div class="planner-list">${calendarEvents().map((event) => `
-          <div class="planner-item">${badge(event.time, event.tone)}<div><strong>${event.title}</strong><span class="helper">${event.date}</span></div></div>
+          <button class="planner-item calendar-item" data-target="${event.target}">${badge(event.time, event.tone)}<div><strong>${event.title}</strong><span class="helper">${event.date}</span></div></button>
         `).join("")}</div>
       </div>
       <div class="card planner-card">

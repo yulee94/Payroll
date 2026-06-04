@@ -56,6 +56,7 @@ export type WorkQueueItem = {
 export type CalendarEvent = {
   readonly id: string;
   readonly dateLabel: string;
+  readonly target: PlatformId;
   readonly title: string;
   readonly timeLabel: string;
   readonly tone: ReadinessTone;

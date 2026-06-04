@@ -566,9 +566,16 @@ button {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 8px;
+  color: var(--text);
   display: flex;
   gap: 10px;
   padding: 12px;
+  text-align: left;
+  width: 100%;
+}
+
+button.planner-item {
+  cursor: pointer;
 }
 
 .planner-item div {
