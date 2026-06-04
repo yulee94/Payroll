@@ -246,6 +246,54 @@ class BusinessTripFollowUpKpiManagerTests(unittest.TestCase):
         self.assertEqual(reflected_trip["kpi_reflection_status"], KPI_REFLECTION_REFLECTED)
         self.assertEqual(len(reflected_records), 1)
 
+    def test_manual_trip_cannot_reflect_kpi_without_report_and_execution_proof(self) -> None:
+        admin = self._session("admin", role="admin")
+        with self.assertRaises(ValueError):
+            wf_svc.upsert_business_trip_lifecycle(
+                self._tenant,
+                fields={
+                    "trip_id": "manual-complete-without-proof",
+                    "title": "증빙 없는 수기 완료 출장",
+                    "status": TRIP_STATUS_COMPLETED,
+                    "kpi_reflection_status": KPI_REFLECTION_READY,
+                    "requester_id": "requester-a",
+                    "executor_id": "executor-a",
+                    "site_id": "site-a",
+                    "department_id": "dept-a",
+                    "source": {"kind": "manual", "dedupe_key": "manual:without-proof"},
+                },
+                session=admin,
+            )
+
+        db = _load_raw(self._tenant)
+        db["business_trips"].append(
+            {
+                "id": "manual-direct-row",
+                "trip_id": "manual-direct-row",
+                "tenant_id": self._tenant,
+                "status": TRIP_STATUS_COMPLETED,
+                "kpi_reflection_status": KPI_REFLECTION_READY,
+                "title": "저장소 직접 삽입 수기 출장",
+                "requester_id": "requester-a",
+                "executor_id": "executor-a",
+                "site_id": "site-a",
+                "department_id": "dept-a",
+                "period_start": "2026-06-01",
+                "period_end": "2026-06-03",
+                "approved_document_id": "",
+                "diary_document_id": "",
+                "report_document_id": "",
+                "source": {"kind": "manual", "dedupe_key": "manual:direct-row"},
+                "dedupe_key": "manual:direct-row",
+                "created_at": "2026-06-04T00:00:00",
+                "updated_at": "2026-06-04T00:00:00",
+            }
+        )
+        _save_raw(self._tenant, db)
+
+        with self.assertRaises(ValueError):
+            wf_svc.reflect_business_trip_kpi(self._tenant, "manual-direct-row", session=admin)
+
     def test_manager_dashboard_filters_visible_trips_and_sections(self) -> None:
         admin = self._session("admin", role="admin")
         visible_overdue = wf_svc.upsert_business_trip_lifecycle(
@@ -263,21 +311,14 @@ class BusinessTripFollowUpKpiManagerTests(unittest.TestCase):
             },
             session=admin,
         )
-        wf_svc.upsert_business_trip_lifecycle(
-            self._tenant,
-            fields={
-                "trip_id": "trip-hidden-completed",
-                "title": "현장 B 완료 출장",
-                "status": TRIP_STATUS_COMPLETED,
-                "kpi_reflection_status": KPI_REFLECTION_READY,
-                "requester_id": "requester-b",
-                "executor_id": "executor-b",
-                "site_id": "site-b",
-                "department_id": "dept-b",
-                "source": {"kind": "manual", "dedupe_key": "manual:hidden-completed"},
-            },
-            session=admin,
+        hidden_doc, hidden_trip_id, hidden_task = self._approve_trip(
+            requester=admin,
+            executor_id="executor-b",
+            site_id="site-b",
+            department_id="dept-b",
         )
+        wf_svc.complete_execution_task(self._tenant, hidden_task["id"], session=admin)
+        self._approve_trip_report(hidden_trip_id, hidden_doc["id"], session=admin)
         wf_svc.upsert_business_trip_lifecycle(
             self._tenant,
             fields={

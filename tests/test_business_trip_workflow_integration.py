@@ -27,6 +27,7 @@ from core.workflow.constants import (
     TRIP_STATUS_COMPLETED,
     TRIP_STATUS_DIARY_DUE,
     TRIP_STATUS_DRAFT,
+    TRIP_STATUS_IN_PROGRESS,
     TRIP_STATUS_PLANNED,
 )
 from core.workflow.store import _load_raw, _save_raw
@@ -194,6 +195,67 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         self.assertEqual(completed_trip["kpi_reflection_status"], KPI_REFLECTION_READY)
         self.assertEqual(completed_trip["report_document_id"], report["id"])
         self.assertEqual(len(tasks_after_report), 1)
+
+    def test_admin_repair_cannot_move_to_diary_due_before_execution_task(self) -> None:
+        sess = self._session()
+        doc = self._create_business_trip_document(session=sess)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=sess)
+        task = wf_svc.list_execution_tasks(self._tenant, session=sess)[0]
+
+        wf_svc.transition_business_trip_lifecycle(self._tenant, trip_id, TRIP_STATUS_IN_PROGRESS, session=sess)
+        with self.assertRaises(ValueError):
+            wf_svc.transition_business_trip_lifecycle(self._tenant, trip_id, TRIP_STATUS_DIARY_DUE, session=sess)
+
+        pending_task = wf_svc.list_execution_tasks(self._tenant, session=sess)[0]
+        blocked_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+        self.assertEqual(pending_task["status"], TASK_PENDING)
+        self.assertEqual(blocked_trip["status"], TRIP_STATUS_IN_PROGRESS)
+        self.assertEqual(blocked_trip["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
+
+        wf_svc.complete_execution_task(self._tenant, task["id"], session=sess)
+        diary_due_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+        self.assertEqual(diary_due_trip["status"], TRIP_STATUS_DIARY_DUE)
+
+    def test_same_tenant_user_cannot_link_report_to_another_users_trip(self) -> None:
+        owner = self._session("owner", role="admin")
+        doc = self._create_business_trip_document(session=owner)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": owner.user_id, "approver_role": "admin"}],
+            session=owner,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=owner)
+        task = wf_svc.list_execution_tasks(self._tenant, session=owner)[0]
+        wf_svc.complete_execution_task(self._tenant, task["id"], session=owner)
+
+        attacker = self._session("attacker", role="staff")
+        with self.assertRaises(PermissionError):
+            wf_svc.create_document(
+                self._tenant,
+                document_type=DOC_TYPE_GENERAL,
+                title="출장보고서",
+                summary="타인 출장 결과 보고",
+                payload={
+                    "trip_id": trip_id,
+                    "source_document_id": doc["id"],
+                    "template_name": "출장보고서",
+                    "business_trip_artifact": "trip_report",
+                },
+                session=attacker,
+            )
+
+        unchanged_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=owner)
+        self.assertEqual(unchanged_trip["status"], TRIP_STATUS_DIARY_DUE)
+        self.assertEqual(unchanged_trip["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
 
     def test_reject_and_cancel_paths_update_lifecycle_without_duplicate_rows(self) -> None:
         sess = self._session()
