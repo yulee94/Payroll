@@ -87,6 +87,12 @@ const adminPermissionDefinitions = [
   { id: "role-employee", tone: "attention" }
 ] as const satisfies readonly ToneDefinition[];
 
+const adminReviewDefinitions = [
+  { id: "payrollPermission", target: "payroll", tone: "attention" },
+  { id: "archiveAccess", target: "archive", tone: "neutral" },
+  { id: "branchAccounts", target: "settings", tone: "ready" }
+] as const satisfies readonly TargetToneDefinition[];
+
 const payrollIntegrationCheckDefinitions = [
   { id: "branch-docs", tone: "attention" },
   { id: "edi", tone: "attention" },
@@ -106,6 +112,12 @@ const archiveDocumentDefinitions = [
   { id: "doc-attendance", tone: "attention" },
   { id: "doc-travel", tone: "neutral" }
 ] as const satisfies readonly ToneDefinition[];
+
+const archiveReviewDefinitions = [
+  { id: "payrollOutputs", target: "payroll", tone: "ready" },
+  { id: "accessReview", target: "admin", tone: "attention" },
+  { id: "approvalFiles", target: "workflow", tone: "neutral" }
+] as const satisfies readonly TargetToneDefinition[];
 
 const aiRecommendationDefinitions = [
   { id: "ai-payroll-errors", tone: "ready", target: "payroll" },
@@ -225,6 +237,8 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">{tScreen(locale, "login.form.companyCode")}</Label>
           <TextInput
+            accessibilityHint={tScreen(locale, "login.form.companyCodeHint", demoParams)}
+            accessibilityLabel={tScreen(locale, "login.form.companyCode")}
             autoCapitalize="characters"
             autoComplete="organization"
             onChangeText={setCompanyCode}
@@ -238,6 +252,8 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">{tScreen(locale, "login.form.userId")}</Label>
           <TextInput
+            accessibilityHint={tScreen(locale, "login.form.userIdHint", demoParams)}
+            accessibilityLabel={tScreen(locale, "login.form.userId")}
             autoCapitalize="none"
             autoComplete="username"
             onChangeText={setUserId}
@@ -251,6 +267,8 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">{tScreen(locale, "login.form.password")}</Label>
           <TextInput
+            accessibilityHint={tScreen(locale, "login.form.passwordHint", demoParams)}
+            accessibilityLabel={tScreen(locale, "login.form.password")}
             autoComplete="password"
             onChangeText={setPassword}
             placeholder={demoAccount.password}
@@ -268,8 +286,19 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
           </View>
         ) : null}
         <View style={styles.loginActions}>
-          <ActionButton onPress={handleLogin}>{tScreen(locale, canSubmit ? "login.actions.enterHome" : "login.actions.login")}</ActionButton>
-          <ActionButton onPress={handleDemoLogin} variant="secondary">{tScreen(locale, "login.actions.demo")}</ActionButton>
+          <ActionButton
+            accessibilityLabel={tScreen(locale, canSubmit ? "login.actions.enterHomeAccessibility" : "login.actions.loginAccessibility", demoParams)}
+            onPress={handleLogin}
+          >
+            {tScreen(locale, canSubmit ? "login.actions.enterHome" : "login.actions.login")}
+          </ActionButton>
+          <ActionButton
+            accessibilityLabel={tScreen(locale, "login.actions.demoAccessibility", demoParams)}
+            onPress={handleDemoLogin}
+            variant="secondary"
+          >
+            {tScreen(locale, "login.actions.demo")}
+          </ActionButton>
         </View>
       </Card>
     </View>
@@ -461,6 +490,11 @@ function CalendarTodoPanel({
   readonly onSelect: (id: PlatformId) => void;
   readonly todos: readonly TodoItem[];
 }) {
+  const completedTodos = todos.filter((todo) => todo.completed).length;
+  const totalTodos = todos.length;
+  const pendingTodos = totalTodos - completedTodos;
+  const completionRatio = totalTodos > 0 ? completedTodos / totalTodos : 0;
+  const progressStyle = { width: `${Math.round(completionRatio * 100)}%` } as const;
   return (
     <View style={styles.homePlannerGrid}>
       <Card style={styles.homePlannerCard}>
@@ -489,6 +523,15 @@ function CalendarTodoPanel({
       </Card>
       <Card style={styles.homePlannerCard}>
         <SectionHeader title={tScreen(locale, "todo.title")} description={tScreen(locale, "todo.description")} />
+        <View style={styles.todoProgressPanel}>
+          <View style={styles.todoProgressHeader}>
+            <Label weight="bold">{tScreen(locale, "todo.progress.title", { done: completedTodos, total: totalTodos })}</Label>
+            <Label size="sm" muted>{tScreen(locale, "todo.progress.pending", { count: pendingTodos })}</Label>
+          </View>
+          <View style={styles.todoProgressTrack}>
+            <View style={[styles.todoProgressFill, progressStyle]} />
+          </View>
+        </View>
         <View style={styles.plannerList}>
           {todos.map((todo) => (
             <Pressable
@@ -578,13 +621,27 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
       {active.id === "attendance" ? <AttendancePhonePanel locale={locale} /> : null}
       {active.id === "hr" ? <HrPeoplePanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "travel" ? <TravelWorklogPanel locale={locale} /> : null}
-      {active.id === "admin" ? <AdminAccountPanel locale={locale} /> : null}
+      {active.id === "admin" ? <AdminAccountPanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "archive" ? <ArchiveLibraryPanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "ai" ? <AiWorkspacePanel locale={locale} onSelect={onSelect} /> : null}
 
       {active.id === "settings" ? (
         <Card>
           <SectionHeader title={t(locale, "settings.i18n.title")} description={t(locale, "settings.i18n.description")} />
+          <View style={styles.settingsStatusGrid}>
+            <View style={styles.settingsStatusItem}>
+              <Label size="sm" muted>{t(locale, "settings.i18n.status.selected")}</Label>
+              <Label weight="bold">{languageOptions.find((option) => option.locale === locale)?.label ?? locale}</Label>
+            </View>
+            <View style={styles.settingsStatusItem}>
+              <Label size="sm" muted>{t(locale, "settings.i18n.status.available")}</Label>
+              <Label weight="bold">{languageOptions.length}</Label>
+            </View>
+            <View style={styles.settingsStatusItem}>
+              <Label size="sm" muted>{t(locale, "settings.i18n.catalogRule.title")}</Label>
+              <Label size="sm">{t(locale, "settings.i18n.catalogRule.description")}</Label>
+            </View>
+          </View>
           <View style={styles.languageGrid}>
             {languageOptions.map((option) => {
               const selected = option.locale === locale;
@@ -621,6 +678,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
             <Label size="sm" weight="bold">{tScreen(locale, "module.search.label")}</Label>
             <TextInput
               autoCapitalize="none"
+              accessibilityLabel={tScreen(locale, "module.search.accessibilityLabel")}
               onChangeText={setSearch}
               placeholder={tScreen(locale, "module.search.placeholder")}
               placeholderTextColor={colors.muted}
@@ -628,11 +686,20 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
               style={styles.input}
               value={search}
             />
+            {search ? (
+              <ActionButton accessibilityLabel={tScreen(locale, "module.search.clearAccessibilityLabel")} onPress={() => setSearch("")} variant="ghost">
+                {tScreen(locale, "module.search.clear")}
+              </ActionButton>
+            ) : null}
           </View>
         </View>
         <View style={styles.listSummary}>
-          <Label weight="bold">{tScreen(locale, "module.list.count", { count: filteredRows.length })}</Label>
-          <Label size="sm" muted>{search ? tScreen(locale, "module.list.filteredWithSearch", { filter: activeFilter, search }) : tScreen(locale, "module.list.filtered", { filter: activeFilter })}</Label>
+          <View style={styles.listSummaryCount}>
+            <Label weight="bold">{tScreen(locale, "module.list.count", { count: filteredRows.length })}</Label>
+          </View>
+          <View style={styles.listSummaryCopy}>
+            <Label size="sm" muted>{search ? tScreen(locale, "module.list.filteredWithSearch", { filter: activeFilter, search }) : tScreen(locale, "module.list.filtered", { filter: activeFilter })}</Label>
+          </View>
         </View>
         {dashboard.rows.length === 0 ? (
           <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />
@@ -791,6 +858,26 @@ function ArchiveLibraryPanel({ locale, onSelect }: Pick<ScreenProps, "locale" | 
           </Pressable>
         ))}
       </View>
+      <View style={styles.archiveReviewPanel}>
+        <SectionHeader title={tScreen(locale, "archive.review.title")} description={tScreen(locale, "archive.review.description")} />
+        <View style={styles.archiveReviewGrid}>
+          {archiveReviewDefinitions.map((item) => (
+            <Pressable
+              accessibilityRole="button"
+              key={item.id}
+              onPress={() => onSelect(item.target)}
+              style={({ pressed }) => [styles.archiveReviewCard, { borderTopColor: toneColor(item.tone) }, pressed && styles.buttonPressed]}
+            >
+              <View style={styles.archiveReviewHead}>
+                <Label size="sm" muted>{tScreen(locale, `archive.review.cards.${item.id}.label`)}</Label>
+                <Badge tone={item.tone}>{tScreen(locale, `archive.review.cards.${item.id}.status`)}</Badge>
+              </View>
+              <Label weight="bold">{tScreen(locale, `archive.review.cards.${item.id}.title`)}</Label>
+              <Label size="sm" muted>{tScreen(locale, `archive.review.cards.${item.id}.detail`)}</Label>
+            </Pressable>
+          ))}
+        </View>
+      </View>
       <View style={styles.archivePreviewGrid}>
         <View style={styles.archiveDocumentList}>
           {archiveDocumentDefinitions.map((document) => (
@@ -908,7 +995,7 @@ function SettingsControlPanel({ locale, onSelect }: Pick<ScreenProps, "locale" |
   );
 }
 
-function AdminAccountPanel({ locale }: Pick<ScreenProps, "locale">) {
+function AdminAccountPanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "onSelect">) {
   return (
     <Card>
       <SectionHeader title={tScreen(locale, "admin.title")} description={tScreen(locale, "admin.description")} />
@@ -922,6 +1009,26 @@ function AdminAccountPanel({ locale }: Pick<ScreenProps, "locale">) {
           <Label size="sm" muted>{tScreen(locale, "admin.subaccount.label")}</Label>
           <Label weight="bold">{tScreen(locale, "admin.subaccount.value")}</Label>
           <Label size="sm" muted>{tScreen(locale, "admin.subaccount.detail")}</Label>
+        </View>
+      </View>
+      <View style={styles.adminReviewPanel}>
+        <SectionHeader title={tScreen(locale, "admin.review.title")} description={tScreen(locale, "admin.review.description")} />
+        <View style={styles.adminReviewGrid}>
+          {adminReviewDefinitions.map((item) => (
+            <Pressable
+              accessibilityRole="button"
+              key={item.id}
+              onPress={() => onSelect(item.target)}
+              style={({ pressed }) => [styles.adminReviewCard, { borderTopColor: toneColor(item.tone) }, pressed && styles.buttonPressed]}
+            >
+              <View style={styles.adminReviewHead}>
+                <Label size="sm" muted>{tScreen(locale, `admin.review.cards.${item.id}.label`)}</Label>
+                <Badge tone={item.tone}>{tScreen(locale, `admin.review.cards.${item.id}.status`)}</Badge>
+              </View>
+              <Label weight="bold">{tScreen(locale, `admin.review.cards.${item.id}.title`)}</Label>
+              <Label size="sm" muted>{tScreen(locale, `admin.review.cards.${item.id}.detail`)}</Label>
+            </Pressable>
+          ))}
         </View>
       </View>
       <View style={styles.permissionMatrix}>
@@ -1214,6 +1321,37 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.md
   },
+  archiveReviewCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 220,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  archiveReviewGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  archiveReviewHead: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
+  },
+  archiveReviewPanel: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.md,
+    padding: spacing.md
+  },
   adminBranchCard: {
     backgroundColor: colors.card,
     borderColor: colors.border,
@@ -1228,6 +1366,37 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.md
+  },
+  adminReviewCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 220,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  adminReviewGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  adminReviewHead: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
+  },
+  adminReviewPanel: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.md,
+    padding: spacing.md
   },
   attendanceGrid: {
     alignItems: "stretch",
@@ -1452,6 +1621,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentSoft,
     borderColor: colors.accent
   },
+  settingsStatusGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  settingsStatusItem: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 180,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
   listSummary: {
     alignItems: "center",
     backgroundColor: colors.input,
@@ -1463,6 +1647,18 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm
+  },
+  listSummaryCopy: {
+    flex: 1,
+    minWidth: 160
+  },
+  listSummaryCount: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs
   },
   listToolbar: {
     alignItems: "flex-end",
@@ -1797,6 +1993,32 @@ const styles = StyleSheet.create({
   todoItemDone: {
     backgroundColor: colors.input,
     opacity: 0.5
+  },
+  todoProgressFill: {
+    backgroundColor: colors.success,
+    borderRadius: 999,
+    minHeight: 8
+  },
+  todoProgressHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
+  },
+  todoProgressPanel: {
+    backgroundColor: colors.successSoft,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  todoProgressTrack: {
+    backgroundColor: colors.card,
+    borderRadius: 999,
+    minHeight: 8,
+    overflow: "hidden"
   },
   travelReviewCard: {
     backgroundColor: colors.card,

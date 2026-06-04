@@ -135,6 +135,12 @@ const adminPermissionDefs = [
   ["role-employee", "attention"]
 ].map(([id, tone]) => ({ id, tone }));
 
+const adminReviewDefs = [
+  ["payrollPermission", "attention", "payroll"],
+  ["archiveAccess", "neutral", "archive"],
+  ["branchAccounts", "ready", "settings"]
+].map(([id, tone, target]) => ({ id, target, tone }));
+
 const archiveFolderDefs = [
   ["folder-payroll", "ready", "payroll"],
   ["folder-attendance", "attention", "attendance"],
@@ -147,6 +153,12 @@ const archiveDocumentDefs = [
   ["doc-attendance", "attention"],
   ["doc-travel", "neutral"]
 ].map(([id, tone]) => ({ id, tone }));
+
+const archiveReviewDefs = [
+  ["payrollOutputs", "ready", "payroll"],
+  ["accessReview", "attention", "admin"],
+  ["approvalFiles", "neutral", "workflow"]
+].map(([id, tone, target]) => ({ id, target, tone }));
 
 const aiRecommendationDefs = [
   ["ai-payroll-errors", "ready", "payroll"],
@@ -414,13 +426,18 @@ function render() {
   if (!state.catalog) return;
   document.documentElement.lang = state.locale.split("-")[0];
   document.title = t("preview.documentTitle");
+  const skipLink = document.querySelector("[data-skip-link]");
+  if (skipLink) {
+    skipLink.textContent = t("preview.skipLink");
+    skipLink.setAttribute("aria-label", t("preview.skipLink"));
+  }
   document.getElementById("app").innerHTML = state.authed ? renderShell() : renderLogin();
   bindEvents();
 }
 
 function renderLogin() {
   return html`
-    <section class="login-page">
+    <section class="login-page" id="main-content" tabindex="-1">
       <div class="login-grid">
         <div class="login-hero">
           ${badge(t("screens.login.hero.badge"), "ready")}
@@ -448,11 +465,12 @@ function renderLogin() {
           ${field(t("screens.login.form.companyCode"), "company-code", demoAccount.companyCode, "text", state.companyCode)}
           ${field(t("screens.login.form.userId"), "user-id", demoAccount.userId, "text", state.userId)}
           ${field(t("screens.login.form.password"), "password", demoAccount.password, "password", state.password)}
-          ${state.loginFeedbackKey ? `<div class="inline-warning">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey)}</span></div>` : ""}
+          ${state.loginFeedbackKey ? `<div aria-live="assertive" class="inline-warning" role="alert">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey)}</span></div>` : ""}
           <div class="login-actions">
             <button class="btn primary" type="submit">${t("screens.login.actions.enterHome")}</button>
             <button class="btn secondary" type="button" data-demo-login="true">${t("screens.login.actions.demo")}</button>
           </div>
+          <div class="notice">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.summary", demoAccount)}</span></div>
         </form>
       </div>
     </section>
@@ -471,12 +489,14 @@ function languageSelector() {
 }
 
 function field(label, id, placeholder, type = "text", value = "") {
-  return `<label class="field" for="${id}"><span>${escapeText(label)}</span><input id="${id}" type="${type}" value="${escapeText(value)}" placeholder="${escapeText(placeholder)}" /></label>`;
+  return `<label class="field" for="${id}"><span>${escapeText(label)}</span><input aria-label="${escapeText(label)}" id="${id}" type="${type}" value="${escapeText(value)}" placeholder="${escapeText(placeholder)}" /></label>`;
 }
 
 function renderShell() {
   const items = navigationItems();
   const active = items.find((item) => item.id === state.activeId) || items[0];
+  const themes = sidebarThemes();
+  const activeSidebarTheme = themes.find((theme) => theme.id === state.sidebarTheme) || themes[0];
   const sessionLabel = `${session.tenantName} · ${t("session.roleLabel")} · ${demoAccount.companyCode}`;
   return html`
     <section class="shell sidebar-theme-${state.sidebarTheme}">
@@ -488,17 +508,30 @@ function renderShell() {
         <div class="sidebar-options" aria-label="${t("shell.themePanel.aria")}">
           <span class="sidebar-options-title">${t("shell.themePanel.title")}</span>
           <div class="sidebar-theme-grid">
-            ${sidebarThemes().map((theme) => `
-              <button class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}" data-sidebar-theme="${theme.id}" title="${escapeText(theme.description)}">
+            ${themes.map((theme) => `
+              <button
+                aria-label="${escapeText(t("shell.themePanel.optionLabel", { label: theme.label, description: theme.description }))}"
+                aria-pressed="${state.sidebarTheme === theme.id ? "true" : "false"}"
+                class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}"
+                data-sidebar-theme="${theme.id}"
+                title="${escapeText(theme.description)}"
+              >
                 <span class="sidebar-swatch sidebar-swatch-${theme.id}"></span>
-                <strong>${theme.label}</strong>
+                <strong>${escapeText(theme.label)}</strong>
               </button>
             `).join("")}
+          </div>
+          <div class="sidebar-theme-current" aria-live="polite">
+            <span class="sidebar-theme-current-rail"></span>
+            <span>
+              <strong>${t("shell.themePanel.current", { theme: activeSidebarTheme.label })}</strong>
+              <small>${escapeText(activeSidebarTheme.description)}</small>
+            </span>
           </div>
         </div>
         <nav class="nav" aria-label="${t("shell.navigation.aria")}">
             ${items.map((item) => `
-            <button class="nav-button ${item.id === active.id ? "active" : ""}" data-target="${item.id}" style="${item.id === active.id ? `border-left-color:${item.accent}` : ""}">
+            <button aria-current="${item.id === active.id ? "page" : "false"}" class="nav-button ${item.id === active.id ? "active" : ""}" data-target="${item.id}" style="${item.id === active.id ? `border-left-color:${item.accent}` : ""}">
               <strong>${item.label}</strong>
             </button>
           `).join("")}
@@ -507,7 +540,9 @@ function renderShell() {
       <div class="main">
         <header class="topbar">
           <div class="topbar-copy">
+            <span class="topbar-eyebrow">${active.eyebrow}</span>
             <h1>${active.label}</h1>
+            <p>${active.description}</p>
           </div>
           <div class="top-actions">
             ${badge(sessionLabel, "neutral")}
@@ -515,7 +550,7 @@ function renderShell() {
             <button class="btn ghost compact-btn" data-logout="true">${t("shell.logout")}</button>
           </div>
         </header>
-        <div class="content">${renderScreen(active.id)}</div>
+        <div class="content" id="main-content" tabindex="-1">${renderScreen(active.id)}</div>
         <footer class="shell-status" aria-label="${t("shell.status.aria")}">
           <div class="shell-status-group">
             <span class="status-dot" aria-hidden="true"></span>
@@ -533,7 +568,7 @@ function renderShell() {
         </footer>
       </div>
     </section>
-    <div class="toast" id="toast">${t("preview.toast.default")}</div>
+    <div aria-atomic="true" aria-live="polite" class="toast" id="toast" role="status">${t("preview.toast.default")}</div>
   `;
 }
 
@@ -547,6 +582,10 @@ function renderHome() {
   const queueItems = workQueue();
   const selectedQueue = queueItems.find((row) => row.id === state.selectedQueueKey) || queueItems[0];
   const items = navigationItems();
+  const todos = todayTodos();
+  const completedTodos = todos.filter((item) => item.done).length;
+  const pendingTodos = todos.length - completedTodos;
+  const completionPercent = todos.length > 0 ? Math.round((completedTodos / todos.length) * 100) : 0;
 
   return html`
     <section class="card">
@@ -563,7 +602,11 @@ function renderHome() {
       </div>
       <div class="card planner-card">
         ${sectionHead("", t("screens.todo.title"), t("screens.todo.description"))}
-        <div class="planner-list">${todayTodos().map((item) => `
+        <div class="todo-progress">
+          <div class="todo-progress-head"><strong>${t("screens.todo.progress.title", { done: completedTodos, total: todos.length })}</strong><span class="helper">${t("screens.todo.progress.pending", { count: pendingTodos })}</span></div>
+          <div class="todo-progress-track"><span style="width: ${completionPercent}%"></span></div>
+        </div>
+        <div class="planner-list">${todos.map((item) => `
           <button class="planner-item planner-button todo-item ${item.done ? "done" : ""}" data-target="${item.target}">${badge(item.timeLabel, item.tone)}<div><strong>${item.title}</strong><span class="helper">${item.owner} · ${t("screens.workDetail.actions.openRelated")}</span></div></button>
         `).join("")}</div>
       </div>
@@ -571,7 +614,7 @@ function renderHome() {
     <section class="card">
       ${sectionHead("", t("screens.launcher.workQueue.title"), t("screens.launcher.workQueue.description"))}
       <div class="queue-grid">${queueItems.map((item) => `
-        <button class="queue-card select-card ${state.selectedQueueKey === item.id ? "selected" : ""}" data-queue-key="${item.id}">
+        <button aria-pressed="${state.selectedQueueKey === item.id}" class="queue-card select-card ${state.selectedQueueKey === item.id ? "selected" : ""}" data-queue-key="${item.id}">
           <div class="queue-head">${badge(item.status, item.tone)}<span class="helper">${item.due}</span></div>
           <strong>${item.title}</strong>
           <span class="helper">${t("screens.launcher.workQueue.metaOwner", { meta: item.meta, owner: item.owner })}</span>
@@ -614,7 +657,7 @@ function renderPayroll() {
     <section class="card">
       ${sectionHead(t("screens.payroll.readiness.eyebrow"), t("screens.payroll.readiness.title"), t("screens.payroll.readiness.description"), button(t("screens.payroll.readiness.action"), "settings", "secondary"))}
       <div class="card-grid">${cards.map((item) => `
-        <button class="mini-card readiness-card select-card ${state.selectedPayrollCardKey === item.id ? "selected" : ""}" data-payroll-card-key="${item.id}" style="border-top-color:${toneColor(item.tone)}">
+        <button aria-pressed="${state.selectedPayrollCardKey === item.id}" class="mini-card readiness-card select-card ${state.selectedPayrollCardKey === item.id ? "selected" : ""}" data-payroll-card-key="${item.id}" style="border-top-color:${toneColor(item.tone)}">
           <span class="helper">${item.title}</span>
           <strong class="metric-value" style="color:${toneColor(item.tone)}">${item.value}</strong>
           <span>${item.detail}</span>
@@ -626,7 +669,7 @@ function renderPayroll() {
     <section class="card">
       ${sectionHead(t("screens.payroll.flow.eyebrow"), t("screens.payroll.flow.title"), t("screens.payroll.flow.description"), button(t("screens.payroll.flow.action"), "settings", "secondary"))}
       <div class="step-grid">${steps.map((item) => `
-        <button class="step-card select-card ${state.selectedPayrollStepKey === item.id ? "selected" : ""}" data-payroll-step-key="${item.id}" style="border-top-color:${toneColor(item.tone)}">
+        <button aria-pressed="${state.selectedPayrollStepKey === item.id}" class="step-card select-card ${state.selectedPayrollStepKey === item.id ? "selected" : ""}" data-payroll-step-key="${item.id}" style="border-top-color:${toneColor(item.tone)}">
           <span class="eyebrow">${item.index}</span>
           ${badge(item.status, item.tone)}
           <strong>${item.title}</strong>
@@ -700,10 +743,17 @@ function renderModule(id) {
     <section class="card">
       ${sectionHead("", t("screens.module.list.title"), t("screens.module.list.description"), button(data.secondaryAction.label, data.secondaryAction.target, "secondary"))}
       <div class="list-toolbar">
-        <div class="filters">${data.filters.map((filter) => `<button class="filter-chip ${state.filter === filter.id ? "active" : ""}" data-filter="${filter.id}">${filter.label}</button>`).join("")}</div>
-        <label class="search-box" for="work-search"><span>${t("screens.module.search.label")}</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="${t("screens.module.search.placeholder")}" /></label>
+        <div class="filters">${data.filters.map((filter) => {
+          const selected = state.filter === filter.id;
+          return `<button aria-pressed="${selected ? "true" : "false"}" class="filter-chip ${selected ? "active" : ""}" data-filter="${filter.id}">${selected ? '<span class="filter-chip-mark" aria-hidden="true"></span>' : ""}<span>${filter.label}</span></button>`;
+        }).join("")}</div>
+        ${state.search ? `<button class="btn ghost search-clear" data-clear-search="true" type="button">${t("screens.module.search.clear")}</button>` : ""}
+        <label class="search-box" for="work-search"><span>${t("screens.module.search.label")}</span><input aria-label="${t("screens.module.search.accessibilityLabel")}" id="work-search" type="search" value="${escapeText(state.search)}" placeholder="${t("screens.module.search.placeholder")}" /></label>
       </div>
-      <div class="list-summary"><strong>${t("screens.module.list.count", { count: rows.length })}</strong><span class="helper">${state.search ? t("screens.module.list.filteredWithSearch", { filter: filterLabel, search: state.search }) : t("screens.module.list.filtered", { filter: filterLabel })}</span></div>
+      <div aria-atomic="true" aria-live="polite" class="list-summary" role="status">
+        <strong class="list-summary-count">${t("screens.module.list.count", { count: rows.length })}</strong>
+        <span class="helper list-summary-copy">${state.search ? t("screens.module.list.filteredWithSearch", { filter: filterLabel, search: state.search }) : t("screens.module.list.filtered", { filter: filterLabel })}</span>
+      </div>
       ${data.rows.length === 0 ? empty(t("table.empty.title"), t("table.empty.description")) : rows.length ? table(rows, true) : filteredEmpty()}
       ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
@@ -719,10 +769,16 @@ function sectionHead(eyebrow, title, desc, action = "") {
 }
 
 function i18nSettingsPanel() {
+  const selectedLanguage = languageName(state.locale);
   return `<section class="card">
     ${sectionHead("", t("settings.i18n.title"), t("settings.i18n.description"))}
+    <div class="settings-status-grid">
+      <div class="settings-status-item"><span class="helper">${t("settings.i18n.status.selected")}</span><strong>${selectedLanguage}</strong></div>
+      <div class="settings-status-item"><span class="helper">${t("settings.i18n.status.available")}</span><strong>${supportedLocales.length}</strong></div>
+      <div class="settings-status-item"><span class="helper">${t("settings.i18n.catalogRule.title")}</span><span>${t("settings.i18n.catalogRule.description")}</span></div>
+    </div>
     <div class="language-grid">${supportedLocales.map((locale) => `
-      <button class="language-option ${state.locale === locale ? "selected" : ""}" data-language="${locale}">
+      <button aria-pressed="${state.locale === locale}" class="language-option ${state.locale === locale ? "selected" : ""}" data-language="${locale}">
         <strong>${languageName(locale)}</strong><span class="helper">${state.locale === locale ? t("settings.i18n.status.selected") : t("settings.i18n.status.available")}</span>
       </button>
     `).join("")}</div>
@@ -793,6 +849,16 @@ function archiveLibraryPanel() {
         <span class="helper">${t(`screens.archive.folders.${item.id}.owner`)}</span>
       </button>
     `).join("")}</div>
+    <div class="archive-review-panel">
+      ${sectionHead("", t("screens.archive.review.title"), t("screens.archive.review.description"))}
+      <div class="archive-review-grid">${archiveReviewDefs.map((item) => `
+        <button class="archive-review-card" data-target="${item.target}" style="border-top-color:${toneColor(item.tone)}">
+          <div class="archive-review-head"><span class="helper">${t(`screens.archive.review.cards.${item.id}.label`)}</span>${badge(t(`screens.archive.review.cards.${item.id}.status`), item.tone)}</div>
+          <strong>${t(`screens.archive.review.cards.${item.id}.title`)}</strong>
+          <span class="helper">${t(`screens.archive.review.cards.${item.id}.detail`)}</span>
+        </button>
+      `).join("")}</div>
+    </div>
     <div class="archive-preview-grid">
       <div class="archive-document-list">${archiveDocumentDefs.map((item) => `
         <article class="archive-document-item">${badge(t(`screens.archive.documents.${item.id}.status`), item.tone)}<div><strong>${t(`screens.archive.documents.${item.id}.title`)}</strong><span class="helper">${t("screens.archive.documents.meta", { type: t(`screens.archive.documents.${item.id}.type`), owner: t(`screens.archive.documents.${item.id}.owner`) })}</span></div></article>
@@ -816,6 +882,16 @@ function adminAccountPanel() {
     <div class="admin-branch-grid">
       <article class="detail-item"><span class="helper">${t("screens.admin.branchAccount.label")}</span><strong>${t("screens.admin.branchAccount.value")}</strong><span>${t("screens.admin.branchAccount.detail")}</span></article>
       <article class="detail-item"><span class="helper">${t("screens.admin.subaccount.label")}</span><strong>${t("screens.admin.subaccount.value")}</strong><span>${t("screens.admin.subaccount.detail")}</span></article>
+    </div>
+    <div class="admin-review-panel">
+      ${sectionHead("", t("screens.admin.review.title"), t("screens.admin.review.description"))}
+      <div class="admin-review-grid">${adminReviewDefs.map((item) => `
+        <button class="admin-review-card" data-target="${item.target}" style="border-top-color:${toneColor(item.tone)}">
+          <div class="admin-review-head"><span class="helper">${t(`screens.admin.review.cards.${item.id}.label`)}</span>${badge(t(`screens.admin.review.cards.${item.id}.status`), item.tone)}</div>
+          <strong>${t(`screens.admin.review.cards.${item.id}.title`)}</strong>
+          <span class="helper">${t(`screens.admin.review.cards.${item.id}.detail`)}</span>
+        </button>
+      `).join("")}</div>
     </div>
     <div class="permission-matrix">${adminPermissionDefs.map((item) => `
       <article class="permission-row">
@@ -883,7 +959,7 @@ function table(rows, selectable = false) {
     ${rows.map((row) => {
       const content = `<span><strong>${row.category}</strong></span><span>${badge(row.status, row.tone)}</span><span>${row.owner}</span><span>${row.next}</span>`;
       return selectable ? `
-      <button class="table-row row-button ${state.selectedRowKey === row.id ? "selected" : ""}" data-row-key="${row.id}" style="border-left-color:${toneColor(row.tone)}">
+      <button aria-pressed="${state.selectedRowKey === row.id}" class="table-row row-button ${state.selectedRowKey === row.id ? "selected" : ""}" data-row-key="${row.id}" style="border-left-color:${toneColor(row.tone)}">
         ${content}
       </button>
     ` : `
@@ -917,7 +993,7 @@ function filterRows(rows) {
 }
 
 function empty(title, desc) {
-  return `<div class="empty"><strong>${title}</strong><span class="helper">${desc}</span></div>`;
+  return `<div aria-live="polite" class="empty" role="status"><strong>${title}</strong><span class="helper">${desc}</span></div>`;
 }
 
 function filteredEmpty() {
@@ -1076,6 +1152,16 @@ function bindEvents() {
       });
     });
   }
+
+  document.querySelectorAll("[data-clear-search]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.search = "";
+      state.selectedRowKey = "";
+      render();
+      window.requestAnimationFrame(() => document.getElementById("work-search")?.focus());
+      toast(t("preview.toast.searchClear"));
+    });
+  });
 
   const companyCode = document.getElementById("company-code");
   if (companyCode) {
