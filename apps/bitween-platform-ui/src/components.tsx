@@ -9,8 +9,8 @@ import {
 } from "react-native";
 import type { StyleProp, ViewStyle } from "react-native";
 
-import { colors, radius, spacing, toneBackground, toneColor } from "./theme";
-import type { MetricItem, ModuleRow, NavigationItem, ReadinessTone } from "./types";
+import { colors, radius, sidebarThemes, spacing, toneBackground, toneColor } from "./theme";
+import type { MetricItem, ModuleRow, NavigationItem, ReadinessTone, SidebarTheme, SidebarThemeId } from "./types";
 
 type TextProps = PropsWithChildren<{
   readonly muted?: boolean;
@@ -232,14 +232,41 @@ type SidebarProps = {
   readonly items: readonly NavigationItem[];
   readonly activeId: NavigationItem["id"];
   readonly onSelect: (id: NavigationItem["id"]) => void;
+  readonly onThemeChange: (id: SidebarThemeId) => void;
+  readonly theme: SidebarTheme;
 };
 
-export function Sidebar({ activeId, compact, items, onSelect }: SidebarProps) {
+export function Sidebar({ activeId, compact, items, onSelect, onThemeChange, theme }: SidebarProps) {
   return (
-    <View style={[styles.sidebar, compact && styles.sidebarCompact]}>
+    <View style={[styles.sidebar, { backgroundColor: theme.sidebar }, compact && styles.sidebarCompact]}>
       <View style={[styles.brandBlock, compact && styles.brandBlockCompact]}>
         <Label size="lg" weight="bold">Bitween</Label>
         <Label size="sm" muted>Business Platform</Label>
+      </View>
+      <View style={[styles.themePanel, compact && styles.themePanelCompact]}>
+        <Label size="sm" weight="bold">메뉴 색상 옵션</Label>
+        <View style={styles.themeChips}>
+          {sidebarThemes.map((item) => {
+            const selected = item.id === theme.id;
+            return (
+              <Pressable
+                accessibilityRole="button"
+                key={item.id}
+                onPress={() => onThemeChange(item.id)}
+                style={({ pressed }) => [
+                  styles.themeChip,
+                  selected && { backgroundColor: theme.activeBackground, borderColor: theme.activeText },
+                  pressed && styles.buttonPressed
+                ]}
+              >
+                <View style={[styles.themeSwatch, { backgroundColor: item.swatchStart, borderColor: item.swatchEnd }]}>
+                  <View style={[styles.themeSwatchInset, { backgroundColor: item.swatchEnd }]} />
+                </View>
+                <Text style={[styles.themeChipText, selected && { color: theme.activeText }]}>{item.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
       <ScrollView
         horizontal={compact}
@@ -257,11 +284,11 @@ export function Sidebar({ activeId, compact, items, onSelect }: SidebarProps) {
               style={[
                 styles.navItem,
                 compact && styles.navItemCompact,
-                active && { backgroundColor: `${item.accent}18`, borderLeftColor: item.accent }
+                active && { backgroundColor: theme.activeBackground, borderLeftColor: item.accent }
               ]}
             >
-              <Text style={[styles.navEyebrow, active && { color: item.accent }]}>{item.eyebrow}</Text>
-              <Text style={[styles.navLabel, active && { color: item.accent }]}>{item.label}</Text>
+              <Text style={[styles.navEyebrow, active && { color: theme.activeText }]}>{item.eyebrow}</Text>
+              <Text style={[styles.navLabel, active && { color: theme.activeText }]}>{item.label}</Text>
             </Pressable>
           );
         })}
@@ -275,16 +302,27 @@ type ShellProps = PropsWithChildren<{
   readonly items: readonly NavigationItem[];
   readonly onLogout?: () => void;
   readonly onSelect: (id: NavigationItem["id"]) => void;
+  readonly onThemeChange: (id: SidebarThemeId) => void;
   readonly sessionLabel?: string;
+  readonly sidebarTheme: SidebarTheme;
 }>;
 
-export function AppShell({ active, children, items, onLogout, onSelect, sessionLabel = "법인 운영 콘솔" }: ShellProps) {
+export function AppShell({
+  active,
+  children,
+  items,
+  onLogout,
+  onSelect,
+  onThemeChange,
+  sessionLabel = "법인 운영 콘솔",
+  sidebarTheme
+}: ShellProps) {
   const { width } = useWindowDimensions();
   const compact = width < 980;
 
   return (
     <View style={[styles.shell, compact && styles.shellCompact]}>
-      <Sidebar activeId={active.id} compact={compact} items={items} onSelect={onSelect} />
+      <Sidebar activeId={active.id} compact={compact} items={items} onSelect={onSelect} onThemeChange={onThemeChange} theme={sidebarTheme} />
       <View style={styles.main}>
         <View style={[styles.header, compact && styles.headerCompact]}>
           <View style={styles.headerCopy}>
@@ -561,6 +599,53 @@ const styles = StyleSheet.create({
     borderRightWidth: 0,
     padding: spacing.md,
     width: "100%"
+  },
+  themeChip: {
+    alignItems: "center",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.sm,
+    minHeight: 34,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm
+  },
+  themeChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  themeChipText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 16
+  },
+  themePanel: {
+    backgroundColor: "rgba(255, 255, 255, 0.54)",
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+    padding: spacing.sm
+  },
+  themePanelCompact: {
+    marginBottom: spacing.md
+  },
+  themeSwatch: {
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 18,
+    overflow: "hidden",
+    width: 18
+  },
+  themeSwatchInset: {
+    alignSelf: "flex-end",
+    height: 18,
+    width: 9
   },
   table: {
     borderColor: colors.border,

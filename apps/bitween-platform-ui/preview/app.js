@@ -24,6 +24,13 @@ const navItems = [
   ["settings", "설정", "Settings", "개인 화면, 급여 운영 기준, 플랫폼 환경을 조정합니다.", "#0F766E"]
 ].map(([id, label, eyebrow, description, accent]) => ({ id, label, eyebrow, description, accent }));
 
+const sidebarThemes = [
+  ["steel", "스틸 블루", "현재 톤보다 선명한 업무형 파랑"],
+  ["graphite", "그래파이트", "차분하고 밀도 있는 관리자형"],
+  ["teal", "틸 그린", "신뢰감 있는 HR/운영형"],
+  ["navy", "딥 네이비", "가장 강한 기업용 대비"]
+].map(([id, label, description]) => ({ id, label, description }));
+
 const state = {
   activeId: "home",
   authed: false,
@@ -36,6 +43,7 @@ const state = {
   selectedQueueKey: "",
   search: "",
   selectedRowKey: "",
+  sidebarTheme: "steel",
   userId: ""
 };
 
@@ -201,9 +209,20 @@ function field(label, id, placeholder, type = "text", value = "") {
 function renderShell() {
   const active = navItems.find((item) => item.id === state.activeId) || navItems[0];
   return html`
-    <section class="shell">
+    <section class="shell sidebar-theme-${state.sidebarTheme}">
       <aside class="sidebar">
         <div class="brand-block"><strong>Bitween</strong><span>Business Platform</span></div>
+        <div class="sidebar-options" aria-label="sidebar color options">
+          <span class="sidebar-options-title">메뉴 색상 옵션</span>
+          <div class="sidebar-theme-grid">
+            ${sidebarThemes.map((theme) => `
+              <button class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}" data-sidebar-theme="${theme.id}" title="${theme.description}">
+                <span class="sidebar-swatch sidebar-swatch-${theme.id}"></span>
+                <strong>${theme.label}</strong>
+              </button>
+            `).join("")}
+          </div>
+        </div>
         <nav class="nav" aria-label="platform menu">
           ${navItems.map((item) => `
             <button class="nav-button ${item.id === active.id ? "active" : ""}" data-target="${item.id}" style="${item.id === active.id ? `border-left-color:${item.accent}` : ""}">
@@ -548,6 +567,14 @@ function bindEvents() {
       state.selectedRowKey = el.dataset.rowKey;
       render();
       toast("업무 상세를 열었습니다.");
+    });
+  });
+
+  document.querySelectorAll("[data-sidebar-theme]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.sidebarTheme = el.dataset.sidebarTheme || "steel";
+      render();
+      toast("사이드 메뉴 색상 옵션을 적용했습니다.");
     });
   });
 

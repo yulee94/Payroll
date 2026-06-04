@@ -10,6 +10,19 @@ export type PlatformId =
 
 export type ReadinessTone = "ready" | "attention" | "blocked" | "neutral";
 
+export type SidebarThemeId = "steel" | "graphite" | "teal" | "navy";
+
+export type SidebarTheme = {
+  readonly id: SidebarThemeId;
+  readonly label: string;
+  readonly description: string;
+  readonly sidebar: string;
+  readonly activeBackground: string;
+  readonly activeText: string;
+  readonly swatchEnd: string;
+  readonly swatchStart: string;
+};
+
 export type NavigationItem = {
   readonly id: PlatformId;
   readonly label: string;
