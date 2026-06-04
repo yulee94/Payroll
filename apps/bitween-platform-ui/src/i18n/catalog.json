@@ -4210,6 +4210,24 @@
       }
     },
     {
+      "key": "screens.login.actions.showPassword",
+      "values": {
+        "ko-KR": "비밀번호 보기",
+        "en-US": "Show password",
+        "zh-Hans-CN": "显示密码",
+        "ja-JP": "パスワードを表示"
+      }
+    },
+    {
+      "key": "screens.login.actions.hidePassword",
+      "values": {
+        "ko-KR": "비밀번호 숨기기",
+        "en-US": "Hide password",
+        "zh-Hans-CN": "隐藏密码",
+        "ja-JP": "パスワードを隠す"
+      }
+    },
+    {
       "key": "screens.login.demo.badge",
       "values": {
         "ko-KR": "Demo 계정",

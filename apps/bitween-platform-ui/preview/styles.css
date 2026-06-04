@@ -684,6 +684,10 @@ button {
   border-color: var(--accent);
 }
 
+.password-toggle {
+  justify-self: start;
+}
+
 .travel-stage-grid,
 .travel-review-grid {
   display: grid;
