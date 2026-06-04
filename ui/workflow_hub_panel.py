@@ -1122,8 +1122,8 @@ class WorkflowHubPanel(tk.Frame):
         trip_top.pack(fill=tk.X)
         flat_button(
             trip_top,
-            "지연 평가 · 새로고침",
-            command=self._evaluate_overdues_and_reload_trip_dashboard,
+            "새로고침",
+            command=self._reload_trip_dashboard,
             bg="#0F766E",
             fg="#FFFFFF",
             padx=10,
@@ -1381,15 +1381,6 @@ class WorkflowHubPanel(tk.Frame):
             self._set_text(self._trip_text, str(exc))
             return
         self._set_text(self._trip_text, "\n".join(format_business_trip_dashboard_lines(dashboard)))
-
-    def _evaluate_overdues_and_reload_trip_dashboard(self) -> None:
-        try:
-            wf_svc.evaluate_business_trip_overdues(self._tenant(), session=require_session())
-        except Exception as exc:
-            messagebox.showerror("오류", str(exc), parent=self.winfo_toplevel())
-            return
-        self._reload_tasks()
-        self._reload_trip_dashboard()
 
     def _reload_site_dashboard(self) -> None:
         month = date.today().strftime("%Y-%m")

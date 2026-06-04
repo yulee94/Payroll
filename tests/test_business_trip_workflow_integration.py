@@ -433,6 +433,40 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
                 session=sibling_admin,
             )
 
+    def test_same_group_sibling_assigned_approver_cannot_read_or_approve_origin_trip_request(self) -> None:
+        create_group(
+            name="Trip Workflow Group",
+            root_tenant_id=self._tenant,
+            tenant_ids=(self._tenant, "sibling-tenant"),
+            group_id="trip-workflow-group-approver",
+        )
+        owner = self._session("owner", role="admin")
+        doc = self._create_business_trip_document(session=owner)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": "sibling-admin", "approver_role": "admin"}],
+            session=owner,
+        )
+        sibling_admin = UserSession(
+            user_id="sibling-admin",
+            tenant_id="sibling-tenant",
+            username="sibling-admin",
+            display_name="sibling-admin",
+            role="admin",
+        )
+
+        self.assertNotIn(doc["id"], [row["id"] for row in wf_svc.list_documents(self._tenant, session=sibling_admin)])
+        with self.assertRaises(PermissionError):
+            wf_svc.get_document(self._tenant, doc["id"], session=sibling_admin)
+        with self.assertRaises(PermissionError):
+            wf_svc.approve_document(self._tenant, doc["id"], session=sibling_admin)
+
+        unchanged_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=owner)
+        self.assertEqual(unchanged_trip["status"], TRIP_STATUS_PLANNED)
+        self.assertEqual(wf_svc.list_execution_tasks(self._tenant, session=owner), [])
+
     def test_cross_tenant_admin_cannot_mutate_trip_report_documents(self) -> None:
         owner = self._session("owner", role="admin")
         doc = self._create_business_trip_document(session=owner)
@@ -501,6 +535,49 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         unchanged_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=owner)
         self.assertEqual(unchanged_trip["status"], TRIP_STATUS_DIARY_DUE)
         self.assertEqual(unchanged_trip["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
+
+    def test_approved_daily_work_log_completes_trip_and_unblocks_kpi_after_execution(self) -> None:
+        sess = self._session()
+        doc = self._create_business_trip_document(session=sess)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=sess)
+        task = wf_svc.list_execution_tasks(self._tenant, session=sess)[0]
+        wf_svc.complete_execution_task(self._tenant, task["id"], session=sess)
+
+        diary = wf_svc.create_document(
+            self._tenant,
+            document_type=DOC_TYPE_GENERAL,
+            title="업무일지",
+            summary="출장 업무일지",
+            payload={
+                "trip_id": trip_id,
+                "template_name": "업무일지",
+                "business_trip_artifact": "daily_diary",
+                "diary_body": "고객 미팅 및 후속 업무 정리",
+            },
+            session=sess,
+        )
+        wf_svc.submit_document(
+            self._tenant,
+            diary["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+        approved_diary = wf_svc.approve_document(self._tenant, diary["id"], session=sess)
+        completed_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+
+        self.assertEqual(approved_diary["status"], DOC_STATUS_APPROVED)
+        self.assertEqual(completed_trip["status"], TRIP_STATUS_COMPLETED)
+        self.assertEqual(completed_trip["kpi_reflection_status"], KPI_REFLECTION_READY)
+        self.assertEqual(completed_trip["diary_document_id"], diary["id"])
+        self.assertEqual(completed_trip["report_document_id"], "")
+        self.assertTrue(completed_trip["completed_at"])
 
     def test_reject_and_cancel_paths_update_lifecycle_without_duplicate_rows(self) -> None:
         sess = self._session()

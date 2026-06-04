@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import shutil
 import tempfile
 import tkinter as tk
@@ -130,6 +131,12 @@ class BusinessTripUiSurfaceTests(unittest.TestCase):
         self.assertIn("출장 lifecycle 현황", text)
         self.assertIn("[지연] 1건", text)
         self.assertIn("실적", text)
+
+    def test_trip_dashboard_refresh_control_is_read_only(self) -> None:
+        source = inspect.getsource(WorkflowHubPanel._build_reports_tab)
+        self.assertIn('"새로고침"', source)
+        self.assertNotIn("지연 평가", source)
+        self.assertNotIn("evaluate_business_trip_overdues", source)
 
     def test_workflow_hub_trip_dashboard_tk_smoke_renders_overdue_path(self) -> None:
         self._approve_trip(period_end="2026-06-01")

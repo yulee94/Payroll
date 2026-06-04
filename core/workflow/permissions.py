@@ -15,6 +15,7 @@ from core.workflow.constants import (
     DOC_STATUS_IN_REVIEW,
     DOC_STATUS_REQUESTED_CHANGES,
     DOC_STATUS_SUBMITTED,
+    DOC_TYPE_BUSINESS_TRIP_REQUEST,
     STEP_PENDING,
     WF_ROLE_ADMIN,
     WF_ROLE_APPROVER,
@@ -88,7 +89,52 @@ def is_business_trip_legal_scope_allowed(
     return bool(storage_tenant and user_tenant == storage_tenant and storage_tenant != origin_tenant)
 
 
+def _is_business_trip_related_document(document: dict[str, Any]) -> bool:
+    if document.get("document_type") == DOC_TYPE_BUSINESS_TRIP_REQUEST:
+        return True
+    payload = document.get("content_json") if isinstance(document.get("content_json"), dict) else {}
+    return bool(str(payload.get("trip_id") or "").strip())
+
+
+def is_business_trip_document_legal_scope_allowed(
+    user: dict[str, Any] | UserSession,
+    document: dict[str, Any],
+    *,
+    tenant_id: str,
+) -> bool:
+    """Tenant/legal-entity gate for business-trip documents and artifacts.
+
+    Business-trip request, work-log, and report documents live in the workflow
+    document table, but their side effects are legal-tenant scoped. Being a
+    sibling-tenant admin or an assigned approver in the same workflow-root DB is
+    not enough to read or mutate another legal tenant's trip evidence.
+    """
+    if not _is_business_trip_related_document(document):
+        return True
+    storage_tenant = str(tenant_id or "").strip()
+    payload = document.get("content_json") if isinstance(document.get("content_json"), dict) else {}
+    origin_tenant = str(
+        document.get("origin_tenant_id")
+        or payload.get("origin_tenant_id")
+        or payload.get("legal_tenant_id")
+        or storage_tenant
+    ).strip()
+    return is_business_trip_legal_scope_allowed(
+        user,
+        {
+            "tenant_id": storage_tenant,
+            "origin_tenant_id": origin_tenant,
+            "legal_entity_id": str(
+                document.get("legal_entity_id") or payload.get("legal_entity_id") or ""
+            ).strip(),
+        },
+        tenant_id=storage_tenant,
+    )
+
+
 def can_view_document(user: dict[str, Any] | UserSession, document: dict[str, Any], *, tenant_id: str) -> bool:
+    if not is_business_trip_document_legal_scope_allowed(user, document, tenant_id=tenant_id):
+        return False
     uid = _user_id(user)
     profile = get_user_profile(tenant_id, uid)
     roles = _workflow_roles(user, profile)
@@ -108,6 +154,8 @@ def can_view_document(user: dict[str, Any] | UserSession, document: dict[str, An
 
 
 def can_edit_document(user: dict[str, Any] | UserSession, document: dict[str, Any], *, tenant_id: str) -> bool:
+    if not is_business_trip_document_legal_scope_allowed(user, document, tenant_id=tenant_id):
+        return False
     if document.get("status") in (DOC_STATUS_CLOSED, DOC_STATUS_APPROVED):
         return False
     uid = _user_id(user)
@@ -124,6 +172,8 @@ def can_submit_document(user: dict[str, Any] | UserSession, document: dict[str, 
 
 
 def can_approve_document(user: dict[str, Any] | UserSession, document: dict[str, Any], *, tenant_id: str) -> bool:
+    if not is_business_trip_document_legal_scope_allowed(user, document, tenant_id=tenant_id):
+        return False
     if document.get("status") not in (DOC_STATUS_SUBMITTED, DOC_STATUS_IN_REVIEW):
         return False
     uid = _user_id(user)

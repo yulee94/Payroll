@@ -211,11 +211,9 @@ def _assert_business_trip_report_approval_allowed(
         return
     artifact_kind, trip = target
     _assert_business_trip_artifact_approval_allowed(tenant_id, trip, session=session)
-    if artifact_kind != "report":
-        return
     _assert_business_trip_execution_task_completed(db, trip)
     if trip.get("status") not in (TRIP_STATUS_DIARY_DUE, TRIP_STATUS_OVERDUE, TRIP_STATUS_COMPLETED):
-        raise ValueError("출장 실행업무 완료 후 출장보고서 승인이 가능합니다.")
+        raise ValueError("출장 실행업무 완료 후 업무일지/출장보고서 승인이 가능합니다.")
 
 
 def _business_trip_execution_task_is_completed(db: dict[str, Any], trip: dict[str, Any]) -> bool:
@@ -251,24 +249,31 @@ def _assert_business_trip_execution_task_exists(db: dict[str, Any], trip: dict[s
         raise ValueError("출장 실행업무 생성 후 지연 상태 전이가 가능합니다.")
 
 
-def _business_trip_report_document_is_approved(db: dict[str, Any], trip: dict[str, Any]) -> bool:
+def _business_trip_completion_artifact_document_is_approved(db: dict[str, Any], trip: dict[str, Any]) -> bool:
     trip_id = str(trip.get("trip_id") or trip.get("id") or "").strip()
-    report_document_id = str(trip.get("report_document_id") or "").strip()
-    if not report_document_id or not trip_id:
+    artifact_document_ids = [
+        str(trip.get("report_document_id") or "").strip(),
+        str(trip.get("diary_document_id") or "").strip(),
+    ]
+    if not trip_id:
         return False
-    report = next((doc for doc in db.get("documents") or [] if doc.get("id") == report_document_id), None)
-    if not report or report.get("status") != DOC_STATUS_APPROVED:
-        return False
-    payload = report.get("content_json") if isinstance(report.get("content_json"), dict) else {}
-    if str(payload.get("trip_id") or "").strip() != trip_id:
-        return False
-    return _trip_artifact_kind_from_document(report) == "report"
-
+    for artifact_document_id in artifact_document_ids:
+        if not artifact_document_id:
+            continue
+        doc = next((row for row in db.get("documents") or [] if row.get("id") == artifact_document_id), None)
+        if not doc or doc.get("status") != DOC_STATUS_APPROVED:
+            continue
+        payload = doc.get("content_json") if isinstance(doc.get("content_json"), dict) else {}
+        if str(payload.get("trip_id") or "").strip() != trip_id:
+            continue
+        if _trip_artifact_kind_from_document(doc) in {"report", "diary"}:
+            return True
+    return False
 
 def _assert_business_trip_completion_prerequisites(db: dict[str, Any], trip: dict[str, Any]) -> None:
     _assert_business_trip_execution_task_completed(db, trip)
-    if not _business_trip_report_document_is_approved(db, trip):
-        raise ValueError("승인된 출장보고서 연결 후 완료 또는 실적 반영이 가능합니다.")
+    if not _business_trip_completion_artifact_document_is_approved(db, trip):
+        raise ValueError("승인된 업무일지 또는 출장보고서 연결 후 완료 또는 실적 반영이 가능합니다.")
 
 
 def _assert_business_trip_terminal_fields_allowed(db: dict[str, Any], trip: dict[str, Any]) -> None:
@@ -354,12 +359,12 @@ def _sync_business_trip_artifact_for_document(
         trip["diary_document_id"] = str(doc.get("id") or "")
     elif artifact_kind == "report":
         trip["report_document_id"] = str(doc.get("id") or "")
-        if complete_report:
-            _assert_business_trip_execution_task_completed(db, trip)
-            if trip.get("status") in (TRIP_STATUS_DIARY_DUE, TRIP_STATUS_OVERDUE):
-                trip.update(transition_trip_status(trip, TRIP_STATUS_COMPLETED))
-            elif trip.get("status") != TRIP_STATUS_COMPLETED:
-                raise ValueError("출장 실행업무 완료 후 출장보고서 승인이 가능합니다.")
+    if artifact_kind in {"diary", "report"} and complete_report:
+        _assert_business_trip_execution_task_completed(db, trip)
+        if trip.get("status") in (TRIP_STATUS_DIARY_DUE, TRIP_STATUS_OVERDUE):
+            trip.update(transition_trip_status(trip, TRIP_STATUS_COMPLETED))
+        elif trip.get("status") != TRIP_STATUS_COMPLETED:
+            raise ValueError("출장 실행업무 완료 후 업무일지/출장보고서 승인이 가능합니다.")
     trip["updated_at"] = _now_iso()
     if trip == before:
         return trip
@@ -1579,8 +1584,8 @@ def transition_business_trip_lifecycle(
                 _assert_business_trip_execution_task_completed(db, row)
             if target_status == TRIP_STATUS_OVERDUE:
                 _assert_business_trip_execution_task_exists(db, row)
-            if target_status == TRIP_STATUS_COMPLETED and not _business_trip_report_document_is_approved(db, row):
-                raise ValueError("승인된 출장보고서 연결 후 완료 전이가 가능합니다.")
+            if target_status == TRIP_STATUS_COMPLETED and not _business_trip_completion_artifact_document_is_approved(db, row):
+                raise ValueError("승인된 업무일지 또는 출장보고서 연결 후 완료 전이가 가능합니다.")
             before = deepcopy(row)
             updated = transition_trip_status(row, target_status)
             if updated == before:
