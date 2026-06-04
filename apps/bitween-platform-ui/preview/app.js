@@ -332,20 +332,26 @@ function renderShell() {
         <div class="sidebar-options" aria-label="sidebar color options">
           <span class="sidebar-options-title">메뉴 색상 옵션</span>
           <div class="sidebar-theme-grid">
-            ${sidebarThemes.map((theme) => `
-              <button class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}" data-sidebar-theme="${theme.id}" title="${theme.description}">
+            ${sidebarThemes.map((theme) => {
+              const selected = state.sidebarTheme === theme.id;
+              return `
+              <button aria-pressed="${selected}" class="sidebar-theme-chip ${selected ? "active" : ""}" data-sidebar-theme="${theme.id}" title="${theme.description}">
                 <span class="sidebar-swatch sidebar-swatch-${theme.id}"></span>
                 <strong>${theme.label}</strong>
               </button>
-            `).join("")}
+            `;
+            }).join("")}
           </div>
         </div>
         <nav class="nav" aria-label="platform menu">
-            ${navItems.map((item) => `
-            <button class="nav-button ${item.id === active.id ? "active" : ""}" data-target="${item.id}" style="${item.id === active.id ? `border-left-color:${item.accent}` : ""}">
+            ${navItems.map((item) => {
+              const selected = item.id === active.id;
+              return `
+            <button aria-current="${selected ? "page" : "false"}" class="nav-button ${selected ? "active" : ""}" data-target="${item.id}" style="${selected ? `border-left-color:${item.accent}` : ""}">
               <strong>${item.label}</strong>
             </button>
-          `).join("")}
+          `;
+            }).join("")}
         </nav>
       </aside>
       <div class="main">
@@ -398,7 +404,7 @@ function renderHome() {
     <section class="card">
       ${sectionHead("", "오늘의 업무", "처리 우선순위가 높은 업무를 카드로 정리합니다.")}
       <div class="queue-grid">${workQueue.map(([title, meta, owner, due, status, tone]) => `
-        <button class="queue-card select-card ${state.selectedQueueKey === queueKey([title, meta, owner, due, status, tone]) ? "selected" : ""}" data-queue-key="${escapeText(queueKey([title, meta, owner, due, status, tone]))}">
+        <button aria-pressed="${state.selectedQueueKey === queueKey([title, meta, owner, due, status, tone])}" class="queue-card select-card ${state.selectedQueueKey === queueKey([title, meta, owner, due, status, tone]) ? "selected" : ""}" data-queue-key="${escapeText(queueKey([title, meta, owner, due, status, tone]))}">
           <div class="queue-head">${badge(status, tone)}<span class="helper">${due}</span></div>
           <strong>${title}</strong>
           <span class="helper">${meta} · ${owner}</span>
@@ -455,7 +461,7 @@ function renderPayroll() {
     <section class="card">
       ${sectionHead("Readiness", "급여 자동화 준비 현황", "산출 전 필요한 기준과 자료 상태를 먼저 확인합니다.", button("설정 확인", "settings", "secondary"))}
       <div class="card-grid">${readinessCards.map(([title, value, detail, tone]) => `
-        <button class="mini-card readiness-card select-card ${state.selectedPayrollCardKey === payrollCardKey([title, value, detail, tone]) ? "selected" : ""}" data-payroll-card-key="${escapeText(payrollCardKey([title, value, detail, tone]))}" style="border-top-color:${toneColor(tone)}">
+        <button aria-pressed="${state.selectedPayrollCardKey === payrollCardKey([title, value, detail, tone])}" class="mini-card readiness-card select-card ${state.selectedPayrollCardKey === payrollCardKey([title, value, detail, tone]) ? "selected" : ""}" data-payroll-card-key="${escapeText(payrollCardKey([title, value, detail, tone]))}" style="border-top-color:${toneColor(tone)}">
           <span class="helper">${title}</span>
           <strong class="metric-value" style="color:${toneColor(tone)}">${value}</strong>
           <span>${detail}</span>
@@ -467,7 +473,7 @@ function renderPayroll() {
     <section class="card">
       ${sectionHead("Payroll flow", "급여 산출 작업 흐름", "운영 기준 확인부터 입력 자료 준비, 결과 검토, 자료함 저장까지 순서대로 진행합니다.", button("급여 설정 확인", "settings", "secondary"))}
       <div class="step-grid">${payrollSteps.map(([index, title, detail, status, tone]) => `
-        <button class="step-card select-card ${state.selectedPayrollStepKey === payrollStepKey([index, title, detail, status, tone]) ? "selected" : ""}" data-payroll-step-key="${escapeText(payrollStepKey([index, title, detail, status, tone]))}" style="border-top-color:${toneColor(tone)}">
+        <button aria-pressed="${state.selectedPayrollStepKey === payrollStepKey([index, title, detail, status, tone])}" class="step-card select-card ${state.selectedPayrollStepKey === payrollStepKey([index, title, detail, status, tone]) ? "selected" : ""}" data-payroll-step-key="${escapeText(payrollStepKey([index, title, detail, status, tone]))}" style="border-top-color:${toneColor(tone)}">
           <span class="eyebrow">${index}</span>
           ${badge(status, tone)}
           <strong>${title}</strong>
@@ -554,7 +560,7 @@ function renderModule(id) {
     <section class="card">
       ${sectionHead("", "업무 목록", "필터로 상태를 좁히고 필요한 다음 작업을 확인합니다.", button(secondaryLabel(id), secondaryTarget(id), "secondary"))}
       <div class="list-toolbar">
-        <div class="filters">${data.filters.map((filter) => `<button class="filter-chip ${state.filter === filter ? "active" : ""}" data-filter="${filter}">${filter}</button>`).join("")}</div>
+        <div class="filters">${data.filters.map((filter) => `<button aria-pressed="${state.filter === filter}" class="filter-chip ${state.filter === filter ? "active" : ""}" data-filter="${filter}">${filter}</button>`).join("")}</div>
         <label class="search-box" for="work-search"><span>검색</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="업무, 상태, 담당자 검색" /></label>
       </div>
       <div class="list-summary"><strong>${rows.length}건</strong><span class="helper">${state.filter} 필터${state.search ? ` · "${escapeText(state.search)}" 검색` : ""}</span></div>
@@ -576,7 +582,7 @@ function i18nSettingsPanel() {
   return `<section class="card">
     ${sectionHead("", "국제화 설정", "한국어, 영어, 중국어 화면 전환을 준비합니다.")}
     <div class="language-grid">${languageOptions.map(([code, label, status]) => `
-      <button class="language-option ${state.selectedLanguage === code ? "selected" : ""}" data-language="${code}">
+      <button aria-pressed="${state.selectedLanguage === code}" class="language-option ${state.selectedLanguage === code ? "selected" : ""}" data-language="${code}">
         <strong>${label}</strong><span class="helper">${state.selectedLanguage === code ? "선택됨" : status}</span>
       </button>
     `).join("")}</div>
@@ -709,8 +715,9 @@ function table(rows, selectable = false) {
     ${rows.map(([category, status, owner, next, tone]) => {
       const key = rowKey([category, status, owner, next, tone]);
       const content = `<span><strong>${category}</strong></span><span>${badge(status, tone)}</span><span>${owner}</span><span>${next}</span>`;
+      const selected = state.selectedRowKey === key;
       return selectable ? `
-      <button class="table-row row-button ${state.selectedRowKey === key ? "selected" : ""}" data-row-key="${escapeText(key)}">
+      <button aria-pressed="${selected}" class="table-row row-button ${selected ? "selected" : ""}" data-row-key="${escapeText(key)}">
         ${content}
       </button>
     ` : `
