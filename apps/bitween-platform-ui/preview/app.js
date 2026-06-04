@@ -178,58 +178,58 @@ const dashboards = {
     ["근태 확인", "6건", "월말 마감 전 확인", "attention"],
     ["증명서 요청", "2건", "담당자 처리 대기", "neutral"]
   ], [
-    ["직원명부 업데이트", "확인 필요", "인사 담당", "부서/직무 최신 정보 확인", "attention"],
-    ["재직증명서/경력증명서", "접수", "운영팀", "발급 양식 검토", "neutral"],
-    ["이력서/사직서 관리", "정리 중", "인사 담당", "입사/퇴사 문서 분류", "ready"]
+    ["직원명부 업데이트", "확인 필요", "인사 담당", "부서/직무 최신 정보 확인", "attention", "hr"],
+    ["재직증명서/경력증명서", "접수", "운영팀", "발급 양식 검토", "neutral", "hr"],
+    ["이력서/사직서 관리", "정리 중", "인사 담당", "입사/퇴사 문서 분류", "ready", "hr"]
   ]),
   attendance: dashboard("모바일 출퇴근", "휴대폰에서 출근/퇴근 상태, 위치 확인, 최근 근태 기록을 확인합니다.", ["전체", "출근", "퇴근", "확인 필요"], [
     ["오늘 출근", "09:02", "본사 120m 이내", "ready"],
     ["확인 필요", "1건", "외근 위치 확인", "attention"],
     ["이번 주 기록", "4일", "정상 출근", "neutral"]
   ], [
-    ["오늘 출근 기록", "확인됨", "BW-0001", "퇴근 체크 대기", "ready"],
-    ["외근 위치 확인", "확인 필요", "관리자", "외근 사유 확인", "attention"]
+    ["오늘 출근 기록", "확인됨", "BW-0001", "퇴근 체크 대기", "ready", "attendance"],
+    ["외근 위치 확인", "확인 필요", "관리자", "외근 사유 확인", "attention", "attendance"]
   ]),
   recruit: dashboard("채용 인재 관리", "지원자 경력과 자격 정보를 공유하고 부서별 필요 인재를 배치합니다.", ["전체", "지원자", "경력", "자격", "배치"], [
     ["지원자", "8명", "공유 가능 후보", "ready"],
     ["자격 검토", "3건", "부서 확인 대기", "attention"],
     ["배치 후보", "4명", "직무 적합 후보", "neutral"]
   ], [
-    ["지원자 경력 공유", "검토 중", "채용 담당", "부서장 열람 권한 확인", "attention"],
-    ["자격사항 매칭", "추천", "운영팀", "필요 부서 후보 배치", "ready"]
+    ["지원자 경력 공유", "검토 중", "채용 담당", "부서장 열람 권한 확인", "attention", "recruit"],
+    ["자격사항 매칭", "추천", "운영팀", "필요 부서 후보 배치", "ready", "recruit"]
   ]),
   travel: dashboard("출장/업무일지", "출장계획, 실행, 업무일지, 실적반영, 상급자 진행/완료 view를 연결해 확인합니다.", ["전체", "출장계획", "출장실행", "업무일지", "실적", "검토"], [
     ["출장계획", "4건", "승인 전/진행 중 포함", "neutral"],
     ["업무일지", "2건", "오늘 작성 권장", "attention"],
     ["완료 반영", "7건", "상급자 확인 완료", "ready"]
   ], [
-    ["부산 고객사 출장계획", "출장실행", "영업팀", "현장 미팅 후 업무일지 작성", "attention"],
-    ["대전 설치 지원 업무일지", "상급자 검토", "기술지원", "실적 반영 승인 대기", "neutral"],
-    ["서울 협력사 방문", "Completed", "운영팀", "완료 업무 성과 리포트 보관", "ready"]
+    ["부산 고객사 출장계획", "출장실행", "영업팀", "현장 미팅 후 업무일지 작성", "attention", "travel"],
+    ["대전 설치 지원 업무일지", "상급자 검토", "기술지원", "실적 반영 승인 대기", "neutral", "travel"],
+    ["서울 협력사 방문", "Completed", "운영팀", "완료 업무 성과 리포트 보관", "ready", "archive"]
   ]),
   workflow: dashboard("전자결재 업무함", "기안, 승인, 반려, 회람 문서를 상태별로 정리합니다.", ["전체", "결재 대기", "진행 중", "반려"], [
     ["결재 대기", "3건", "오늘 처리 권장", "attention"],
     ["임시저장", "1건", "기안자 작성 중", "neutral"],
     ["완료 문서", "18건", "이번 달 기준", "ready"]
   ], [
-    ["급여 지급 품의", "결재 대기", "대표 승인", "금액 요약 확인", "attention"],
-    ["계약서 검토", "진행 중", "법무 담당", "첨부 파일 회람", "neutral"]
+    ["급여 지급 품의", "결재 대기", "대표 승인", "금액 요약 확인", "attention", "workflow"],
+    ["계약서 검토", "진행 중", "법무 담당", "첨부 파일 회람", "neutral", "archive"]
   ]),
   archive: dashboard("자료함", "월별 급여 산출물, 보고서, 업로드 문서를 안전하게 찾습니다.", ["전체", "급여", "계약", "보고서"], [
     ["최근 보고서", "12개", "3개월 내 생성", "ready"],
     ["정리 필요", "4개", "분류 대기", "attention"],
     ["공유 링크", "0개", "외부 공유 없음", "ready"]
   ], [
-    ["2026년 5월 급여 보고서", "보관됨", "급여 담당", "미리보기", "ready"],
-    ["근태 원본 파일", "분류 대기", "운영팀", "폴더 지정", "attention"]
+    ["2026년 5월 급여 보고서", "보관됨", "급여 담당", "미리보기", "ready", "archive"],
+    ["근태 원본 파일", "분류 대기", "운영팀", "폴더 지정", "attention", "attendance"]
   ]),
   ai: dashboard("AI 업무 지원", "급여/HR/결재 문맥을 읽고 요약과 검토 질문을 준비합니다.", ["전체", "요약", "초안", "검토"], [
     ["추천 작업", "5개", "현재 화면 기준", "ready"],
     ["검토 대기", "2건", "사람 확인 필요", "attention"],
     ["정책 문맥", "확인 전", "업무 기준 확인 후 사용", "neutral"]
   ], [
-    ["급여 오류 요약", "추천", "AI", "오류 행 설명 생성", "ready"],
-    ["결재 의견 초안", "검토 필요", "사용자", "문서 맥락 확인", "attention"]
+    ["급여 오류 요약", "추천", "AI", "오류 행 설명 생성", "ready", "payroll"],
+    ["결재 의견 초안", "검토 필요", "사용자", "문서 맥락 확인", "attention", "workflow"]
   ]),
   admin: dashboard("관리자 콘솔", "법인 Branch, 하위계정, 민감 문서 권한, 감사 상태를 분리해서 관리합니다.", ["전체", "권한", "법인", "하위계정", "감사"], [
     ["Branch", "1개", "Bitween Demo 법인", "ready"],
@@ -237,17 +237,17 @@ const dashboards = {
     ["권한 검토", "2건", "민감 문서 접근 확인", "attention"],
     ["감사 로그", "정상", "최근 오류 없음", "ready"]
   ], [
-    ["신규 하위계정 초대", "검토 중", "관리자", "Branch 소속과 역할 지정", "attention"],
-    ["법인 Branch 정보", "정상", "운영 관리자", "정기 검토", "ready"],
-    ["급여 민감 문서 권한", "확인 필요", "대표 승인", "경영진 급여/일반 급여 열람 범위 분리", "attention"]
+    ["신규 하위계정 초대", "검토 중", "관리자", "Branch 소속과 역할 지정", "attention", "admin"],
+    ["법인 Branch 정보", "정상", "운영 관리자", "정기 검토", "ready", "admin"],
+    ["급여 민감 문서 권한", "확인 필요", "대표 승인", "경영진 급여/일반 급여 열람 범위 분리", "attention", "admin"]
   ]),
   settings: dashboard("설정", "개인 화면, 급여 운영 기준, 알림, 접근 환경을 정리합니다.", ["전체", "개인", "급여", "알림"], [
     ["프로필", "완료", "기본 정보 설정됨", "ready"],
     ["급여 기준", "확인 필요", "지급일/반올림 기준", "attention"],
     ["알림", "4개", "업무별 수신 설정", "neutral"]
   ], [
-    ["급여 운영 기준", "확인 필요", "급여 담당", "지급일과 반올림 기준 확인", "attention"],
-    ["화면 밀도", "권장", "개인", "업무형 레이아웃 유지", "ready"]
+    ["급여 운영 기준", "확인 필요", "급여 담당", "지급일과 반올림 기준 확인", "attention", "payroll"],
+    ["화면 밀도", "권장", "개인", "업무형 레이아웃 유지", "ready", "settings"]
   ])
 };
 
@@ -731,30 +731,15 @@ function selectedWorkRow(rows) {
   return rows.find((row) => rowKey(row) === state.selectedRowKey) || rows[0];
 }
 
-function workDetail([category, status, owner, next, tone]) {
+function workDetail([category, status, owner, next, tone, target]) {
   return `<div class="detail-panel">
     <div class="detail-head"><div><span class="helper">선택한 업무</span><strong>${escapeText(category)}</strong></div>${badge(status, tone)}</div>
     <div class="detail-grid">
       <div class="detail-item"><span class="helper">담당</span><strong>${escapeText(owner)}</strong></div>
       <div class="detail-item"><span class="helper">다음 작업</span><span>${escapeText(next)}</span></div>
     </div>
-    <div class="action-row">${button("관련 화면 열기", workRowTarget([category, status, owner, next, tone]), "secondary")}${button("담당자 확인", state.activeId, "ghost")}</div>
+    <div class="action-row">${button("관련 화면 열기", target, "secondary")}${button("담당자 확인", state.activeId, "ghost")}</div>
   </div>`;
-}
-
-function workRowTarget(row) {
-  const haystack = row.slice(0, 4).join(" ");
-  if (haystack.includes("급여") || haystack.includes("산출") || haystack.includes("월 기본근로시간")) return "payroll";
-  if (haystack.includes("결재") || haystack.includes("회람") || haystack.includes("기안")) return "workflow";
-  if (haystack.includes("출장") || haystack.includes("업무일지") || haystack.includes("실적")) return "travel";
-  if (haystack.includes("자료") || haystack.includes("보고서") || haystack.includes("파일") || haystack.includes("폴더")) return "archive";
-  if (haystack.includes("권한") || haystack.includes("사용자") || haystack.includes("역할") || haystack.includes("법인")) return "admin";
-  if (haystack.includes("채용") || haystack.includes("지원자") || haystack.includes("자격") || haystack.includes("배치")) return "recruit";
-  if (haystack.includes("출근") || haystack.includes("퇴근") || haystack.includes("외근")) return "attendance";
-  if (haystack.includes("설정") || haystack.includes("알림") || haystack.includes("환경")) return "settings";
-  if (haystack.includes("AI") || haystack.includes("요약") || haystack.includes("초안")) return "ai";
-  if (haystack.includes("근태") || haystack.includes("증명서") || haystack.includes("직원")) return "hr";
-  return "home";
 }
 
 function filterRows(rows) {

@@ -845,8 +845,6 @@ function AttendancePhonePanel() {
 }
 
 function WorkDetailPanel({ row, onSelect }: { readonly row: ModuleRow; readonly onSelect: (id: PlatformId) => void }) {
-  const target = workRowTarget(row);
-
   return (
     <View style={styles.detailPanel}>
       <View style={styles.detailHeader}>
@@ -867,7 +865,7 @@ function WorkDetailPanel({ row, onSelect }: { readonly row: ModuleRow; readonly 
         </View>
       </View>
       <View style={styles.actionRow}>
-        <ActionButton onPress={() => onSelect(target)} variant="secondary">관련 화면 열기</ActionButton>
+        <ActionButton onPress={() => onSelect(row.target)} variant="secondary">관련 화면 열기</ActionButton>
         <ActionButton onPress={() => undefined} variant="ghost">담당자 확인</ActionButton>
       </View>
     </View>
@@ -923,52 +921,6 @@ function workQueueTarget(item: WorkQueueItem): PlatformId {
 
   if (item.meta.includes("아카이브") || item.meta.includes("자료")) {
     return "archive";
-  }
-
-  return "home";
-}
-
-function workRowTarget(row: ModuleRow): PlatformId {
-  const haystack = [row.category, row.status, row.owner, row.nextStep].join(" ");
-
-  if (haystack.includes("급여") || haystack.includes("산출") || haystack.includes("월 기본근로시간")) {
-    return "payroll";
-  }
-
-  if (haystack.includes("결재") || haystack.includes("회람") || haystack.includes("기안")) {
-    return "workflow";
-  }
-
-  if (haystack.includes("출장") || haystack.includes("업무일지") || haystack.includes("실적")) {
-    return "travel";
-  }
-
-  if (haystack.includes("자료") || haystack.includes("보고서") || haystack.includes("파일") || haystack.includes("폴더")) {
-    return "archive";
-  }
-
-  if (haystack.includes("권한") || haystack.includes("사용자") || haystack.includes("역할") || haystack.includes("법인")) {
-    return "admin";
-  }
-
-  if (haystack.includes("채용") || haystack.includes("지원자") || haystack.includes("자격") || haystack.includes("배치")) {
-    return "recruit";
-  }
-
-  if (haystack.includes("설정") || haystack.includes("알림") || haystack.includes("환경")) {
-    return "settings";
-  }
-
-  if (haystack.includes("AI") || haystack.includes("요약") || haystack.includes("초안")) {
-    return "ai";
-  }
-
-  if (haystack.includes("근태") || haystack.includes("증명서") || haystack.includes("직원")) {
-    return "hr";
-  }
-
-  if (haystack.includes("출근") || haystack.includes("퇴근") || haystack.includes("외근")) {
-    return "attendance";
   }
 
   return "home";

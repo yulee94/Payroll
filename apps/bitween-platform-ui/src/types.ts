@@ -89,6 +89,7 @@ export type ModuleRow = {
   readonly status: string;
   readonly owner: string;
   readonly nextStep: string;
+  readonly target: PlatformId;
   readonly tone: ReadinessTone;
 };
 

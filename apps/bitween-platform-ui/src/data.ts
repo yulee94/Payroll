@@ -389,6 +389,7 @@ export const moduleDashboards = {
         status: "확인 필요",
         owner: "인사 담당",
         nextStep: "부서/직무 최신 정보 확인",
+        target: "hr",
         tone: "attention"
       },
       {
@@ -397,6 +398,7 @@ export const moduleDashboards = {
         status: "접수",
         owner: "운영팀",
         nextStep: "발급 양식 검토",
+        target: "hr",
         tone: "neutral"
       },
       {
@@ -405,6 +407,7 @@ export const moduleDashboards = {
         status: "정리 중",
         owner: "인사 담당",
         nextStep: "입사/퇴사 문서 분류",
+        target: "hr",
         tone: "ready"
       }
     ],
@@ -438,6 +441,7 @@ export const moduleDashboards = {
         status: "확인됨",
         owner: "BW-0001",
         nextStep: "퇴근 체크 대기",
+        target: "attendance",
         tone: "ready"
       },
       {
@@ -446,6 +450,7 @@ export const moduleDashboards = {
         status: "확인 필요",
         owner: "관리자",
         nextStep: "외근 사유 확인",
+        target: "attendance",
         tone: "attention"
       }
     ],
@@ -479,6 +484,7 @@ export const moduleDashboards = {
         status: "검토 중",
         owner: "채용 담당",
         nextStep: "부서장 열람 권한 확인",
+        target: "recruit",
         tone: "attention"
       },
       {
@@ -487,6 +493,7 @@ export const moduleDashboards = {
         status: "추천",
         owner: "운영팀",
         nextStep: "필요 부서 후보 배치",
+        target: "recruit",
         tone: "ready"
       }
     ],
@@ -520,6 +527,7 @@ export const moduleDashboards = {
         status: "출장실행",
         owner: "영업팀",
         nextStep: "현장 미팅 후 업무일지 작성",
+        target: "travel",
         tone: "attention"
       },
       {
@@ -528,6 +536,7 @@ export const moduleDashboards = {
         status: "상급자 검토",
         owner: "기술지원",
         nextStep: "실적 반영 승인 대기",
+        target: "travel",
         tone: "neutral"
       },
       {
@@ -536,6 +545,7 @@ export const moduleDashboards = {
         status: "Completed",
         owner: "운영팀",
         nextStep: "완료 업무 성과 리포트 보관",
+        target: "archive",
         tone: "ready"
       }
     ],
@@ -569,6 +579,7 @@ export const moduleDashboards = {
         status: "결재 대기",
         owner: "대표 승인",
         nextStep: "금액 요약 확인",
+        target: "workflow",
         tone: "attention"
       },
       {
@@ -577,6 +588,7 @@ export const moduleDashboards = {
         status: "진행 중",
         owner: "법무 담당",
         nextStep: "첨부 파일 회람",
+        target: "archive",
         tone: "neutral"
       }
     ],
@@ -610,6 +622,7 @@ export const moduleDashboards = {
         status: "보관됨",
         owner: "급여 담당",
         nextStep: "미리보기",
+        target: "archive",
         tone: "ready"
       },
       {
@@ -618,6 +631,7 @@ export const moduleDashboards = {
         status: "분류 대기",
         owner: "운영팀",
         nextStep: "폴더 지정",
+        target: "attendance",
         tone: "attention"
       }
     ],
@@ -651,6 +665,7 @@ export const moduleDashboards = {
         status: "추천",
         owner: "AI",
         nextStep: "오류 행 설명 생성",
+        target: "payroll",
         tone: "ready"
       },
       {
@@ -659,6 +674,7 @@ export const moduleDashboards = {
         status: "검토 필요",
         owner: "사용자",
         nextStep: "문서 맥락 확인",
+        target: "workflow",
         tone: "attention"
       }
     ],
@@ -693,6 +709,7 @@ export const moduleDashboards = {
         status: "검토 중",
         owner: "관리자",
         nextStep: "Branch 소속과 역할 지정",
+        target: "admin",
         tone: "attention"
       },
       {
@@ -701,6 +718,7 @@ export const moduleDashboards = {
         status: "정상",
         owner: "운영 관리자",
         nextStep: "정기 검토",
+        target: "admin",
         tone: "ready"
       },
       {
@@ -709,6 +727,7 @@ export const moduleDashboards = {
         status: "확인 필요",
         owner: "대표 승인",
         nextStep: "경영진 급여/일반 급여 열람 범위 분리",
+        target: "admin",
         tone: "attention"
       }
     ],
@@ -742,6 +761,7 @@ export const moduleDashboards = {
         status: "확인 필요",
         owner: "급여 담당",
         nextStep: "지급일과 반올림 기준 확인",
+        target: "payroll",
         tone: "attention"
       },
       {
@@ -750,6 +770,7 @@ export const moduleDashboards = {
         status: "권장",
         owner: "개인",
         nextStep: "업무형 레이아웃 유지",
+        target: "settings",
         tone: "ready"
       }
     ],
