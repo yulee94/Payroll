@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from core.workflow import constants as c
+from core.workflow import inbox as workflow_inbox
 from core.workflow.business_trip import TRIP_SOURCE_KEYS, TRIP_VIEW_MODEL_KEYS
 
 
@@ -215,13 +216,55 @@ def workflow_business_trip_permissions_example() -> dict[str, Any]:
     }
 
 
+def workflow_inbox_example() -> dict[str, Any]:
+    """Return the Rust-owned pure workflow inbox classification contract."""
+    return {
+        "rust_crate": "bitween-workflow-core",
+        "rust_module": "workflow_inbox",
+        "rust_entrypoints": [
+            "matches_inbox",
+            "filter_inbox_ids",
+        ],
+        "python_compatibility_source": "core.workflow.inbox",
+        "python_boundary": (
+            "Python supplies can_approve_document and Rust does not read sessions or stores. "
+            "Python compatibility code may still own UserSession adaptation, document hydration, "
+            "permission resolution, labels, counts, filtering, workflow JSON persistence, and UI bridges."
+        ),
+        "inbox_dtos": [
+            "WorkflowInboxApprovalStep",
+            "WorkflowInboxDocument",
+            "WorkflowInboxMatchInput",
+        ],
+        "inbox_ids": list(workflow_inbox.INBOX_IDS),
+        "quick_tabs": [tab[0] for tab in workflow_inbox.GW_INBOX_QUICK_TABS],
+        "inbox_invariants": [
+            "blank or all inbox id includes every supplied document",
+            "to_approve uses supplied can_approve_document for non-imported active approval statuses",
+            "GW imported pending/to_approve/inbox documents classify as to_approve by list kind",
+            "GW imported draft list kinds classify as my_draft independent of requester ownership",
+            "GW imported circulate/reference list kinds classify as circulate",
+            "my_draft is requester-owned draft or requested_changes for non-imported documents",
+            "in_progress includes requester or approval-line users while submitted or in_review",
+            "completed includes requester, approval-line, or cc users for approved/completed/closed documents",
+            "rejected includes requester or approval-line users for rejected/cancelled documents",
+            "circulate excludes draft/cancelled documents and active approval tasks for cc users",
+            "reference excludes cc users and draft documents",
+            "my_requests is a legacy alias for requester-owned documents",
+            "pending_approval is a legacy alias for to_approve",
+        ],
+    }
+
+
 def workflow_api_contract() -> dict[str, Any]:
     """Return workflow API contract metadata for Rust migration slices."""
     return {
         "business_trip_lifecycle": workflow_business_trip_lifecycle_example(),
         "business_trip_permissions": workflow_business_trip_permissions_example(),
+        "workflow_inbox": workflow_inbox_example(),
         "response": {
             "business_trip_lifecycle_entrypoint": "bitween_workflow_core::business_trip::transition_trip_status(record, target, now_iso)",
             "business_trip_permissions_entrypoint": "bitween_workflow_core::business_trip_permissions::can_view_business_trip_lifecycle(input)",
+            "workflow_inbox_entrypoint": "bitween_workflow_core::workflow_inbox::matches_inbox(input)",
         },
     }

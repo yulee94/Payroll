@@ -2,6 +2,7 @@ WORKFLOW_CORE_SRCS = [
     "src/lib.rs",
     "src/business_trip.rs",
     "src/business_trip_permissions.rs",
+    "src/workflow_inbox.rs",
 ]
 
 WORKFLOW_CORE_DEPS = [
