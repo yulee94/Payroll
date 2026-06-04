@@ -140,6 +140,23 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertEqual([row["name"] for row in audit["example_result"]["rows"]], ["A", "B", "C"])
         self.assertIn("audit_invoice_batch", response["invoice_audit_batch_entrypoint"])
 
+    def test_contract_declares_rust_ei65_payroll_decision(self) -> None:
+        contract = payroll_api_contract()
+        ei65 = contract["ei65_payroll_decision"]
+        response = contract["response"]
+
+        self.assertIn("resolve_ei_65_for_payroll", ei65["rust_entrypoint"])
+        self.assertIn("core.payroll.employment_insurance_65.resolve_ei_65_for_payroll", ei65["python_compatibility_source"])
+        self.assertEqual(ei65["status_values"], ["exempt", "liable", "unknown"])
+        self.assertEqual(ei65["unknown_default_values"], ["skip", "deduct"])
+        self.assertIn("latest_verification", ei65["input_fields"])
+        self.assertEqual(ei65["example_result"]["status"], "exempt")
+        self.assertEqual(ei65["example_result"]["premium_amount"], 0)
+        self.assertFalse(ei65["example_result"]["deduct_employment_insurance"])
+        self.assertIsNone(ei65["example_unknown_result"]["premium_amount"])
+        self.assertIn("공제 생략", ei65["example_unknown_result"]["warning"])
+        self.assertIn("resolve_ei_65_for_payroll", response["ei65_payroll_decision_entrypoint"])
+
     def test_contract_declares_rust_site_benefits_application(self) -> None:
         contract = payroll_api_contract()
         benefits = contract["site_benefits_application"]

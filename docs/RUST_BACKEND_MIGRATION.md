@@ -191,6 +191,42 @@ Verification evidence for this checkpoint:
 Slice spec: `docs/PAYROLL_RUST_INVOICE_AUDIT_BATCH_SLICE.md`.
 
 
+
+## Current implementation checkpoint: Rust payroll EI 65+ decision
+
+Implemented on 2026-06-04 as the next payroll decision behavior slice:
+
+- `crates/payroll-api` now exposes `Ei65EligibilityStatus`,
+  `Ei65UnknownDefault`, `Ei65VerificationRecord`, `Ei65PayrollInput`,
+  `Ei65PayrollResult`, `age_years_from_korean_identity`,
+  `is_age_65_plus_for_period`, and `resolve_ei_65_for_payroll`.
+- `PayrollApiService::resolve_ei_65_for_payroll` resolves the supplied-input
+  Korean age-65+ employment-insurance payroll decision without reading KCOMWEL
+  storage, tenant/site settings, live APIs, workbooks, EDI premiums, or payroll
+  invoice rows.
+- Rust preserves Python compatibility for valid-period month-end age checks,
+  Korean RRN century/pivot parsing, `exempt`/`liable`/`unknown` status values,
+  `skip`/`deduct` unknown defaults, management-number fallback, and the Korean
+  unknown-warning wording.
+- Python remains responsible for KCOMWEL CSV import/persistence, live provider
+  calls, employee matching, site management-number lookup, EDI premium
+  application, payroll row mutation, and workbook I/O until those slices move to
+  Rust behind parity tests.
+- TypeScript and Python contract metadata now include EI 65+ supplied-input and
+  result DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo fmt --check`
+- `cargo test --workspace`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_employment_insurance_65 tests.test_payroll_employment_insurance tests.test_payroll_api_contract -v`
+- `npm run typecheck --prefix frontend`
+- `git diff --check`
+- `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
+
+Slice spec: `docs/PAYROLL_RUST_EI65_SLICE.md`.
+
 ## Current implementation checkpoint: Rust payroll site-benefits application
 
 Implemented on 2026-06-04 as the next payroll row-application behavior slice:

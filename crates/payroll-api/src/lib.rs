@@ -1,5 +1,6 @@
 pub mod access;
 pub mod attendance;
+pub mod employment_insurance_65;
 pub mod error;
 pub mod execution_plan;
 pub mod fixed_hours;
@@ -18,6 +19,11 @@ pub use access::{
     PayrollPosition, PayrollPrincipal, PayrollRole,
 };
 pub use attendance::{aggregate_attendance_records, AttendanceInvoiceRow, AttendanceSourceRecord};
+pub use employment_insurance_65::{
+    age_years_from_korean_identity, is_age_65_plus_for_period, resolve_ei_65_for_payroll,
+    Ei65EligibilityStatus, Ei65PayrollInput, Ei65PayrollResult, Ei65UnknownDefault,
+    Ei65VerificationRecord,
+};
 pub use error::PayrollApiError;
 pub use execution_plan::{
     plan_payroll_execution, PayrollExecutionBackend, PayrollExecutionPlan, PayrollExecutionStep,

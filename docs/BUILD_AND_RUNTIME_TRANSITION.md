@@ -249,7 +249,7 @@ cargo test --workspace
 
 **Acceptance criteria:**
 
-- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, workplace-hours application, invoice audit row/batch evaluation, site-benefits application, fixed-hours application, execution planning, authorization, run-result response shaping, health, and readiness.
+- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, workplace-hours application, invoice audit row/batch evaluation, employment-insurance 65+ decisions, site-benefits application, fixed-hours application, execution planning, authorization, run-result response shaping, health, and readiness.
 - [ ] Python adapter is retained only as compatibility fallback while rollout is incomplete.
 - [x] Health/readiness behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [x] Run-result success/error envelope behavior is defined in framework-neutral Rust DTOs and API contracts.
@@ -258,6 +258,7 @@ cargo test --workspace
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
 - [x] Invoice audit row and batch behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/fixed-profile resolver and workbook/UI bridge.
+- [x] Employment-insurance 65+ payroll decision behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the KCOMWEL/settings/payroll-row/workbook bridge.
 - [x] Site-benefits payroll row application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/workbook/totals bridge.
 - [x] Fixed-hours payroll row application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the HR contract/settings resolver.
 - [ ] Service-account permissions and initial latency/error budgets are defined for Kubernetes.
@@ -416,6 +417,39 @@ Task 4 acceptance status:
 
 - [x] Supplied-input invoice audit batch summarization is Rust-owned behind
       parity tests.
+
+
+## Implementation checkpoint: Rust payroll EI 65+ decision
+
+Completed on 2026-06-04 as a payroll decision behavior slice:
+
+- `crates/payroll-api` owns supplied-input EI 65+ payroll decisions through
+  `resolve_ei_65_for_payroll`, age helpers, decision DTOs, and
+  `PayrollApiService::resolve_ei_65_for_payroll`.
+- Rust handles valid-period month-end age checks, Korean RRN century/pivot
+  parsing, supplied KCOMWEL premium interpretation, unknown-default skip/deduct
+  handling, management-number fallback, and Korean warning text.
+- Python remains the KCOMWEL import/storage/live-provider, employee matching,
+  site settings, EDI premium, payroll-row mutation, and workbook bridge.
+- Contract docs and TypeScript/Python metadata name the EI 65+ input,
+  verification, and result DTOs.
+- Slice spec: `docs/PAYROLL_RUST_EI65_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo fmt --check
+cargo test --workspace
+buck2 test //crates/payroll-api:payroll_api_test
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_employment_insurance_65 tests.test_payroll_employment_insurance tests.test_payroll_api_contract -v
+npm run typecheck --prefix frontend
+git diff --check
+cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
+```
+
+Task 4 acceptance status:
+
+- [x] Supplied-input EI 65+ payroll decision is Rust-owned behind parity tests.
 
 ## Implementation checkpoint: Rust payroll site-benefits application
 

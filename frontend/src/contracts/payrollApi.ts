@@ -249,6 +249,39 @@ export interface PayrollInvoiceAuditBatchResult {
   warn_count: number;
 }
 
+export type PayrollEi65EligibilityStatus = "exempt" | "liable" | "unknown";
+export type PayrollEi65UnknownDefault = "skip" | "deduct";
+export type PayrollEi65VerificationSource = "manual" | "import" | "api";
+
+export interface PayrollEi65VerificationRecord {
+  employee_id: string;
+  employee_name: string;
+  check_date: string;
+  premium_amount: number;
+  management_no: string;
+  source: PayrollEi65VerificationSource;
+}
+
+export interface PayrollEi65PayrollInput {
+  identity: string;
+  payroll_period: string;
+  employee_id: string;
+  employee_name: string;
+  workplace: string;
+  site_management_no: string;
+  unknown_default: PayrollEi65UnknownDefault;
+  latest_verification?: PayrollEi65VerificationRecord;
+}
+
+export interface PayrollEi65PayrollResult {
+  status: PayrollEi65EligibilityStatus;
+  premium_amount: number | null;
+  management_no: string;
+  deduct_employment_insurance: boolean;
+  warning: string;
+  default_action: PayrollEi65UnknownDefault;
+}
+
 export type PayrollBenefitSource = "site" | "tenant" | "global";
 
 export interface PayrollWorkersDayConfig {
