@@ -145,7 +145,7 @@ export function DataTable({ rows }: { readonly rows: readonly ModuleRow[] }) {
   const compact = width < 760;
 
   if (rows.length === 0) {
-    return <EmptyState title="표시할 항목이 없습니다." description="연동 데이터가 생기면 목록이 자동으로 채워집니다." />;
+    return <EmptyState title="표시할 항목이 없습니다." description="처리할 업무가 생기면 목록이 자동으로 채워집니다." />;
   }
 
   if (compact) {
@@ -250,7 +250,7 @@ export function AppShell({ active, children, items, onSelect }: ShellProps) {
             <Label size="xl" weight="bold">{active.label}</Label>
             <Label muted>{active.description}</Label>
           </View>
-          <Badge tone="neutral">RN/TypeScript preview</Badge>
+          <Badge tone="neutral">법인 운영 콘솔</Badge>
         </View>
         <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]}>{children}</ScrollView>
       </View>
