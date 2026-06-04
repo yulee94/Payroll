@@ -8,6 +8,12 @@ Bitween 급여 자동화는 현재 데스크톱 앱 내부 서비스로 구현�
 - 예정 HTTP 엔드포인트: `POST /api/payroll/v1/runs`
 - Content-Type: `application/json`
 
+관련 준비상태 조회:
+
+- 내부 진입점: `services.payroll_readiness.payroll_readiness_snapshot(tenant_id=...)`
+- 예정 HTTP 엔드포인트: `GET /api/payroll/v1/readiness`
+- 용도: 명부, 운영 기준, 산출 자료, API 계약 준비 상태를 프론트 대시보드에서 표시합니다.
+
 ## Request
 
 `scope`는 세 가지 형태를 받습니다.

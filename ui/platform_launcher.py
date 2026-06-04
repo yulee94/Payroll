@@ -319,47 +319,17 @@ class PlatformLauncherPanel(tk.Frame):
         self._on_open("payroll")
 
     def _payroll_readiness_items(self) -> list[tuple[str, str, str, str]]:
-        items: list[tuple[str, str, str, str]] = []
+        from services.payroll_readiness import payroll_readiness_cards
 
-        try:
-            from core.session_service import session_tenant_id
-            from services.payroll_policy_store import (
-                INPUT_LABELS,
-                operation_policy_source_label,
-                resolve_payroll_operation_policy,
+        return [
+            (
+                card.get("title", ""),
+                card.get("value", ""),
+                card.get("detail", ""),
+                card.get("color", "#64748B"),
             )
-
-            resolved = resolve_payroll_operation_policy("", tenant_id=session_tenant_id())
-            policy = resolved["policy"]
-            source = operation_policy_source_label(resolved["source"])
-            input_basis = INPUT_LABELS.get(policy["input_basis"], policy["input_basis"])
-            items.append(("입력 기준", input_basis, source, "#2563EB"))
-        except Exception:
-            items.append(("입력 기준", "청구서+근태 혼합", "기본값", "#2563EB"))
-
-        try:
-            from services.employee_roster_store import roster_exists, roster_updated_display
-
-            if roster_exists():
-                items.append(("근로자 명부", "준비됨", roster_updated_display(), "#0D9488"))
-            else:
-                items.append(("근로자 명부", "확인 필요", "templates/근로자명부.xlsx", "#B45309"))
-        except Exception:
-            items.append(("근로자 명부", "확인 필요", "상태 조회 실패", "#B45309"))
-
-        try:
-            from payroll_archive import list_payroll_periods
-
-            periods = list_payroll_periods()
-            if periods:
-                items.append(("산출 자료", f"{len(periods)}개 급여월", periods[0], "#7C3AED"))
-            else:
-                items.append(("산출 자료", "대기 중", "첫 청구서 업로드 필요", "#64748B"))
-        except Exception:
-            items.append(("산출 자료", "대기 중", "상태 조회 실패", "#64748B"))
-
-        items.append(("API 연결", "준비됨", "JSON 요청/응답 어댑터", "#1F3864"))
-        return items
+            for card in payroll_readiness_cards()
+        ]
 
     def _build_payroll_readiness_section(self, outer: tk.Frame) -> None:
         wrap = tk.Frame(outer, bg=COLORS["bg"])
