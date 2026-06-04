@@ -5,6 +5,9 @@ use crate::attendance::{
     aggregate_attendance_records, AttendanceInvoiceRow, AttendanceSourceRecord,
 };
 use crate::execution_plan::{plan_payroll_execution, PayrollExecutionPlan};
+use crate::fixed_hours::{
+    apply_fixed_hours_to_invoice, FixedHoursApplication, FixedHoursInvoice, FixedHoursProfile,
+};
 use crate::policy::{AttendancePolicy, OperationPolicySnapshot};
 use crate::policy_resolution::PayrollPolicySettings;
 use crate::request::PayrollRunRequest;
@@ -146,6 +149,18 @@ impl PayrollApiService {
         policy_snapshot: impl Into<OperationPolicySnapshot>,
     ) -> PayrollExecutionPlan {
         plan_payroll_execution(request, policy_snapshot)
+    }
+
+    pub fn apply_fixed_hours_to_invoice<S>(
+        &self,
+        invoice: FixedHoursInvoice,
+        profile: &FixedHoursProfile,
+        workplace: S,
+    ) -> FixedHoursApplication
+    where
+        S: Into<String>,
+    {
+        apply_fixed_hours_to_invoice(invoice, profile, workplace)
     }
 
     pub fn run_response(

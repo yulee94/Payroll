@@ -292,6 +292,110 @@ def payroll_attendance_aggregation_example() -> dict[str, Any]:
         ],
     }
 
+
+def payroll_fixed_hours_application_example() -> dict[str, Any]:
+    """Return the Rust-owned fixed-hours application contract shape."""
+    return {
+        "rust_entrypoint": "PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)",
+        "calculator_entrypoint": "apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)",
+        "python_compatibility_source": "core.payroll.fixed_hours.apply_fixed_hours_to_invoice",
+        "resolver_boundary": "Python compatibility code may still resolve HR contracts, site job-group templates, and payroll settings before supplying a fixed-hours profile to Rust.",
+        "pay_type_values": ["hourly", "monthly_salary"],
+        "profile_fields": [
+            "fixed_hours_mode",
+            "monthly_fixed_hours",
+            "daily_fixed_hours",
+            "fixed_overtime_hours",
+            "fixed_extension_hours",
+            "pay_type",
+            "job_group",
+            "source",
+            "source_label",
+            "contract_id",
+        ],
+        "invoice_fields": [
+            "name",
+            "workplace",
+            "work_days",
+            "base_days",
+            "ot_hours",
+            "special_hours",
+            "special_ext_hours",
+            "_invoice_work_days",
+            "_invoice_base_days",
+            "_invoice_ot_hours",
+            "_invoice_special_hours",
+            "_invoice_special_ext_hours",
+            "_monthly_work_hours",
+            "_monthly_hours_source",
+            "_fixed_hours_mode",
+            "_fixed_hours_source",
+            "_fixed_hours_pay_type",
+            "_fixed_hours_job_group",
+            "_preserve_reference_hours",
+        ],
+        "example_profile": {
+            "fixed_hours_mode": True,
+            "monthly_fixed_hours": 209,
+            "daily_fixed_hours": 0,
+            "fixed_overtime_hours": 10,
+            "fixed_extension_hours": 20,
+            "pay_type": "monthly_salary",
+            "job_group": "경비",
+            "source": "contract",
+            "source_label": "근로계약서 기준 고정",
+            "contract_id": "c1",
+        },
+        "example_invoice": {
+            "name": "최연봉",
+            "workplace": "청구지",
+            "work_days": 150,
+            "base_days": 150,
+            "ot_hours": 5,
+            "special_hours": 3,
+            "special_ext_hours": 2,
+        },
+        "example_application": {
+            "applied": True,
+            "invoice": {
+                "name": "최연봉",
+                "workplace": "강남경비",
+                "work_days": 209,
+                "base_days": 209,
+                "ot_hours": 20,
+                "special_hours": 10,
+                "special_ext_hours": 2,
+                "_invoice_work_days": 150,
+                "_invoice_base_days": 150,
+                "_invoice_ot_hours": 5,
+                "_invoice_special_hours": 3,
+                "_invoice_special_ext_hours": 2,
+                "_monthly_work_hours": 209,
+                "_monthly_hours_source": "근로계약서 기준 고정",
+                "_fixed_hours_mode": True,
+                "_fixed_hours_source": "contract",
+                "_fixed_hours_pay_type": "monthly_salary",
+                "_fixed_hours_job_group": "경비",
+                "_preserve_reference_hours": False,
+            },
+            "audit_flags": [
+                "근로계약서 기준 고정 (경비)",
+                "급여형태: 연봉직",
+                "청구서 연장(5h) ≠ 계약 고정(20h)",
+                "청구서 특근(3h) ≠ 계약 고정(10h)",
+                "청구서 근무시간(150h) ≠ 계약 월시간(209h)",
+            ],
+        },
+        "invariants": [
+            "resolved profiles are normalized before application",
+            "original invoice work/base/overtime/special hours are preserved under _invoice_* fields before replacement",
+            "fixed_extension_hours maps to invoice ot_hours and fixed_overtime_hours maps to special_hours when positive",
+            "_preserve_reference_hours keeps original invoice work/base hours for application while audit flags still compare against the resolved profile",
+            "audit flags preserve the Python compatibility Korean labels for source, pay type, and hour mismatches",
+        ],
+    }
+
+
 def payroll_policy_resolution_example() -> dict[str, Any]:
     """Return the Rust operation-policy resolution contract shape."""
     return {
@@ -480,6 +584,7 @@ def payroll_api_contract() -> dict[str, Any]:
         },
         "input_types": list(PAYROLL_API_INPUT_TYPES),
         "attendance_aggregation": payroll_attendance_aggregation_example(),
+        "fixed_hours_application": payroll_fixed_hours_application_example(),
         "policy_resolution": payroll_policy_resolution_example(),
         "execution_plan": payroll_execution_plan_example(),
         "authorization": {
@@ -663,6 +768,7 @@ def payroll_api_contract() -> dict[str, Any]:
             "policy_resolution_entrypoint": "PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)",
             "execution_plan_entrypoint": "PayrollApiService::plan_run_request(request, policy_snapshot)",
             "attendance_aggregation_entrypoint": "PayrollApiService::aggregate_attendance_records(records, workplace, attendance_policy)",
+            "fixed_hours_application_entrypoint": "PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)",
             "never_include": ["exception"],
         },
     }

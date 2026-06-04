@@ -94,6 +94,22 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertTrue(aggregation["example_invoice_rows"][0]["_attendance_input"])
         self.assertIn("aggregate_attendance_records", response["attendance_aggregation_entrypoint"])
 
+    def test_contract_declares_rust_fixed_hours_application(self) -> None:
+        contract = payroll_api_contract()
+        fixed = contract["fixed_hours_application"]
+        response = contract["response"]
+
+        self.assertIn("apply_fixed_hours_to_invoice", fixed["rust_entrypoint"])
+        self.assertIn("core.payroll.fixed_hours.apply_fixed_hours_to_invoice", fixed["python_compatibility_source"])
+        self.assertIn("monthly_salary", fixed["pay_type_values"])
+        self.assertIn("_invoice_work_days", fixed["invoice_fields"])
+        self.assertEqual(fixed["example_profile"]["monthly_fixed_hours"], 209)
+        self.assertEqual(fixed["example_application"]["invoice"]["work_days"], 209)
+        self.assertEqual(fixed["example_application"]["invoice"]["ot_hours"], 20)
+        self.assertEqual(fixed["example_application"]["invoice"]["special_hours"], 10)
+        self.assertIn("청구서 연장(5h)", fixed["example_application"]["audit_flags"][2])
+        self.assertIn("apply_fixed_hours_to_invoice", response["fixed_hours_application_entrypoint"])
+
     def test_contract_declares_rust_operation_policy_resolution(self) -> None:
         contract = payroll_api_contract()
         resolution = contract["policy_resolution"]
