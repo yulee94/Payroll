@@ -1,4 +1,5 @@
 import type {
+  CalendarEvent,
   MetricItem,
   ModuleDashboard,
   ModuleRow,
@@ -6,9 +7,11 @@ import type {
   PayrollStep,
   PlatformId,
   ReadinessCard,
+  TodoItem,
   WorkQueueItem
 } from "./types";
 import {
+  calendarEvents,
   moduleDashboards,
   navigationItems,
   payrollSettingsRows,
@@ -16,6 +19,7 @@ import {
   platformMetrics,
   previewRows,
   readinessCards,
+  todayTodos,
   workQueue
 } from "./data";
 
@@ -24,12 +28,15 @@ export type NonEmptyNavigation = readonly [NavigationItem, ...NavigationItem[]];
 export type SessionViewModel = {
   readonly companyCodeLabel: string;
   readonly displayName: string;
+  readonly employeeNumber: string;
   readonly roleLabel: string;
   readonly tenantName: string;
 };
 
 export type LauncherViewModel = {
+  readonly calendarEvents: readonly CalendarEvent[];
   readonly metrics: readonly MetricItem[];
+  readonly todayTodos: readonly TodoItem[];
   readonly navigation: NonEmptyNavigation;
   readonly workQueue: readonly WorkQueueItem[];
 };
@@ -55,14 +62,17 @@ export type PlatformViewModelAdapter = {
 export const previewSession: SessionViewModel = {
   companyCodeLabel: "0000",
   displayName: "admin",
+  employeeNumber: "BW-0001",
   roleLabel: "Demo 관리자",
   tenantName: "Bitween Demo"
 };
 
 export const previewPlatformViewModel: PlatformViewModel = {
   launcher: {
+    calendarEvents,
     metrics: platformMetrics,
     navigation: navigationItems,
+    todayTodos,
     workQueue
   },
   modules: moduleDashboards,

@@ -12,17 +12,36 @@ const demoAccount = {
 };
 
 const sessionLabel = "Bitween Demo · admin · 0000";
+const employeeNumber = "BW-0001";
+const companyLogoUri =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F3864'/%3E%3Cpath d='M18 18h18c7 0 11 4 11 9 0 4-2 7-6 8 5 1 8 5 8 10 0 6-5 10-13 10H18V18zm11 14h6c3 0 5-1 5-4s-2-4-5-4h-6v8zm0 17h7c4 0 6-2 6-5s-2-5-6-5h-7v10z' fill='white'/%3E%3C/svg%3E";
 
 const navItems = [
   ["home", "플랫폼 홈", "Launcher", "오늘의 업무, 빠른 실행, 플랫폼 상태를 한 화면에서 확인합니다.", "#64748B"],
   ["payroll", "급여", "Payroll", "급여 자동화 준비 상태, 산출 진입, 월별 보고와 설정을 관리합니다.", "#1F3864"],
-  ["hr", "HR", "People", "직원 명부, 근태, 연차, 계약, 증명서 흐름을 정리합니다.", "#0D9488"],
+  ["hr", "HR", "People", "직원 명부, 이력서, 사직서, 증명서 흐름을 정리합니다.", "#0D9488"],
+  ["attendance", "출퇴근", "Attendance", "모바일 출근, 퇴근, 위치 확인, 근태 기록을 관리합니다.", "#0284C7"],
+  ["recruit", "채용", "Recruit", "지원자 경력, 자격, 부서 배치 후보를 관리합니다.", "#9333EA"],
+  ["travel", "출장/일지", "Travel", "출장계획, 실행, 업무일지, 실적반영, 상급자 검토 흐름을 확인합니다.", "#0F766E"],
   ["workflow", "전자결재", "Workflow", "기안, 결재 대기, 진행 문서, 회람 상태를 추적합니다.", "#2563EB"],
   ["archive", "자료함", "Archive", "법인, 사업장, 월별 산출 자료와 보고서를 찾고 미리 봅니다.", "#475569"],
   ["ai", "AI", "Assistant", "업무 문맥을 기반으로 요약, 초안, 확인 질문을 도와줍니다.", "#7C3AED"],
   ["admin", "관리자", "Admin", "법인, 사용자 권한, 조직과 운영 설정을 관리합니다.", "#B45309"],
   ["settings", "설정", "Settings", "개인 화면, 급여 운영 기준, 플랫폼 환경을 조정합니다.", "#0F766E"]
 ].map(([id, label, eyebrow, description, accent]) => ({ id, label, eyebrow, description, accent }));
+
+const sidebarThemes = [
+  ["steel", "스틸 블루", "현재 톤보다 선명한 업무형 파랑"],
+  ["graphite", "그래파이트", "차분하고 밀도 있는 관리자형"],
+  ["teal", "틸 그린", "신뢰감 있는 HR/운영형"],
+  ["navy", "딥 네이비", "가장 강한 기업용 대비"]
+].map(([id, label, description]) => ({ id, label, description }));
+
+const languageOptions = [
+  ["ko", "한국어", "현재 적용"],
+  ["en", "English", "준비"],
+  ["zh", "中文", "준비"]
+];
 
 const state = {
   activeId: "home",
@@ -34,13 +53,15 @@ const state = {
   selectedPayrollCardKey: "",
   selectedPayrollStepKey: "",
   selectedQueueKey: "",
+  selectedLanguage: "ko",
   search: "",
   selectedRowKey: "",
+  sidebarTheme: "steel",
   userId: ""
 };
 
 const platformMetrics = [
-  ["오늘 처리할 업무", "9건", "급여, 결재, 자료 확인 포함", "attention"],
+  ["오늘 처리할 업무", "10건", "급여, 출장, 결재, 자료 확인 포함", "attention"],
   ["연동 준비 완료", "5개", "연동 준비 항목 포함", "ready"],
   ["확인 필요", "2건", "권한 또는 정책 확인 대기", "blocked"],
   ["최근 자료", "12개", "월별 보고서와 업로드 문서", "neutral"]
@@ -63,13 +84,86 @@ const payrollSteps = [
 const workQueue = [
   ["6월 급여 산출 준비", "급여 자동화", "급여 담당", "오늘", "확인 필요", "attention"],
   ["전자결재 대기 문서", "워크플로우", "승인권자", "D-1", "3건", "neutral"],
+  ["출장 계획/업무일지 검토", "출장/업무일지", "팀 리더", "오늘", "진행 중", "attention"],
   ["자료함 최근 보고서", "아카이브", "운영팀", "상시", "미리보기 가능", "ready"]
+];
+
+const calendarEvents = [
+  ["2026.06.04", "10:00", "급여 산출 기준 확인", "attention"],
+  ["2026.06.04", "14:00", "전자결재 대기 문서 검토", "neutral"],
+  ["2026.06.05", "09:30", "채용 후보자 부서 배치 회의", "ready"],
+  ["2026.06.05", "16:00", "부산 출장 업무일지 실적 반영", "attention"]
+];
+
+const todayTodos = [
+  ["6월 급여 산출 준비", "급여 담당", "오늘", "attention", false],
+  ["전자결재 대기 문서", "승인권자", "오늘", "neutral", false],
+  ["출장 업무일지 작성 및 실적 반영", "영업팀", "오늘", "attention", false],
+  ["자료함 최근 보고서 확인", "운영팀", "완료", "ready", true]
+];
+
+const attendanceLogs = [
+  ["출근", "09:02", "본사", "ready"],
+  ["외근", "13:40", "고객사", "attention"],
+  ["퇴근", "--:--", "대기", "neutral"]
+];
+
+const travelWorkflowStages = [
+  ["01", "출장계획", "작성/승인", "출장신청서와 일정 목적을 먼저 정리합니다.", "neutral"],
+  ["02", "출장실행", "진행 중", "현장 방문, 이동, 고객 미팅 상태를 표시합니다.", "attention"],
+  ["03", "업무일지", "오늘 작성", "출장 중 처리한 업무와 후속 조치를 기록합니다.", "attention"],
+  ["04", "실적반영", "검토 대기", "계약, 매출, 고객 대응 결과를 성과에 연결합니다.", "neutral"],
+  ["05", "상급자 view", "view 준비", "on-going과 Completed 상태를 관리자가 나눠 확인합니다.", "ready"]
+];
+
+const adminPermissionRows = [
+  ["Branch 관리자", "전체", "요청 승인", "전체", "ready"],
+  ["경영진", "열람", "열람", "경영 자료", "neutral"],
+  ["일반 사원", "본인 자료", "차단", "공유 자료", "attention"]
+];
+
+const payrollIntegrationChecks = [
+  ["법인/사업장 입력자료", "3곳", "근태문서와 청구서 유형을 사업장별로 구분합니다.", "attention"],
+  ["건강보험EDI", "확인 전", "급여 작업 전 보험료 변동 확인이 필요한 상태입니다.", "attention"],
+  ["양식 매핑", "2종", "근태문서/청구서 입력 양식 연결 예정입니다.", "neutral"],
+  ["산출 진입", "대기", "backend API 계약 후 실제 검증 흐름으로 전환합니다.", "ready"]
+];
+
+const archiveFolders = [
+  ["급여 산출물", "12개", "급여 담당", "ready", "payroll"],
+  ["근태 원본", "4개", "운영팀", "attention", "attendance"],
+  ["결재 첨부", "8개", "승인권자", "neutral", "workflow"],
+  ["출장/업무일지", "7개", "영업팀", "ready", "travel"]
+];
+
+const archiveDocuments = [
+  ["2026년 5월 급여 보고서", "Excel", "급여 담당", "보관됨", "ready"],
+  ["6월 1주차 근태 원본", "CSV", "운영팀", "분류 대기", "attention"],
+  ["부산 출장 업무일지", "PDF", "영업팀", "성과 연결", "neutral"]
+];
+
+const aiRecommendations = [
+  ["급여 산출 오류 요약", "급여 준비 현황", "추천", "ready", "payroll"],
+  ["결재 의견 초안", "전자결재 대기 문서", "검토 필요", "attention", "workflow"],
+  ["자료함 문서 요약", "2026년 5월 급여 보고서", "미리보기", "neutral", "archive"]
+];
+
+const aiDraftCards = [
+  ["요약", "급여 기준 확인 요약", "누락된 입력자료, EDI 확인 전 상태, 산출 전 검토 항목을 짧게 정리합니다.", "ready"],
+  ["확인 질문", "관리자에게 물어볼 항목", "경영진 급여 열람 권한과 Branch 하위계정 범위를 확인하도록 제안합니다.", "attention"],
+  ["초안", "결재 의견 문장", "급여 지급 품의에 붙일 검토 의견 초안을 사람이 확인하기 전 상태로 표시합니다.", "neutral"]
 ];
 
 const payrollSettingsRows = [
   ["설정 대상", "법인 기본", "급여 담당", "사업장별 예외 여부 확인", "neutral"],
   ["휴업수당 지급률", "법정 기준 확인", "급여 담당", "최저 기준 이상 입력값 검토", "attention"],
   ["월 기본근로시간", "209시간", "운영 관리자", "사업장별 고정/대체 방식 표시", "ready"]
+];
+
+const payrollIntegrationRows = [
+  ["Bitween Demo / 본사", "근태문서 2종", "건강보험EDI 확인 전", "급여 작업 전 보험료 공제금액 확인 필요", "attention"],
+  ["Bitween Demo / 부산지점", "청구서 매핑 대기", "사업장 담당", "사업장별 청구서 양식과 근태문서 연결", "neutral"],
+  ["협력 사업장", "입력자료 준비", "급여 담당", "법인/사업장별 입력 정책 확인 후 산출 진입", "ready"]
 ];
 
 const previewRows = [
@@ -79,13 +173,39 @@ const previewRows = [
 ];
 
 const dashboards = {
-  hr: dashboard("HR 운영 현황", "직원 명부, 근태, 증명서 요청을 한 화면에서 추적합니다.", ["전체", "입사/퇴사", "근태", "증명서"], [
+  hr: dashboard("HR 운영 현황", "직원 명부, 이력서, 사직서, 재직/경력증명서 요청을 한 화면에서 추적합니다.", ["전체", "직원명부", "이력서", "사직서", "증명서"], [
     ["재직 직원", "48명", "법인 전체", "ready"],
     ["근태 확인", "6건", "월말 마감 전 확인", "attention"],
     ["증명서 요청", "2건", "담당자 처리 대기", "neutral"]
   ], [
-    ["근태 누락", "확인 필요", "인사 담당", "6월 2주차 누락 항목 확인", "attention"],
-    ["재직증명서", "접수", "운영팀", "발급 양식 검토", "neutral"]
+    ["직원명부 업데이트", "확인 필요", "인사 담당", "부서/직무 최신 정보 확인", "attention"],
+    ["재직증명서/경력증명서", "접수", "운영팀", "발급 양식 검토", "neutral"],
+    ["이력서/사직서 관리", "정리 중", "인사 담당", "입사/퇴사 문서 분류", "ready"]
+  ]),
+  attendance: dashboard("모바일 출퇴근", "휴대폰에서 출근/퇴근 상태, 위치 확인, 최근 근태 기록을 확인합니다.", ["전체", "출근", "퇴근", "확인 필요"], [
+    ["오늘 출근", "09:02", "본사 120m 이내", "ready"],
+    ["확인 필요", "1건", "외근 위치 확인", "attention"],
+    ["이번 주 기록", "4일", "정상 출근", "neutral"]
+  ], [
+    ["오늘 출근 기록", "확인됨", "BW-0001", "퇴근 체크 대기", "ready"],
+    ["외근 위치 확인", "확인 필요", "관리자", "외근 사유 확인", "attention"]
+  ]),
+  recruit: dashboard("채용 인재 관리", "지원자 경력과 자격 정보를 공유하고 부서별 필요 인재를 배치합니다.", ["전체", "지원자", "경력", "자격", "배치"], [
+    ["지원자", "8명", "공유 가능 후보", "ready"],
+    ["자격 검토", "3건", "부서 확인 대기", "attention"],
+    ["배치 후보", "4명", "직무 적합 후보", "neutral"]
+  ], [
+    ["지원자 경력 공유", "검토 중", "채용 담당", "부서장 열람 권한 확인", "attention"],
+    ["자격사항 매칭", "추천", "운영팀", "필요 부서 후보 배치", "ready"]
+  ]),
+  travel: dashboard("출장/업무일지", "출장계획, 실행, 업무일지, 실적반영, 상급자 진행/완료 view를 연결해 확인합니다.", ["전체", "출장계획", "출장실행", "업무일지", "실적", "검토"], [
+    ["출장계획", "4건", "승인 전/진행 중 포함", "neutral"],
+    ["업무일지", "2건", "오늘 작성 권장", "attention"],
+    ["완료 반영", "7건", "상급자 확인 완료", "ready"]
+  ], [
+    ["부산 고객사 출장계획", "출장실행", "영업팀", "현장 미팅 후 업무일지 작성", "attention"],
+    ["대전 설치 지원 업무일지", "상급자 검토", "기술지원", "실적 반영 승인 대기", "neutral"],
+    ["서울 협력사 방문", "Completed", "운영팀", "완료 업무 성과 리포트 보관", "ready"]
   ]),
   workflow: dashboard("전자결재 업무함", "기안, 승인, 반려, 회람 문서를 상태별로 정리합니다.", ["전체", "결재 대기", "진행 중", "반려"], [
     ["결재 대기", "3건", "오늘 처리 권장", "attention"],
@@ -111,13 +231,15 @@ const dashboards = {
     ["급여 오류 요약", "추천", "AI", "오류 행 설명 생성", "ready"],
     ["결재 의견 초안", "검토 필요", "사용자", "문서 맥락 확인", "attention"]
   ]),
-  admin: dashboard("관리자 콘솔", "사용자, 권한, 법인 운영 설정을 분리해서 관리합니다.", ["전체", "권한", "법인", "감사"], [
-    ["활성 사용자", "14명", "초대 완료 계정", "ready"],
-    ["권한 검토", "2건", "승인권자 확인", "attention"],
+  admin: dashboard("관리자 콘솔", "법인 Branch, 하위계정, 민감 문서 권한, 감사 상태를 분리해서 관리합니다.", ["전체", "권한", "법인", "하위계정", "감사"], [
+    ["Branch", "1개", "Bitween Demo 법인", "ready"],
+    ["하위계정", "14명", "초대 완료 계정", "ready"],
+    ["권한 검토", "2건", "민감 문서 접근 확인", "attention"],
     ["감사 로그", "정상", "최근 오류 없음", "ready"]
   ], [
-    ["신규 사용자 초대", "검토 중", "관리자", "역할 지정", "attention"],
-    ["법인 정보", "정상", "운영 관리자", "정기 검토", "ready"]
+    ["신규 하위계정 초대", "검토 중", "관리자", "Branch 소속과 역할 지정", "attention"],
+    ["법인 Branch 정보", "정상", "운영 관리자", "정기 검토", "ready"],
+    ["급여 민감 문서 권한", "확인 필요", "대표 승인", "경영진 급여/일반 급여 열람 범위 분리", "attention"]
   ]),
   settings: dashboard("설정", "개인 화면, 급여 운영 기준, 알림, 접근 환경을 정리합니다.", ["전체", "개인", "급여", "알림"], [
     ["프로필", "완료", "기본 정보 설정됨", "ready"],
@@ -201,13 +323,27 @@ function field(label, id, placeholder, type = "text", value = "") {
 function renderShell() {
   const active = navItems.find((item) => item.id === state.activeId) || navItems[0];
   return html`
-    <section class="shell">
+    <section class="shell sidebar-theme-${state.sidebarTheme}">
       <aside class="sidebar">
-        <div class="brand-block"><strong>Bitween</strong><span>Business Platform</span></div>
+        <div class="brand-block">
+          <img class="company-logo" src="${companyLogoUri}" alt="Bitween 회사 로고" />
+          <div><strong>Bitween</strong><span>업무 플랫폼</span></div>
+        </div>
+        <div class="sidebar-options" aria-label="sidebar color options">
+          <span class="sidebar-options-title">메뉴 색상 옵션</span>
+          <div class="sidebar-theme-grid">
+            ${sidebarThemes.map((theme) => `
+              <button class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}" data-sidebar-theme="${theme.id}" title="${theme.description}">
+                <span class="sidebar-swatch sidebar-swatch-${theme.id}"></span>
+                <strong>${theme.label}</strong>
+              </button>
+            `).join("")}
+          </div>
+        </div>
         <nav class="nav" aria-label="platform menu">
-          ${navItems.map((item) => `
+            ${navItems.map((item) => `
             <button class="nav-button ${item.id === active.id ? "active" : ""}" data-target="${item.id}" style="${item.id === active.id ? `border-left-color:${item.accent}` : ""}">
-              <span>${item.eyebrow}</span><strong>${item.label}</strong>
+              <strong>${item.label}</strong>
             </button>
           `).join("")}
         </nav>
@@ -215,12 +351,11 @@ function renderShell() {
       <div class="main">
         <header class="topbar">
           <div class="topbar-copy">
-            <span class="eyebrow">${active.eyebrow}</span>
             <h1>${active.label}</h1>
-            <span class="muted">${active.description}</span>
           </div>
           <div class="top-actions">
             ${badge(sessionLabel, "neutral")}
+            ${badge(`사번 ${employeeNumber}`, "neutral")}
             <button class="btn ghost compact-btn" data-logout="true">로그아웃</button>
           </div>
         </header>
@@ -242,8 +377,23 @@ function renderHome() {
 
   return html`
     <section class="card">
-      ${sectionHead("Overview", "오늘의 플랫폼 상태", "중요한 업무 상태를 먼저 보고 필요한 메뉴로 바로 이동합니다.", button("급여 준비 확인", "payroll", "secondary"))}
+      ${sectionHead("", "오늘의 플랫폼 상태", "중요한 업무 상태를 먼저 보고 필요한 메뉴로 바로 이동합니다.", button("급여 준비 확인", "payroll", "secondary"))}
       ${metrics(platformMetrics)}
+    </section>
+    <section class="planner-grid">
+      <div class="card planner-card">
+        ${sectionHead("", "오늘 일정", "2026년 6월 4일 기준 주요 일정을 확인합니다.")}
+        <div class="calendar-day"><span>2026.06</span><strong>04</strong><em>목요일</em></div>
+        <div class="planner-list">${calendarEvents.map(([date, time, title, tone]) => `
+          <div class="planner-item">${badge(time, tone)}<div><strong>${title}</strong><span class="helper">${date}</span></div></div>
+        `).join("")}</div>
+      </div>
+      <div class="card planner-card">
+        ${sectionHead("", "To-do list", "오늘 업무는 계속 표시하고 실행한 항목은 흐리게 표시합니다.")}
+        <div class="planner-list">${todayTodos.map(([title, owner, time, tone, done]) => `
+          <div class="planner-item todo-item ${done ? "done" : ""}">${badge(time, tone)}<div><strong>${title}</strong><span class="helper">${owner}</span></div></div>
+        `).join("")}</div>
+      </div>
     </section>
     <section class="card">
       ${sectionHead("", "오늘의 업무", "처리 우선순위가 높은 업무를 카드로 정리합니다.")}
@@ -293,6 +443,7 @@ function queueDetail([title, meta, owner, due, status, tone]) {
 function queueTarget(meta) {
   if (meta.includes("급여")) return "payroll";
   if (meta.includes("워크") || meta.includes("결재")) return "workflow";
+  if (meta.includes("출장") || meta.includes("업무일지")) return "travel";
   if (meta.includes("아카이브") || meta.includes("자료")) return "archive";
   return "home";
 }
@@ -312,6 +463,7 @@ function renderPayroll() {
       `).join("")}</div>
       ${selectedReadiness ? payrollReadinessDetail(selectedReadiness) : ""}
     </section>
+    ${payrollIntegrationPanel()}
     <section class="card">
       ${sectionHead("Payroll flow", "급여 산출 작업 흐름", "운영 기준 확인부터 입력 자료 준비, 결과 검토, 자료함 저장까지 순서대로 진행합니다.", button("급여 설정 확인", "settings", "secondary"))}
       <div class="step-grid">${payrollSteps.map(([index, title, detail, status, tone]) => `
@@ -334,6 +486,21 @@ function renderPayroll() {
       ${table(previewRows)}
     </section>
   `;
+}
+
+function payrollIntegrationPanel() {
+  return `<section class="card">
+    ${sectionHead("", "급여 연동 준비 점검", "법인/사업장별 근태문서, 청구서, 건강보험EDI 확인 상태를 산출 전 화면에서 먼저 정리합니다.", button("Branch 권한 확인", "admin", "secondary"))}
+    <div class="integration-grid">${payrollIntegrationChecks.map(([label, value, detail, tone]) => `
+      <article class="integration-card" style="border-top-color:${toneColor(tone)}">
+        <span class="helper">${label}</span>
+        <strong class="metric-value" style="color:${toneColor(tone)}">${value}</strong>
+        <span>${detail}</span>
+      </article>
+    `).join("")}</div>
+    ${table(payrollIntegrationRows)}
+    <div class="notice">${badge("Frontend 준비", "neutral")}<span class="helper">실제 건강보험EDI 조회, 보험료 공제금액 반영, 사업장별 입력 양식 검증은 backend/API 계약 후 연결합니다.</span></div>
+  </section>`;
 }
 
 function payrollCardKey(row) {
@@ -375,9 +542,15 @@ function renderModule(id) {
   const selectedRow = selectedWorkRow(rows);
   return html`
     <section class="card">
-      ${sectionHead(navItems.find((item) => item.id === id)?.eyebrow || "", data.title, data.subtitle, button(primaryLabel(id), id, "primary"))}
+      ${sectionHead("", data.title, "", button(primaryLabel(id), id, "primary"))}
       ${metrics(data.metrics)}
     </section>
+    ${id === "attendance" ? attendancePhonePanel() : ""}
+    ${id === "travel" ? travelWorklogPanel() : ""}
+    ${id === "admin" ? adminAccountPanel() : ""}
+    ${id === "archive" ? archiveLibraryPanel() : ""}
+    ${id === "ai" ? aiWorkspacePanel() : ""}
+    ${id === "settings" ? i18nSettingsPanel() : ""}
     <section class="card">
       ${sectionHead("", "업무 목록", "필터로 상태를 좁히고 필요한 다음 작업을 확인합니다.", button(secondaryLabel(id), secondaryTarget(id), "secondary"))}
       <div class="list-toolbar">
@@ -396,7 +569,127 @@ function renderModule(id) {
 }
 
 function sectionHead(eyebrow, title, desc, action = "") {
-  return `<div class="section-head"><div class="section-title">${eyebrow ? `<span class="eyebrow">${eyebrow}</span>` : ""}<h2>${title}</h2><p>${desc}</p></div>${action}</div>`;
+  return `<div class="section-head"><div class="section-title">${eyebrow ? `<span class="eyebrow">${eyebrow}</span>` : ""}<h2>${title}</h2>${desc ? `<p>${desc}</p>` : ""}</div>${action}</div>`;
+}
+
+function i18nSettingsPanel() {
+  return `<section class="card">
+    ${sectionHead("", "국제화 설정", "한국어, 영어, 중국어 화면 전환을 준비합니다.")}
+    <div class="language-grid">${languageOptions.map(([code, label, status]) => `
+      <button class="language-option ${state.selectedLanguage === code ? "selected" : ""}" data-language="${code}">
+        <strong>${label}</strong><span class="helper">${state.selectedLanguage === code ? "선택됨" : status}</span>
+      </button>
+    `).join("")}</div>
+  </section>`;
+}
+
+function aiWorkspacePanel() {
+  return `<section class="card">
+    ${sectionHead("", "AI 업무 작업대", "급여, 결재, 자료함 문맥에서 추천 작업을 고르고 사람이 확인해야 할 초안과 질문을 분리합니다.", button("AI 사용 범위 확인", "settings", "secondary"))}
+    <div class="ai-workspace-grid">
+      <div class="ai-recommendation-list">${aiRecommendations.map(([title, source, status, tone, target]) => `
+        <button class="ai-recommendation-item" data-target="${target}" style="border-left-color:${toneColor(tone)}">
+          ${badge(status, tone)}
+          <div><strong>${title}</strong><span class="helper">${source}</span></div>
+        </button>
+      `).join("")}</div>
+      <div class="ai-preview-pane">
+        <span class="helper">사람 검토 필요</span>
+        <strong>AI가 만든 문장은 바로 확정하지 않고 담당자가 확인합니다.</strong>
+        <div class="ai-draft-grid">${aiDraftCards.map(([label, title, detail, tone]) => `
+          <article class="ai-draft-card" style="border-top-color:${toneColor(tone)}">
+            ${badge(label, tone)}
+            <strong>${title}</strong>
+            <span class="helper">${detail}</span>
+          </article>
+        `).join("")}</div>
+        <div class="action-row">${button("급여 문맥 열기", "payroll", "secondary")}${button("자료함 문서 보기", "archive", "ghost")}</div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function archiveLibraryPanel() {
+  return `<section class="card">
+    ${sectionHead("", "자료함 작업대", "급여 산출물, 근태 원본, 결재 첨부, 출장/업무일지 자료를 폴더별로 확인하고 최근 문서를 바로 미리봅니다.", button("급여 자료 확인", "payroll", "secondary"))}
+    <div class="archive-folder-grid">${archiveFolders.map(([label, count, owner, tone, target]) => `
+      <button class="archive-folder-card" data-target="${target}" style="border-top-color:${toneColor(tone)}">
+        ${badge(count, tone)}
+        <strong>${label}</strong>
+        <span class="helper">${owner}</span>
+      </button>
+    `).join("")}</div>
+    <div class="archive-preview-grid">
+      <div class="archive-document-list">${archiveDocuments.map(([title, type, owner, status, tone]) => `
+        <article class="archive-document-item">${badge(status, tone)}<div><strong>${title}</strong><span class="helper">${type} · ${owner}</span></div></article>
+      `).join("")}</div>
+      <div class="archive-preview-pane">
+        <span class="helper">선택 문서 미리보기</span>
+        <strong>2026년 5월 급여 보고서</strong>
+        <div class="archive-meta-grid">
+          <div class="detail-item"><span class="helper">보안 범위</span><strong>급여 담당 / Branch 관리자</strong></div>
+          <div class="detail-item"><span class="helper">상태</span><strong>보관됨</strong></div>
+        </div>
+        <div class="action-row">${button("급여 화면 열기", "payroll", "secondary")}${button("권한 확인", "admin", "ghost")}</div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function adminAccountPanel() {
+  return `<section class="card">
+    ${sectionHead("", "법인 Branch / 하위계정 권한", "회사 하나를 하나의 Branch로 보고, 하위계정과 민감 문서 접근 범위를 화면에서 분리합니다.")}
+    <div class="admin-branch-grid">
+      <article class="detail-item"><span class="helper">Branch 계정</span><strong>Bitween Demo · 법인코드 0000</strong><span>법인 기본사항 입력, 사업장 정보, 하위계정 생성 권한을 이 화면에서 검토합니다.</span></article>
+      <article class="detail-item"><span class="helper">하위계정 구조</span><strong>관리자 2명 · 경영진 3명 · 일반 사원 9명</strong><span>신규 계정은 Branch 소속, 부서, 역할을 지정한 뒤 초대합니다.</span></article>
+    </div>
+    <div class="permission-matrix">${adminPermissionRows.map(([role, payroll, executive, archive, tone]) => `
+      <article class="permission-row">
+        <div class="permission-role">${badge(role, tone)}</div>
+        <div class="permission-cell"><span class="helper">급여</span><strong>${payroll}</strong></div>
+        <div class="permission-cell"><span class="helper">경영진 급여</span><strong>${executive}</strong></div>
+        <div class="permission-cell"><span class="helper">자료함</span><strong>${archive}</strong></div>
+      </article>
+    `).join("")}</div>
+  </section>`;
+}
+
+function travelWorklogPanel() {
+  return `<section class="card">
+    ${sectionHead("", "출장/업무일지 흐름", "출장계획부터 출장실행, 업무일지, 실적반영, 상급자 검토까지 한 화면에서 확인합니다.")}
+    <div class="travel-stage-grid">${travelWorkflowStages.map(([index, label, status, detail, tone]) => `
+      <article class="travel-stage-card" style="border-top-color:${toneColor(tone)}">
+        <span class="eyebrow">${index}</span>
+        ${badge(status, tone)}
+        <strong>${label}</strong>
+        <span class="helper">${detail}</span>
+      </article>
+    `).join("")}</div>
+    <div class="travel-review-grid">
+      <article class="detail-item"><span class="helper">상급자 on-going view</span><strong>진행 중 출장 2건</strong><span>출장실행, 업무일지 작성, 실적 반영 대기 상태를 분리해서 봅니다.</span></article>
+      <article class="detail-item"><span class="helper">상급자 Completed view</span><strong>완료 반영 7건</strong><span>검토 완료된 출장신청서, 업무일지, 성과 연결 내역을 보관 화면으로 넘깁니다.</span></article>
+    </div>
+  </section>`;
+}
+
+function attendancePhonePanel() {
+  return `<section class="card">
+    ${sectionHead("", "휴대폰 출퇴근", "직원이 모바일에서 확인하는 오늘의 출근/퇴근 상태입니다.")}
+    <div class="attendance-grid">
+      <div class="phone-frame">
+        <div class="phone-head"><span class="helper">오늘 상태</span>${badge("출근 확인", "ready")}</div>
+        <div class="phone-clock"><strong>09:02</strong><span class="helper">본사 120m 이내 · 위치 확인됨</span></div>
+        <div class="punch-actions"><button class="punch primary">출근</button><button class="punch secondary">퇴근</button></div>
+        <div class="location-notice"><strong>위치 확인</strong><span class="helper">GPS 또는 현장 QR 확인 후 기록되는 모바일 UI 자리입니다.</span></div>
+      </div>
+      <div class="attendance-side">
+        <div class="detail-item"><span class="helper">관리자 확인</span><strong>외근 위치 확인 1건</strong><span>사유와 위치 메모를 확인한 뒤 승인 흐름으로 연결합니다.</span></div>
+        <div class="planner-list">${attendanceLogs.map(([label, time, place, tone]) => `
+          <div class="planner-item">${badge(label, tone)}<div><strong>${time}</strong><span class="helper">${place}</span></div></div>
+        `).join("")}</div>
+      </div>
+    </div>
+  </section>`;
 }
 
 function metrics(items) {
@@ -445,8 +738,23 @@ function workDetail([category, status, owner, next, tone]) {
       <div class="detail-item"><span class="helper">담당</span><strong>${escapeText(owner)}</strong></div>
       <div class="detail-item"><span class="helper">다음 작업</span><span>${escapeText(next)}</span></div>
     </div>
-    <div class="action-row">${button("상세 보기", state.activeId, "secondary")}${button("담당자 확인", state.activeId, "ghost")}</div>
+    <div class="action-row">${button("관련 화면 열기", workRowTarget([category, status, owner, next, tone]), "secondary")}${button("담당자 확인", state.activeId, "ghost")}</div>
   </div>`;
+}
+
+function workRowTarget(row) {
+  const haystack = row.slice(0, 4).join(" ");
+  if (haystack.includes("급여") || haystack.includes("산출") || haystack.includes("월 기본근로시간")) return "payroll";
+  if (haystack.includes("결재") || haystack.includes("회람") || haystack.includes("기안")) return "workflow";
+  if (haystack.includes("출장") || haystack.includes("업무일지") || haystack.includes("실적")) return "travel";
+  if (haystack.includes("자료") || haystack.includes("보고서") || haystack.includes("파일") || haystack.includes("폴더")) return "archive";
+  if (haystack.includes("권한") || haystack.includes("사용자") || haystack.includes("역할") || haystack.includes("법인")) return "admin";
+  if (haystack.includes("채용") || haystack.includes("지원자") || haystack.includes("자격") || haystack.includes("배치")) return "recruit";
+  if (haystack.includes("출근") || haystack.includes("퇴근") || haystack.includes("외근")) return "attendance";
+  if (haystack.includes("설정") || haystack.includes("알림") || haystack.includes("환경")) return "settings";
+  if (haystack.includes("AI") || haystack.includes("요약") || haystack.includes("초안")) return "ai";
+  if (haystack.includes("근태") || haystack.includes("증명서") || haystack.includes("직원")) return "hr";
+  return "home";
 }
 
 function filterRows(rows) {
@@ -475,6 +783,9 @@ function toneColor(tone) {
 function primaryLabel(id) {
   return ({
     hr: "직원 명부 보기",
+    attendance: "출퇴근 앱 보기",
+    recruit: "지원자 보기",
+    travel: "출장 흐름 보기",
     workflow: "결재함 열기",
     archive: "최근 자료 보기",
     ai: "추천 작업 보기",
@@ -486,6 +797,9 @@ function primaryLabel(id) {
 function secondaryLabel(id) {
   return ({
     hr: "급여 준비로 이동",
+    attendance: "HR로 이동",
+    recruit: "HR로 이동",
+    travel: "전자결재로 이동",
     workflow: "자료함 확인",
     archive: "급여 화면으로 이동",
     ai: "설정 확인",
@@ -497,6 +811,9 @@ function secondaryLabel(id) {
 function secondaryTarget(id) {
   return ({
     hr: "payroll",
+    attendance: "hr",
+    recruit: "hr",
+    travel: "workflow",
     workflow: "archive",
     archive: "payroll",
     ai: "settings",
@@ -536,6 +853,22 @@ function bindEvents() {
       state.selectedRowKey = el.dataset.rowKey;
       render();
       toast("업무 상세를 열었습니다.");
+    });
+  });
+
+  document.querySelectorAll("[data-sidebar-theme]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.sidebarTheme = el.dataset.sidebarTheme || "steel";
+      render();
+      toast("사이드 메뉴 색상 옵션을 적용했습니다.");
+    });
+  });
+
+  document.querySelectorAll("[data-language]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.selectedLanguage = el.dataset.language || "ko";
+      render();
+      toast("국제화 설정을 선택했습니다.");
     });
   });
 

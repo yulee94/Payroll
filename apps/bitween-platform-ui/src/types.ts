@@ -2,6 +2,9 @@ export type PlatformId =
   | "home"
   | "payroll"
   | "hr"
+  | "attendance"
+  | "recruit"
+  | "travel"
   | "workflow"
   | "archive"
   | "ai"
@@ -9,6 +12,19 @@ export type PlatformId =
   | "settings";
 
 export type ReadinessTone = "ready" | "attention" | "blocked" | "neutral";
+
+export type SidebarThemeId = "steel" | "graphite" | "teal" | "navy";
+
+export type SidebarTheme = {
+  readonly id: SidebarThemeId;
+  readonly label: string;
+  readonly description: string;
+  readonly sidebar: string;
+  readonly activeBackground: string;
+  readonly activeText: string;
+  readonly swatchEnd: string;
+  readonly swatchStart: string;
+};
 
 export type NavigationItem = {
   readonly id: PlatformId;
@@ -33,6 +49,23 @@ export type WorkQueueItem = {
   readonly owner: string;
   readonly due: string;
   readonly status: string;
+  readonly tone: ReadinessTone;
+};
+
+export type CalendarEvent = {
+  readonly id: string;
+  readonly dateLabel: string;
+  readonly title: string;
+  readonly timeLabel: string;
+  readonly tone: ReadinessTone;
+};
+
+export type TodoItem = {
+  readonly id: string;
+  readonly completed: boolean;
+  readonly owner: string;
+  readonly title: string;
+  readonly timeLabel: string;
   readonly tone: ReadinessTone;
 };
 

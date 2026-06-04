@@ -13,17 +13,20 @@ import {
   SectionHeader
 } from "./components";
 import {
+  calendarEvents,
   moduleDashboards,
+  payrollIntegrationRows,
   navigationItems,
   payrollSettingsRows,
   payrollSteps,
   platformMetrics,
   previewRows,
   readinessCards,
+  todayTodos,
   workQueue
 } from "./data";
 import { colors, radius, spacing, toneColor } from "./theme";
-import type { ModuleRow, NavigationItem, PayrollStep, PlatformId, ReadinessCard, WorkQueueItem } from "./types";
+import type { CalendarEvent, ModuleRow, NavigationItem, PayrollStep, PlatformId, ReadinessCard, TodoItem, WorkQueueItem } from "./types";
 
 type ScreenProps = {
   readonly active: NavigationItem;
@@ -37,6 +40,66 @@ const demoAccount = {
   password: "admin",
   userId: "admin"
 } as const;
+
+const languageOptions = [
+  { code: "ko", label: "한국어", status: "현재 적용" },
+  { code: "en", label: "English", status: "준비" },
+  { code: "zh", label: "中文", status: "준비" }
+] as const;
+
+type LanguageCode = (typeof languageOptions)[number]["code"];
+
+const attendanceLogs = [
+  { id: "att-log-1", label: "출근", place: "본사", time: "09:02", tone: "ready" },
+  { id: "att-log-2", label: "외근", place: "고객사", time: "13:40", tone: "attention" },
+  { id: "att-log-3", label: "퇴근", place: "대기", time: "--:--", tone: "neutral" }
+] as const;
+
+const travelWorkflowStages = [
+  { id: "travel-plan", label: "출장계획", detail: "출장신청서와 일정 목적을 먼저 정리합니다.", status: "작성/승인", tone: "neutral" },
+  { id: "travel-run", label: "출장실행", detail: "현장 방문, 이동, 고객 미팅 상태를 표시합니다.", status: "진행 중", tone: "attention" },
+  { id: "travel-diary", label: "업무일지", detail: "출장 중 처리한 업무와 후속 조치를 기록합니다.", status: "오늘 작성", tone: "attention" },
+  { id: "travel-result", label: "실적반영", detail: "계약, 매출, 고객 대응 결과를 성과에 연결합니다.", status: "검토 대기", tone: "neutral" },
+  { id: "travel-review", label: "상급자 view", detail: "on-going과 Completed 상태를 관리자가 나눠 확인합니다.", status: "view 준비", tone: "ready" }
+] as const;
+
+const adminPermissionRows = [
+  { id: "role-owner", role: "Branch 관리자", payroll: "전체", executive: "요청 승인", archive: "전체", tone: "ready" },
+  { id: "role-manager", role: "경영진", payroll: "열람", executive: "열람", archive: "경영 자료", tone: "neutral" },
+  { id: "role-employee", role: "일반 사원", payroll: "본인 자료", executive: "차단", archive: "공유 자료", tone: "attention" }
+] as const;
+
+const payrollIntegrationChecks = [
+  { id: "branch-docs", label: "법인/사업장 입력자료", value: "3곳", detail: "근태문서와 청구서 유형을 사업장별로 구분합니다.", tone: "attention" },
+  { id: "edi", label: "건강보험EDI", value: "확인 전", detail: "급여 작업 전 보험료 변동 확인이 필요한 상태입니다.", tone: "attention" },
+  { id: "mapping", label: "양식 매핑", value: "2종", detail: "근태문서/청구서 입력 양식 연결 예정입니다.", tone: "neutral" },
+  { id: "policy", label: "산출 진입", value: "대기", detail: "backend API 계약 후 실제 검증 흐름으로 전환합니다.", tone: "ready" }
+] as const;
+
+const archiveFolders = [
+  { id: "folder-payroll", label: "급여 산출물", count: "12개", owner: "급여 담당", tone: "ready", target: "payroll" },
+  { id: "folder-attendance", label: "근태 원본", count: "4개", owner: "운영팀", tone: "attention", target: "attendance" },
+  { id: "folder-approval", label: "결재 첨부", count: "8개", owner: "승인권자", tone: "neutral", target: "workflow" },
+  { id: "folder-travel", label: "출장/업무일지", count: "7개", owner: "영업팀", tone: "ready", target: "travel" }
+] as const;
+
+const archiveDocuments = [
+  { id: "doc-payroll", title: "2026년 5월 급여 보고서", type: "Excel", owner: "급여 담당", status: "보관됨", tone: "ready" },
+  { id: "doc-attendance", title: "6월 1주차 근태 원본", type: "CSV", owner: "운영팀", status: "분류 대기", tone: "attention" },
+  { id: "doc-travel", title: "부산 출장 업무일지", type: "PDF", owner: "영업팀", status: "성과 연결", tone: "neutral" }
+] as const;
+
+const aiRecommendations = [
+  { id: "ai-payroll-errors", title: "급여 산출 오류 요약", source: "급여 준비 현황", status: "추천", tone: "ready", target: "payroll" },
+  { id: "ai-approval-comment", title: "결재 의견 초안", source: "전자결재 대기 문서", status: "검토 필요", tone: "attention", target: "workflow" },
+  { id: "ai-archive-summary", title: "자료함 문서 요약", source: "2026년 5월 급여 보고서", status: "미리보기", tone: "neutral", target: "archive" }
+] as const;
+
+const aiDraftCards = [
+  { id: "draft-summary", label: "요약", title: "급여 기준 확인 요약", detail: "누락된 입력자료, EDI 확인 전 상태, 산출 전 검토 항목을 짧게 정리합니다.", tone: "ready" },
+  { id: "draft-question", label: "확인 질문", title: "관리자에게 물어볼 항목", detail: "경영진 급여 열람 권한과 Branch 하위계정 범위를 확인하도록 제안합니다.", tone: "attention" },
+  { id: "draft-comment", label: "초안", title: "결재 의견 문장", detail: "급여 지급 품의에 붙일 검토 의견 초안을 사람이 확인하기 전 상태로 표시합니다.", tone: "neutral" }
+] as const;
 
 function isModuleId(id: PlatformId): id is ModuleId {
   return id !== "home" && id !== "payroll";
@@ -164,13 +227,14 @@ export function LauncherScreen({ onSelect }: ScreenProps) {
     <View style={styles.stack}>
       <Card>
         <SectionHeader
-          eyebrow="Overview"
           title="오늘의 플랫폼 상태"
           description="중요한 업무 상태를 먼저 보고 필요한 메뉴로 바로 이동합니다."
           action={<ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 준비 확인</ActionButton>}
         />
         <MetricGrid items={platformMetrics} />
       </Card>
+
+      <CalendarTodoPanel events={calendarEvents} todos={todayTodos} />
 
       <Card>
         <SectionHeader title="오늘의 업무" description="처리 우선순위가 높은 업무를 카드로 정리합니다." />
@@ -243,6 +307,7 @@ export function PayrollScreen({ onSelect }: ScreenProps) {
     <View style={styles.stack}>
       <PayrollReadiness onSelect={onSelect} selectedId={selectedReadiness?.id} onSelectCard={(card) => setSelectedReadinessId(card.id)} />
       {selectedReadiness ? <PayrollReadinessDetail card={selectedReadiness} /> : null}
+      <PayrollIntegrationPanel onSelect={onSelect} />
       <Card>
         <SectionHeader
           eyebrow="Payroll flow"
@@ -281,6 +346,72 @@ export function PayrollScreen({ onSelect }: ScreenProps) {
   );
 }
 
+function PayrollIntegrationPanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
+  return (
+    <Card>
+      <SectionHeader
+        title="급여 연동 준비 점검"
+        description="법인/사업장별 근태문서, 청구서, 건강보험EDI 확인 상태를 산출 전 화면에서 먼저 정리합니다."
+        action={<ActionButton onPress={() => onSelect("admin")} variant="secondary">Branch 권한 확인</ActionButton>}
+      />
+      <View style={styles.integrationGrid}>
+        {payrollIntegrationChecks.map((item) => (
+          <View key={item.id} style={[styles.integrationCard, { borderTopColor: toneColor(item.tone) }]}>
+            <Label size="sm" muted>{item.label}</Label>
+            <Text style={[styles.integrationValue, { color: toneColor(item.tone) }]}>{item.value}</Text>
+            <Label size="sm">{item.detail}</Label>
+          </View>
+        ))}
+      </View>
+      <DataTable rows={payrollIntegrationRows} />
+      <View style={styles.inlineNotice}>
+        <Badge tone="neutral">Frontend 준비</Badge>
+        <Label size="sm" muted>실제 건강보험EDI 조회, 보험료 공제금액 반영, 사업장별 입력 양식 검증은 backend/API 계약 후 연결합니다.</Label>
+      </View>
+    </Card>
+  );
+}
+
+function CalendarTodoPanel({ events, todos }: { readonly events: readonly CalendarEvent[]; readonly todos: readonly TodoItem[] }) {
+  return (
+    <View style={styles.homePlannerGrid}>
+      <Card style={styles.homePlannerCard}>
+        <SectionHeader title="오늘 일정" description="2026년 6월 4일 기준 주요 일정을 확인합니다." />
+        <View style={styles.calendarDay}>
+          <Text style={styles.calendarMonth}>2026.06</Text>
+          <Text style={styles.calendarDate}>04</Text>
+          <Label size="sm" muted>목요일</Label>
+        </View>
+        <View style={styles.plannerList}>
+          {events.map((event) => (
+            <View key={event.id} style={styles.plannerItem}>
+              <Badge tone={event.tone}>{event.timeLabel}</Badge>
+              <View style={styles.plannerCopy}>
+                <Label weight="bold">{event.title}</Label>
+                <Label size="sm" muted>{event.dateLabel}</Label>
+              </View>
+            </View>
+          ))}
+        </View>
+      </Card>
+      <Card style={styles.homePlannerCard}>
+        <SectionHeader title="To-do list" description="오늘 업무는 계속 표시하고, 실행한 항목은 흐리게 표시합니다." />
+        <View style={styles.plannerList}>
+          {todos.map((todo) => (
+            <View key={todo.id} style={[styles.todoItem, todo.completed && styles.todoItemDone]}>
+              <Badge tone={todo.tone}>{todo.timeLabel}</Badge>
+              <View style={styles.plannerCopy}>
+                <Label weight="bold">{todo.title}</Label>
+                <Label size="sm" muted>{todo.owner}</Label>
+              </View>
+            </View>
+          ))}
+        </View>
+      </Card>
+    </View>
+  );
+}
+
 export function ModuleScreen({ active, onSelect }: ScreenProps) {
   if (!isModuleId(active.id)) {
     return (
@@ -293,6 +424,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
   const dashboard = moduleDashboards[active.id];
   const defaultFilter = dashboard.filters[0] ?? "전체";
   const [activeFilter, setActiveFilter] = useState<string>(defaultFilter);
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>("ko");
   const [search, setSearch] = useState("");
   const [selectedRowId, setSelectedRowId] = useState<string | undefined>(dashboard.rows[0]?.id);
   const filteredRows = useMemo(() => {
@@ -332,13 +464,39 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
     <View style={styles.stack}>
       <Card>
         <SectionHeader
-          eyebrow={active.eyebrow}
           title={dashboard.title}
-          description={dashboard.subtitle}
           action={<ActionButton onPress={() => onSelect(dashboard.primaryAction.target)}>{dashboard.primaryAction.label}</ActionButton>}
         />
         <MetricGrid items={dashboard.metrics} />
       </Card>
+
+      {active.id === "attendance" ? <AttendancePhonePanel /> : null}
+      {active.id === "travel" ? <TravelWorklogPanel /> : null}
+      {active.id === "admin" ? <AdminAccountPanel /> : null}
+      {active.id === "archive" ? <ArchiveLibraryPanel onSelect={onSelect} /> : null}
+      {active.id === "ai" ? <AiWorkspacePanel onSelect={onSelect} /> : null}
+
+      {active.id === "settings" ? (
+        <Card>
+          <SectionHeader title="국제화 설정" description="한국어, 영어, 중국어 화면 전환을 준비합니다." />
+          <View style={styles.languageGrid}>
+            {languageOptions.map((option) => {
+              const selected = option.code === selectedLanguage;
+              return (
+                <Pressable
+                  accessibilityRole="button"
+                  key={option.code}
+                  onPress={() => setSelectedLanguage(option.code)}
+                  style={({ pressed }) => [styles.languageOption, selected && styles.languageOptionSelected, pressed && styles.buttonPressed]}
+                >
+                  <Label weight="bold">{option.label}</Label>
+                  <Label size="sm" muted>{selected ? "선택됨" : option.status}</Label>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Card>
+      ) : null}
 
       <Card>
         <SectionHeader
@@ -370,7 +528,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
         ) : (
           <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />
         )}
-        {selectedRow ? <WorkDetailPanel row={selectedRow} /> : null}
+        {selectedRow ? <WorkDetailPanel row={selectedRow} onSelect={onSelect} /> : null}
       </Card>
 
       <View style={styles.actionPanels}>
@@ -461,7 +619,234 @@ function PayrollStepDetail({ step }: { readonly step: PayrollStep }) {
   );
 }
 
-function WorkDetailPanel({ row }: { readonly row: ModuleRow }) {
+function ArchiveLibraryPanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
+  return (
+    <Card>
+      <SectionHeader
+        title="자료함 작업대"
+        description="급여 산출물, 근태 원본, 결재 첨부, 출장/업무일지 자료를 폴더별로 확인하고 최근 문서를 바로 미리봅니다."
+        action={<ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 자료 확인</ActionButton>}
+      />
+      <View style={styles.archiveFolderGrid}>
+        {archiveFolders.map((folder) => (
+          <Pressable
+            accessibilityRole="button"
+            key={folder.id}
+            onPress={() => onSelect(folder.target)}
+            style={({ pressed }) => [styles.archiveFolderCard, { borderTopColor: toneColor(folder.tone) }, pressed && styles.buttonPressed]}
+          >
+            <Badge tone={folder.tone}>{folder.count}</Badge>
+            <Label weight="bold">{folder.label}</Label>
+            <Label size="sm" muted>{folder.owner}</Label>
+          </Pressable>
+        ))}
+      </View>
+      <View style={styles.archivePreviewGrid}>
+        <View style={styles.archiveDocumentList}>
+          {archiveDocuments.map((document) => (
+            <View key={document.id} style={styles.archiveDocumentItem}>
+              <Badge tone={document.tone}>{document.status}</Badge>
+              <View style={styles.plannerCopy}>
+                <Label weight="bold">{document.title}</Label>
+                <Label size="sm" muted>{document.type} · {document.owner}</Label>
+              </View>
+            </View>
+          ))}
+        </View>
+        <View style={styles.archivePreviewPane}>
+          <Label size="sm" muted>선택 문서 미리보기</Label>
+          <Label weight="bold">2026년 5월 급여 보고서</Label>
+          <View style={styles.archiveMetaGrid}>
+            <View style={styles.archiveMetaItem}>
+              <Label size="sm" muted>보안 범위</Label>
+              <Label weight="bold">급여 담당 / Branch 관리자</Label>
+            </View>
+            <View style={styles.archiveMetaItem}>
+              <Label size="sm" muted>상태</Label>
+              <Label weight="bold">보관됨</Label>
+            </View>
+          </View>
+          <View style={styles.actionRow}>
+            <ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 화면 열기</ActionButton>
+            <ActionButton onPress={() => onSelect("admin")} variant="ghost">권한 확인</ActionButton>
+          </View>
+        </View>
+      </View>
+    </Card>
+  );
+}
+
+function AiWorkspacePanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
+  return (
+    <Card>
+      <SectionHeader
+        title="AI 업무 작업대"
+        description="급여, 결재, 자료함 문맥에서 추천 작업을 고르고 사람이 확인해야 할 초안과 질문을 분리합니다."
+        action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">AI 사용 범위 확인</ActionButton>}
+      />
+      <View style={styles.aiWorkspaceGrid}>
+        <View style={styles.aiRecommendationList}>
+          {aiRecommendations.map((item) => (
+            <Pressable
+              accessibilityRole="button"
+              key={item.id}
+              onPress={() => onSelect(item.target)}
+              style={({ pressed }) => [styles.aiRecommendationItem, { borderLeftColor: toneColor(item.tone) }, pressed && styles.buttonPressed]}
+            >
+              <Badge tone={item.tone}>{item.status}</Badge>
+              <View style={styles.plannerCopy}>
+                <Label weight="bold">{item.title}</Label>
+                <Label size="sm" muted>{item.source}</Label>
+              </View>
+            </Pressable>
+          ))}
+        </View>
+        <View style={styles.aiPreviewPane}>
+          <Label size="sm" muted>사람 검토 필요</Label>
+          <Label weight="bold">AI가 만든 문장은 바로 확정하지 않고 담당자가 확인합니다.</Label>
+          <View style={styles.aiDraftGrid}>
+            {aiDraftCards.map((card) => (
+              <View key={card.id} style={[styles.aiDraftCard, { borderTopColor: toneColor(card.tone) }]}>
+                <Badge tone={card.tone}>{card.label}</Badge>
+                <Label weight="bold">{card.title}</Label>
+                <Label size="sm" muted>{card.detail}</Label>
+              </View>
+            ))}
+          </View>
+          <View style={styles.actionRow}>
+            <ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 문맥 열기</ActionButton>
+            <ActionButton onPress={() => onSelect("archive")} variant="ghost">자료함 문서 보기</ActionButton>
+          </View>
+        </View>
+      </View>
+    </Card>
+  );
+}
+
+function AdminAccountPanel() {
+  return (
+    <Card>
+      <SectionHeader title="법인 Branch / 하위계정 권한" description="회사 하나를 하나의 Branch로 보고, 하위계정과 민감 문서 접근 범위를 화면에서 분리합니다." />
+      <View style={styles.adminBranchGrid}>
+        <View style={styles.adminBranchCard}>
+          <Label size="sm" muted>Branch 계정</Label>
+          <Label weight="bold">Bitween Demo · 법인코드 0000</Label>
+          <Label size="sm" muted>법인 기본사항 입력, 사업장 정보, 하위계정 생성 권한을 이 화면에서 검토합니다.</Label>
+        </View>
+        <View style={styles.adminBranchCard}>
+          <Label size="sm" muted>하위계정 구조</Label>
+          <Label weight="bold">관리자 2명 · 경영진 3명 · 일반 사원 9명</Label>
+          <Label size="sm" muted>신규 계정은 Branch 소속, 부서, 역할을 지정한 뒤 초대합니다.</Label>
+        </View>
+      </View>
+      <View style={styles.permissionMatrix}>
+        {adminPermissionRows.map((row) => (
+          <View key={row.id} style={styles.permissionRow}>
+            <View style={styles.permissionRole}>
+              <Badge tone={row.tone}>{row.role}</Badge>
+            </View>
+            <View style={styles.permissionCell}>
+              <Label size="sm" muted>급여</Label>
+              <Label weight="bold">{row.payroll}</Label>
+            </View>
+            <View style={styles.permissionCell}>
+              <Label size="sm" muted>경영진 급여</Label>
+              <Label weight="bold">{row.executive}</Label>
+            </View>
+            <View style={styles.permissionCell}>
+              <Label size="sm" muted>자료함</Label>
+              <Label weight="bold">{row.archive}</Label>
+            </View>
+          </View>
+        ))}
+      </View>
+    </Card>
+  );
+}
+
+function TravelWorklogPanel() {
+  return (
+    <Card>
+      <SectionHeader title="출장/업무일지 흐름" description="출장계획부터 출장실행, 업무일지, 실적반영, 상급자 검토까지 한 화면에서 확인합니다." />
+      <View style={styles.travelStageGrid}>
+        {travelWorkflowStages.map((stage, index) => (
+          <View key={stage.id} style={[styles.travelStageCard, { borderTopColor: toneColor(stage.tone) }]}>
+            <Text style={styles.travelStageStep}>{String(index + 1).padStart(2, "0")}</Text>
+            <Badge tone={stage.tone}>{stage.status}</Badge>
+            <Label weight="bold">{stage.label}</Label>
+            <Label size="sm" muted>{stage.detail}</Label>
+          </View>
+        ))}
+      </View>
+      <View style={styles.travelReviewGrid}>
+        <View style={styles.travelReviewCard}>
+          <Label size="sm" muted>상급자 on-going view</Label>
+          <Label weight="bold">진행 중 출장 2건</Label>
+          <Label size="sm" muted>출장실행, 업무일지 작성, 실적 반영 대기 상태를 분리해서 봅니다.</Label>
+        </View>
+        <View style={styles.travelReviewCard}>
+          <Label size="sm" muted>상급자 Completed view</Label>
+          <Label weight="bold">완료 반영 7건</Label>
+          <Label size="sm" muted>검토 완료된 출장신청서, 업무일지, 성과 연결 내역을 보관 화면으로 넘깁니다.</Label>
+        </View>
+      </View>
+    </Card>
+  );
+}
+
+function AttendancePhonePanel() {
+  return (
+    <Card>
+      <SectionHeader title="휴대폰 출퇴근" description="직원이 모바일에서 확인하는 오늘의 출근/퇴근 상태입니다." />
+      <View style={styles.attendanceGrid}>
+        <View style={styles.phoneFrame}>
+          <View style={styles.phoneHeader}>
+            <Label size="sm" muted>오늘 상태</Label>
+            <Badge tone="ready">출근 확인</Badge>
+          </View>
+          <View style={styles.phoneClock}>
+            <Text style={styles.phoneTime}>09:02</Text>
+            <Label size="sm" muted>본사 120m 이내 · 위치 확인됨</Label>
+          </View>
+          <View style={styles.punchActions}>
+            <Pressable accessibilityRole="button" style={({ pressed }) => [styles.punchButton, pressed && styles.buttonPressed]}>
+              <Text style={styles.punchButtonText}>출근</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" style={({ pressed }) => [styles.punchButtonSecondary, pressed && styles.buttonPressed]}>
+              <Text style={styles.punchButtonSecondaryText}>퇴근</Text>
+            </Pressable>
+          </View>
+          <View style={styles.locationNotice}>
+            <Label size="sm" weight="bold">위치 확인</Label>
+            <Label size="sm" muted>GPS 또는 현장 QR 확인 후 기록되는 모바일 UI 자리입니다.</Label>
+          </View>
+        </View>
+        <View style={styles.attendanceSide}>
+          <View style={styles.attendanceSummaryCard}>
+            <Label size="sm" muted>관리자 확인</Label>
+            <Label weight="bold">외근 위치 확인 1건</Label>
+            <Label size="sm" muted>사유와 위치 메모를 확인한 뒤 승인 흐름으로 연결합니다.</Label>
+          </View>
+          <View style={styles.attendanceLogList}>
+            {attendanceLogs.map((log) => (
+              <View key={log.id} style={styles.attendanceLogItem}>
+                <Badge tone={log.tone}>{log.label}</Badge>
+                <View style={styles.plannerCopy}>
+                  <Label weight="bold">{log.time}</Label>
+                  <Label size="sm" muted>{log.place}</Label>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+      </View>
+    </Card>
+  );
+}
+
+function WorkDetailPanel({ row, onSelect }: { readonly row: ModuleRow; readonly onSelect: (id: PlatformId) => void }) {
+  const target = workRowTarget(row);
+
   return (
     <View style={styles.detailPanel}>
       <View style={styles.detailHeader}>
@@ -482,7 +867,7 @@ function WorkDetailPanel({ row }: { readonly row: ModuleRow }) {
         </View>
       </View>
       <View style={styles.actionRow}>
-        <ActionButton onPress={() => undefined} variant="secondary">상세 보기</ActionButton>
+        <ActionButton onPress={() => onSelect(target)} variant="secondary">관련 화면 열기</ActionButton>
         <ActionButton onPress={() => undefined} variant="ghost">담당자 확인</ActionButton>
       </View>
     </View>
@@ -532,8 +917,58 @@ function workQueueTarget(item: WorkQueueItem): PlatformId {
     return "workflow";
   }
 
+  if (item.meta.includes("출장") || item.meta.includes("업무일지")) {
+    return "travel";
+  }
+
   if (item.meta.includes("아카이브") || item.meta.includes("자료")) {
     return "archive";
+  }
+
+  return "home";
+}
+
+function workRowTarget(row: ModuleRow): PlatformId {
+  const haystack = [row.category, row.status, row.owner, row.nextStep].join(" ");
+
+  if (haystack.includes("급여") || haystack.includes("산출") || haystack.includes("월 기본근로시간")) {
+    return "payroll";
+  }
+
+  if (haystack.includes("결재") || haystack.includes("회람") || haystack.includes("기안")) {
+    return "workflow";
+  }
+
+  if (haystack.includes("출장") || haystack.includes("업무일지") || haystack.includes("실적")) {
+    return "travel";
+  }
+
+  if (haystack.includes("자료") || haystack.includes("보고서") || haystack.includes("파일") || haystack.includes("폴더")) {
+    return "archive";
+  }
+
+  if (haystack.includes("권한") || haystack.includes("사용자") || haystack.includes("역할") || haystack.includes("법인")) {
+    return "admin";
+  }
+
+  if (haystack.includes("채용") || haystack.includes("지원자") || haystack.includes("자격") || haystack.includes("배치")) {
+    return "recruit";
+  }
+
+  if (haystack.includes("설정") || haystack.includes("알림") || haystack.includes("환경")) {
+    return "settings";
+  }
+
+  if (haystack.includes("AI") || haystack.includes("요약") || haystack.includes("초안")) {
+    return "ai";
+  }
+
+  if (haystack.includes("근태") || haystack.includes("증명서") || haystack.includes("직원")) {
+    return "hr";
+  }
+
+  if (haystack.includes("출근") || haystack.includes("퇴근") || haystack.includes("외근")) {
+    return "attendance";
   }
 
   return "home";
@@ -554,8 +989,186 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: spacing.sm
   },
+  aiDraftCard: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 180,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  aiDraftGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  aiPreviewPane: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 340,
+    flexGrow: 1,
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  aiRecommendationItem: {
+    alignItems: "flex-start",
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderLeftWidth: 4,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  aiRecommendationList: {
+    flexBasis: 300,
+    flexGrow: 1,
+    gap: spacing.sm
+  },
+  aiWorkspaceGrid: {
+    alignItems: "stretch",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.lg
+  },
+  archiveDocumentItem: {
+    alignItems: "flex-start",
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  archiveDocumentList: {
+    flexBasis: 300,
+    flexGrow: 1,
+    gap: spacing.sm
+  },
+  archiveFolderCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 190,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  archiveFolderGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  archiveMetaGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  archiveMetaItem: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexBasis: 160,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  archivePreviewGrid: {
+    alignItems: "stretch",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.lg
+  },
+  archivePreviewPane: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 320,
+    flexGrow: 1,
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  adminBranchCard: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 260,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  adminBranchGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  attendanceGrid: {
+    alignItems: "stretch",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.lg
+  },
+  attendanceLogItem: {
+    alignItems: "flex-start",
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  attendanceLogList: {
+    gap: spacing.sm
+  },
+  attendanceSide: {
+    flexBasis: 280,
+    flexGrow: 1,
+    gap: spacing.md
+  },
+  attendanceSummaryCard: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
   buttonPressed: {
     opacity: 0.86
+  },
+  calendarDate: {
+    color: colors.accent,
+    fontSize: 34,
+    fontWeight: "800",
+    lineHeight: 40
+  },
+  calendarDay: {
+    alignItems: "center",
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.xs,
+    padding: spacing.lg
+  },
+  calendarMonth: {
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: "800",
+    lineHeight: 18
   },
   detailGrid: {
     flexDirection: "row",
@@ -648,6 +1261,55 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md
   },
+  integrationCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 210,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  integrationGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  integrationValue: {
+    fontSize: 20,
+    fontWeight: "800",
+    lineHeight: 26
+  },
+  homePlannerCard: {
+    flexBasis: 320,
+    flexGrow: 1
+  },
+  homePlannerGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.lg
+  },
+  languageGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  languageOption: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 160,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  languageOptionSelected: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent
+  },
   listSummary: {
     alignItems: "center",
     backgroundColor: colors.input,
@@ -665,6 +1327,127 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.md
+  },
+  plannerCopy: {
+    flex: 1,
+    gap: spacing.xs,
+    minWidth: 0
+  },
+  plannerItem: {
+    alignItems: "flex-start",
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  plannerList: {
+    gap: spacing.sm
+  },
+  locationNotice: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  phoneClock: {
+    alignItems: "center",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.xs,
+    padding: spacing.lg
+  },
+  phoneFrame: {
+    backgroundColor: colors.card,
+    borderColor: colors.text,
+    borderRadius: 24,
+    borderWidth: 2,
+    flexBasis: 280,
+    flexGrow: 1,
+    gap: spacing.md,
+    maxWidth: 360,
+    padding: spacing.lg
+  },
+  phoneHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
+  },
+  phoneTime: {
+    color: colors.accent,
+    fontSize: 36,
+    fontWeight: "800",
+    lineHeight: 44
+  },
+  permissionCell: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexBasis: 150,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  permissionMatrix: {
+    gap: spacing.sm
+  },
+  permissionRole: {
+    flexBasis: 150,
+    flexGrow: 1
+  },
+  permissionRow: {
+    alignItems: "stretch",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    padding: spacing.sm
+  },
+  punchActions: {
+    flexDirection: "row",
+    gap: spacing.sm
+  },
+  punchButton: {
+    alignItems: "center",
+    backgroundColor: colors.accent,
+    borderRadius: radius.lg,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 52,
+    padding: spacing.md
+  },
+  punchButtonSecondary: {
+    alignItems: "center",
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 52,
+    padding: spacing.md
+  },
+  punchButtonSecondaryText: {
+    color: colors.accent,
+    fontSize: 16,
+    fontWeight: "800"
+  },
+  punchButtonText: {
+    color: colors.card,
+    fontSize: 16,
+    fontWeight: "800"
   },
   launcherCard: {
     backgroundColor: colors.bg,
@@ -792,6 +1575,56 @@ const styles = StyleSheet.create({
     gap: spacing.md
   },
   stepIndex: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800"
+  },
+  todoItem: {
+    alignItems: "flex-start",
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  todoItemDone: {
+    backgroundColor: colors.input,
+    opacity: 0.5
+  },
+  travelReviewCard: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 260,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  travelReviewGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  travelStageCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 190,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  travelStageGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  travelStageStep: {
     color: colors.muted,
     fontSize: 12,
     fontWeight: "800"

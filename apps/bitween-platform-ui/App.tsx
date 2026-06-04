@@ -3,16 +3,18 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaView, StyleSheet, View } from "react-native";
 
 import { AppShell } from "./src/components";
-import { colors } from "./src/theme";
-import type { PlatformId } from "./src/types";
+import { colors, defaultSidebarThemeId, getSidebarTheme } from "./src/theme";
+import type { PlatformId, SidebarThemeId } from "./src/types";
 import { getNavigationItem, previewPlatformViewModel } from "./src/viewModel";
 import { LauncherScreen, LoginScreen, ModuleScreen, PayrollScreen } from "./src/screens";
 
 export default function App() {
   const [activeId, setActiveId] = useState<PlatformId>("home");
   const [authenticated, setAuthenticated] = useState(false);
+  const [sidebarThemeId, setSidebarThemeId] = useState<SidebarThemeId>(defaultSidebarThemeId);
   const active = useMemo(() => getNavigationItem(activeId), [activeId]);
   const navigationItems = previewPlatformViewModel.launcher.navigation;
+  const sidebarTheme = useMemo(() => getSidebarTheme(sidebarThemeId), [sidebarThemeId]);
   const session = previewPlatformViewModel.session;
   const sessionLabel = `${session.tenantName} · ${session.displayName} · ${session.companyCodeLabel}`;
 
@@ -45,7 +47,16 @@ export default function App() {
   return (
     <SafeAreaView style={styles.root}>
       <StatusBar style="dark" />
-      <AppShell active={active} items={navigationItems} onLogout={logout} onSelect={select} sessionLabel={sessionLabel}>
+      <AppShell
+        active={active}
+        employeeNumber={session.employeeNumber}
+        items={navigationItems}
+        onLogout={logout}
+        onSelect={select}
+        onThemeChange={setSidebarThemeId}
+        sessionLabel={sessionLabel}
+        sidebarTheme={sidebarTheme}
+      >
         {activeId === "home" ? (
           <LauncherScreen active={active} onSelect={select} />
         ) : activeId === "payroll" ? (

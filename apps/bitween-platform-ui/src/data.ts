@@ -1,10 +1,12 @@
 import type {
+  CalendarEvent,
   MetricItem,
   ModuleDashboard,
   ModuleRow,
   NavigationItem,
   PayrollStep,
   ReadinessCard,
+  TodoItem,
   WorkQueueItem
 } from "./types";
 
@@ -29,8 +31,29 @@ export const navigationItems = [
     id: "hr",
     label: "HR",
     eyebrow: "People",
-    description: "직원 명부, 근태, 연차, 계약, 증명서 흐름을 정리합니다.",
+    description: "직원 명부, 이력서, 사직서, 증명서 흐름을 정리합니다.",
     accent: "#0D9488"
+  },
+  {
+    id: "attendance",
+    label: "출퇴근",
+    eyebrow: "Attendance",
+    description: "모바일 출근, 퇴근, 위치 확인, 근태 기록을 관리합니다.",
+    accent: "#0284C7"
+  },
+  {
+    id: "recruit",
+    label: "채용",
+    eyebrow: "Recruit",
+    description: "지원자 경력, 자격, 부서 배치 후보를 관리합니다.",
+    accent: "#9333EA"
+  },
+  {
+    id: "travel",
+    label: "출장/일지",
+    eyebrow: "Travel",
+    description: "출장계획, 실행, 업무일지, 실적반영, 상급자 검토 흐름을 확인합니다.",
+    accent: "#0F766E"
   },
   {
     id: "workflow",
@@ -73,8 +96,8 @@ export const platformMetrics: readonly MetricItem[] = [
   {
     id: "today",
     label: "오늘 처리할 업무",
-    value: "9건",
-    helper: "급여, 결재, 자료 확인 포함",
+    value: "10건",
+    helper: "급여, 출장, 결재, 자료 확인 포함",
     tone: "attention"
   },
   {
@@ -189,6 +212,33 @@ export const payrollSettingsRows: readonly ModuleRow[] = [
   }
 ];
 
+export const payrollIntegrationRows: readonly ModuleRow[] = [
+  {
+    id: "payroll-integration-1",
+    category: "Bitween Demo / 본사",
+    status: "근태문서 2종",
+    owner: "건강보험EDI 확인 전",
+    nextStep: "급여 작업 전 보험료 공제금액 확인 필요",
+    tone: "attention"
+  },
+  {
+    id: "payroll-integration-2",
+    category: "Bitween Demo / 부산지점",
+    status: "청구서 매핑 대기",
+    owner: "사업장 담당",
+    nextStep: "사업장별 청구서 양식과 근태문서 연결",
+    tone: "neutral"
+  },
+  {
+    id: "payroll-integration-3",
+    category: "협력 사업장",
+    status: "입력자료 준비",
+    owner: "급여 담당",
+    nextStep: "법인/사업장별 입력 정책 확인 후 산출 진입",
+    tone: "ready"
+  }
+];
+
 export const previewRows: readonly ModuleRow[] = [
   {
     id: "preview-1",
@@ -236,6 +286,15 @@ export const workQueue: readonly WorkQueueItem[] = [
     tone: "neutral"
   },
   {
+    id: "travel-diary",
+    title: "출장 계획/업무일지 검토",
+    meta: "출장/업무일지",
+    owner: "팀 리더",
+    due: "오늘",
+    status: "진행 중",
+    tone: "attention"
+  },
+  {
     id: "archive-preview",
     title: "자료함 최근 보고서",
     meta: "아카이브",
@@ -246,12 +305,78 @@ export const workQueue: readonly WorkQueueItem[] = [
   }
 ];
 
+export const calendarEvents: readonly CalendarEvent[] = [
+  {
+    dateLabel: "2026.06.04",
+    id: "calendar-payroll",
+    timeLabel: "10:00",
+    title: "급여 산출 기준 확인",
+    tone: "attention"
+  },
+  {
+    dateLabel: "2026.06.04",
+    id: "calendar-approval",
+    timeLabel: "14:00",
+    title: "전자결재 대기 문서 검토",
+    tone: "neutral"
+  },
+  {
+    dateLabel: "2026.06.05",
+    id: "calendar-recruit",
+    timeLabel: "09:30",
+    title: "채용 후보자 부서 배치 회의",
+    tone: "ready"
+  },
+  {
+    dateLabel: "2026.06.05",
+    id: "calendar-travel",
+    timeLabel: "16:00",
+    title: "부산 출장 업무일지 실적 반영",
+    tone: "attention"
+  }
+];
+
+export const todayTodos: readonly TodoItem[] = [
+  {
+    completed: false,
+    id: "todo-payroll",
+    owner: "급여 담당",
+    timeLabel: "오늘",
+    title: "6월 급여 산출 준비",
+    tone: "attention"
+  },
+  {
+    completed: false,
+    id: "todo-approval",
+    owner: "승인권자",
+    timeLabel: "오늘",
+    title: "전자결재 대기 문서",
+    tone: "neutral"
+  },
+  {
+    completed: false,
+    id: "todo-travel",
+    owner: "영업팀",
+    timeLabel: "오늘",
+    title: "출장 업무일지 작성 및 실적 반영",
+    tone: "attention"
+  },
+  {
+    completed: true,
+    id: "todo-archive",
+    owner: "운영팀",
+    timeLabel: "완료",
+    title: "자료함 최근 보고서 확인",
+    tone: "ready"
+  }
+];
+
 export const moduleDashboards = {
   hr: {
     id: "hr",
     title: "HR 운영 현황",
-    subtitle: "직원 명부, 근태, 증명서 요청을 한 화면에서 추적합니다.",
-    filters: ["전체", "입사/퇴사", "근태", "증명서"],
+    subtitle: "직원 명부, 이력서, 사직서, 재직/경력증명서 요청을 한 화면에서 추적합니다.",
+    filters: ["전체", "직원명부", "이력서", "사직서", "증명서"],
     metrics: [
       { id: "employees", label: "재직 직원", value: "48명", helper: "법인 전체", tone: "ready" },
       { id: "attendance", label: "근태 확인", value: "6건", helper: "월말 마감 전 확인", tone: "attention" },
@@ -260,19 +385,27 @@ export const moduleDashboards = {
     rows: [
       {
         id: "hr-1",
-        category: "근태 누락",
+        category: "직원명부 업데이트",
         status: "확인 필요",
         owner: "인사 담당",
-        nextStep: "6월 2주차 누락 항목 확인",
+        nextStep: "부서/직무 최신 정보 확인",
         tone: "attention"
       },
       {
         id: "hr-2",
-        category: "재직증명서",
+        category: "재직증명서/경력증명서",
         status: "접수",
         owner: "운영팀",
         nextStep: "발급 양식 검토",
         tone: "neutral"
+      },
+      {
+        id: "hr-3",
+        category: "이력서/사직서 관리",
+        status: "정리 중",
+        owner: "인사 담당",
+        nextStep: "입사/퇴사 문서 분류",
+        tone: "ready"
       }
     ],
     primaryAction: {
@@ -286,7 +419,138 @@ export const moduleDashboards = {
       target: "payroll"
     },
     emptyTitle: "표시할 HR 업무가 없습니다.",
-    emptyDescription: "명부 또는 근태 업무가 생기면 처리 대기 항목이 표시됩니다."
+    emptyDescription: "명부, 이력서, 사직서, 증명서 업무가 생기면 처리 대기 항목이 표시됩니다."
+  },
+  attendance: {
+    id: "attendance",
+    title: "모바일 출퇴근",
+    subtitle: "휴대폰에서 출근/퇴근 상태, 위치 확인, 최근 근태 기록을 확인합니다.",
+    filters: ["전체", "출근", "퇴근", "확인 필요"],
+    metrics: [
+      { id: "checked-in", label: "오늘 출근", value: "09:02", helper: "본사 120m 이내", tone: "ready" },
+      { id: "pending", label: "확인 필요", value: "1건", helper: "외근 위치 확인", tone: "attention" },
+      { id: "weekly", label: "이번 주 기록", value: "4일", helper: "정상 출근", tone: "neutral" }
+    ],
+    rows: [
+      {
+        id: "attendance-1",
+        category: "오늘 출근 기록",
+        status: "확인됨",
+        owner: "BW-0001",
+        nextStep: "퇴근 체크 대기",
+        tone: "ready"
+      },
+      {
+        id: "attendance-2",
+        category: "외근 위치 확인",
+        status: "확인 필요",
+        owner: "관리자",
+        nextStep: "외근 사유 확인",
+        tone: "attention"
+      }
+    ],
+    primaryAction: {
+      label: "출퇴근 앱 보기",
+      description: "휴대폰 출퇴근 화면을 확인합니다.",
+      target: "attendance"
+    },
+    secondaryAction: {
+      label: "HR로 이동",
+      description: "근태와 직원 정보를 함께 확인합니다.",
+      target: "hr"
+    },
+    emptyTitle: "표시할 출퇴근 기록이 없습니다.",
+    emptyDescription: "출근 또는 퇴근 기록이 생기면 이곳에 표시됩니다."
+  },
+  recruit: {
+    id: "recruit",
+    title: "채용 인재 관리",
+    subtitle: "지원자 경력과 자격 정보를 공유하고 부서별 필요 인재를 배치합니다.",
+    filters: ["전체", "지원자", "경력", "자격", "배치"],
+    metrics: [
+      { id: "applicants", label: "지원자", value: "8명", helper: "공유 가능 후보", tone: "ready" },
+      { id: "qualified", label: "자격 검토", value: "3건", helper: "부서 확인 대기", tone: "attention" },
+      { id: "placement", label: "배치 후보", value: "4명", helper: "직무 적합 후보", tone: "neutral" }
+    ],
+    rows: [
+      {
+        id: "recruit-1",
+        category: "지원자 경력 공유",
+        status: "검토 중",
+        owner: "채용 담당",
+        nextStep: "부서장 열람 권한 확인",
+        tone: "attention"
+      },
+      {
+        id: "recruit-2",
+        category: "자격사항 매칭",
+        status: "추천",
+        owner: "운영팀",
+        nextStep: "필요 부서 후보 배치",
+        tone: "ready"
+      }
+    ],
+    primaryAction: {
+      label: "지원자 보기",
+      description: "지원자 경력과 자격 정보를 검토합니다.",
+      target: "recruit"
+    },
+    secondaryAction: {
+      label: "HR로 이동",
+      description: "직원 전환 후 문서 흐름을 확인합니다.",
+      target: "hr"
+    },
+    emptyTitle: "표시할 채용 업무가 없습니다.",
+    emptyDescription: "지원자 경력 또는 자격 검토 항목이 생기면 표시됩니다."
+  },
+  travel: {
+    id: "travel",
+    title: "출장/업무일지",
+    subtitle: "출장계획, 실행, 업무일지, 실적반영, 상급자 진행/완료 view를 연결해 확인합니다.",
+    filters: ["전체", "출장계획", "출장실행", "업무일지", "실적", "검토"],
+    metrics: [
+      { id: "plans", label: "출장계획", value: "4건", helper: "승인 전/진행 중 포함", tone: "neutral" },
+      { id: "diary", label: "업무일지", value: "2건", helper: "오늘 작성 권장", tone: "attention" },
+      { id: "completed", label: "완료 반영", value: "7건", helper: "상급자 확인 완료", tone: "ready" }
+    ],
+    rows: [
+      {
+        id: "travel-1",
+        category: "부산 고객사 출장계획",
+        status: "출장실행",
+        owner: "영업팀",
+        nextStep: "현장 미팅 후 업무일지 작성",
+        tone: "attention"
+      },
+      {
+        id: "travel-2",
+        category: "대전 설치 지원 업무일지",
+        status: "상급자 검토",
+        owner: "기술지원",
+        nextStep: "실적 반영 승인 대기",
+        tone: "neutral"
+      },
+      {
+        id: "travel-3",
+        category: "서울 협력사 방문",
+        status: "Completed",
+        owner: "운영팀",
+        nextStep: "완료 업무 성과 리포트 보관",
+        tone: "ready"
+      }
+    ],
+    primaryAction: {
+      label: "출장 흐름 보기",
+      description: "계획부터 실적 반영까지 상태를 확인합니다.",
+      target: "travel"
+    },
+    secondaryAction: {
+      label: "전자결재로 이동",
+      description: "출장신청서와 결재 문서를 함께 확인합니다.",
+      target: "workflow"
+    },
+    emptyTitle: "표시할 출장/업무일지 업무가 없습니다.",
+    emptyDescription: "출장계획, 업무일지, 실적 반영 항목이 생기면 진행 상태가 표시됩니다."
   },
   workflow: {
     id: "workflow",
@@ -414,29 +678,38 @@ export const moduleDashboards = {
   admin: {
     id: "admin",
     title: "관리자 콘솔",
-    subtitle: "사용자, 권한, 법인 운영 설정을 분리해서 관리합니다.",
-    filters: ["전체", "권한", "법인", "감사"],
+    subtitle: "법인 Branch, 하위계정, 민감 문서 권한, 감사 상태를 분리해서 관리합니다.",
+    filters: ["전체", "권한", "법인", "하위계정", "감사"],
     metrics: [
-      { id: "users", label: "활성 사용자", value: "14명", helper: "초대 완료 계정", tone: "ready" },
-      { id: "roles", label: "권한 검토", value: "2건", helper: "승인권자 확인", tone: "attention" },
+      { id: "branch", label: "Branch", value: "1개", helper: "Bitween Demo 법인", tone: "ready" },
+      { id: "users", label: "하위계정", value: "14명", helper: "초대 완료 계정", tone: "ready" },
+      { id: "roles", label: "권한 검토", value: "2건", helper: "민감 문서 접근 확인", tone: "attention" },
       { id: "audit", label: "감사 로그", value: "정상", helper: "최근 오류 없음", tone: "ready" }
     ],
     rows: [
       {
         id: "ad-1",
-        category: "신규 사용자 초대",
+        category: "신규 하위계정 초대",
         status: "검토 중",
         owner: "관리자",
-        nextStep: "역할 지정",
+        nextStep: "Branch 소속과 역할 지정",
         tone: "attention"
       },
       {
         id: "ad-2",
-        category: "법인 정보",
+        category: "법인 Branch 정보",
         status: "정상",
         owner: "운영 관리자",
         nextStep: "정기 검토",
         tone: "ready"
+      },
+      {
+        id: "ad-3",
+        category: "급여 민감 문서 권한",
+        status: "확인 필요",
+        owner: "대표 승인",
+        nextStep: "경영진 급여/일반 급여 열람 범위 분리",
+        tone: "attention"
       }
     ],
     primaryAction: {

@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ReactNode } from "react";
 import {
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,8 +10,11 @@ import {
 } from "react-native";
 import type { StyleProp, ViewStyle } from "react-native";
 
-import { colors, radius, spacing, toneBackground, toneColor } from "./theme";
-import type { MetricItem, ModuleRow, NavigationItem, ReadinessTone } from "./types";
+import { colors, radius, sidebarThemes, spacing, toneBackground, toneColor } from "./theme";
+import type { MetricItem, ModuleRow, NavigationItem, ReadinessTone, SidebarTheme, SidebarThemeId } from "./types";
+
+const companyLogoUri =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F3864'/%3E%3Cpath d='M18 18h18c7 0 11 4 11 9 0 4-2 7-6 8 5 1 8 5 8 10 0 6-5 10-13 10H18V18zm11 14h6c3 0 5-1 5-4s-2-4-5-4h-6v8zm0 17h7c4 0 6-2 6-5s-2-5-6-5h-7v10z' fill='white'/%3E%3C/svg%3E";
 
 type TextProps = PropsWithChildren<{
   readonly muted?: boolean;
@@ -232,14 +236,46 @@ type SidebarProps = {
   readonly items: readonly NavigationItem[];
   readonly activeId: NavigationItem["id"];
   readonly onSelect: (id: NavigationItem["id"]) => void;
+  readonly onThemeChange: (id: SidebarThemeId) => void;
+  readonly theme: SidebarTheme;
 };
 
-export function Sidebar({ activeId, compact, items, onSelect }: SidebarProps) {
+export function Sidebar({ activeId, compact, items, onSelect, onThemeChange, theme }: SidebarProps) {
   return (
-    <View style={[styles.sidebar, compact && styles.sidebarCompact]}>
+    <View style={[styles.sidebar, { backgroundColor: theme.sidebar }, compact && styles.sidebarCompact]}>
       <View style={[styles.brandBlock, compact && styles.brandBlockCompact]}>
-        <Label size="lg" weight="bold">Bitween</Label>
-        <Label size="sm" muted>Business Platform</Label>
+        <View style={styles.brandRow}>
+          <Image accessibilityLabel="Bitween 회사 로고" source={{ uri: companyLogoUri }} style={styles.logoImage} />
+          <View>
+            <Label size="lg" weight="bold">Bitween</Label>
+            <Label size="sm" muted>업무 플랫폼</Label>
+          </View>
+        </View>
+      </View>
+      <View style={[styles.themePanel, compact && styles.themePanelCompact]}>
+        <Label size="sm" weight="bold">메뉴 색상 옵션</Label>
+        <View style={styles.themeChips}>
+          {sidebarThemes.map((item) => {
+            const selected = item.id === theme.id;
+            return (
+              <Pressable
+                accessibilityRole="button"
+                key={item.id}
+                onPress={() => onThemeChange(item.id)}
+                style={({ pressed }) => [
+                  styles.themeChip,
+                  selected && { backgroundColor: theme.activeBackground, borderColor: theme.activeText },
+                  pressed && styles.buttonPressed
+                ]}
+              >
+                <View style={[styles.themeSwatch, { backgroundColor: item.swatchStart, borderColor: item.swatchEnd }]}>
+                  <View style={[styles.themeSwatchInset, { backgroundColor: item.swatchEnd }]} />
+                </View>
+                <Text style={[styles.themeChipText, selected && { color: theme.activeText }]}>{item.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
       <ScrollView
         horizontal={compact}
@@ -257,11 +293,10 @@ export function Sidebar({ activeId, compact, items, onSelect }: SidebarProps) {
               style={[
                 styles.navItem,
                 compact && styles.navItemCompact,
-                active && { backgroundColor: `${item.accent}18`, borderLeftColor: item.accent }
+                active && { backgroundColor: theme.activeBackground, borderLeftColor: item.accent }
               ]}
             >
-              <Text style={[styles.navEyebrow, active && { color: item.accent }]}>{item.eyebrow}</Text>
-              <Text style={[styles.navLabel, active && { color: item.accent }]}>{item.label}</Text>
+              <Text style={[styles.navLabel, active && { color: theme.activeText }]}>{item.label}</Text>
             </Pressable>
           );
         })}
@@ -272,28 +307,40 @@ export function Sidebar({ activeId, compact, items, onSelect }: SidebarProps) {
 
 type ShellProps = PropsWithChildren<{
   readonly active: NavigationItem;
+  readonly employeeNumber?: string;
   readonly items: readonly NavigationItem[];
   readonly onLogout?: () => void;
   readonly onSelect: (id: NavigationItem["id"]) => void;
+  readonly onThemeChange: (id: SidebarThemeId) => void;
   readonly sessionLabel?: string;
+  readonly sidebarTheme: SidebarTheme;
 }>;
 
-export function AppShell({ active, children, items, onLogout, onSelect, sessionLabel = "법인 운영 콘솔" }: ShellProps) {
+export function AppShell({
+  active,
+  children,
+  employeeNumber,
+  items,
+  onLogout,
+  onSelect,
+  onThemeChange,
+  sessionLabel = "법인 운영 콘솔",
+  sidebarTheme
+}: ShellProps) {
   const { width } = useWindowDimensions();
   const compact = width < 980;
 
   return (
     <View style={[styles.shell, compact && styles.shellCompact]}>
-      <Sidebar activeId={active.id} compact={compact} items={items} onSelect={onSelect} />
+      <Sidebar activeId={active.id} compact={compact} items={items} onSelect={onSelect} onThemeChange={onThemeChange} theme={sidebarTheme} />
       <View style={styles.main}>
         <View style={[styles.header, compact && styles.headerCompact]}>
           <View style={styles.headerCopy}>
-            <Label size="sm" muted>{active.eyebrow}</Label>
             <Label size="xl" weight="bold">{active.label}</Label>
-            <Label muted>{active.description}</Label>
           </View>
           <View style={styles.headerActions}>
             <Badge tone="neutral">{sessionLabel}</Badge>
+            {employeeNumber ? <Badge tone="neutral">사번 {employeeNumber}</Badge> : null}
             {onLogout ? <ActionButton onPress={onLogout} variant="ghost">로그아웃</ActionButton> : null}
           </View>
         </View>
@@ -327,6 +374,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
     marginBottom: spacing.md,
     paddingBottom: 0
+  },
+  brandRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm
   },
   button: {
     alignItems: "center",
@@ -451,6 +503,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
     flex: 1
   },
+  logoImage: {
+    borderRadius: radius.lg,
+    height: 38,
+    width: 38
+  },
   metricCard: {
     backgroundColor: colors.bg,
     borderColor: colors.border,
@@ -474,11 +531,6 @@ const styles = StyleSheet.create({
   },
   muted: {
     color: colors.muted
-  },
-  navEyebrow: {
-    color: colors.muted,
-    fontSize: 11,
-    fontWeight: "700"
   },
   navItem: {
     borderLeftColor: "transparent",
@@ -561,6 +613,53 @@ const styles = StyleSheet.create({
     borderRightWidth: 0,
     padding: spacing.md,
     width: "100%"
+  },
+  themeChip: {
+    alignItems: "center",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.sm,
+    minHeight: 34,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm
+  },
+  themeChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  themeChipText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 16
+  },
+  themePanel: {
+    backgroundColor: "rgba(255, 255, 255, 0.54)",
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+    padding: spacing.sm
+  },
+  themePanelCompact: {
+    marginBottom: spacing.md
+  },
+  themeSwatch: {
+    borderRadius: 999,
+    borderWidth: 1,
+    height: 18,
+    overflow: "hidden",
+    width: 18
+  },
+  themeSwatchInset: {
+    alignSelf: "flex-end",
+    height: 18,
+    width: 9
   },
   table: {
     borderColor: colors.border,
