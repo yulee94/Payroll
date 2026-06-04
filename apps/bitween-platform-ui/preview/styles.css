@@ -913,6 +913,10 @@ button.planner-item {
   border-color: var(--accent);
 }
 
+.password-toggle {
+  justify-self: start;
+}
+
 .settings-status-grid {
   display: grid;
   gap: 12px;

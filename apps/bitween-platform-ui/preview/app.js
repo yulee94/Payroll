@@ -256,6 +256,7 @@ const state = {
   filter: "all",
   loginFeedbackKey: "",
   password: "",
+  passwordVisible: false,
   selectedPayrollCardKey: "",
   selectedPayrollStepKey: "",
   selectedQueueKey: "",
@@ -476,7 +477,8 @@ function renderLogin() {
           ${languageSelector()}
           ${field(t("screens.login.form.companyCode"), "company-code", demoAccount.companyCode, "text", state.companyCode)}
           ${field(t("screens.login.form.userId"), "user-id", demoAccount.userId, "text", state.userId)}
-          ${field(t("screens.login.form.password"), "password", demoAccount.password, "password", state.password)}
+          ${field(t("screens.login.form.password"), "password", demoAccount.password, state.passwordVisible ? "text" : "password", state.password)}
+          <button aria-pressed="${state.passwordVisible ? "true" : "false"}" class="btn ghost password-toggle" type="button" data-password-toggle="true">${t(state.passwordVisible ? "screens.login.actions.hidePassword" : "screens.login.actions.showPassword")}</button>
           ${state.loginFeedbackKey ? `<div aria-live="assertive" class="inline-warning" role="alert">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey, demoAccount)}</span></div>` : ""}
           <div class="login-actions">
             <button class="btn primary" type="submit">${t("screens.login.actions.enterHome")}</button>
@@ -1149,6 +1151,7 @@ function bindEvents() {
       state.filter = "all";
       state.loginFeedbackKey = "";
       state.password = "";
+      state.passwordVisible = false;
       state.selectedPayrollCardKey = "";
       state.selectedPayrollStepKey = "";
       state.selectedQueueKey = "";
@@ -1175,6 +1178,21 @@ function bindEvents() {
       state.selectedRowKey = "";
       render();
       toast(t("preview.toast.demoLogin"));
+    });
+  });
+
+  document.querySelectorAll("[data-password-toggle]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.password = document.getElementById("password")?.value || state.password;
+      state.passwordVisible = !state.passwordVisible;
+      render();
+      window.requestAnimationFrame(() => {
+        const nextPassword = document.getElementById("password");
+        if (nextPassword) {
+          nextPassword.focus();
+          nextPassword.setSelectionRange(nextPassword.value.length, nextPassword.value.length);
+        }
+      });
     });
   });
 

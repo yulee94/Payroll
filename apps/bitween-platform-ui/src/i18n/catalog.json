@@ -7367,6 +7367,24 @@
         "zh-Hans-CN": "此面板不执行实际审批处理，仅引导用户前往相关工作区。",
         "ja-JP": "このパネルは実際の承認処理を行わず、関連画面への移動を案内するだけです。"
       }
+    },
+    {
+      "key": "screens.login.actions.showPassword",
+      "values": {
+        "ko-KR": "비밀번호 보기",
+        "en-US": "Show password",
+        "zh-Hans-CN": "显示密码",
+        "ja-JP": "パスワードを表示"
+      }
+    },
+    {
+      "key": "screens.login.actions.hidePassword",
+      "values": {
+        "ko-KR": "비밀번호 숨기기",
+        "en-US": "Hide password",
+        "zh-Hans-CN": "隐藏密码",
+        "ja-JP": "パスワードを隠す"
+      }
     }
   ],
   "languageDisplayNames": [

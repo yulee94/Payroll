@@ -161,6 +161,7 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
   const [companyCode, setCompanyCode] = useState("");
   const [feedbackKey, setFeedbackKey] = useState<string | undefined>();
   const [password, setPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [userId, setUserId] = useState("");
   const canSubmit = companyCode.trim().length > 0 && userId.trim().length > 0 && password.trim().length > 0;
   const languageOptions = useMemo(() => getLanguageOptions(locale), [locale]);
@@ -286,10 +287,13 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
             placeholder={demoAccount.password}
             placeholderTextColor={colors.muted}
             returnKeyType="done"
-            secureTextEntry
+            secureTextEntry={!passwordVisible}
             style={styles.input}
             value={password}
           />
+          <ActionButton onPress={() => setPasswordVisible((current) => !current)} variant="ghost">
+            {tScreen(locale, passwordVisible ? "login.actions.hidePassword" : "login.actions.showPassword")}
+          </ActionButton>
         </View>
         {feedbackKey ? (
           <View style={styles.inlineNotice}>
