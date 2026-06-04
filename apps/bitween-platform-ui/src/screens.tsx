@@ -41,6 +41,12 @@ const demoAccount = {
   userId: "admin"
 } as const;
 
+const demoCredentialCards = [
+  { id: "company", label: "법인 코드", value: demoAccount.companyCode, helper: "Bitween Demo 법인" },
+  { id: "user", label: "아이디", value: demoAccount.userId, helper: "관리자 권한 화면 확인" },
+  { id: "password", label: "비밀번호", value: demoAccount.password, helper: "미리보기 전용" }
+] as const;
+
 const languageOptions = [
   { code: "ko", label: "한국어", status: "현재 적용" },
   { code: "en", label: "English", status: "준비" },
@@ -160,6 +166,22 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
           title="로그인"
           description="법인 계정으로 접속하면 권한에 맞는 업무 화면으로 이동합니다."
         />
+        <View style={styles.loginCredentialPanel}>
+          <View style={styles.loginCredentialHeader}>
+            <Badge tone="neutral">Demo 계정</Badge>
+            <Label size="sm" muted>테스트 접속 정보로 플랫폼 흐름을 바로 확인합니다.</Label>
+          </View>
+          <View style={styles.loginCredentialGrid}>
+            {demoCredentialCards.map((item) => (
+              <View key={item.id} style={styles.loginCredentialItem}>
+                <Label size="sm" muted>{item.label}</Label>
+                <Label weight="bold">{item.value}</Label>
+                <Label size="sm" muted>{item.helper}</Label>
+              </View>
+            ))}
+          </View>
+          <Label size="sm" muted>실제 직원 명부, 급여 파일, 운영 설정과 분리된 frontend 미리보기 계정입니다.</Label>
+        </View>
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">법인 코드</Label>
           <TextInput
@@ -208,10 +230,6 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
         <View style={styles.loginActions}>
           <ActionButton onPress={handleLogin}>{canSubmit ? "플랫폼 홈으로 이동" : "로그인"}</ActionButton>
           <ActionButton onPress={handleDemoLogin} variant="secondary">Demo 계정으로 접속</ActionButton>
-        </View>
-        <View style={styles.inlineNotice}>
-          <Badge tone="neutral">Demo 계정</Badge>
-          <Label size="sm" muted>법인코드 0000 · 아이디 admin · 비밀번호 admin</Label>
         </View>
       </Card>
     </View>
@@ -1495,6 +1513,35 @@ const styles = StyleSheet.create({
   loginCard: {
     flexBasis: 360,
     flexGrow: 1
+  },
+  loginCredentialGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  loginCredentialHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  loginCredentialItem: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexBasis: 120,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.sm
+  },
+  loginCredentialPanel: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.sm,
+    padding: spacing.md
   },
   searchGroup: {
     flexBasis: 240,

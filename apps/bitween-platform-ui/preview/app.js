@@ -11,6 +11,12 @@ const demoAccount = {
   userId: "admin"
 };
 
+const demoCredentialCards = [
+  ["법인 코드", demoAccount.companyCode, "Bitween Demo 법인"],
+  ["아이디", demoAccount.userId, "관리자 권한 화면 확인"],
+  ["비밀번호", demoAccount.password, "미리보기 전용"]
+];
+
 const sessionLabel = "Bitween Demo · admin · 0000";
 const employeeNumber = "BW-0001";
 const companyLogoUri =
@@ -301,6 +307,13 @@ function renderLogin() {
         </div>
         <form class="card login-card" id="login-form">
           ${sectionHead("Secure sign in", "로그인", "법인 계정으로 접속하면 권한에 맞는 업무 화면으로 이동합니다.")}
+          <div class="login-credential-panel">
+            <div class="login-credential-head">${badge("Demo 계정", "neutral")}<span class="helper">테스트 접속 정보로 플랫폼 흐름을 바로 확인합니다.</span></div>
+            <div class="login-credential-grid">${demoCredentialCards.map(([label, value, helper]) => `
+              <div class="login-credential-item"><span class="helper">${label}</span><strong>${value}</strong><span class="helper">${helper}</span></div>
+            `).join("")}</div>
+            <span class="helper">실제 직원 명부, 급여 파일, 운영 설정과 분리된 frontend 미리보기 계정입니다.</span>
+          </div>
           ${field("법인 코드", "company-code", "0000", "text", state.companyCode)}
           ${field("아이디", "user-id", "admin", "text", state.userId)}
           ${field("비밀번호", "password", "admin", "password", state.password)}
@@ -309,7 +322,6 @@ function renderLogin() {
             <button class="btn primary" type="submit">플랫폼 홈으로 이동</button>
             <button class="btn secondary" type="button" data-demo-login="true">Demo 계정으로 접속</button>
           </div>
-          <div class="notice">${badge("Demo 계정", "neutral")}<span class="helper">법인코드 0000 · 아이디 admin · 비밀번호 admin</span></div>
         </form>
       </div>
     </section>
