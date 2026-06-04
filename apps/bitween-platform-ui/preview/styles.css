@@ -701,6 +701,32 @@ button {
   padding: 14px;
 }
 
+.recruit-placement-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.recruit-placement-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  border-top: 4px solid var(--muted);
+  color: var(--text);
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  text-align: left;
+}
+
+.recruit-placement-head {
+  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
 .admin-branch-grid {
   display: grid;
   gap: 12px;
