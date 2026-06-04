@@ -6460,6 +6460,204 @@
       }
     },
     {
+      "key": "screens.login.actions.enterHomeAccessibility",
+      "values": {
+        "ko-KR": "입력한 demo 계정으로 플랫폼 홈 이동",
+        "en-US": "Go to the platform home with the entered demo account",
+        "zh-Hans-CN": "使用已输入的演示账号进入平台首页",
+        "ja-JP": "入力したデモアカウントでプラットフォームホームへ移動"
+      }
+    },
+    {
+      "key": "screens.login.actions.loginAccessibility",
+      "values": {
+        "ko-KR": "로그인 정보 확인",
+        "en-US": "Check sign-in information",
+        "zh-Hans-CN": "检查登录信息",
+        "ja-JP": "ログイン情報を確認"
+      }
+    },
+    {
+      "key": "screens.login.actions.demoAccessibility",
+      "values": {
+        "ko-KR": "법인코드 {companyCode}, 아이디 {userId}, 비밀번호 {password} demo 계정으로 접속",
+        "en-US": "Sign in with demo account company code {companyCode}, user ID {userId}, and password {password}",
+        "zh-Hans-CN": "使用公司代码 {companyCode}、用户 ID {userId}、密码 {password} 的演示账号登录",
+        "ja-JP": "法人コード {companyCode}、ID {userId}、パスワード {password} のデモアカウントでログイン"
+      }
+    },
+    {
+      "key": "screens.login.form.companyCodeHint",
+      "values": {
+        "ko-KR": "Demo 계정은 법인코드 {companyCode}을 사용합니다.",
+        "en-US": "The demo account uses company code {companyCode}.",
+        "zh-Hans-CN": "演示账号使用公司代码 {companyCode}。",
+        "ja-JP": "デモアカウントは法人コード {companyCode} を使用します。"
+      }
+    },
+    {
+      "key": "screens.login.form.userIdHint",
+      "values": {
+        "ko-KR": "Demo 계정은 아이디 {userId}을 사용합니다.",
+        "en-US": "The demo account uses user ID {userId}.",
+        "zh-Hans-CN": "演示账号使用用户 ID {userId}。",
+        "ja-JP": "デモアカウントはID {userId} を使用します。"
+      }
+    },
+    {
+      "key": "screens.login.form.passwordHint",
+      "values": {
+        "ko-KR": "Demo 계정은 비밀번호 {password}을 사용합니다.",
+        "en-US": "The demo account uses password {password}.",
+        "zh-Hans-CN": "演示账号使用密码 {password}。",
+        "ja-JP": "デモアカウントはパスワード {password} を使用します。"
+      }
+    },
+    {
+      "key": "shell.status.aria",
+      "values": {
+        "ko-KR": "플랫폼 상태",
+        "en-US": "Platform status",
+        "zh-Hans-CN": "平台状态",
+        "ja-JP": "プラットフォーム状態"
+      }
+    },
+    {
+      "key": "shell.status.previewTitle",
+      "values": {
+        "ko-KR": "프론트엔드 미리보기",
+        "en-US": "Frontend preview",
+        "zh-Hans-CN": "前端预览",
+        "ja-JP": "フロントエンドプレビュー"
+      }
+    },
+    {
+      "key": "shell.status.demoCompany",
+      "values": {
+        "ko-KR": "Demo 법인 0000",
+        "en-US": "Demo company 0000",
+        "zh-Hans-CN": "演示法人 0000",
+        "ja-JP": "デモ法人 0000"
+      }
+    },
+    {
+      "key": "shell.status.uiOnly",
+      "values": {
+        "ko-KR": "UI 전용",
+        "en-US": "UI only",
+        "zh-Hans-CN": "仅 UI",
+        "ja-JP": "UI のみ"
+      }
+    },
+    {
+      "key": "shell.status.logicUnchanged",
+      "values": {
+        "ko-KR": "급여 계산/저장 로직 미변경",
+        "en-US": "Payroll calculation/storage logic unchanged",
+        "zh-Hans-CN": "薪资计算/保存逻辑未更改",
+        "ja-JP": "給与計算/保存ロジックは未変更"
+      }
+    },
+    {
+      "key": "shell.status.strictTs",
+      "values": {
+        "ko-KR": "엄격한 TypeScript",
+        "en-US": "Strict TypeScript",
+        "zh-Hans-CN": "严格 TypeScript",
+        "ja-JP": "厳格な TypeScript"
+      }
+    },
+    {
+      "key": "shell.status.reactNativeWebReady",
+      "values": {
+        "ko-KR": "React Native/Web 준비",
+        "en-US": "React Native/Web ready",
+        "zh-Hans-CN": "React Native/Web 就绪",
+        "ja-JP": "React Native/Web 対応準備済み"
+      }
+    },
+    {
+      "key": "preview.skipLink",
+      "values": {
+        "ko-KR": "본문으로 건너뛰기",
+        "en-US": "Skip to main content",
+        "zh-Hans-CN": "跳到主要内容",
+        "ja-JP": "本文へスキップ"
+      }
+    },
+    {
+      "key": "shell.themePanel.current",
+      "values": {
+        "ko-KR": "현재 적용: {theme}",
+        "en-US": "Current: {theme}",
+        "zh-Hans-CN": "当前应用：{theme}",
+        "ja-JP": "現在適用中: {theme}"
+      }
+    },
+    {
+      "key": "shell.themePanel.optionLabel",
+      "values": {
+        "ko-KR": "{label} 메뉴 색상 옵션. {description}",
+        "en-US": "{label} menu color option. {description}",
+        "zh-Hans-CN": "{label} 菜单颜色选项。{description}",
+        "ja-JP": "{label} メニュー色オプション。{description}"
+      }
+    },
+    {
+      "key": "screens.module.search.clear",
+      "values": {
+        "ko-KR": "검색 초기화",
+        "en-US": "Clear search",
+        "zh-Hans-CN": "清除搜索",
+        "ja-JP": "検索をクリア"
+      }
+    },
+    {
+      "key": "screens.module.search.accessibilityLabel",
+      "values": {
+        "ko-KR": "업무 목록 검색",
+        "en-US": "Search work list",
+        "zh-Hans-CN": "搜索工作列表",
+        "ja-JP": "業務一覧を検索"
+      }
+    },
+    {
+      "key": "screens.module.search.clearAccessibilityLabel",
+      "values": {
+        "ko-KR": "업무 목록 검색어 초기화",
+        "en-US": "Clear work list search text",
+        "zh-Hans-CN": "清除工作列表搜索词",
+        "ja-JP": "業務一覧の検索語をクリア"
+      }
+    },
+    {
+      "key": "preview.toast.searchClear",
+      "values": {
+        "ko-KR": "검색어를 초기화했습니다.",
+        "en-US": "Cleared the search text.",
+        "zh-Hans-CN": "已清除搜索词。",
+        "ja-JP": "検索語をクリアしました。"
+      }
+    },
+    {
+      "key": "screens.todo.progress.title",
+      "values": {
+        "ko-KR": "오늘 업무 {done}/{total} 완료",
+        "en-US": "Today tasks {done}/{total} complete",
+        "zh-Hans-CN": "今日任务已完成 {done}/{total}",
+        "ja-JP": "本日の業務 {done}/{total} 完了"
+      }
+    },
+    {
+      "key": "screens.todo.progress.pending",
+      "values": {
+        "ko-KR": "남은 업무 {count}건",
+        "en-US": "{count} tasks remaining",
+        "zh-Hans-CN": "剩余 {count} 项任务",
+        "ja-JP": "残り {count} 件"
+      }
+    },
+    {
       "key": "screens.admin.review.title",
       "values": {
         "ko-KR": "관리자 검토 요약",
@@ -6583,69 +6781,6 @@
         "en-US": "Continue to Settings to review company basics and subaccount operating standards.",
         "zh-Hans-CN": "前往设置画面，继续确认公司基本信息和子账户运营标准。",
         "ja-JP": "設定画面で法人基本情報とサブアカウント運用基準を続けて確認します。"
-      }
-    },
-    {
-      "key": "shell.status.aria",
-      "values": {
-        "ko-KR": "플랫폼 상태",
-        "en-US": "Platform status",
-        "zh-Hans-CN": "平台状态",
-        "ja-JP": "プラットフォーム状態"
-      }
-    },
-    {
-      "key": "shell.status.previewTitle",
-      "values": {
-        "ko-KR": "프론트엔드 미리보기",
-        "en-US": "Frontend preview",
-        "zh-Hans-CN": "前端预览",
-        "ja-JP": "フロントエンドプレビュー"
-      }
-    },
-    {
-      "key": "shell.status.demoCompany",
-      "values": {
-        "ko-KR": "Demo 법인 0000",
-        "en-US": "Demo company 0000",
-        "zh-Hans-CN": "演示法人 0000",
-        "ja-JP": "デモ法人 0000"
-      }
-    },
-    {
-      "key": "shell.status.uiOnly",
-      "values": {
-        "ko-KR": "UI 전용",
-        "en-US": "UI only",
-        "zh-Hans-CN": "仅 UI",
-        "ja-JP": "UI のみ"
-      }
-    },
-    {
-      "key": "shell.status.logicUnchanged",
-      "values": {
-        "ko-KR": "급여 계산/저장 로직 미변경",
-        "en-US": "Payroll calculation/storage logic unchanged",
-        "zh-Hans-CN": "薪资计算/保存逻辑未更改",
-        "ja-JP": "給与計算/保存ロジックは未変更"
-      }
-    },
-    {
-      "key": "shell.status.strictTs",
-      "values": {
-        "ko-KR": "엄격한 TypeScript",
-        "en-US": "Strict TypeScript",
-        "zh-Hans-CN": "严格 TypeScript",
-        "ja-JP": "厳格な TypeScript"
-      }
-    },
-    {
-      "key": "shell.status.reactNativeWebReady",
-      "values": {
-        "ko-KR": "React Native/Web 준비",
-        "en-US": "React Native/Web ready",
-        "zh-Hans-CN": "React Native/Web 就绪",
-        "ja-JP": "React Native/Web 対応準備済み"
       }
     }
   ],
