@@ -21,6 +21,7 @@ from core.workflow.constants import (
     KPI_REFLECTION_BLOCKED,
     KPI_REFLECTION_NOT_APPLICABLE,
     KPI_REFLECTION_READY,
+    KPI_REFLECTION_REFLECTED,
     TASK_COMPLETED,
     TASK_PENDING,
     TRIP_STATUS_APPROVED,
@@ -536,7 +537,7 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         self.assertEqual(unchanged_trip["status"], TRIP_STATUS_DIARY_DUE)
         self.assertEqual(unchanged_trip["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
 
-    def test_approved_daily_work_log_completes_trip_and_unblocks_kpi_after_execution(self) -> None:
+    def test_approved_daily_work_log_links_without_completing_trip(self) -> None:
         sess = self._session()
         doc = self._create_business_trip_document(session=sess)
         trip_id = doc["content_json"]["trip_id"]
@@ -570,14 +571,98 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
             session=sess,
         )
         approved_diary = wf_svc.approve_document(self._tenant, diary["id"], session=sess)
-        completed_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+        diary_due_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
 
         self.assertEqual(approved_diary["status"], DOC_STATUS_APPROVED)
+        self.assertEqual(diary_due_trip["status"], TRIP_STATUS_DIARY_DUE)
+        self.assertEqual(diary_due_trip["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
+        self.assertEqual(diary_due_trip["diary_document_id"], diary["id"])
+        self.assertEqual(diary_due_trip["report_document_id"], "")
+        self.assertFalse(diary_due_trip["completed_at"])
+        with self.assertRaises(ValueError):
+            wf_svc.transition_business_trip_lifecycle(self._tenant, trip_id, TRIP_STATUS_COMPLETED, session=sess)
+        with self.assertRaises(ValueError):
+            wf_svc.reflect_business_trip_kpi(self._tenant, trip_id, session=sess)
+
+    def test_trip_report_template_metadata_survives_edited_title(self) -> None:
+        sess = self._session()
+        doc = self._create_business_trip_document(session=sess)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=sess)
+        task = wf_svc.list_execution_tasks(self._tenant, session=sess)[0]
+        wf_svc.complete_execution_task(self._tenant, task["id"], session=sess)
+
+        report = wf_svc.create_document(
+            self._tenant,
+            document_type=DOC_TYPE_GENERAL,
+            title="현장 방문 결과 공유",
+            summary="고객 후속 조치",
+            payload={
+                "trip_id": trip_id,
+                "gw_template_id": "coss_출장보고서",
+                "gw_form_name": "출장보고서",
+                "content": "출장 결과",
+            },
+            session=sess,
+        )
+        wf_svc.submit_document(
+            self._tenant,
+            report["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+        approved_report = wf_svc.approve_document(self._tenant, report["id"], session=sess)
+        completed_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+
+        self.assertEqual(approved_report["status"], DOC_STATUS_APPROVED)
         self.assertEqual(completed_trip["status"], TRIP_STATUS_COMPLETED)
         self.assertEqual(completed_trip["kpi_reflection_status"], KPI_REFLECTION_READY)
-        self.assertEqual(completed_trip["diary_document_id"], diary["id"])
-        self.assertEqual(completed_trip["report_document_id"], "")
-        self.assertTrue(completed_trip["completed_at"])
+        self.assertEqual(completed_trip["report_document_id"], report["id"])
+
+    def test_draft_report_does_not_replace_approved_completion_evidence(self) -> None:
+        sess = self._session()
+        doc = self._create_business_trip_document(session=sess)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=sess)
+        task = wf_svc.list_execution_tasks(self._tenant, session=sess)[0]
+        wf_svc.complete_execution_task(self._tenant, task["id"], session=sess)
+        approved_report = self._approve_trip_report(trip_id, doc["id"], session=sess)
+        ready_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+        self.assertEqual(ready_trip["report_document_id"], approved_report["id"])
+        self.assertEqual(ready_trip["kpi_reflection_status"], KPI_REFLECTION_READY)
+
+        draft_report = wf_svc.create_document(
+            self._tenant,
+            document_type=DOC_TYPE_GENERAL,
+            title="출장보고서 수정본",
+            summary="아직 승인되지 않은 수정본",
+            payload={
+                "trip_id": trip_id,
+                "business_trip_artifact": "trip_report",
+                "report_body": "초안",
+            },
+            session=sess,
+        )
+        after_draft = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+        reflected = wf_svc.reflect_business_trip_kpi(self._tenant, trip_id, session=sess)
+
+        self.assertNotEqual(draft_report["id"], approved_report["id"])
+        self.assertEqual(after_draft["report_document_id"], approved_report["id"])
+        self.assertEqual(after_draft["status"], TRIP_STATUS_COMPLETED)
+        self.assertEqual(after_draft["kpi_reflection_status"], KPI_REFLECTION_READY)
+        self.assertEqual(reflected["kpi_reflection_status"], KPI_REFLECTION_REFLECTED)
 
     def test_reject_and_cancel_paths_update_lifecycle_without_duplicate_rows(self) -> None:
         sess = self._session()

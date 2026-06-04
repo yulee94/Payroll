@@ -11,7 +11,7 @@ Bitween Payroll은 급여·HR·전자결재·업무일지·출장 lifecycle·KPI
 - 근로자 명부, 연차 사용대장, 월별 보고, 급여차이 보고 관리
 - 법인/테넌트 기반 데이터 분리와 사용자 권한 관리
 - 업무/전자결재 허브: 결재함, 기안, 승인/반려, 실행업무, 보고, 월마감
-- 출장 lifecycle: 출장계획 → 출장승인/실행 → 업무일지/출장보고서 → KPI 실적반영 → 관리자 ongoing/completed/overdue view
+- 출장 lifecycle: 출장계획 → 출장승인/실행 → 업무일지 기록 → 승인된 출장보고서 → KPI 실적반영 → 관리자 ongoing/completed/overdue view
 - HR, 채용, KPI, 정비, 입찰, 회계, Personal AI 업무 보조 기능
 - TypeScript frontend contracts and React Native platform shell for cross-platform UI delivery
 - Rust payroll API contract crate as the first backend migration slice

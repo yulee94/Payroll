@@ -157,26 +157,35 @@ def _link_document_to_trip(doc: dict[str, Any], trip: dict[str, Any]) -> None:
 
 
 def _trip_artifact_kind_from_document(doc: dict[str, Any]) -> str:
-    """Classify non-request documents that are explicitly linked to a trip."""
+    """Classify non-request documents that are explicitly linked to a trip.
+
+    Prefer stable payload/template metadata over mutable document titles or
+    summaries. Compose surfaces persist GW template IDs/names in the payload,
+    and API/import callers can pass an explicit business_trip_artifact or
+    artifact_type value.
+    """
     if _is_business_trip_document(doc):
         return ""
     payload = doc.get("content_json") if isinstance(doc.get("content_json"), dict) else {}
     if not str(payload.get("trip_id") or "").strip():
         return ""
-    raw = " ".join(
-        str(v or "")
-        for v in (
-            payload.get("business_trip_artifact"),
-            payload.get("artifact_type"),
-            payload.get("template_name"),
-            payload.get("template_id"),
-            doc.get("title"),
-            doc.get("summary"),
-        )
-    ).lower()
-    if "출장보고" in raw or "trip_report" in raw or str(payload.get("source_document_id") or "").strip():
+
+    explicit = " ".join(
+        str(payload.get(k) or "").strip().lower()
+        for k in ("business_trip_artifact", "artifact_type", "document_artifact_kind")
+    )
+    if "trip_report" in explicit or "business_trip_report" in explicit or "출장보고" in explicit:
         return "report"
-    if "업무일지" in raw or "diary" in raw or "daily" in raw:
+    if "daily_diary" in explicit or "work_diary" in explicit or "업무일지" in explicit or "일일업무" in explicit:
+        return "diary"
+
+    template = " ".join(
+        str(payload.get(k) or "").strip().lower()
+        for k in ("gw_template_id", "gw_form_id", "gw_form_name", "template_id", "template_name")
+    )
+    if "trip_report" in template or "business_trip_report" in template or "출장보고" in template:
+        return "report"
+    if "daily_diary" in template or "work_diary" in template or "업무일지" in template or "일일업무" in template:
         return "diary"
     return ""
 
@@ -249,31 +258,32 @@ def _assert_business_trip_execution_task_exists(db: dict[str, Any], trip: dict[s
         raise ValueError("출장 실행업무 생성 후 지연 상태 전이가 가능합니다.")
 
 
-def _business_trip_completion_artifact_document_is_approved(db: dict[str, Any], trip: dict[str, Any]) -> bool:
+def _business_trip_completion_report_document_is_approved(db: dict[str, Any], trip: dict[str, Any]) -> bool:
+    """Return true only when an approved 출장보고서 is linked to this trip.
+
+    Daily work logs are useful evidence, but they are not the terminal report
+    artifact that unlocks completion or KPI reflection.  Scan approved report
+    artifacts by trip_id instead of trusting the mutable report_document_id
+    pointer so draft/submitted replacement reports cannot invalidate already
+    approved completion evidence.
+    """
     trip_id = str(trip.get("trip_id") or trip.get("id") or "").strip()
-    artifact_document_ids = [
-        str(trip.get("report_document_id") or "").strip(),
-        str(trip.get("diary_document_id") or "").strip(),
-    ]
     if not trip_id:
         return False
-    for artifact_document_id in artifact_document_ids:
-        if not artifact_document_id:
-            continue
-        doc = next((row for row in db.get("documents") or [] if row.get("id") == artifact_document_id), None)
-        if not doc or doc.get("status") != DOC_STATUS_APPROVED:
+    for doc in db.get("documents") or []:
+        if not isinstance(doc, dict) or doc.get("status") != DOC_STATUS_APPROVED:
             continue
         payload = doc.get("content_json") if isinstance(doc.get("content_json"), dict) else {}
         if str(payload.get("trip_id") or "").strip() != trip_id:
             continue
-        if _trip_artifact_kind_from_document(doc) in {"report", "diary"}:
+        if _trip_artifact_kind_from_document(doc) == "report":
             return True
     return False
 
 def _assert_business_trip_completion_prerequisites(db: dict[str, Any], trip: dict[str, Any]) -> None:
     _assert_business_trip_execution_task_completed(db, trip)
-    if not _business_trip_completion_artifact_document_is_approved(db, trip):
-        raise ValueError("승인된 업무일지 또는 출장보고서 연결 후 완료 또는 실적 반영이 가능합니다.")
+    if not _business_trip_completion_report_document_is_approved(db, trip):
+        raise ValueError("승인된 출장보고서 연결 후 완료 또는 실적 반영이 가능합니다.")
 
 
 def _assert_business_trip_terminal_fields_allowed(db: dict[str, Any], trip: dict[str, Any]) -> None:
@@ -344,7 +354,7 @@ def _sync_business_trip_artifact_for_document(
     complete_report: bool = False,
     session: UserSession,
 ) -> dict[str, Any] | None:
-    """Link diary/report documents to an existing lifecycle and gate completion."""
+    """Link diary/report documents; only approved reports can gate completion."""
     target = _business_trip_artifact_target(db, tenant_id, doc)
     if not target:
         return None
@@ -355,17 +365,19 @@ def _sync_business_trip_artifact_for_document(
     from core.workflow.business_trip import transition_trip_status
 
     before = deepcopy(trip)
-    if artifact_kind == "diary":
+    is_approved_artifact = doc.get("status") == DOC_STATUS_APPROVED
+    if artifact_kind == "diary" and is_approved_artifact:
         trip["diary_document_id"] = str(doc.get("id") or "")
-    elif artifact_kind == "report":
+    elif artifact_kind == "report" and is_approved_artifact:
         trip["report_document_id"] = str(doc.get("id") or "")
-    if artifact_kind in {"diary", "report"} and complete_report:
+    if artifact_kind == "report" and complete_report:
         _assert_business_trip_execution_task_completed(db, trip)
         if trip.get("status") in (TRIP_STATUS_DIARY_DUE, TRIP_STATUS_OVERDUE):
             trip.update(transition_trip_status(trip, TRIP_STATUS_COMPLETED))
         elif trip.get("status") != TRIP_STATUS_COMPLETED:
-            raise ValueError("출장 실행업무 완료 후 업무일지/출장보고서 승인이 가능합니다.")
-    trip["updated_at"] = _now_iso()
+            raise ValueError("출장 실행업무 완료 후 출장보고서 승인이 가능합니다.")
+    if trip != before:
+        trip["updated_at"] = _now_iso()
     if trip == before:
         return trip
     append_audit(
@@ -1584,8 +1596,8 @@ def transition_business_trip_lifecycle(
                 _assert_business_trip_execution_task_completed(db, row)
             if target_status == TRIP_STATUS_OVERDUE:
                 _assert_business_trip_execution_task_exists(db, row)
-            if target_status == TRIP_STATUS_COMPLETED and not _business_trip_completion_artifact_document_is_approved(db, row):
-                raise ValueError("승인된 업무일지 또는 출장보고서 연결 후 완료 전이가 가능합니다.")
+            if target_status == TRIP_STATUS_COMPLETED and not _business_trip_completion_report_document_is_approved(db, row):
+                raise ValueError("승인된 출장보고서 연결 후 완료 전이가 가능합니다.")
             before = deepcopy(row)
             updated = transition_trip_status(row, target_status)
             if updated == before:
@@ -1735,7 +1747,7 @@ def list_business_trip_kpi_reflections(
         kpi_status = row.get("kpi_reflection_status") or KPI_REFLECTION_BLOCKED
         blocking_reason = ""
         if kpi_status == KPI_REFLECTION_BLOCKED:
-            blocking_reason = "출장 실행 완료 후 실적 반영 가능"
+            blocking_reason = "출장 실행 완료와 승인된 출장보고서 후 실적 반영 가능"
         elif kpi_status == KPI_REFLECTION_NOT_APPLICABLE:
             blocking_reason = "취소 또는 반려된 출장은 실적 반영 대상이 아님"
         out.append(
