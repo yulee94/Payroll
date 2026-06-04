@@ -554,7 +554,10 @@ function renderModule(id) {
     <section class="card">
       ${sectionHead("", "업무 목록", "필터로 상태를 좁히고 필요한 다음 작업을 확인합니다.", button(secondaryLabel(id), secondaryTarget(id), "secondary"))}
       <div class="list-toolbar">
-        <div class="filters">${data.filters.map((filter) => `<button class="filter-chip ${state.filter === filter ? "active" : ""}" data-filter="${filter}">${filter}</button>`).join("")}</div>
+        <div class="filters">${data.filters.map((filter) => {
+          const selected = state.filter === filter;
+          return `<button aria-label="${filter} 필터${selected ? ", 선택됨" : ""}" aria-pressed="${selected ? "true" : "false"}" class="filter-chip ${selected ? "active" : ""}" data-filter="${filter}">${selected ? '<span class="filter-chip-mark" aria-hidden="true"></span>' : ""}<span>${filter}</span></button>`;
+        }).join("")}</div>
         <label class="search-box" for="work-search"><span>검색</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="업무, 상태, 담당자 검색" /></label>
       </div>
       <div class="list-summary"><strong>${rows.length}건</strong><span class="helper">${state.filter} 필터${state.search ? ` · "${escapeText(state.search)}" 검색` : ""}</span></div>

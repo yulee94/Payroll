@@ -922,12 +922,15 @@ button {
 }
 
 .filter-chip {
+  align-items: center;
   background: var(--input);
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--muted);
+  display: inline-flex;
   font-size: 13px;
   font-weight: 800;
+  gap: 4px;
   padding: 8px 12px;
 }
 
@@ -935,6 +938,14 @@ button {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--card);
+}
+
+.filter-chip-mark {
+  background: var(--card);
+  border-radius: 999px;
+  display: inline-block;
+  height: 6px;
+  width: 6px;
 }
 
 .list-toolbar {

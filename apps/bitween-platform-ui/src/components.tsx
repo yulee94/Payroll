@@ -137,11 +137,15 @@ export function FilterBar({ active, filters, onSelect }: FilterBarProps) {
         const selected = filter === selectedFilter;
         return (
           <Pressable
+            accessibilityHint="업무 목록을 선택한 조건으로 좁힙니다."
+            accessibilityLabel={`${filter} 필터${selected ? ", 선택됨" : ""}`}
             accessibilityRole="button"
+            accessibilityState={{ selected }}
             key={filter}
             onPress={() => onSelect?.(filter)}
             style={({ pressed }) => [styles.filterChip, selected && styles.filterChipActive, pressed && styles.buttonPressed]}
           >
+            {selected ? <View style={styles.filterChipMark} /> : null}
             <Text style={[styles.filterText, selected && styles.filterTextActive]}>{filter}</Text>
           </Pressable>
         );
@@ -454,16 +458,25 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs
   },
   filterChip: {
+    alignItems: "center",
     backgroundColor: colors.input,
     borderColor: colors.border,
     borderRadius: radius.md,
     borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm
   },
   filterChipActive: {
     backgroundColor: colors.accent,
     borderColor: colors.accent
+  },
+  filterChipMark: {
+    backgroundColor: colors.card,
+    borderRadius: 999,
+    height: 6,
+    width: 6
   },
   filterText: {
     color: colors.muted,
