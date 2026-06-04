@@ -309,6 +309,7 @@ export const calendarEvents: readonly CalendarEvent[] = [
   {
     dateLabel: "2026.06.04",
     id: "calendar-payroll",
+    target: "payroll",
     timeLabel: "10:00",
     title: "급여 산출 기준 확인",
     tone: "attention"
@@ -316,6 +317,7 @@ export const calendarEvents: readonly CalendarEvent[] = [
   {
     dateLabel: "2026.06.04",
     id: "calendar-approval",
+    target: "workflow",
     timeLabel: "14:00",
     title: "전자결재 대기 문서 검토",
     tone: "neutral"
@@ -323,6 +325,7 @@ export const calendarEvents: readonly CalendarEvent[] = [
   {
     dateLabel: "2026.06.05",
     id: "calendar-recruit",
+    target: "recruit",
     timeLabel: "09:30",
     title: "채용 후보자 부서 배치 회의",
     tone: "ready"
@@ -330,6 +333,7 @@ export const calendarEvents: readonly CalendarEvent[] = [
   {
     dateLabel: "2026.06.05",
     id: "calendar-travel",
+    target: "travel",
     timeLabel: "16:00",
     title: "부산 출장 업무일지 실적 반영",
     tone: "attention"
@@ -341,6 +345,7 @@ export const todayTodos: readonly TodoItem[] = [
     completed: false,
     id: "todo-payroll",
     owner: "급여 담당",
+    target: "payroll",
     timeLabel: "오늘",
     title: "6월 급여 산출 준비",
     tone: "attention"
@@ -349,6 +354,7 @@ export const todayTodos: readonly TodoItem[] = [
     completed: false,
     id: "todo-approval",
     owner: "승인권자",
+    target: "workflow",
     timeLabel: "오늘",
     title: "전자결재 대기 문서",
     tone: "neutral"
@@ -357,6 +363,7 @@ export const todayTodos: readonly TodoItem[] = [
     completed: false,
     id: "todo-travel",
     owner: "영업팀",
+    target: "travel",
     timeLabel: "오늘",
     title: "출장 업무일지 작성 및 실적 반영",
     tone: "attention"
@@ -365,6 +372,7 @@ export const todayTodos: readonly TodoItem[] = [
     completed: true,
     id: "todo-archive",
     owner: "운영팀",
+    target: "archive",
     timeLabel: "완료",
     title: "자료함 최근 보고서 확인",
     tone: "ready"

@@ -89,17 +89,17 @@ const workQueue = [
 ];
 
 const calendarEvents = [
-  ["2026.06.04", "10:00", "급여 산출 기준 확인", "attention"],
-  ["2026.06.04", "14:00", "전자결재 대기 문서 검토", "neutral"],
-  ["2026.06.05", "09:30", "채용 후보자 부서 배치 회의", "ready"],
-  ["2026.06.05", "16:00", "부산 출장 업무일지 실적 반영", "attention"]
+  ["2026.06.04", "10:00", "급여 산출 기준 확인", "attention", "payroll"],
+  ["2026.06.04", "14:00", "전자결재 대기 문서 검토", "neutral", "workflow"],
+  ["2026.06.05", "09:30", "채용 후보자 부서 배치 회의", "ready", "recruit"],
+  ["2026.06.05", "16:00", "부산 출장 업무일지 실적 반영", "attention", "travel"]
 ];
 
 const todayTodos = [
-  ["6월 급여 산출 준비", "급여 담당", "오늘", "attention", false],
-  ["전자결재 대기 문서", "승인권자", "오늘", "neutral", false],
-  ["출장 업무일지 작성 및 실적 반영", "영업팀", "오늘", "attention", false],
-  ["자료함 최근 보고서 확인", "운영팀", "완료", "ready", true]
+  ["6월 급여 산출 준비", "급여 담당", "오늘", "attention", false, "payroll"],
+  ["전자결재 대기 문서", "승인권자", "오늘", "neutral", false, "workflow"],
+  ["출장 업무일지 작성 및 실적 반영", "영업팀", "오늘", "attention", false, "travel"],
+  ["자료함 최근 보고서 확인", "운영팀", "완료", "ready", true, "archive"]
 ];
 
 const attendanceLogs = [
@@ -384,14 +384,14 @@ function renderHome() {
       <div class="card planner-card">
         ${sectionHead("", "오늘 일정", "2026년 6월 4일 기준 주요 일정을 확인합니다.")}
         <div class="calendar-day"><span>2026.06</span><strong>04</strong><em>목요일</em></div>
-        <div class="planner-list">${calendarEvents.map(([date, time, title, tone]) => `
-          <div class="planner-item">${badge(time, tone)}<div><strong>${title}</strong><span class="helper">${date}</span></div></div>
+        <div class="planner-list">${calendarEvents.map(([date, time, title, tone, target]) => `
+          <button class="planner-item planner-button" data-target="${target}">${badge(time, tone)}<div><strong>${title}</strong><span class="helper">${date} · 관련 화면 열기</span></div></button>
         `).join("")}</div>
       </div>
       <div class="card planner-card">
         ${sectionHead("", "To-do list", "오늘 업무는 계속 표시하고 실행한 항목은 흐리게 표시합니다.")}
-        <div class="planner-list">${todayTodos.map(([title, owner, time, tone, done]) => `
-          <div class="planner-item todo-item ${done ? "done" : ""}">${badge(time, tone)}<div><strong>${title}</strong><span class="helper">${owner}</span></div></div>
+        <div class="planner-list">${todayTodos.map(([title, owner, time, tone, done, target]) => `
+          <button class="planner-item planner-button todo-item ${done ? "done" : ""}" data-target="${target}">${badge(time, tone)}<div><strong>${title}</strong><span class="helper">${owner} · 관련 화면 열기</span></div></button>
         `).join("")}</div>
       </div>
     </section>

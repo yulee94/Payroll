@@ -234,7 +234,7 @@ export function LauncherScreen({ onSelect }: ScreenProps) {
         <MetricGrid items={platformMetrics} />
       </Card>
 
-      <CalendarTodoPanel events={calendarEvents} todos={todayTodos} />
+      <CalendarTodoPanel events={calendarEvents} todos={todayTodos} onSelect={onSelect} />
 
       <Card>
         <SectionHeader title="오늘의 업무" description="처리 우선순위가 높은 업무를 카드로 정리합니다." />
@@ -372,7 +372,15 @@ function PayrollIntegrationPanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
   );
 }
 
-function CalendarTodoPanel({ events, todos }: { readonly events: readonly CalendarEvent[]; readonly todos: readonly TodoItem[] }) {
+function CalendarTodoPanel({
+  events,
+  onSelect,
+  todos
+}: {
+  readonly events: readonly CalendarEvent[];
+  readonly onSelect: (id: PlatformId) => void;
+  readonly todos: readonly TodoItem[];
+}) {
   return (
     <View style={styles.homePlannerGrid}>
       <Card style={styles.homePlannerCard}>
@@ -384,13 +392,18 @@ function CalendarTodoPanel({ events, todos }: { readonly events: readonly Calend
         </View>
         <View style={styles.plannerList}>
           {events.map((event) => (
-            <View key={event.id} style={styles.plannerItem}>
+            <Pressable
+              accessibilityRole="button"
+              key={event.id}
+              onPress={() => onSelect(event.target)}
+              style={({ pressed }) => [styles.plannerItem, pressed && styles.buttonPressed]}
+            >
               <Badge tone={event.tone}>{event.timeLabel}</Badge>
               <View style={styles.plannerCopy}>
                 <Label weight="bold">{event.title}</Label>
-                <Label size="sm" muted>{event.dateLabel}</Label>
+                <Label size="sm" muted>{event.dateLabel} · 관련 화면 열기</Label>
               </View>
-            </View>
+            </Pressable>
           ))}
         </View>
       </Card>
@@ -398,13 +411,18 @@ function CalendarTodoPanel({ events, todos }: { readonly events: readonly Calend
         <SectionHeader title="To-do list" description="오늘 업무는 계속 표시하고, 실행한 항목은 흐리게 표시합니다." />
         <View style={styles.plannerList}>
           {todos.map((todo) => (
-            <View key={todo.id} style={[styles.todoItem, todo.completed && styles.todoItemDone]}>
+            <Pressable
+              accessibilityRole="button"
+              key={todo.id}
+              onPress={() => onSelect(todo.target)}
+              style={({ pressed }) => [styles.todoItem, todo.completed && styles.todoItemDone, pressed && styles.buttonPressed]}
+            >
               <Badge tone={todo.tone}>{todo.timeLabel}</Badge>
               <View style={styles.plannerCopy}>
                 <Label weight="bold">{todo.title}</Label>
-                <Label size="sm" muted>{todo.owner}</Label>
+                <Label size="sm" muted>{todo.owner} · 관련 화면 열기</Label>
               </View>
-            </View>
+            </Pressable>
           ))}
         </View>
       </Card>
