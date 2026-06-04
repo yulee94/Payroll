@@ -13,6 +13,8 @@ export default function App() {
   const [authenticated, setAuthenticated] = useState(false);
   const active = useMemo(() => getNavigationItem(activeId), [activeId]);
   const navigationItems = previewPlatformViewModel.launcher.navigation;
+  const session = previewPlatformViewModel.session;
+  const sessionLabel = `${session.tenantName} · ${session.displayName} · ${session.companyCodeLabel}`;
 
   const select = (id: PlatformId) => {
     if (!authenticated && id !== "home") {
@@ -38,7 +40,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.root}>
       <StatusBar style="dark" />
-      <AppShell active={active} items={navigationItems} onSelect={select}>
+      <AppShell active={active} items={navigationItems} onSelect={select} sessionLabel={sessionLabel}>
         {activeId === "home" ? (
           <LauncherScreen active={active} onSelect={select} />
         ) : activeId === "payroll" ? (

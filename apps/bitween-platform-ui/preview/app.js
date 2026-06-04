@@ -11,6 +11,8 @@ const demoAccount = {
   userId: "admin"
 };
 
+const sessionLabel = "Bitween Demo · admin · 0000";
+
 const navItems = [
   ["home", "플랫폼 홈", "Launcher", "오늘의 업무, 빠른 실행, 플랫폼 상태를 한 화면에서 확인합니다.", "#64748B"],
   ["payroll", "급여", "Payroll", "급여 자동화 준비 상태, 산출 진입, 월별 보고와 설정을 관리합니다.", "#1F3864"],
@@ -210,7 +212,7 @@ function renderShell() {
             <h1>${active.label}</h1>
             <span class="muted">${active.description}</span>
           </div>
-          ${badge("법인 운영 콘솔", "neutral")}
+          ${badge(sessionLabel, "neutral")}
         </header>
         <div class="content">${renderScreen(active.id)}</div>
       </div>

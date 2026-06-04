@@ -53,10 +53,10 @@ export type PlatformViewModelAdapter = {
 };
 
 export const previewSession: SessionViewModel = {
-  companyCodeLabel: "BTW-2026",
-  displayName: "급여 담당자",
-  roleLabel: "운영 관리자",
-  tenantName: "Bitween 법인"
+  companyCodeLabel: "0000",
+  displayName: "admin",
+  roleLabel: "Demo 관리자",
+  tenantName: "Bitween Demo"
 };
 
 export const previewPlatformViewModel: PlatformViewModel = {
