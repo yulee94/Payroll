@@ -3,6 +3,7 @@ PAYROLL_API_SRCS = [
     "src/access.rs",
     "src/error.rs",
     "src/policy.rs",
+    "src/policy_resolution.rs",
     "src/request.rs",
     "src/response.rs",
     "src/run.rs",

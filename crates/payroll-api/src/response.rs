@@ -1,5 +1,6 @@
 use crate::error::PayrollApiError;
 use crate::policy::OperationPolicySnapshot;
+use crate::policy_resolution::{resolve_operation_policy, PayrollPolicySettings};
 use crate::request::{parse_payroll_api_request, request_id_from_payload, PayrollRunRequest};
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -125,6 +126,25 @@ pub fn validate_payroll_api_payload(
             &request,
             policy_snapshot.into().unwrap_or_default(),
         )),
+        Err(error) => {
+            PayrollApiResponse::Error(PayrollApiErrorResponse::from_error(error, request_id))
+        }
+    }
+}
+
+pub fn validate_payroll_api_payload_with_policy_settings(
+    payload: Value,
+    settings: &PayrollPolicySettings,
+) -> PayrollApiResponse {
+    let request_id = request_id_from_payload(&payload);
+    match parse_payroll_api_request(payload) {
+        Ok(request) => {
+            let resolved = resolve_operation_policy(&request.scope.workplace, settings);
+            PayrollApiResponse::Validated(PayrollValidationResponse::from_request(
+                &request,
+                resolved.snapshot(),
+            ))
+        }
         Err(error) => {
             PayrollApiResponse::Error(PayrollApiErrorResponse::from_error(error, request_id))
         }

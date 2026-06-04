@@ -15,11 +15,12 @@ Rust transition entry point:
 - Rust crate: `crates/payroll-api`
 - Service facade: `bitween_payroll_api::PayrollApiService`
 - Validation function: `bitween_payroll_api::validate_payroll_api_payload(payload, policy_snapshot)`
+- Policy-resolved validation function: `PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)`
 - Run-result response function: `PayrollApiService::run_response(result, request_id)`
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -46,6 +47,44 @@ Readiness endpoint:
 
 - `GET /api/payroll/v1/readiness`
 - Purpose: expose Rust service readiness checks for policy, persistence, compatibility fallback, and future tenant dependencies.
+
+## Operation Policy Resolution
+
+For compatibility, Python may still load and save tenant/site settings, but Rust now owns the deterministic policy-resolution decision once a settings snapshot is supplied. Future HTTP, Tauri, mobile, worker, or Kubernetes wrappers should supply a snapshot to `PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)` instead of resolving `operation_policy_source` in client code.
+
+Resolution precedence:
+
+1. `site` — canonical or aliased workplace has a site `payroll_operation_policy` override.
+2. `tenant` — tenant-level `payroll_operation_policy` exists and no site override matched.
+3. `global` — built-in Rust default when neither site nor tenant policy exists.
+
+Resolver output shape:
+
+```json
+{
+  "workplace": "Site A",
+  "policy": {
+    "input_basis": "hybrid",
+    "payday": "25일",
+    "show_setup_guide": true,
+    "policy_note": "",
+    "attendance": {
+      "enabled": true,
+      "source": "biometric",
+      "rounding_minutes": 1,
+      "late_grace_minutes": 0,
+      "early_leave_grace_minutes": 0,
+      "overtime_rounding_minutes": 1,
+      "missing_clock_policy": "warn",
+      "holiday_source": "invoice"
+    }
+  },
+  "source": "site",
+  "has_site_override": true
+}
+```
+
+The selected policy is normalized in Rust before validation response serialization. Workplaces are trimmed, and alias/canonical matching is supported from the supplied settings snapshot; Rust-owned org configuration and settings persistence remain future slices.
 
 ## Kubernetes production behavior
 
@@ -408,13 +447,14 @@ Frontend code must use `error_code`, not parse `error` text.
 
 ## Implementation Notes
 
-- `input_type=auto` resolves against tenant/site operation policy first.
+- `input_type=auto` resolves against the Rust-selected tenant/site/global operation policy first.
 - `auto` requires at least one of `invoice_path` or `attendance_path`; explicit `mixed` requires both.
 - `validate_only`/`dry_run` validates file references and request shape but does not generate payroll outputs.
 - Frontend code can use `can_run` to enable or disable run actions.
 - `input_type` in validation responses is the resolved input type; `requested_input_type` preserves caller input.
 - Explicit `invoice`, `attendance`, and `mixed` requests preserve caller selection.
-- Responses include `operation_policy` and `operation_policy_source` so operators can audit which policy was applied.
+- Responses include `operation_policy` and `operation_policy_source` (`site`, `tenant`, or `global`) so operators can audit which policy was applied.
+- Rust owns site -> tenant -> global policy-resolution precedence for supplied settings snapshots through `PayrollApiService::validate_run_payload_with_policy_settings`; Python settings persistence remains compatibility-only until the repository/storage migration lands.
 - Rust now owns run-result success and execution-failure envelope shaping through `PayrollApiService::run_response`; Python execution remains a compatibility source until the Rust executor and persistence slices land.
 - Rust normalizes `operation_policy` known fields before serializing responses: invalid input basis falls back to `hybrid`; attendance minute fields are clamped to Python-compatible ranges; missing-clock policy falls back to `warn`.
 - `PayrollApiService` now owns framework-neutral health/readiness DTOs; future Axum/Actix/Tauri/Kubernetes wrappers should call those Rust functions rather than inventing parallel probe payloads.

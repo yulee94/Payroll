@@ -130,6 +130,34 @@ Verification evidence for this checkpoint:
 
 Slice spec: `docs/PAYROLL_RUST_RUN_RESPONSE_SLICE.md`.
 
+## Current implementation checkpoint: Rust payroll policy resolution
+
+Implemented on 2026-06-04 as the next service-boundary behavior slice:
+
+- `crates/payroll-api` now exposes `PayrollPolicySettings`,
+  `OperationPolicySource`, `ResolvedOperationPolicy`, and
+  `resolve_operation_policy`.
+- Rust resolves supplied settings snapshots using site -> tenant -> global
+  precedence and normalizes the selected `OperationPolicy` before response
+  serialization.
+- `PayrollApiService::validate_run_payload_with_policy_settings` validates a
+  payroll payload using Rust policy resolution instead of a Python-resolved
+  policy snapshot.
+- Supplied workplace aliases can canonicalize site-policy lookup until Rust owns
+  the org-config repository.
+- TypeScript and Python contract metadata now name the Rust policy-resolution
+  entrypoint, source values, and settings snapshot fields.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-payroll-api policy_resolution::tests`
+- `cargo test -p bitween-payroll-api service::tests`
+- Python policy/API contract tests for `tests.test_payroll_operation_policy` and
+  `tests.test_payroll_api_contract`
+- `npm run typecheck --prefix frontend`
+
+Slice spec: `docs/PAYROLL_RUST_POLICY_RESOLUTION_SLICE.md`.
+
 ## Required execution disciplines
 
 - **Incremental implementation:** migrate thin vertical slices behind stable contracts; no big-bang rewrite.

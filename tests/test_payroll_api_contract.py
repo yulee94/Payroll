@@ -79,6 +79,21 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertEqual(response["validation"]["operation_policy_source"], "tenant")
         self.assertEqual(response["validation"]["error_code"], "")
 
+    def test_contract_declares_rust_operation_policy_resolution(self) -> None:
+        contract = payroll_api_contract()
+        resolution = contract["policy_resolution"]
+        response = contract["response"]
+
+        self.assertIn("validate_run_payload_with_policy_settings", resolution["rust_entrypoint"])
+        self.assertEqual(resolution["precedence"], ["site", "tenant", "global"])
+        self.assertIn("site_policies", resolution["settings_snapshot_fields"])
+        self.assertEqual(resolution["example_resolution"]["source"], "site")
+        self.assertTrue(resolution["example_resolution"]["has_site_override"])
+        self.assertIn(
+            "validate_run_payload_with_policy_settings",
+            response["policy_resolution_entrypoint"],
+        )
+
     def test_contract_declares_rust_authorization_decisions(self) -> None:
         contract = payroll_api_contract()
         authorization = contract["authorization"]

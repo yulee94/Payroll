@@ -176,6 +176,33 @@ def payroll_api_validation_example() -> dict[str, Any]:
     }
 
 
+def payroll_policy_resolution_example() -> dict[str, Any]:
+    """Return the Rust operation-policy resolution contract shape."""
+    return {
+        "rust_entrypoint": "PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)",
+        "resolver_entrypoint": "resolve_operation_policy(workplace, settings)",
+        "source_values": ["site", "tenant", "global"],
+        "precedence": ["site", "tenant", "global"],
+        "settings_snapshot_fields": [
+            "tenant_policy",
+            "site_policies",
+            "workplace_aliases",
+        ],
+        "example_resolution": {
+            "workplace": "Site A",
+            "policy": payroll_operation_policy_example(),
+            "source": "site",
+            "has_site_override": True,
+        },
+        "invariants": [
+            "site payroll_operation_policy overrides tenant payroll_operation_policy when the canonical or aliased workplace matches",
+            "tenant payroll_operation_policy overrides the built-in global default when no site override matches",
+            "global default is used when neither site nor tenant policy exists",
+            "the selected policy is normalized in Rust before validation response serialization",
+        ],
+    }
+
+
 def payroll_api_authorization_example(*, allowed: bool = True) -> dict[str, Any]:
     """Return the Rust payroll authorization decision shape."""
     if allowed:
@@ -271,6 +298,7 @@ def payroll_api_contract() -> dict[str, Any]:
             "readiness_path": PAYROLL_API_READINESS_ENDPOINT,
         },
         "input_types": list(PAYROLL_API_INPUT_TYPES),
+        "policy_resolution": payroll_policy_resolution_example(),
         "authorization": {
             "rust_entrypoint": "PayrollApiService::authorize_run_request(request, principal, action)",
             "actions": ["validate", "run", "settings"],
@@ -449,6 +477,7 @@ def payroll_api_contract() -> dict[str, Any]:
                 "error",
             ],
             "run_response_entrypoint": "PayrollApiService::run_response(result, request_id)",
+            "policy_resolution_entrypoint": "PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)",
             "never_include": ["exception"],
         },
     }
