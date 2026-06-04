@@ -117,6 +117,12 @@ const travelStageDefs = [
   ["travel-review", "05", "ready"]
 ].map(([id, index, tone]) => ({ id, index, tone }));
 
+const workflowApprovalDefs = [
+  ["pendingApproval", "attention", "admin"],
+  ["returnedDraft", "neutral", "ai"],
+  ["attachments", "ready", "archive"]
+].map(([id, tone, target]) => ({ id, target, tone }));
+
 const adminPermissionDefs = [
   ["role-owner", "ready"],
   ["role-manager", "neutral"],
@@ -650,6 +656,7 @@ function renderModule(id) {
       ${metrics(data.metrics)}
     </section>
     ${id === "attendance" ? attendancePhonePanel() : ""}
+    ${id === "workflow" ? workflowApprovalPanel() : ""}
     ${id === "travel" ? travelWorklogPanel() : ""}
     ${id === "admin" ? adminAccountPanel() : ""}
     ${id === "archive" ? archiveLibraryPanel() : ""}
@@ -711,6 +718,20 @@ function aiWorkspacePanel() {
         <div class="action-row">${button(t("screens.ai.preview.actions.payroll"), "payroll", "secondary")}${button(t("screens.ai.preview.actions.archive"), "archive", "ghost")}</div>
       </div>
     </div>
+  </section>`;
+}
+
+function workflowApprovalPanel() {
+  return `<section class="card">
+    ${sectionHead("", t("screens.workflowApproval.title"), t("screens.workflowApproval.description"), button(t("screens.workflowApproval.action"), "archive", "secondary"))}
+    <div class="workflow-approval-grid">${workflowApprovalDefs.map((item) => `
+      <button class="workflow-approval-card" data-target="${item.target}" style="border-top-color:${toneColor(item.tone)}">
+        <div class="workflow-approval-head"><span class="helper">${t(`screens.workflowApproval.cards.${item.id}.label`)}</span>${badge(t(`screens.workflowApproval.cards.${item.id}.status`), item.tone)}</div>
+        <strong>${t(`screens.workflowApproval.cards.${item.id}.title`)}</strong>
+        <span class="helper">${t(`screens.workflowApproval.cards.${item.id}.detail`)}</span>
+      </button>
+    `).join("")}</div>
+    <div class="notice">${badge(t("screens.workflowApproval.notice.badge"), "neutral")}<span class="helper">${t("screens.workflowApproval.notice.description")}</span></div>
   </section>`;
 }
 

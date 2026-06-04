@@ -6197,6 +6197,159 @@
         "zh-Hans-CN": "已退出登录。",
         "ja-JP": "ログアウトしました。"
       }
+    },
+    {
+      "key": "screens.workflowApproval.title",
+      "values": {
+        "ko-KR": "전자결재 처리 요약",
+        "en-US": "Approval workflow summary",
+        "zh-Hans-CN": "审批流程摘要",
+        "ja-JP": "承認ワークフローサマリー"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.description",
+      "values": {
+        "ko-KR": "결재 대기, 반려 보완, 첨부 보관 상태를 먼저 확인하고 관련 업무로 이동합니다.",
+        "en-US": "Review pending approvals, returned-draft fixes, and attachment storage before moving to the related workspace.",
+        "zh-Hans-CN": "先检查待审批、退回补正和附件存档状态，然后跳转到相关业务。",
+        "ja-JP": "承認待ち、差し戻し修正、添付保管状態を先に確認し、関連業務へ移動します。"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.action",
+      "values": {
+        "ko-KR": "첨부 자료 보기",
+        "en-US": "View attachments",
+        "zh-Hans-CN": "查看附件",
+        "ja-JP": "添付資料を見る"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.pendingApproval.label",
+      "values": {
+        "ko-KR": "결재 대기",
+        "en-US": "Pending approvals",
+        "zh-Hans-CN": "待审批",
+        "ja-JP": "承認待ち"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.pendingApproval.status",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs review",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.pendingApproval.title",
+      "values": {
+        "ko-KR": "승인권자와 위임 흐름",
+        "en-US": "Approver and delegation flow",
+        "zh-Hans-CN": "审批人和委托流程",
+        "ja-JP": "承認者と委任フロー"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.pendingApproval.detail",
+      "values": {
+        "ko-KR": "관리자 화면에서 결재 권한, 위임, Branch 계정 범위를 이어서 확인합니다.",
+        "en-US": "Open Admin to review approval permissions, delegation, and Branch account scope.",
+        "zh-Hans-CN": "打开管理员画面，继续检查审批权限、委托和 Branch 账户范围。",
+        "ja-JP": "管理者画面で承認権限、委任、Branch アカウント範囲を確認します。"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.returnedDraft.label",
+      "values": {
+        "ko-KR": "반려 보완",
+        "en-US": "Returned draft",
+        "zh-Hans-CN": "退回补正",
+        "ja-JP": "差し戻し修正"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.returnedDraft.status",
+      "values": {
+        "ko-KR": "초안 준비",
+        "en-US": "Draft ready",
+        "zh-Hans-CN": "草稿就绪",
+        "ja-JP": "下書き準備"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.returnedDraft.title",
+      "values": {
+        "ko-KR": "보완 의견 초안",
+        "en-US": "Correction comment draft",
+        "zh-Hans-CN": "补正意见草稿",
+        "ja-JP": "修正コメント下書き"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.returnedDraft.detail",
+      "values": {
+        "ko-KR": "AI 화면에서 반려 사유, 보완 요청, 결재 의견 초안을 이어서 점검합니다.",
+        "en-US": "Open AI to review return reasons, correction requests, and approval comment drafts.",
+        "zh-Hans-CN": "打开 AI 画面，继续检查退回原因、补正请求和审批意见草稿。",
+        "ja-JP": "AI 画面で差し戻し理由、修正依頼、承認コメント下書きを確認します。"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.attachments.label",
+      "values": {
+        "ko-KR": "첨부 보관",
+        "en-US": "Attachment storage",
+        "zh-Hans-CN": "附件存档",
+        "ja-JP": "添付保管"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.attachments.status",
+      "values": {
+        "ko-KR": "연결됨",
+        "en-US": "Linked",
+        "zh-Hans-CN": "已连接",
+        "ja-JP": "連携済み"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.attachments.title",
+      "values": {
+        "ko-KR": "결재 첨부문서 보관",
+        "en-US": "Approval attachment archive",
+        "zh-Hans-CN": "审批附件归档",
+        "ja-JP": "承認添付文書の保管"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.cards.attachments.detail",
+      "values": {
+        "ko-KR": "자료함에서 결재 첨부, 급여 품의, 보관 상태를 이어서 확인합니다.",
+        "en-US": "Open Archive to review approval attachments, payroll requests, and storage status.",
+        "zh-Hans-CN": "打开资料库，继续检查审批附件、工资请求和存档状态。",
+        "ja-JP": "資料箱で承認添付、給与稟議、保管状態を確認します。"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.notice.badge",
+      "values": {
+        "ko-KR": "결재 UI 흐름",
+        "en-US": "Approval UI flow",
+        "zh-Hans-CN": "审批 UI 流程",
+        "ja-JP": "承認 UI フロー"
+      }
+    },
+    {
+      "key": "screens.workflowApproval.notice.description",
+      "values": {
+        "ko-KR": "이 패널은 실제 결재 처리를 수행하지 않고, 관련 업무 화면으로 이동하는 UI 안내만 제공합니다.",
+        "en-US": "This panel does not process approvals; it only guides users to related workspaces.",
+        "zh-Hans-CN": "此面板不执行实际审批处理，仅引导用户前往相关工作区。",
+        "ja-JP": "このパネルは実際の承認処理を行わず、関連画面への移動を案内するだけです。"
+      }
     }
   ],
   "languageDisplayNames": [

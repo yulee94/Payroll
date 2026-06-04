@@ -69,6 +69,12 @@ const travelWorkflowStageDefinitions = [
   { id: "travel-review", tone: "ready" }
 ] as const satisfies readonly ToneDefinition[];
 
+const workflowApprovalDefinitions = [
+  { id: "pendingApproval", target: "admin", tone: "attention" },
+  { id: "returnedDraft", target: "ai", tone: "neutral" },
+  { id: "attachments", target: "archive", tone: "ready" }
+] as const satisfies readonly TargetToneDefinition[];
+
 const adminPermissionDefinitions = [
   { id: "role-owner", tone: "ready" },
   { id: "role-manager", tone: "neutral" },
@@ -520,6 +526,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
       </Card>
 
       {active.id === "attendance" ? <AttendancePhonePanel locale={locale} /> : null}
+      {active.id === "workflow" ? <WorkflowApprovalPanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "travel" ? <TravelWorklogPanel locale={locale} /> : null}
       {active.id === "admin" ? <AdminAccountPanel locale={locale} /> : null}
       {active.id === "archive" ? <ArchiveLibraryPanel locale={locale} onSelect={onSelect} /> : null}
@@ -670,6 +677,39 @@ function PayrollStepDetail({ locale, step }: { readonly locale: SupportedLocale;
         <ActionButton onPress={() => undefined} variant="ghost">{tScreen(locale, "payroll.stepDetail.actions.help")}</ActionButton>
       </View>
     </View>
+  );
+}
+
+function WorkflowApprovalPanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "onSelect">) {
+  return (
+    <Card>
+      <SectionHeader
+        title={tScreen(locale, "workflowApproval.title")}
+        description={tScreen(locale, "workflowApproval.description")}
+        action={<ActionButton onPress={() => onSelect("archive")} variant="secondary">{tScreen(locale, "workflowApproval.action")}</ActionButton>}
+      />
+      <View style={styles.workflowApprovalGrid}>
+        {workflowApprovalDefinitions.map((item) => (
+          <Pressable
+            accessibilityRole="button"
+            key={item.id}
+            onPress={() => onSelect(item.target)}
+            style={({ pressed }) => [styles.workflowApprovalCard, { borderTopColor: toneColor(item.tone) }, pressed && styles.buttonPressed]}
+          >
+            <View style={styles.workflowApprovalHead}>
+              <Label size="sm" muted>{tScreen(locale, `workflowApproval.cards.${item.id}.label`)}</Label>
+              <Badge tone={item.tone}>{tScreen(locale, `workflowApproval.cards.${item.id}.status`)}</Badge>
+            </View>
+            <Label weight="bold">{tScreen(locale, `workflowApproval.cards.${item.id}.title`)}</Label>
+            <Label size="sm" muted>{tScreen(locale, `workflowApproval.cards.${item.id}.detail`)}</Label>
+          </Pressable>
+        ))}
+      </View>
+      <View style={styles.inlineNotice}>
+        <Badge tone="neutral">{tScreen(locale, "workflowApproval.notice.badge")}</Badge>
+        <Label size="sm" muted>{tScreen(locale, "workflowApproval.notice.description")}</Label>
+      </View>
+    </Card>
   );
 }
 
@@ -1565,6 +1605,29 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 12,
     fontWeight: "800"
+  },
+  workflowApprovalCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 220,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  workflowApprovalGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  workflowApprovalHead: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
   },
   todoItem: {
     alignItems: "flex-start",
