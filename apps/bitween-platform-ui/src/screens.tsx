@@ -48,6 +48,12 @@ const languageOptions = [
 
 type LanguageCode = (typeof languageOptions)[number]["code"];
 
+const attendanceLogs = [
+  { id: "att-log-1", label: "출근", place: "본사", time: "09:02", tone: "ready" },
+  { id: "att-log-2", label: "외근", place: "고객사", time: "13:40", tone: "attention" },
+  { id: "att-log-3", label: "퇴근", place: "대기", time: "--:--", tone: "neutral" }
+] as const;
+
 function isModuleId(id: PlatformId): id is ModuleId {
   return id !== "home" && id !== "payroll";
 }
@@ -390,6 +396,8 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
         <MetricGrid items={dashboard.metrics} />
       </Card>
 
+      {active.id === "attendance" ? <AttendancePhonePanel /> : null}
+
       {active.id === "settings" ? (
         <Card>
           <SectionHeader title="국제화 설정" description="한국어, 영어, 중국어 화면 전환을 준비합니다." />
@@ -533,6 +541,56 @@ function PayrollStepDetail({ step }: { readonly step: PayrollStep }) {
   );
 }
 
+function AttendancePhonePanel() {
+  return (
+    <Card>
+      <SectionHeader title="휴대폰 출퇴근" description="직원이 모바일에서 확인하는 오늘의 출근/퇴근 상태입니다." />
+      <View style={styles.attendanceGrid}>
+        <View style={styles.phoneFrame}>
+          <View style={styles.phoneHeader}>
+            <Label size="sm" muted>오늘 상태</Label>
+            <Badge tone="ready">출근 확인</Badge>
+          </View>
+          <View style={styles.phoneClock}>
+            <Text style={styles.phoneTime}>09:02</Text>
+            <Label size="sm" muted>본사 120m 이내 · 위치 확인됨</Label>
+          </View>
+          <View style={styles.punchActions}>
+            <Pressable accessibilityRole="button" style={({ pressed }) => [styles.punchButton, pressed && styles.buttonPressed]}>
+              <Text style={styles.punchButtonText}>출근</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" style={({ pressed }) => [styles.punchButtonSecondary, pressed && styles.buttonPressed]}>
+              <Text style={styles.punchButtonSecondaryText}>퇴근</Text>
+            </Pressable>
+          </View>
+          <View style={styles.locationNotice}>
+            <Label size="sm" weight="bold">위치 확인</Label>
+            <Label size="sm" muted>GPS 또는 현장 QR 확인 후 기록되는 모바일 UI 자리입니다.</Label>
+          </View>
+        </View>
+        <View style={styles.attendanceSide}>
+          <View style={styles.attendanceSummaryCard}>
+            <Label size="sm" muted>관리자 확인</Label>
+            <Label weight="bold">외근 위치 확인 1건</Label>
+            <Label size="sm" muted>사유와 위치 메모를 확인한 뒤 승인 흐름으로 연결합니다.</Label>
+          </View>
+          <View style={styles.attendanceLogList}>
+            {attendanceLogs.map((log) => (
+              <View key={log.id} style={styles.attendanceLogItem}>
+                <Badge tone={log.tone}>{log.label}</Badge>
+                <View style={styles.plannerCopy}>
+                  <Label weight="bold">{log.time}</Label>
+                  <Label size="sm" muted>{log.place}</Label>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+      </View>
+    </Card>
+  );
+}
+
 function WorkDetailPanel({ row, onSelect }: { readonly row: ModuleRow; readonly onSelect: (id: PlatformId) => void }) {
   const target = workRowTarget(row);
 
@@ -648,6 +706,10 @@ function workRowTarget(row: ModuleRow): PlatformId {
     return "hr";
   }
 
+  if (haystack.includes("출근") || haystack.includes("퇴근") || haystack.includes("외근")) {
+    return "attendance";
+  }
+
   return "home";
 }
 
@@ -665,6 +727,38 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm
+  },
+  attendanceGrid: {
+    alignItems: "stretch",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.lg
+  },
+  attendanceLogItem: {
+    alignItems: "flex-start",
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  attendanceLogList: {
+    gap: spacing.sm
+  },
+  attendanceSide: {
+    flexBasis: 280,
+    flexGrow: 1,
+    gap: spacing.md
+  },
+  attendanceSummaryCard: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.xs,
+    padding: spacing.md
   },
   buttonPressed: {
     opacity: 0.86
@@ -844,6 +938,81 @@ const styles = StyleSheet.create({
   },
   plannerList: {
     gap: spacing.sm
+  },
+  locationNotice: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  phoneClock: {
+    alignItems: "center",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.xs,
+    padding: spacing.lg
+  },
+  phoneFrame: {
+    backgroundColor: colors.card,
+    borderColor: colors.text,
+    borderRadius: 24,
+    borderWidth: 2,
+    flexBasis: 280,
+    flexGrow: 1,
+    gap: spacing.md,
+    maxWidth: 360,
+    padding: spacing.lg
+  },
+  phoneHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
+  },
+  phoneTime: {
+    color: colors.accent,
+    fontSize: 36,
+    fontWeight: "800",
+    lineHeight: 44
+  },
+  punchActions: {
+    flexDirection: "row",
+    gap: spacing.sm
+  },
+  punchButton: {
+    alignItems: "center",
+    backgroundColor: colors.accent,
+    borderRadius: radius.lg,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 52,
+    padding: spacing.md
+  },
+  punchButtonSecondary: {
+    alignItems: "center",
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 52,
+    padding: spacing.md
+  },
+  punchButtonSecondaryText: {
+    color: colors.accent,
+    fontSize: 16,
+    fontWeight: "800"
+  },
+  punchButtonText: {
+    color: colors.card,
+    fontSize: 16,
+    fontWeight: "800"
   },
   launcherCard: {
     backgroundColor: colors.bg,

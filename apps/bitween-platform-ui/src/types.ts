@@ -2,6 +2,7 @@ export type PlatformId =
   | "home"
   | "payroll"
   | "hr"
+  | "attendance"
   | "recruit"
   | "workflow"
   | "archive"

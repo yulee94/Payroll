@@ -35,6 +35,13 @@ export const navigationItems = [
     accent: "#0D9488"
   },
   {
+    id: "attendance",
+    label: "출퇴근",
+    eyebrow: "Attendance",
+    description: "모바일 출근, 퇴근, 위치 확인, 근태 기록을 관리합니다.",
+    accent: "#0284C7"
+  },
+  {
     id: "recruit",
     label: "채용",
     eyebrow: "Recruit",
@@ -355,6 +362,47 @@ export const moduleDashboards = {
     },
     emptyTitle: "표시할 HR 업무가 없습니다.",
     emptyDescription: "명부, 이력서, 사직서, 증명서 업무가 생기면 처리 대기 항목이 표시됩니다."
+  },
+  attendance: {
+    id: "attendance",
+    title: "모바일 출퇴근",
+    subtitle: "휴대폰에서 출근/퇴근 상태, 위치 확인, 최근 근태 기록을 확인합니다.",
+    filters: ["전체", "출근", "퇴근", "확인 필요"],
+    metrics: [
+      { id: "checked-in", label: "오늘 출근", value: "09:02", helper: "본사 120m 이내", tone: "ready" },
+      { id: "pending", label: "확인 필요", value: "1건", helper: "외근 위치 확인", tone: "attention" },
+      { id: "weekly", label: "이번 주 기록", value: "4일", helper: "정상 출근", tone: "neutral" }
+    ],
+    rows: [
+      {
+        id: "attendance-1",
+        category: "오늘 출근 기록",
+        status: "확인됨",
+        owner: "BW-0001",
+        nextStep: "퇴근 체크 대기",
+        tone: "ready"
+      },
+      {
+        id: "attendance-2",
+        category: "외근 위치 확인",
+        status: "확인 필요",
+        owner: "관리자",
+        nextStep: "외근 사유 확인",
+        tone: "attention"
+      }
+    ],
+    primaryAction: {
+      label: "출퇴근 앱 보기",
+      description: "휴대폰 출퇴근 화면을 확인합니다.",
+      target: "attendance"
+    },
+    secondaryAction: {
+      label: "HR로 이동",
+      description: "근태와 직원 정보를 함께 확인합니다.",
+      target: "hr"
+    },
+    emptyTitle: "표시할 출퇴근 기록이 없습니다.",
+    emptyDescription: "출근 또는 퇴근 기록이 생기면 이곳에 표시됩니다."
   },
   recruit: {
     id: "recruit",

@@ -20,6 +20,7 @@ const navItems = [
   ["home", "플랫폼 홈", "Launcher", "오늘의 업무, 빠른 실행, 플랫폼 상태를 한 화면에서 확인합니다.", "#64748B"],
   ["payroll", "급여", "Payroll", "급여 자동화 준비 상태, 산출 진입, 월별 보고와 설정을 관리합니다.", "#1F3864"],
   ["hr", "HR", "People", "직원 명부, 이력서, 사직서, 증명서 흐름을 정리합니다.", "#0D9488"],
+  ["attendance", "출퇴근", "Attendance", "모바일 출근, 퇴근, 위치 확인, 근태 기록을 관리합니다.", "#0284C7"],
   ["recruit", "채용", "Recruit", "지원자 경력, 자격, 부서 배치 후보를 관리합니다.", "#9333EA"],
   ["workflow", "전자결재", "Workflow", "기안, 결재 대기, 진행 문서, 회람 상태를 추적합니다.", "#2563EB"],
   ["archive", "자료함", "Archive", "법인, 사업장, 월별 산출 자료와 보고서를 찾고 미리 봅니다.", "#475569"],
@@ -97,6 +98,12 @@ const todayTodos = [
   ["자료함 최근 보고서 확인", "운영팀", "완료", "ready", true]
 ];
 
+const attendanceLogs = [
+  ["출근", "09:02", "본사", "ready"],
+  ["외근", "13:40", "고객사", "attention"],
+  ["퇴근", "--:--", "대기", "neutral"]
+];
+
 const payrollSettingsRows = [
   ["설정 대상", "법인 기본", "급여 담당", "사업장별 예외 여부 확인", "neutral"],
   ["휴업수당 지급률", "법정 기준 확인", "급여 담당", "최저 기준 이상 입력값 검토", "attention"],
@@ -118,6 +125,14 @@ const dashboards = {
     ["직원명부 업데이트", "확인 필요", "인사 담당", "부서/직무 최신 정보 확인", "attention"],
     ["재직증명서/경력증명서", "접수", "운영팀", "발급 양식 검토", "neutral"],
     ["이력서/사직서 관리", "정리 중", "인사 담당", "입사/퇴사 문서 분류", "ready"]
+  ]),
+  attendance: dashboard("모바일 출퇴근", "휴대폰에서 출근/퇴근 상태, 위치 확인, 최근 근태 기록을 확인합니다.", ["전체", "출근", "퇴근", "확인 필요"], [
+    ["오늘 출근", "09:02", "본사 120m 이내", "ready"],
+    ["확인 필요", "1건", "외근 위치 확인", "attention"],
+    ["이번 주 기록", "4일", "정상 출근", "neutral"]
+  ], [
+    ["오늘 출근 기록", "확인됨", "BW-0001", "퇴근 체크 대기", "ready"],
+    ["외근 위치 확인", "확인 필요", "관리자", "외근 사유 확인", "attention"]
   ]),
   recruit: dashboard("채용 인재 관리", "지원자 경력과 자격 정보를 공유하고 부서별 필요 인재를 배치합니다.", ["전체", "지원자", "경력", "자격", "배치"], [
     ["지원자", "8명", "공유 가능 후보", "ready"],
@@ -446,6 +461,7 @@ function renderModule(id) {
       ${sectionHead("", data.title, "", button(primaryLabel(id), id, "primary"))}
       ${metrics(data.metrics)}
     </section>
+    ${id === "attendance" ? attendancePhonePanel() : ""}
     ${id === "settings" ? i18nSettingsPanel() : ""}
     <section class="card">
       ${sectionHead("", "업무 목록", "필터로 상태를 좁히고 필요한 다음 작업을 확인합니다.", button(secondaryLabel(id), secondaryTarget(id), "secondary"))}
@@ -476,6 +492,26 @@ function i18nSettingsPanel() {
         <strong>${label}</strong><span class="helper">${state.selectedLanguage === code ? "선택됨" : status}</span>
       </button>
     `).join("")}</div>
+  </section>`;
+}
+
+function attendancePhonePanel() {
+  return `<section class="card">
+    ${sectionHead("", "휴대폰 출퇴근", "직원이 모바일에서 확인하는 오늘의 출근/퇴근 상태입니다.")}
+    <div class="attendance-grid">
+      <div class="phone-frame">
+        <div class="phone-head"><span class="helper">오늘 상태</span>${badge("출근 확인", "ready")}</div>
+        <div class="phone-clock"><strong>09:02</strong><span class="helper">본사 120m 이내 · 위치 확인됨</span></div>
+        <div class="punch-actions"><button class="punch primary">출근</button><button class="punch secondary">퇴근</button></div>
+        <div class="location-notice"><strong>위치 확인</strong><span class="helper">GPS 또는 현장 QR 확인 후 기록되는 모바일 UI 자리입니다.</span></div>
+      </div>
+      <div class="attendance-side">
+        <div class="detail-item"><span class="helper">관리자 확인</span><strong>외근 위치 확인 1건</strong><span>사유와 위치 메모를 확인한 뒤 승인 흐름으로 연결합니다.</span></div>
+        <div class="planner-list">${attendanceLogs.map(([label, time, place, tone]) => `
+          <div class="planner-item">${badge(label, tone)}<div><strong>${time}</strong><span class="helper">${place}</span></div></div>
+        `).join("")}</div>
+      </div>
+    </div>
   </section>`;
 }
 
@@ -536,6 +572,7 @@ function workRowTarget(row) {
   if (haystack.includes("자료") || haystack.includes("보고서") || haystack.includes("파일") || haystack.includes("폴더")) return "archive";
   if (haystack.includes("권한") || haystack.includes("사용자") || haystack.includes("역할") || haystack.includes("법인")) return "admin";
   if (haystack.includes("채용") || haystack.includes("지원자") || haystack.includes("자격") || haystack.includes("배치")) return "recruit";
+  if (haystack.includes("출근") || haystack.includes("퇴근") || haystack.includes("외근")) return "attendance";
   if (haystack.includes("설정") || haystack.includes("알림") || haystack.includes("환경")) return "settings";
   if (haystack.includes("AI") || haystack.includes("요약") || haystack.includes("초안")) return "ai";
   if (haystack.includes("근태") || haystack.includes("증명서") || haystack.includes("직원")) return "hr";
@@ -568,6 +605,7 @@ function toneColor(tone) {
 function primaryLabel(id) {
   return ({
     hr: "직원 명부 보기",
+    attendance: "출퇴근 앱 보기",
     recruit: "지원자 보기",
     workflow: "결재함 열기",
     archive: "최근 자료 보기",
@@ -580,6 +618,7 @@ function primaryLabel(id) {
 function secondaryLabel(id) {
   return ({
     hr: "급여 준비로 이동",
+    attendance: "HR로 이동",
     recruit: "HR로 이동",
     workflow: "자료함 확인",
     archive: "급여 화면으로 이동",
@@ -592,6 +631,7 @@ function secondaryLabel(id) {
 function secondaryTarget(id) {
   return ({
     hr: "payroll",
+    attendance: "hr",
     recruit: "hr",
     workflow: "archive",
     archive: "payroll",
