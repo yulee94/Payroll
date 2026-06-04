@@ -11,10 +11,10 @@ See `docs/decisions/ADR-001-buck2-rust-tauri-react-native-transition.md` for the
 | Area | Current state | Target state |
 | --- | --- | --- |
 | Backend | Python compatibility modules plus `crates/payroll-api` Rust contract crate | Idiomatic Rust services/domain crates deployed on Kubernetes |
-| Build | Cargo, npm, Python unittest commands | Buck2 target graph for Rust, frontend export, desktop package, and CI target selection; Cargo/npm retained until Buck2 parity |
+| Build | Cargo, npm, Python unittest commands, plus first Buck2/Reindeer Rust target for `crates/payroll-api` | Buck2 target graph for Rust, frontend export, desktop package, and CI target selection; Cargo/npm retained until Buck2 parity |
 | Frontend | Expo / React Native / React Native Web app under `apps/bitween-platform-ui/` | Same React Native source exported for web, Kubernetes frontend, and Tauri desktop |
 | Desktop | No production desktop surface | `apps/bitween-desktop-tauri/` wraps the React Native Web export and adds audited Tauri commands |
-| Python | Production behavior still expressed by compatibility modules | Characterization-only, migration tooling, then removed slice by slice |
+| Python | Production behavior still expressed by compatibility modules | Characterization-only evidence source; backend production ownership moves to Rust service/domain crates and Python is removed slice by slice after parity |
 | Runtime | Kubernetes direction documented | Kubernetes manifests/images/jobs added after Rust service boundaries exist |
 | Authorization | Python/Rust compatibility checks and org roles are still transitional | RBAC role families plus ABAC per-request policy checks in Rust services, workers, CronJobs, and desktop command boundaries |
 | Security posture | Compatibility code preserves behavior | Zero Trust: every request authenticated, authorized, least-privilege, audited, and validated at the boundary |
@@ -152,12 +152,12 @@ Characterization tests
 **Acceptance criteria:**
 
 - [ ] Candidate targets cover `crates/payroll-api`, `frontend`, `apps/bitween-platform-ui`, security/policy tests, and characterization tests.
-- [ ] Third-party Rust dependency handling states whether Reindeer or generated rules will be used.
-- [ ] Buck2 package boundaries avoid symlinked or implicit inputs.
+- [x] Third-party Rust dependency handling uses Reindeer-generated, vendored Buck2 rules under `third-party/rust/`.
+- [x] Buck2 package boundaries avoid symlinked sources; first-party Rust sources and Reindeer vendored inputs are declared in Buck targets.
 
 **Verification:**
 
-- [ ] `cargo test --workspace`
+- [x] `cargo test --workspace`
 - [ ] `npm run typecheck --prefix frontend`
 - [ ] `npm run typecheck --prefix apps/bitween-platform-ui`
 - [ ] Relevant Python characterization suite remains green.
@@ -177,14 +177,14 @@ Characterization tests
 
 **Acceptance criteria:**
 
-- [ ] Buck2 builds/checks the selected Rust crate or test target.
-- [ ] Cargo remains the authoritative CI gate until Buck2 is proven equivalent.
-- [ ] All source files and dependencies are explicit Buck2 inputs.
+- [x] Buck2 builds/checks the selected Rust crate and test target.
+- [x] Cargo remains an authoritative compatibility gate until Buck2 parity expands beyond the first Rust target.
+- [x] First-party source files and Reindeer-managed dependencies are declared as Buck2 inputs for `crates/payroll-api`.
 
 **Verification:**
 
-- [ ] `buck2 build //crates/payroll-api:...` or the reviewed equivalent
-- [ ] `cargo test --workspace`
+- [x] `buck2 build //crates/payroll-api:payroll_api`
+- [x] `cargo test --workspace`
 
 **Dependencies:** Task 1
 
@@ -196,6 +196,24 @@ Characterization tests
 - optional third-party generated Buck rules
 
 **Estimated scope:** Medium
+
+## Implementation checkpoint: Buck2/Reindeer Rust foundation
+
+Completed on 2026-06-04 as the first build-system implementation slice:
+
+- Buck2 root configuration and bundled toolchain cell are present.
+- Reindeer manages vendored third-party Rust dependencies in `third-party/rust/`.
+- `crates/payroll-api` has verified Buck2 `rust_library` and `rust_test` targets.
+- Reindeer fixups are required (`unresolved_fixup_error = true`) for build scripts and Cargo compile-time env usage.
+- The runbook is `docs/BUCK2_REINDEER_RUST_TRANSITION.md`.
+
+Verified commands:
+
+```sh
+buck2 build //crates/payroll-api:payroll_api
+buck2 test //crates/payroll-api:payroll_api_test
+cargo test --workspace
+```
 
 ## Phase 2: Rust backend transition
 

@@ -116,3 +116,6 @@ desktop.ini
 /templates/**/*연차관리*.xlsx
 /templates/~$*
 /templates/**/~$*
+
+# Buck2 / Reindeer
+/buck-out/

@@ -1,0 +1,31 @@
+PAYROLL_API_SRCS = [
+    "src/lib.rs",
+    "src/error.rs",
+    "src/policy.rs",
+    "src/request.rs",
+    "src/response.rs",
+]
+
+PAYROLL_API_DEPS = [
+    "//third-party/rust:serde",
+    "//third-party/rust:serde_json",
+]
+
+rust_library(
+    name = "payroll_api",
+    crate = "bitween_payroll_api",
+    crate_root = "src/lib.rs",
+    edition = "2021",
+    srcs = PAYROLL_API_SRCS,
+    deps = PAYROLL_API_DEPS,
+    visibility = ["PUBLIC"],
+)
+
+rust_test(
+    name = "payroll_api_test",
+    crate = "bitween_payroll_api",
+    crate_root = "src/lib.rs",
+    edition = "2021",
+    srcs = PAYROLL_API_SRCS,
+    deps = PAYROLL_API_DEPS,
+)
