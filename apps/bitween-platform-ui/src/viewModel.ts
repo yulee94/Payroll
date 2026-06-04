@@ -19,6 +19,8 @@ import {
   workQueue
 } from "./data";
 
+export type NonEmptyNavigation = readonly [NavigationItem, ...NavigationItem[]];
+
 export type SessionViewModel = {
   readonly companyCodeLabel: string;
   readonly displayName: string;
@@ -28,7 +30,7 @@ export type SessionViewModel = {
 
 export type LauncherViewModel = {
   readonly metrics: readonly MetricItem[];
-  readonly navigation: readonly NavigationItem[];
+  readonly navigation: NonEmptyNavigation;
   readonly workQueue: readonly WorkQueueItem[];
 };
 
