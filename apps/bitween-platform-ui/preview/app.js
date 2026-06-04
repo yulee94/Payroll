@@ -684,6 +684,7 @@ function i18nSettingsPanel() {
         <strong>${languageName(locale)}</strong><span class="helper">${state.locale === locale ? t("settings.i18n.status.selected") : t("settings.i18n.status.available")}</span>
       </button>
     `).join("")}</div>
+    <div class="language-summary-panel">${badge(t("settings.i18n.current.badge"), "ready")}<strong>${t("settings.i18n.current.title", { language: languageName(state.locale) })}</strong><span class="helper">${t("settings.i18n.current.description")}</span></div>
     <div class="notice">${badge(t("settings.i18n.catalogRule.title"), "neutral")}<span class="helper">${t("settings.i18n.catalogRule.description")}</span></div>
   </section>`;
 }

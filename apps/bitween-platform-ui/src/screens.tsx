@@ -476,6 +476,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
   const [search, setSearch] = useState("");
   const [selectedRowId, setSelectedRowId] = useState<string | undefined>(dashboard.rows[0]?.id);
   const languageOptions = useMemo(() => getLanguageOptions(locale), [locale]);
+  const selectedLanguage = languageOptions.find((option) => option.locale === locale) ?? languageOptions[0];
   const filteredRows = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
     return dashboard.rows.filter((row) => {
@@ -543,6 +544,11 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
                 </Pressable>
               );
             })}
+          </View>
+          <View style={styles.languageSummaryPanel}>
+            <Badge tone="ready">{t(locale, "settings.i18n.current.badge")}</Badge>
+            <Label weight="bold">{t(locale, "settings.i18n.current.title", { language: selectedLanguage?.label ?? locale })}</Label>
+            <Label size="sm" muted>{t(locale, "settings.i18n.current.description")}</Label>
           </View>
           <View style={styles.inlineNotice}>
             <Badge tone="neutral">{t(locale, "settings.i18n.catalogRule.title")}</Badge>
@@ -1296,6 +1302,14 @@ const styles = StyleSheet.create({
   languageOptionSelected: {
     backgroundColor: colors.accentSoft,
     borderColor: colors.accent
+  },
+  languageSummaryPanel: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.sm,
+    padding: spacing.md
   },
   listSummary: {
     alignItems: "center",

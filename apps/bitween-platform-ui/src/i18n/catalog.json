@@ -61,6 +61,33 @@
       }
     },
     {
+      "key": "settings.i18n.current.badge",
+      "values": {
+        "ko-KR": "현재 언어",
+        "en-US": "Current language",
+        "zh-Hans-CN": "当前语言",
+        "ja-JP": "現在の言語"
+      }
+    },
+    {
+      "key": "settings.i18n.current.title",
+      "values": {
+        "ko-KR": "{language}로 표시 중",
+        "en-US": "Showing in {language}",
+        "zh-Hans-CN": "正在以{language}显示",
+        "ja-JP": "{language}で表示中"
+      }
+    },
+    {
+      "key": "settings.i18n.current.description",
+      "values": {
+        "ko-KR": "언어를 선택하면 사이드 메뉴, 홈, 각 업무 화면 문구가 같은 설정으로 갱신됩니다.",
+        "en-US": "Selecting a language updates the sidebar, Home, and each workspace with the same setting.",
+        "zh-Hans-CN": "选择语言后，侧边菜单、首页和各业务画面会使用同一设置更新。",
+        "ja-JP": "言語を選択すると、サイドメニュー、ホーム、各業務画面の文言が同じ設定で更新されます。"
+      }
+    },
+    {
       "key": "shell.logout",
       "values": {
         "ko-KR": "로그아웃",

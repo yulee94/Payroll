@@ -684,6 +684,15 @@ button {
   border-color: var(--accent);
 }
 
+.language-summary-panel {
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
 .travel-stage-grid,
 .travel-review-grid {
   display: grid;
