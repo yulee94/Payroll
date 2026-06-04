@@ -58,3 +58,30 @@ jobs:
       - name: Type-check frontend contracts
         working-directory: frontend
         run: npm run typecheck
+
+  rust-buck2-reindeer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Buck2
+        uses: dtolnay/install-buck2@latest
+
+      - name: Install Reindeer
+        run: cargo install --locked --git https://github.com/facebookincubator/reindeer --rev d1638c7675fe31013f101f39cd18248f40b5ce6c reindeer
+
+      - name: Verify Reindeer-generated Buck rules and vendor tree are current
+        run: |
+          reindeer --config reindeer.toml vendor
+          reindeer --config reindeer.toml buckify
+          git diff --exit-code -- third-party/rust/BUCK third-party/rust/vendor
+
+      - name: Build Rust payroll API with Buck2
+        run: buck2 build //crates/payroll-api:payroll_api
+
+      - name: Test Rust payroll API with Buck2
+        run: buck2 test //crates/payroll-api:payroll_api_test

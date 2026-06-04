@@ -2,11 +2,31 @@
 
 ## Status
 
-Backlog / not started as a standalone migration. This is a production-quality rewrite track and is not an MVP shortcut.
+In progress. The Buck2/Reindeer foundation for the first Rust backend contract crate is in place; Python remains characterization-only until Rust parity is proven domain by domain. This is a production-quality rewrite track and is not an MVP shortcut.
 
 ## Goal
 
 Rewrite backend code in idiomatic Rust while preserving the observable business behavior already covered by compatibility tests. The target runtime is the Kubernetes-native stack documented in `docs/KUBERNETES_NATIVE_STACK.md`.
+
+## Current implementation checkpoint: Buck2/Reindeer foundation
+
+Implemented on 2026-06-04:
+
+- Added Buck2 repository configuration with bundled prelude/toolchain wiring.
+- Added Reindeer-managed, vendored third-party Rust dependencies under `third-party/rust/`.
+- Added first-party Buck2 targets for `crates/payroll-api`:
+  - `//crates/payroll-api:payroll_api`
+  - `//crates/payroll-api:payroll_api_test`
+- Added Reindeer fixups for crates that require build-script execution or Cargo compile-time environment values.
+- Added `scripts/verify_rust_buck2_reindeer.sh` as the local verification entrypoint.
+
+Verification evidence for this checkpoint:
+
+- `buck2 build //crates/payroll-api:payroll_api`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `cargo test --workspace`
+
+Runbook: `docs/BUCK2_REINDEER_RUST_TRANSITION.md`.
 
 ## Required execution disciplines
 

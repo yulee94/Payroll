@@ -1,0 +1,2 @@
+# Intentionally empty: the root .buckconfig wires this directory into the
+# bundled Buck2 demo toolchain cell for local Rust target validation.
