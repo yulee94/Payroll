@@ -34,6 +34,9 @@ use crate::site_benefits::{
     SiteBenefitsApplication, SiteBenefitsConfig, SiteBenefitsInvoice,
     apply_site_benefits_to_invoice,
 };
+use crate::social_insurance::{
+    SocialInsuranceInput, SocialInsuranceResult, calculate_social_insurance,
+};
 use crate::workplace_hours::{
     WorkplaceHoursInvoice, WorkplaceHoursPolicy, WorkplaceMonthlyHoursApplication,
     WorkplaceMonthlyHoursResolution, apply_monthly_hours_to_invoice, resolve_monthly_work_hours,
@@ -235,6 +238,10 @@ impl PayrollApiService {
         resolve_ei_65_for_payroll(input)
     }
 
+    pub fn calculate_social_insurance(&self, input: SocialInsuranceInput) -> SocialInsuranceResult {
+        calculate_social_insurance(input)
+    }
+
     pub fn finalize_payroll_deductions(
         &self,
         input: PayrollDeductionInput,
@@ -388,6 +395,7 @@ mod tests {
     use crate::service::{
         HealthStatus, PayrollApiService, ReadinessCheck, ReadinessState, ServiceConfig,
     };
+    use crate::social_insurance::SocialInsuranceInput;
     use serde_json::json;
 
     #[test]
@@ -439,6 +447,15 @@ mod tests {
         assert_eq!(value["ok"], true);
         assert_eq!(value["action"], "run");
         assert_eq!(value["scope"], "COSS/Site A/2026-05");
+    }
+
+    #[test]
+    fn service_calculates_social_insurance() {
+        let service = PayrollApiService::new(ServiceConfig::default());
+        let result = service.calculate_social_insurance(SocialInsuranceInput::new(3_000_000.0));
+
+        assert_eq!(result.total, 282_122);
+        assert_eq!(result.employment_insurance, 27_000);
     }
 
     #[test]

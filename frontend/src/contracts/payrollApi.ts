@@ -250,6 +250,23 @@ export interface PayrollInvoiceAuditBatchResult {
 }
 
 
+
+export interface PayrollSocialInsuranceInput {
+  taxable_pay: number;
+  preset_national_pension?: number;
+  preset_health_insurance?: number;
+  insurance_exempt: boolean;
+}
+
+export interface PayrollSocialInsuranceResult {
+  national_pension: number;
+  health_insurance: number;
+  long_term_care: number;
+  employment_insurance: number;
+  total: number;
+  insurance_exempt: boolean;
+}
+
 export type PayrollTaxMethod = "preset" | "simplified_table";
 
 export interface PayrollDeductionInput {

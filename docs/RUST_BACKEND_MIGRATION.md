@@ -193,6 +193,40 @@ Slice spec: `docs/PAYROLL_RUST_INVOICE_AUDIT_BATCH_SLICE.md`.
 
 
 
+
+## Current implementation checkpoint: Rust payroll social-insurance calculation
+
+Implemented on 2026-06-04 as the next payroll calculation behavior slice:
+
+- `crates/payroll-api` now exposes `SocialInsuranceInput`,
+  `SocialInsuranceResult`, `calculate_social_insurance`, and
+  `calculate_employment_insurance`.
+- `PayrollApiService::calculate_social_insurance` calculates supplied-input
+  pension, health insurance, long-term care, employment insurance, total, and
+  exemption state without reading employee masters, identities, KCOMWEL records,
+  EDI files, settings, or workbooks.
+- Rust preserves Python compatibility for pension floor/ceiling clamps, pension
+  and health rates, long-term-care ratio, employment-insurance worker rate,
+  positive preset precedence, exemption zeroing, won rounding, and employment
+  insurance 10-won rounding.
+- Python remains responsible for identity parsing, KCOMWEL age-65 decisions,
+  EDI premium overrides, employee-master lookup, workbook parsing/writing, and
+  payroll row mutation until those boundaries move behind parity tests.
+- TypeScript and Python contract metadata now include social-insurance input and
+  result DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo fmt --check`
+- `cargo test --workspace`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_payroll_api_contract -v`
+- `npm run typecheck --prefix frontend`
+- `git diff --check`
+- `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
+
+Slice spec: `docs/PAYROLL_RUST_SOCIAL_INSURANCE_SLICE.md`.
+
 ## Current implementation checkpoint: Rust payroll deduction finalization
 
 Implemented on 2026-06-04 as the next payroll output-generation behavior slice:
