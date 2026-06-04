@@ -87,18 +87,18 @@ const workQueueDefinitions = [
 ] as const satisfies readonly RowDefinition[];
 
 const calendarEventDefinitions = [
-  { dateLabel: "2026.06.04", id: "calendar-payroll", timeLabel: "10:00", tone: "attention" },
-  { dateLabel: "2026.06.04", id: "calendar-approval", timeLabel: "14:00", tone: "neutral" },
-  { dateLabel: "2026.06.05", id: "calendar-recruit", timeLabel: "09:30", tone: "ready" },
-  { dateLabel: "2026.06.05", id: "calendar-travel", timeLabel: "16:00", tone: "attention" }
-] as const satisfies readonly { readonly dateLabel: string; readonly id: string; readonly timeLabel: string; readonly tone: ReadinessTone }[];
+  { dateLabel: "2026.06.04", id: "calendar-payroll", target: "payroll", timeLabel: "10:00", tone: "attention" },
+  { dateLabel: "2026.06.04", id: "calendar-approval", target: "workflow", timeLabel: "14:00", tone: "neutral" },
+  { dateLabel: "2026.06.05", id: "calendar-recruit", target: "recruit", timeLabel: "09:30", tone: "ready" },
+  { dateLabel: "2026.06.05", id: "calendar-travel", target: "travel", timeLabel: "16:00", tone: "attention" }
+] as const satisfies readonly { readonly dateLabel: string; readonly id: string; readonly target: PlatformId; readonly timeLabel: string; readonly tone: ReadinessTone }[];
 
 const todoDefinitions = [
-  { completed: false, id: "todo-payroll", tone: "attention" },
-  { completed: false, id: "todo-approval", tone: "neutral" },
-  { completed: false, id: "todo-travel", tone: "attention" },
-  { completed: true, id: "todo-archive", tone: "ready" }
-] as const satisfies readonly { readonly completed: boolean; readonly id: string; readonly tone: ReadinessTone }[];
+  { completed: false, id: "todo-payroll", target: "payroll", tone: "attention" },
+  { completed: false, id: "todo-approval", target: "workflow", tone: "neutral" },
+  { completed: false, id: "todo-travel", target: "travel", tone: "attention" },
+  { completed: true, id: "todo-archive", target: "archive", tone: "ready" }
+] as const satisfies readonly { readonly completed: boolean; readonly id: string; readonly target: PlatformId; readonly tone: ReadinessTone }[];
 
 const moduleDefinitions = {
   hr: {
@@ -154,7 +154,7 @@ const moduleDefinitions = {
     rows: [
       { id: "travel-1", target: "travel", tone: "attention" },
       { id: "travel-2", target: "travel", tone: "neutral" },
-      { id: "travel-3", target: "travel", tone: "ready" }
+      { id: "travel-3", target: "archive", tone: "ready" }
     ],
     primaryAction: { target: "travel" },
     secondaryAction: { target: "workflow" }
@@ -168,7 +168,7 @@ const moduleDefinitions = {
     ],
     rows: [
       { id: "wf-1", target: "workflow", tone: "attention" },
-      { id: "wf-2", target: "workflow", tone: "neutral" }
+      { id: "wf-2", target: "archive", tone: "neutral" }
     ],
     primaryAction: { target: "workflow" },
     secondaryAction: { target: "archive" }
@@ -182,7 +182,7 @@ const moduleDefinitions = {
     ],
     rows: [
       { id: "ar-1", target: "archive", tone: "ready" },
-      { id: "ar-2", target: "archive", tone: "attention" }
+      { id: "ar-2", target: "attendance", tone: "attention" }
     ],
     primaryAction: { target: "archive" },
     secondaryAction: { target: "payroll" }
@@ -195,8 +195,8 @@ const moduleDefinitions = {
       { id: "policy", tone: "neutral" }
     ],
     rows: [
-      { id: "ai-1", target: "ai", tone: "ready" },
-      { id: "ai-2", target: "ai", tone: "attention" }
+      { id: "ai-1", target: "payroll", tone: "ready" },
+      { id: "ai-2", target: "workflow", tone: "attention" }
     ],
     primaryAction: { target: "ai" },
     secondaryAction: { target: "settings" }
@@ -225,7 +225,7 @@ const moduleDefinitions = {
       { id: "notice", tone: "neutral" }
     ],
     rows: [
-      { id: "st-1", target: "settings", tone: "attention" },
+      { id: "st-1", target: "payroll", tone: "attention" },
       { id: "st-2", target: "settings", tone: "ready" }
     ],
     primaryAction: { target: "settings" },
@@ -306,6 +306,7 @@ export const getCalendarEvents = (locale: SupportedLocale): readonly CalendarEve
   calendarEventDefinitions.map((event) => ({
     dateLabel: event.dateLabel,
     id: event.id,
+    target: event.target,
     timeLabel: event.timeLabel,
     title: t(locale, `calendarEvents.${event.id}.title`),
     tone: event.tone
@@ -316,6 +317,7 @@ export const getTodayTodos = (locale: SupportedLocale): readonly TodoItem[] =>
     completed: todo.completed,
     id: todo.id,
     owner: t(locale, `todayTodos.${todo.id}.owner`),
+    target: todo.target,
     title: t(locale, `todayTodos.${todo.id}.title`),
     timeLabel: t(locale, `todayTodos.${todo.id}.timeLabel`),
     tone: todo.tone
