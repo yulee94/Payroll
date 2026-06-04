@@ -21,6 +21,7 @@ Rust transition entry point:
 - Invoice audit row function: `PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)`
 - Invoice audit batch function: `PayrollApiService::audit_invoice_batch(items, workplace)`
 - Employment-insurance 65+ decision function: `PayrollApiService::resolve_ei_65_for_payroll(input)`
+- EDI insurance premium application function: `PayrollApiService::apply_edi_premiums_to_invoice(invoice, edi_record, edi_config, payroll_period)`
 - Site-benefits application function: `PayrollApiService::apply_site_benefits_to_invoice(invoice, site_benefits_config, payroll_period)`
 - Fixed-hours application function: `PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)`
 - Execution plan function: `PayrollApiService::plan_run_request(request, policy_snapshot)`
@@ -28,7 +29,7 @@ Rust transition entry point:
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, employment-insurance 65+ payroll decisions, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, employment-insurance 65+ payroll decisions, EDI insurance premium payroll row application, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -269,8 +270,8 @@ Example batch result shape:
 
 Python compatibility code may still import and persist KCOMWEL verification
 records, resolve site management numbers from payroll settings, match employees,
-call future live KCOMWEL APIs, apply EDI premiums, mutate payroll invoice rows,
-and read/write workbooks. Once callers supply identity, a valid payroll period,
+call future live KCOMWEL APIs, coordinate supplied EDI premium inputs, mutate
+payroll invoice rows, and read/write workbooks. Once callers supply identity, a valid payroll period,
 labels, a resolved site management number, an optional latest KCOMWEL
 verification record, and the tenant unknown-status default, Rust owns the pure
 age-65+ employment-insurance decision through
@@ -316,6 +317,72 @@ Example unknown decision:
   "deduct_employment_insurance": false,
   "warning": "김순자: 만 65세 이상 고용보험 KCOMWEL 확인 미완료 → 설정 기본값(공제 생략) 적용",
   "default_action": "skip"
+}
+```
+
+
+## EDI Insurance Premium Application
+
+Python compatibility code may still import CSV/Excel EDI files, persist premium
+records, call future EDI providers, resolve tenant/site settings and site
+management numbers, match employees, and coordinate workbook I/O. Once callers
+supply a single invoice row, EDI config, an optional latest premium record, and a
+payroll period, Rust owns the deterministic row-field application through
+`apply_edi_premiums_to_invoice(invoice, edi_record, edi_config, payroll_period)`
+and
+`PayrollApiService::apply_edi_premiums_to_invoice(invoice, edi_record, edi_config, payroll_period)`.
+
+Config and source fields:
+
+- `use_edi_premiums`: false returns `applied: false` with `EDI 보험료 사용 꺼짐`.
+- `respect_age_exempt`: preserves pension, health, and long-term-care fields
+  when the invoice row is already age-exempt.
+- `source`: `manual`, `import`, `api`, or `calculated`; unknown values normalize
+  to `import`.
+
+Application invariants:
+
+1. Missing records return `applied: false` with `EDI 보험료 없음` and leave the
+   invoice unchanged.
+2. Positive EDI pension, health, long-term-care, employment, and industrial
+   accident values override the supplied invoice row.
+3. Missing long-term-care falls back to Python-compatible
+   `round(health_insurance * 0.1295)` when EDI health insurance is positive.
+4. A zero EDI employment premium clears existing employment insurance for
+   non-age-exempt rows; positive employment premiums still apply.
+5. Employer/employee industrial-accident split fields preserve supplied zero
+   values.
+6. `insurance_total` is recalculated from pension, health, long-term-care, and
+   employment insurance, not industrial accident fields.
+7. Applied rows receive `edi_premium_source`, `edi_premium_badge`,
+   `edi_premium_period`, `edi_premium_fetched_at`, and
+   `edi_premium_source_type` metadata.
+
+Example application output:
+
+```json
+{
+  "applied": true,
+  "message": "EDI 보험료 적용",
+  "invoice": {
+    "name": "김철수",
+    "employee_id": "E02",
+    "workplace": "한국앰코",
+    "national_pension": 80000,
+    "health_insurance": 40000,
+    "long_term_care": 5180,
+    "employment_insurance": 20000,
+    "industrial_accident": 3000,
+    "industrial_accident_employer": 2000,
+    "industrial_accident_employee": 0,
+    "insurance_total": 145180,
+    "insurance_exempt": false,
+    "edi_premium_source": true,
+    "edi_premium_badge": "EDI 조회",
+    "edi_premium_period": "2026-06",
+    "edi_premium_fetched_at": "2026-06-10T09:00:00",
+    "edi_premium_source_type": "manual"
+  }
 }
 ```
 
@@ -926,7 +993,8 @@ Frontend code must use `error_code`, not parse `error` text.
 - Rust owns supplied-policy workplace monthly-hours application through `PayrollApiService::apply_monthly_hours_to_invoice`; Python settings persistence and canonical workplace alias resolution remain compatibility-only until repository/storage migration lands.
 - Rust owns supplied-input invoice audit row evaluation through `PayrollApiService::audit_invoice_row`; Python settings lookup, ledger matching, fixed-profile resolution, and workbook I/O remain compatibility-only boundaries.
 - Rust owns supplied-input invoice audit batch summarization through `PayrollApiService::audit_invoice_batch`; Python still supplies resolved row inputs and keeps UI text rendering compatibility.
-- Rust owns supplied-input employment-insurance 65+ payroll decisions through `PayrollApiService::resolve_ei_65_for_payroll`; Python still imports/persists KCOMWEL records, resolves settings/site management numbers, calls future live APIs, applies EDI premiums, and mutates payroll rows.
+- Rust owns supplied-input employment-insurance 65+ payroll decisions through `PayrollApiService::resolve_ei_65_for_payroll`; Python still imports/persists KCOMWEL records, resolves settings/site management numbers, calls future live APIs, coordinates supplied EDI premium inputs, and mutates payroll rows.
+- Rust owns supplied-record EDI insurance premium application through `PayrollApiService::apply_edi_premiums_to_invoice`; Python still imports/stores EDI files, resolves settings/site management numbers, matches employees, and handles workbook I/O.
 - Rust owns supplied-config site-benefits row application through `PayrollApiService::apply_site_benefits_to_invoice`; Python still resolves settings, checks/persists identity-insurance ledgers, and recalculates payroll totals.
 - Rust owns resolved fixed-hours profile application through `PayrollApiService::apply_fixed_hours_to_invoice`; Python contract/template/settings resolution remains compatibility-only until persistence and HR contract repositories move to Rust.
 - Rust now owns run-result success and execution-failure envelope shaping through `PayrollApiService::run_response`; Python execution remains a compatibility source until the Rust executor and persistence slices land.

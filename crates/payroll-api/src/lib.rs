@@ -1,5 +1,6 @@
 pub mod access;
 pub mod attendance;
+pub mod edi_insurance;
 pub mod employment_insurance_65;
 pub mod error;
 pub mod execution_plan;
@@ -19,6 +20,10 @@ pub use access::{
     PayrollPosition, PayrollPrincipal, PayrollRole,
 };
 pub use attendance::{aggregate_attendance_records, AttendanceInvoiceRow, AttendanceSourceRecord};
+pub use edi_insurance::{
+    apply_edi_premiums_to_invoice, EdiInsuranceApplication, EdiInsuranceConfig,
+    EdiInsuranceInvoice, EdiInsurancePremiumRecord, EdiPremiumSource,
+};
 pub use employment_insurance_65::{
     age_years_from_korean_identity, is_age_65_plus_for_period, resolve_ei_65_for_payroll,
     Ei65EligibilityStatus, Ei65PayrollInput, Ei65PayrollResult, Ei65UnknownDefault,

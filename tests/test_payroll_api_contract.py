@@ -157,6 +157,26 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertIn("공제 생략", ei65["example_unknown_result"]["warning"])
         self.assertIn("resolve_ei_65_for_payroll", response["ei65_payroll_decision_entrypoint"])
 
+
+    def test_contract_declares_rust_edi_insurance_application(self) -> None:
+        contract = payroll_api_contract()
+        edi = contract["edi_insurance_application"]
+        response = contract["response"]
+
+        self.assertIn("apply_edi_premiums_to_invoice", edi["rust_entrypoint"])
+        self.assertIn("core.payroll.edi_insurance.apply_edi_premiums_to_inv", edi["python_compatibility_source"])
+        self.assertEqual(edi["source_values"], ["manual", "import", "api", "calculated"])
+        self.assertIn("respect_age_exempt", edi["config_fields"])
+        self.assertIn("industrial_accident_employee", edi["record_fields"])
+        self.assertEqual(edi["messages"]["badge"], "EDI 조회")
+        self.assertEqual(edi["example_application"]["invoice"]["long_term_care"], 5_180)
+        self.assertEqual(edi["example_application"]["invoice"]["insurance_total"], 145_180)
+        self.assertEqual(edi["example_application"]["invoice"]["edi_premium_source_type"], "manual")
+        self.assertIn(
+            "apply_edi_premiums_to_invoice",
+            response["edi_insurance_application_entrypoint"],
+        )
+
     def test_contract_declares_rust_site_benefits_application(self) -> None:
         contract = payroll_api_contract()
         benefits = contract["site_benefits_application"]

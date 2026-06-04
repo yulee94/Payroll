@@ -4,6 +4,10 @@ use crate::access::{
 use crate::attendance::{
     aggregate_attendance_records, AttendanceInvoiceRow, AttendanceSourceRecord,
 };
+use crate::edi_insurance::{
+    apply_edi_premiums_to_invoice, EdiInsuranceApplication, EdiInsuranceConfig,
+    EdiInsuranceInvoice, EdiInsurancePremiumRecord,
+};
 use crate::employment_insurance_65::{
     resolve_ei_65_for_payroll, Ei65PayrollInput, Ei65PayrollResult,
 };
@@ -228,6 +232,19 @@ impl PayrollApiService {
         resolve_ei_65_for_payroll(input)
     }
 
+    pub fn apply_edi_premiums_to_invoice<S>(
+        &self,
+        invoice: EdiInsuranceInvoice,
+        record: Option<&EdiInsurancePremiumRecord>,
+        config: &EdiInsuranceConfig,
+        payroll_period: S,
+    ) -> EdiInsuranceApplication
+    where
+        S: AsRef<str>,
+    {
+        apply_edi_premiums_to_invoice(invoice, record, config, payroll_period)
+    }
+
     pub fn apply_site_benefits_to_invoice<S>(
         &self,
         invoice: SiteBenefitsInvoice,
@@ -349,6 +366,9 @@ fn readiness_state(checks: &[ReadinessCheck]) -> ReadinessState {
 #[cfg(test)]
 mod tests {
     use crate::access::{PayrollAction, PayrollPosition, PayrollPrincipal, PayrollRole};
+    use crate::edi_insurance::{
+        EdiInsuranceConfig, EdiInsuranceInvoice, EdiInsurancePremiumRecord,
+    };
     use crate::employment_insurance_65::{
         Ei65EligibilityStatus, Ei65PayrollInput, Ei65UnknownDefault, Ei65VerificationRecord,
     };
@@ -408,6 +428,27 @@ mod tests {
         assert_eq!(value["ok"], true);
         assert_eq!(value["action"], "run");
         assert_eq!(value["scope"], "COSS/Site A/2026-05");
+    }
+
+    #[test]
+    fn service_applies_edi_premiums_to_invoice() {
+        let service = PayrollApiService::new(ServiceConfig::default());
+        let invoice = EdiInsuranceInvoice::new("김철수");
+        let record = EdiInsurancePremiumRecord::new("2026-06")
+            .with_national_pension(80_000)
+            .with_health_insurance(40_000)
+            .with_employment_insurance(20_000);
+        let result = service.apply_edi_premiums_to_invoice(
+            invoice,
+            Some(&record),
+            &EdiInsuranceConfig::new().with_use_edi_premiums(true),
+            "2026-06",
+        );
+        let value = serde_json::to_value(&result).unwrap();
+
+        assert!(result.applied);
+        assert_eq!(result.invoice.insurance_total, 145_180);
+        assert_eq!(value["invoice"]["edi_premium_badge"], "EDI 조회");
     }
 
     #[test]
