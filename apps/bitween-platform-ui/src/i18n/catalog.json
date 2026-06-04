@@ -6782,6 +6782,132 @@
         "zh-Hans-CN": "前往设置画面，继续确认公司基本信息和子账户运营标准。",
         "ja-JP": "設定画面で法人基本情報とサブアカウント運用基準を続けて確認します。"
       }
+    },
+    {
+      "key": "screens.archive.review.title",
+      "values": {
+        "ko-KR": "자료 검토 요약",
+        "en-US": "Archive review summary",
+        "zh-Hans-CN": "资料复核摘要",
+        "ja-JP": "資料確認サマリー"
+      }
+    },
+    {
+      "key": "screens.archive.review.description",
+      "values": {
+        "ko-KR": "보관 상태, 접근 권한, 결재 첨부 자료를 먼저 점검하고 관련 업무로 이동합니다.",
+        "en-US": "Review storage status, access permissions, and approval attachments first, then jump to the related workflow.",
+        "zh-Hans-CN": "先检查存档状态、访问权限和审批附件，然后跳转到相关业务。",
+        "ja-JP": "保管状態、アクセス権限、承認添付資料を先に確認し、関連業務へ移動します。"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.payrollOutputs.label",
+      "values": {
+        "ko-KR": "급여 산출물",
+        "en-US": "Payroll outputs",
+        "zh-Hans-CN": "工资结果",
+        "ja-JP": "給与算出物"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.payrollOutputs.status",
+      "values": {
+        "ko-KR": "보관됨",
+        "en-US": "Stored",
+        "zh-Hans-CN": "已存档",
+        "ja-JP": "保管済み"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.payrollOutputs.title",
+      "values": {
+        "ko-KR": "월별 보고서 연결",
+        "en-US": "Monthly report linkage",
+        "zh-Hans-CN": "月度报告连接",
+        "ja-JP": "月別レポート連携"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.payrollOutputs.detail",
+      "values": {
+        "ko-KR": "급여 화면에서 산출 흐름과 보관 상태를 이어서 확인합니다.",
+        "en-US": "Continue to Payroll to review calculation flow and storage status together.",
+        "zh-Hans-CN": "前往工资画面，继续同时检查计算流程和存档状态。",
+        "ja-JP": "給与画面で算出フローと保管状態を続けて確認します。"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.accessReview.label",
+      "values": {
+        "ko-KR": "접근 권한",
+        "en-US": "Access permissions",
+        "zh-Hans-CN": "访问权限",
+        "ja-JP": "アクセス権限"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.accessReview.status",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs review",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.accessReview.title",
+      "values": {
+        "ko-KR": "민감 자료 열람 범위",
+        "en-US": "Sensitive document visibility",
+        "zh-Hans-CN": "敏感资料可见范围",
+        "ja-JP": "機密資料の閲覧範囲"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.accessReview.detail",
+      "values": {
+        "ko-KR": "관리자 화면에서 Branch, 경영진, 일반 사원의 열람 범위를 확인합니다.",
+        "en-US": "Continue to Admin to review Branch, executive, and employee visibility ranges.",
+        "zh-Hans-CN": "前往管理员画面，检查 Branch、管理层和员工的可见范围。",
+        "ja-JP": "管理者画面で Branch、経営陣、一般社員の閲覧範囲を確認します。"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.approvalFiles.label",
+      "values": {
+        "ko-KR": "결재 첨부",
+        "en-US": "Approval files",
+        "zh-Hans-CN": "审批附件",
+        "ja-JP": "承認添付"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.approvalFiles.status",
+      "values": {
+        "ko-KR": "연결 중",
+        "en-US": "Linked",
+        "zh-Hans-CN": "已连接",
+        "ja-JP": "連携中"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.approvalFiles.title",
+      "values": {
+        "ko-KR": "전자결재 문서 첨부",
+        "en-US": "Approval document attachments",
+        "zh-Hans-CN": "电子审批文档附件",
+        "ja-JP": "電子承認文書添付"
+      }
+    },
+    {
+      "key": "screens.archive.review.cards.approvalFiles.detail",
+      "values": {
+        "ko-KR": "전자결재 화면으로 이동해 대기 문서와 첨부자료 상태를 이어서 봅니다.",
+        "en-US": "Continue to Workflow to review pending documents and attachment status.",
+        "zh-Hans-CN": "前往电子审批画面，继续查看待处理文档和附件状态。",
+        "ja-JP": "電子承認画面へ移動し、待機文書と添付資料の状態を続けて確認します。"
+      }
     }
   ],
   "languageDisplayNames": [
