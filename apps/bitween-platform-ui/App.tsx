@@ -3,18 +3,16 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaView, StyleSheet, View } from "react-native";
 
 import { AppShell } from "./src/components";
-import { navigationItems } from "./src/data";
 import { colors } from "./src/theme";
 import type { PlatformId } from "./src/types";
+import { getNavigationItem, previewPlatformViewModel } from "./src/viewModel";
 import { LauncherScreen, LoginScreen, ModuleScreen, PayrollScreen } from "./src/screens";
 
 export default function App() {
   const [activeId, setActiveId] = useState<PlatformId>("home");
   const [authenticated, setAuthenticated] = useState(false);
-  const active = useMemo(
-    () => navigationItems.find((item) => item.id === activeId) ?? navigationItems[0],
-    [activeId]
-  );
+  const active = useMemo(() => getNavigationItem(activeId), [activeId]);
+  const navigationItems = previewPlatformViewModel.launcher.navigation;
 
   const select = (id: PlatformId) => {
     if (!authenticated && id !== "home") {
