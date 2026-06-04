@@ -249,12 +249,13 @@ cargo test --workspace
 
 **Acceptance criteria:**
 
-- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, execution planning, authorization, run-result response shaping, health, and readiness.
+- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, execution planning, authorization, run-result response shaping, health, and readiness.
 - [ ] Python adapter is retained only as compatibility fallback while rollout is incomplete.
 - [x] Health/readiness behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [x] Run-result success/error envelope behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [x] Tenant/site/global operation-policy resolution behavior is defined in framework-neutral Rust DTOs and API contracts for supplied settings snapshots.
 - [x] Payroll execution routing/planning behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the compatibility executor.
+- [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [ ] Service-account permissions and initial latency/error budgets are defined for Kubernetes.
 
 **Verification:**
@@ -347,6 +348,35 @@ python -m unittest tests.test_payroll_api_contract -v
 npm run typecheck --prefix frontend
 ```
 
+
+
+## Implementation checkpoint: Rust payroll attendance aggregation
+
+Completed on 2026-06-04 as a payroll-domain behavior slice:
+
+- `crates/payroll-api` owns attendance source-record aggregation through
+  `aggregate_attendance_records` and
+  `PayrollApiService::aggregate_attendance_records`.
+- Rust groups normalized attendance records, applies per-record late/early grace
+  minutes, performs Python-compatible half-even hour rounding, and emits
+  invoice-compatible payroll rows.
+- Python remains the parser/workbook bridge for CSV/XLSX uploads until those I/O
+  surfaces are migrated behind parity tests.
+- Contract docs and TypeScript/Python metadata name the source-record and
+  invoice-row DTOs, including `_attendance_days` and `_attendance_input`.
+- Slice spec: `docs/PAYROLL_RUST_ATTENDANCE_AGGREGATION_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo fmt --check
+cargo test --workspace
+buck2 test //crates/payroll-api:payroll_api_test
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_attendance_import tests.test_payroll_api_contract -v
+npm run typecheck --prefix frontend
+git diff --check
+cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
+```
 
 ## Implementation checkpoint: Rust payroll execution planning
 

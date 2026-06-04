@@ -1,4 +1,5 @@
 pub mod access;
+pub mod attendance;
 pub mod error;
 pub mod execution_plan;
 pub mod policy;
@@ -12,6 +13,7 @@ pub use access::{
     authorize_payroll_request, PayrollAccessDecision, PayrollAction, PayrollPermission,
     PayrollPosition, PayrollPrincipal, PayrollRole,
 };
+pub use attendance::{aggregate_attendance_records, AttendanceInvoiceRow, AttendanceSourceRecord};
 pub use error::PayrollApiError;
 pub use execution_plan::{
     plan_payroll_execution, PayrollExecutionBackend, PayrollExecutionPlan, PayrollExecutionStep,

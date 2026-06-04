@@ -79,6 +79,21 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertEqual(response["validation"]["operation_policy_source"], "tenant")
         self.assertEqual(response["validation"]["error_code"], "")
 
+    def test_contract_declares_rust_attendance_aggregation(self) -> None:
+        contract = payroll_api_contract()
+        aggregation = contract["attendance_aggregation"]
+        response = contract["response"]
+
+        self.assertIn("aggregate_attendance_records", aggregation["rust_entrypoint"])
+        self.assertIn("services.attendance_import._aggregate_records", aggregation["python_compatibility_source"])
+        self.assertIn("name_key", aggregation["source_record_fields"])
+        self.assertIn("_attendance_days", aggregation["invoice_row_fields"])
+        self.assertEqual(aggregation["example_policy"]["rounding_minutes"], 15)
+        self.assertEqual(aggregation["example_invoice_rows"][0]["work_days"], 8.0)
+        self.assertEqual(aggregation["example_invoice_rows"][0]["early_leave_hours"], 0.25)
+        self.assertTrue(aggregation["example_invoice_rows"][0]["_attendance_input"])
+        self.assertIn("aggregate_attendance_records", response["attendance_aggregation_entrypoint"])
+
     def test_contract_declares_rust_operation_policy_resolution(self) -> None:
         contract = payroll_api_contract()
         resolution = contract["policy_resolution"]
