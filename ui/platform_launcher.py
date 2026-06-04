@@ -31,6 +31,7 @@ class PlatformLauncherPanel(tk.Frame):
         on_login: Callable[[], None] | None = None,
         on_logout: Callable[[], None] | None = None,
         on_theme_select: Callable[[str], None] | None = None,
+        on_open_payroll_page: Callable[[str], None] | None = None,
         on_open_compliance_docs: Callable[[], None] | None = None,
         **kwargs: Any,
     ) -> None:
@@ -39,6 +40,7 @@ class PlatformLauncherPanel(tk.Frame):
         self._on_login = on_login
         self._on_logout = on_logout
         self._on_theme_select = on_theme_select
+        self._on_open_payroll_page = on_open_payroll_page
         self._on_open_compliance_docs = on_open_compliance_docs
         self.appearance_panel: AppearanceSettingsPanel | None = None
         self._photo_refs: list[tk.PhotoImage] = []
@@ -105,6 +107,7 @@ class PlatformLauncherPanel(tk.Frame):
         if is_logged_in():
             self._build_gw_status_widgets(outer)
             self._build_workspace_or_login(outer)
+            self._build_payroll_readiness_section(outer)
             self._build_bulletin_section(outer)
             self._build_section_header(outer)
             self._build_card_area(outer)
@@ -209,7 +212,7 @@ class PlatformLauncherPanel(tk.Frame):
     def _build_appearance_section(self, parent: tk.Frame) -> None:
         """스크롤 맨 아래 — 테마·언어 컴팩트 바 (하단 도달 시에만 표시)."""
         self._appearance_anchor = tk.Frame(parent, bg=COLORS["bg"])
-        self._appearance_anchor.grid(row=6, column=0, sticky="ew")
+        self._appearance_anchor.grid(row=7, column=0, sticky="ew")
         self._appearance_anchor.grid_remove()
         self._bind_drag_scroll_bg(self._appearance_anchor)
 
@@ -309,6 +312,159 @@ class PlatformLauncherPanel(tk.Frame):
         if hasattr(self, "workspace_hub"):
             self.workspace_hub.refresh()
 
+    def _open_payroll_page(self, page: str) -> None:
+        if self._on_open_payroll_page is not None:
+            self._on_open_payroll_page(page)
+            return
+        self._on_open("payroll")
+
+    def _payroll_readiness_items(self) -> list[tuple[str, str, str, str]]:
+        items: list[tuple[str, str, str, str]] = []
+
+        try:
+            from core.session_service import session_tenant_id
+            from services.payroll_policy_store import (
+                INPUT_LABELS,
+                operation_policy_source_label,
+                resolve_payroll_operation_policy,
+            )
+
+            resolved = resolve_payroll_operation_policy("", tenant_id=session_tenant_id())
+            policy = resolved["policy"]
+            source = operation_policy_source_label(resolved["source"])
+            input_basis = INPUT_LABELS.get(policy["input_basis"], policy["input_basis"])
+            items.append(("입력 기준", input_basis, source, "#2563EB"))
+        except Exception:
+            items.append(("입력 기준", "청구서+근태 혼합", "기본값", "#2563EB"))
+
+        try:
+            from services.employee_roster_store import roster_exists, roster_updated_display
+
+            if roster_exists():
+                items.append(("근로자 명부", "준비됨", roster_updated_display(), "#0D9488"))
+            else:
+                items.append(("근로자 명부", "확인 필요", "templates/근로자명부.xlsx", "#B45309"))
+        except Exception:
+            items.append(("근로자 명부", "확인 필요", "상태 조회 실패", "#B45309"))
+
+        try:
+            from payroll_archive import list_payroll_periods
+
+            periods = list_payroll_periods()
+            if periods:
+                items.append(("산출 자료", f"{len(periods)}개 급여월", periods[0], "#7C3AED"))
+            else:
+                items.append(("산출 자료", "대기 중", "첫 청구서 업로드 필요", "#64748B"))
+        except Exception:
+            items.append(("산출 자료", "대기 중", "상태 조회 실패", "#64748B"))
+
+        items.append(("API 연결", "준비됨", "JSON 요청/응답 어댑터", "#1F3864"))
+        return items
+
+    def _build_payroll_readiness_section(self, outer: tk.Frame) -> None:
+        wrap = tk.Frame(outer, bg=COLORS["bg"])
+        wrap.grid(row=3, column=0, sticky="ew", padx=32, pady=(12, 0))
+        wrap.grid_columnconfigure(0, weight=1)
+        self._bind_drag_scroll_bg(wrap)
+
+        shell = tk.Frame(
+            wrap,
+            bg=COLORS["card"],
+            highlightbackground=COLORS["border"],
+            highlightthickness=1,
+        )
+        shell.grid(row=0, column=0, sticky="ew")
+        shell.grid_columnconfigure(0, weight=1)
+        self._bind_drag_scroll_bg(shell)
+
+        head = tk.Frame(shell, bg=COLORS["card"])
+        head.grid(row=0, column=0, sticky="ew", padx=18, pady=(16, 10))
+        head.grid_columnconfigure(0, weight=1)
+
+        title_box = tk.Frame(head, bg=COLORS["card"])
+        title_box.grid(row=0, column=0, sticky="w")
+        tk.Label(
+            title_box,
+            text="급여 자동화 준비 현황",
+            bg=COLORS["card"],
+            fg=COLORS["text"],
+            font=(FONT, 13, "bold"),
+            anchor=tk.W,
+        ).pack(anchor=tk.W)
+        tk.Label(
+            title_box,
+            text="명부, 입력 기준, 산출 자료, API 연결 상태를 한 번에 확인합니다.",
+            bg=COLORS["card"],
+            fg=COLORS["muted"],
+            font=(FONT, 9),
+            anchor=tk.W,
+        ).pack(anchor=tk.W, pady=(3, 0))
+
+        action_row = tk.Frame(head, bg=COLORS["card"])
+        action_row.grid(row=0, column=1, sticky="e")
+        actions = (
+            ("급여 산출", "home", COLORS["accent"]),
+            ("자료함", "archive", "#334155"),
+            ("설정", "settings", "#0F766E"),
+        )
+        for label, page, color in actions:
+            tk.Button(
+                action_row,
+                text=label,
+                bg=color,
+                fg="#FFFFFF",
+                activebackground=color,
+                activeforeground="#FFFFFF",
+                relief=tk.FLAT,
+                font=(FONT, 9, "bold"),
+                padx=12,
+                pady=7,
+                cursor="hand2",
+                command=lambda p=page: self._open_payroll_page(p),
+            ).pack(side=tk.LEFT, padx=(6, 0))
+
+        grid = tk.Frame(shell, bg=COLORS["card"])
+        grid.grid(row=1, column=0, sticky="ew", padx=14, pady=(0, 16))
+        for col in range(4):
+            grid.grid_columnconfigure(col, weight=1, uniform="payroll_status")
+
+        for col, (title, value, detail, color) in enumerate(self._payroll_readiness_items()):
+            card = tk.Frame(
+                grid,
+                bg=COLORS["bg"],
+                highlightbackground=COLORS["border"],
+                highlightthickness=1,
+            )
+            card.grid(row=0, column=col, sticky="nsew", padx=4)
+            card.grid_columnconfigure(0, weight=1)
+            tk.Frame(card, bg=color, height=3).grid(row=0, column=0, sticky="ew")
+            tk.Label(
+                card,
+                text=title,
+                bg=COLORS["bg"],
+                fg=COLORS["muted"],
+                font=(FONT, 8),
+                anchor=tk.W,
+            ).grid(row=1, column=0, sticky="w", padx=12, pady=(10, 0))
+            tk.Label(
+                card,
+                text=value,
+                bg=COLORS["bg"],
+                fg=color,
+                font=(FONT, 15, "bold"),
+                anchor=tk.W,
+            ).grid(row=2, column=0, sticky="w", padx=12, pady=(2, 0))
+            tk.Label(
+                card,
+                text=detail,
+                bg=COLORS["bg"],
+                fg=COLORS["text"],
+                font=(FONT, 8),
+                anchor=tk.W,
+                wraplength=180,
+                justify=tk.LEFT,
+            ).grid(row=3, column=0, sticky="w", padx=12, pady=(2, 10))
+
     def _after_inline_login(self) -> None:
         # (레거시) 인라인 로그인 제거됨. 호출부 호환을 위해 남겨둡니다.
         if self._on_login:
@@ -325,14 +481,14 @@ class PlatformLauncherPanel(tk.Frame):
         from ui.bulletin_panel import BulletinSection
 
         wrap = tk.Frame(outer, bg=COLORS["bg"])
-        wrap.grid(row=3, column=0, sticky="ew", padx=32, pady=(12, 0))
+        wrap.grid(row=4, column=0, sticky="ew", padx=32, pady=(12, 0))
         wrap.grid_columnconfigure(0, weight=1)
         self.bulletin_section = BulletinSection(wrap, on_drag_bind=self._bind_drag_scroll_bg)
         self.bulletin_section.pack(fill=tk.X)
 
     def _build_section_header(self, outer: tk.Frame) -> None:
         row = tk.Frame(outer, bg=COLORS["bg"])
-        row.grid(row=4, column=0, sticky="ew", padx=36, pady=(20, 8))
+        row.grid(row=5, column=0, sticky="ew", padx=36, pady=(20, 8))
         tk.Label(
             row,
             text=t("launcher.platform_section.title", default="업무 플랫폼"),
@@ -352,7 +508,7 @@ class PlatformLauncherPanel(tk.Frame):
 
     def _build_card_area(self, outer: tk.Frame) -> None:
         grid_wrap = tk.Frame(outer, bg=COLORS["bg"])
-        grid_wrap.grid(row=5, column=0, sticky="ew", padx=24, pady=(0, 20))
+        grid_wrap.grid(row=6, column=0, sticky="ew", padx=24, pady=(0, 20))
         grid_wrap.grid_columnconfigure(0, weight=1)
 
         grid = tk.Frame(grid_wrap, bg=COLORS["bg"])
