@@ -2,6 +2,8 @@
 
 Initial React Native migration does not require backend changes. The current app uses typed mock data so frontend layout, navigation, responsive behavior, empty states, and screen copy can be reviewed without touching payroll logic.
 
+Future frontend integration should map backend/API-ready outputs into the read-only `PlatformViewModel` shape in `apps/bitween-platform-ui/src/viewModel.ts`.
+
 Future frontend integration will need stable read-only endpoints or adapters for:
 
 - Current tenant/session display info
