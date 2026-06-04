@@ -32,6 +32,7 @@ const state = {
   loginFeedback: "",
   password: "",
   search: "",
+  selectedRowKey: "",
   userId: ""
 };
 
@@ -179,7 +180,10 @@ function renderLogin() {
           ${field("아이디", "user-id", "admin", "text", state.userId)}
           ${field("비밀번호", "password", "admin", "password", state.password)}
           ${state.loginFeedback ? `<div class="inline-warning">${badge("확인 필요", "attention")}<span>${state.loginFeedback}</span></div>` : ""}
-          <button class="btn primary" type="submit">플랫폼 홈으로 이동</button>
+          <div class="login-actions">
+            <button class="btn primary" type="submit">플랫폼 홈으로 이동</button>
+            <button class="btn secondary" type="button" data-demo-login="true">Demo 계정으로 접속</button>
+          </div>
           <div class="notice">${badge("Demo 계정", "neutral")}<span class="helper">법인코드 0000 · 아이디 admin · 비밀번호 admin</span></div>
         </form>
       </div>
@@ -299,6 +303,7 @@ function renderModule(id) {
   const data = dashboards[id];
   if (!data) return empty("화면을 준비하고 있습니다.", "선택한 메뉴는 전용 화면으로 이동됩니다.");
   const rows = filterRows(data.rows);
+  const selectedRow = selectedWorkRow(rows);
   return html`
     <section class="card">
       ${sectionHead(navItems.find((item) => item.id === id)?.eyebrow || "", data.title, data.subtitle, button(primaryLabel(id), id, "primary"))}
@@ -311,7 +316,8 @@ function renderModule(id) {
         <label class="search-box" for="work-search"><span>검색</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="업무, 상태, 담당자 검색" /></label>
       </div>
       <div class="list-summary"><strong>${rows.length}건</strong><span class="helper">${state.filter} 필터${state.search ? ` · "${escapeText(state.search)}" 검색` : ""}</span></div>
-      ${table(rows)}
+      ${table(rows, true)}
+      ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
     <div class="action-panels">
       <section class="card"><strong>${primaryLabel(id)}</strong><span class="helper">주요 업무 화면으로 이동합니다.</span>${button("이동", id, "ghost")}</section>
@@ -334,13 +340,43 @@ function metrics(items) {
   `).join("")}</div>`;
 }
 
-function table(rows) {
+function table(rows, selectable = false) {
   if (!rows.length) return empty("표시할 항목이 없습니다.", "처리할 업무가 생기면 목록이 자동으로 채워집니다.");
   return `<div class="table">
     <div class="table-row header"><span>구분</span><span>상태</span><span>담당</span><span>다음 작업</span></div>
-    ${rows.map(([category, status, owner, next, tone]) => `
-      <div class="table-row"><span><strong>${category}</strong></span><span>${badge(status, tone)}</span><span>${owner}</span><span>${next}</span></div>
-    `).join("")}
+    ${rows.map(([category, status, owner, next, tone]) => {
+      const key = rowKey([category, status, owner, next, tone]);
+      const content = `<span><strong>${category}</strong></span><span>${badge(status, tone)}</span><span>${owner}</span><span>${next}</span>`;
+      return selectable ? `
+      <button class="table-row row-button ${state.selectedRowKey === key ? "selected" : ""}" data-row-key="${escapeText(key)}">
+        ${content}
+      </button>
+    ` : `
+      <div class="table-row">
+        <span><strong>${category}</strong></span><span>${badge(status, tone)}</span><span>${owner}</span><span>${next}</span>
+      </div>
+    `;
+    }).join("")}
+  </div>`;
+}
+
+function rowKey(row) {
+  return row.slice(0, 4).join("|");
+}
+
+function selectedWorkRow(rows) {
+  if (!rows.length) return undefined;
+  return rows.find((row) => rowKey(row) === state.selectedRowKey) || rows[0];
+}
+
+function workDetail([category, status, owner, next, tone]) {
+  return `<div class="detail-panel">
+    <div class="detail-head"><div><span class="helper">선택한 업무</span><strong>${escapeText(category)}</strong></div>${badge(status, tone)}</div>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="helper">담당</span><strong>${escapeText(owner)}</strong></div>
+      <div class="detail-item"><span class="helper">다음 작업</span><span>${escapeText(next)}</span></div>
+    </div>
+    <div class="action-row">${button("상세 보기", state.activeId, "secondary")}${button("담당자 확인", state.activeId, "ghost")}</div>
   </div>`;
 }
 
@@ -407,6 +443,7 @@ function bindEvents() {
       state.activeId = el.dataset.target;
       state.filter = "전체";
       state.search = "";
+      state.selectedRowKey = "";
       state.loginFeedback = "";
       render();
       toast(`"${navItems.find((item) => item.id === state.activeId)?.label || "화면"}" 화면으로 이동했습니다.`);
@@ -416,8 +453,17 @@ function bindEvents() {
   document.querySelectorAll("[data-filter]").forEach((el) => {
     el.addEventListener("click", () => {
       state.filter = el.dataset.filter;
+      state.selectedRowKey = "";
       render();
       toast(`${state.filter} 필터가 선택되었습니다.`);
+    });
+  });
+
+  document.querySelectorAll("[data-row-key]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.selectedRowKey = el.dataset.rowKey;
+      render();
+      toast("업무 상세를 열었습니다.");
     });
   });
 
@@ -429,8 +475,25 @@ function bindEvents() {
       state.loginFeedback = "";
       state.password = "";
       state.search = "";
+      state.selectedRowKey = "";
       render();
       toast("로그아웃했습니다.");
+    });
+  });
+
+  document.querySelectorAll("[data-demo-login]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.companyCode = demoAccount.companyCode;
+      state.userId = demoAccount.userId;
+      state.password = demoAccount.password;
+      state.loginFeedback = "";
+      state.authed = true;
+      state.activeId = "home";
+      state.filter = "전체";
+      state.search = "";
+      state.selectedRowKey = "";
+      render();
+      toast("Demo 계정으로 접속했습니다.");
     });
   });
 
@@ -439,6 +502,7 @@ function bindEvents() {
     search.addEventListener("input", (event) => {
       const cursor = event.target.selectionStart;
       state.search = event.target.value;
+      state.selectedRowKey = "";
       render();
       window.requestAnimationFrame(() => {
         const nextSearch = document.getElementById("work-search");

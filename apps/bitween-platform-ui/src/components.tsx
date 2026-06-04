@@ -156,7 +156,13 @@ export function EmptyState({ description, title }: { readonly description: strin
   );
 }
 
-export function DataTable({ rows }: { readonly rows: readonly ModuleRow[] }) {
+type DataTableProps = {
+  readonly onRowPress?: (row: ModuleRow) => void;
+  readonly rows: readonly ModuleRow[];
+  readonly selectedRowId?: string;
+};
+
+export function DataTable({ onRowPress, rows, selectedRowId }: DataTableProps) {
   const { width } = useWindowDimensions();
   const compact = width < 760;
 
@@ -168,14 +174,23 @@ export function DataTable({ rows }: { readonly rows: readonly ModuleRow[] }) {
     return (
       <View style={styles.rowCards}>
         {rows.map((row) => (
-          <View key={row.id} style={styles.rowCard}>
+          <Pressable
+            accessibilityRole={onRowPress ? "button" : undefined}
+            key={row.id}
+            onPress={() => onRowPress?.(row)}
+            style={({ pressed }) => [
+              styles.rowCard,
+              selectedRowId === row.id && styles.rowSelected,
+              pressed && onRowPress && styles.buttonPressed
+            ]}
+          >
             <View style={styles.rowCardHeader}>
               <Label weight="bold">{row.category}</Label>
               <Badge tone={row.tone}>{row.status}</Badge>
             </View>
             <Label size="sm" muted>담당: {row.owner}</Label>
             <Label size="sm">{row.nextStep}</Label>
-          </View>
+          </Pressable>
         ))}
       </View>
     );
@@ -190,14 +205,23 @@ export function DataTable({ rows }: { readonly rows: readonly ModuleRow[] }) {
         <Text style={[styles.tableCell, styles.tableHeading]}>다음 작업</Text>
       </View>
       {rows.map((row) => (
-        <View key={row.id} style={styles.tableRow}>
+        <Pressable
+          accessibilityRole={onRowPress ? "button" : undefined}
+          key={row.id}
+          onPress={() => onRowPress?.(row)}
+          style={({ pressed }) => [
+            styles.tableRow,
+            selectedRowId === row.id && styles.tableRowSelected,
+            pressed && onRowPress && styles.buttonPressed
+          ]}
+        >
           <Text style={styles.tableCell}>{row.category}</Text>
           <View style={styles.tableCellShell}>
             <Badge tone={row.tone}>{row.status}</Badge>
           </View>
           <Text style={styles.tableCell}>{row.owner}</Text>
           <Text style={styles.tableCell}>{row.nextStep}</Text>
-        </View>
+        </Pressable>
       ))}
     </View>
   );
@@ -493,6 +517,10 @@ const styles = StyleSheet.create({
   rowCards: {
     gap: spacing.md
   },
+  rowSelected: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent
+  },
   sectionAction: {
     alignItems: "flex-end"
   },
@@ -566,6 +594,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.md,
     padding: spacing.md
+  },
+  tableRowSelected: {
+    backgroundColor: colors.accentSoft
   },
   text: {
     color: colors.text,

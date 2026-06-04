@@ -23,7 +23,7 @@ import {
   workQueue
 } from "./data";
 import { colors, radius, spacing, toneColor } from "./theme";
-import type { NavigationItem, PlatformId } from "./types";
+import type { ModuleRow, NavigationItem, PlatformId } from "./types";
 
 type ScreenProps = {
   readonly active: NavigationItem;
@@ -62,6 +62,14 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
       setFeedback("demo 계정 정보가 일치하지 않습니다. 법인코드 0000, 아이디 admin, 비밀번호 admin으로 입력하세요.");
       return;
     }
+    setFeedback("");
+    onSelect("home");
+  };
+
+  const handleDemoLogin = () => {
+    setCompanyCode(demoAccount.companyCode);
+    setUserId(demoAccount.userId);
+    setPassword(demoAccount.password);
     setFeedback("");
     onSelect("home");
   };
@@ -134,7 +142,10 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
             <Label size="sm" muted>{feedback}</Label>
           </View>
         ) : null}
-        <ActionButton onPress={handleLogin}>{canSubmit ? "플랫폼 홈으로 이동" : "로그인"}</ActionButton>
+        <View style={styles.loginActions}>
+          <ActionButton onPress={handleLogin}>{canSubmit ? "플랫폼 홈으로 이동" : "로그인"}</ActionButton>
+          <ActionButton onPress={handleDemoLogin} variant="secondary">Demo 계정으로 접속</ActionButton>
+        </View>
         <View style={styles.inlineNotice}>
           <Badge tone="neutral">Demo 계정</Badge>
           <Label size="sm" muted>법인코드 0000 · 아이디 admin · 비밀번호 admin</Label>
@@ -254,6 +265,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
   const defaultFilter = dashboard.filters[0] ?? "전체";
   const [activeFilter, setActiveFilter] = useState<string>(defaultFilter);
   const [search, setSearch] = useState("");
+  const [selectedRowId, setSelectedRowId] = useState<string | undefined>(dashboard.rows[0]?.id);
   const filteredRows = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
     return dashboard.rows.filter((row) => {
@@ -263,11 +275,29 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
       return matchesFilter && matchesSearch;
     });
   }, [activeFilter, dashboard.rows, search]);
+  const selectedRow = useMemo(
+    () => filteredRows.find((row) => row.id === selectedRowId) ?? filteredRows[0],
+    [filteredRows, selectedRowId]
+  );
 
   useEffect(() => {
     setActiveFilter(defaultFilter);
     setSearch("");
-  }, [active.id, defaultFilter]);
+    setSelectedRowId(dashboard.rows[0]?.id);
+  }, [active.id, dashboard.rows, defaultFilter]);
+
+  useEffect(() => {
+    setSelectedRowId((current) => {
+      if (filteredRows.some((row) => row.id === current)) {
+        return current;
+      }
+      return filteredRows[0]?.id;
+    });
+  }, [filteredRows]);
+
+  const selectRow = (row: ModuleRow) => {
+    setSelectedRowId(row.id);
+  };
 
   return (
     <View style={styles.stack}>
@@ -306,7 +336,12 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
           <Label weight="bold">{filteredRows.length}건</Label>
           <Label size="sm" muted>{activeFilter} 필터{search ? ` · "${search}" 검색` : ""}</Label>
         </View>
-        {dashboard.rows.length > 0 ? <DataTable rows={filteredRows} /> : <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />}
+        {dashboard.rows.length > 0 ? (
+          <DataTable onRowPress={selectRow} rows={filteredRows} selectedRowId={selectedRow?.id} />
+        ) : (
+          <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />
+        )}
+        {selectedRow ? <WorkDetailPanel row={selectedRow} /> : null}
       </Card>
 
       <View style={styles.actionPanels}>
@@ -344,6 +379,34 @@ function PayrollReadiness({ onSelect }: Pick<ScreenProps, "onSelect">) {
   );
 }
 
+function WorkDetailPanel({ row }: { readonly row: ModuleRow }) {
+  return (
+    <View style={styles.detailPanel}>
+      <View style={styles.detailHeader}>
+        <View style={styles.detailTitle}>
+          <Label size="sm" muted>선택한 업무</Label>
+          <Label weight="bold">{row.category}</Label>
+        </View>
+        <Badge tone={row.tone}>{row.status}</Badge>
+      </View>
+      <View style={styles.detailGrid}>
+        <View style={styles.detailItem}>
+          <Label size="sm" muted>담당</Label>
+          <Label weight="bold">{row.owner}</Label>
+        </View>
+        <View style={styles.detailItem}>
+          <Label size="sm" muted>다음 작업</Label>
+          <Label>{row.nextStep}</Label>
+        </View>
+      </View>
+      <View style={styles.actionRow}>
+        <ActionButton onPress={() => undefined} variant="secondary">상세 보기</ActionButton>
+        <ActionButton onPress={() => undefined} variant="ghost">담당자 확인</ActionButton>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   actionPanels: {
     flexDirection: "row",
@@ -358,6 +421,39 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm
+  },
+  detailGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  detailHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md,
+    justifyContent: "space-between"
+  },
+  detailItem: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexBasis: 220,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  detailPanel: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  detailTitle: {
+    gap: spacing.xs
   },
   formGroup: {
     gap: spacing.xs
@@ -450,6 +546,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.md
+  },
+  loginActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
   },
   loginHero: {
     backgroundColor: colors.accent,

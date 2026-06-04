@@ -186,6 +186,12 @@ button {
   gap: 8px;
 }
 
+.login-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .inline-warning {
   align-items: center;
   background: var(--warning-soft);
@@ -499,6 +505,25 @@ button {
   padding: 12px;
 }
 
+.row-button {
+  background: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+.row-button:hover,
+.row-button.selected {
+  background: var(--accent-soft);
+}
+
+.row-button.selected {
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+
 .table-row.header {
   background: var(--accent-soft);
   border-top: 0;
@@ -521,6 +546,42 @@ button {
   justify-items: center;
   padding: 32px;
   text-align: center;
+}
+
+.detail-panel {
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.detail-head {
+  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.detail-head > div,
+.detail-item {
+  display: grid;
+  gap: 4px;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.detail-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
 }
 
 .toast {
