@@ -1,3 +1,4 @@
+import { defaultLocale, t, type SupportedLocale } from "./i18n";
 import type {
   CalendarEvent,
   MetricItem,
@@ -11,16 +12,16 @@ import type {
   WorkQueueItem
 } from "./types";
 import {
-  calendarEvents,
-  moduleDashboards,
-  navigationItems,
-  payrollSettingsRows,
-  payrollSteps,
-  platformMetrics,
-  previewRows,
-  readinessCards,
-  todayTodos,
-  workQueue
+  getCalendarEvents,
+  getModuleDashboards,
+  getNavigationItems,
+  getPayrollSettingsRows,
+  getPayrollSteps,
+  getPlatformMetrics,
+  getPreviewRows,
+  getReadinessCards,
+  getTodayTodos,
+  getWorkQueue
 } from "./data";
 
 export type NonEmptyNavigation = readonly [NavigationItem, ...NavigationItem[]];
@@ -56,39 +57,42 @@ export type PlatformViewModel = {
 };
 
 export type PlatformViewModelAdapter = {
-  readonly load: () => Promise<PlatformViewModel> | PlatformViewModel;
+  readonly load: (locale: SupportedLocale) => Promise<PlatformViewModel> | PlatformViewModel;
 };
 
-export const previewSession: SessionViewModel = {
+export const getPreviewSession = (locale: SupportedLocale): SessionViewModel => ({
   companyCodeLabel: "0000",
   displayName: "admin",
   employeeNumber: "BW-0001",
-  roleLabel: "Demo 관리자",
+  roleLabel: t(locale, "session.roleLabel"),
   tenantName: "Bitween Demo"
-};
+});
 
-export const previewPlatformViewModel: PlatformViewModel = {
+export const getPreviewPlatformViewModel = (locale: SupportedLocale): PlatformViewModel => ({
   launcher: {
-    calendarEvents,
-    metrics: platformMetrics,
-    navigation: navigationItems,
-    todayTodos,
-    workQueue
+    calendarEvents: getCalendarEvents(locale),
+    metrics: getPlatformMetrics(locale),
+    navigation: getNavigationItems(locale),
+    todayTodos: getTodayTodos(locale),
+    workQueue: getWorkQueue(locale)
   },
-  modules: moduleDashboards,
+  modules: getModuleDashboards(locale),
   payroll: {
-    previewRows,
-    readinessCards,
-    settingsRows: payrollSettingsRows,
-    steps: payrollSteps
+    previewRows: getPreviewRows(locale),
+    readinessCards: getReadinessCards(locale),
+    settingsRows: getPayrollSettingsRows(locale),
+    steps: getPayrollSteps(locale)
   },
-  session: previewSession
-};
+  session: getPreviewSession(locale)
+});
+
+export const previewPlatformViewModel: PlatformViewModel = getPreviewPlatformViewModel(defaultLocale);
 
 export const previewViewModelAdapter: PlatformViewModelAdapter = {
-  load: () => previewPlatformViewModel
+  load: (locale) => getPreviewPlatformViewModel(locale)
 };
 
-export const getNavigationItem = (id: PlatformId): NavigationItem =>
-  previewPlatformViewModel.launcher.navigation.find((item) => item.id === id) ??
-  previewPlatformViewModel.launcher.navigation[0];
+export const getNavigationItem = (id: PlatformId, locale: SupportedLocale = defaultLocale): NavigationItem => {
+  const navigation = getNavigationItems(locale);
+  return navigation.find((item) => item.id === id) ?? navigation[0];
+};

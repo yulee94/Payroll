@@ -14,6 +14,8 @@ Bitween Payroll은 급여·HR·전자결재·업무일지·출장 lifecycle·KPI
 - 출장 lifecycle: 출장계획 → 출장승인/실행 → 업무일지 기록 → 승인된 출장보고서 → KPI 실적반영 → 관리자 ongoing/completed/overdue view
 - HR, 채용, KPI, 정비, 입찰, 회계, Personal AI 업무 보조 기능
 - TypeScript frontend contracts and React Native platform shell for cross-platform UI delivery
+- Industry-leader maturity target inspired by SAP, Remote People, and Workday: role workspaces, employee self-service, manager insight hubs, compliance cockpit, guided setup, lifecycle timelines, and auditable actions localized for Korean SMEs
+- Fully single-language i18n target for Korean, English, Chinese, and Japanese across React Native, web, and Tauri surfaces
 - Rust payroll API contract crate as the first backend migration slice
 
 ## Production stack
@@ -135,4 +137,4 @@ git checkout -b codex/my-feature
 
 ## 상용화 방향
 
-상용화 기준은 Kubernetes-native 운영, Rust backend parity, TypeScript frontend delivery, tenant/legal-entity isolation, reproducible tests, observable runtime health, and safe data migration. Compatibility code is maintained only until each Rust slice is production-proven and explicitly decommissioned.
+상용화 기준은 Kubernetes-native 운영, Rust backend parity, TypeScript frontend delivery, SAP/Remote People/Workday-inspired Korean SME maturity, fully single-language i18n for Korean/English/Chinese/Japanese, Korean labor-market and labor-law localization, WebAuthn/JWT-backed Zero Trust authentication, RBAC+ABAC authorization, tenant/legal-entity isolation, reproducible tests, observable runtime health, and safe data migration. Compatibility code is maintained only until each Rust slice is production-proven and explicitly decommissioned.

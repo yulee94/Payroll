@@ -10,7 +10,8 @@ import {
 } from "react-native";
 import type { StyleProp, ViewStyle } from "react-native";
 
-import { colors, radius, sidebarThemes, spacing, toneBackground, toneColor } from "./theme";
+import { t, type SupportedLocale } from "./i18n";
+import { colors, getSidebarThemes, radius, spacing, toneBackground, toneColor } from "./theme";
 import type { MetricItem, ModuleRow, NavigationItem, ReadinessTone, SidebarTheme, SidebarThemeId } from "./types";
 
 const companyLogoUri =
@@ -166,12 +167,16 @@ type DataTableProps = {
   readonly selectedRowId?: string;
 };
 
-export function DataTable({ onRowPress, rows, selectedRowId }: DataTableProps) {
+type LocalizedDataTableProps = DataTableProps & {
+  readonly locale: SupportedLocale;
+};
+
+export function DataTable({ locale, onRowPress, rows, selectedRowId }: LocalizedDataTableProps) {
   const { width } = useWindowDimensions();
   const compact = width < 760;
 
   if (rows.length === 0) {
-    return <EmptyState title="표시할 항목이 없습니다." description="처리할 업무가 생기면 목록이 자동으로 채워집니다." />;
+    return <EmptyState title={t(locale, "table.empty.title")} description={t(locale, "table.empty.description")} />;
   }
 
   if (compact) {
@@ -184,6 +189,7 @@ export function DataTable({ onRowPress, rows, selectedRowId }: DataTableProps) {
             onPress={() => onRowPress?.(row)}
             style={({ pressed }) => [
               styles.rowCard,
+              { borderLeftColor: toneColor(row.tone) },
               selectedRowId === row.id && styles.rowSelected,
               pressed && onRowPress && styles.buttonPressed
             ]}
@@ -192,7 +198,7 @@ export function DataTable({ onRowPress, rows, selectedRowId }: DataTableProps) {
               <Label weight="bold">{row.category}</Label>
               <Badge tone={row.tone}>{row.status}</Badge>
             </View>
-            <Label size="sm" muted>담당: {row.owner}</Label>
+            <Label size="sm" muted>{t(locale, "table.mobile.owner", { owner: row.owner })}</Label>
             <Label size="sm">{row.nextStep}</Label>
           </Pressable>
         ))}
@@ -203,10 +209,10 @@ export function DataTable({ onRowPress, rows, selectedRowId }: DataTableProps) {
   return (
     <View style={styles.table}>
       <View style={styles.tableHeader}>
-        <Text style={[styles.tableCell, styles.tableHeading]}>구분</Text>
-        <Text style={[styles.tableCell, styles.tableHeading]}>상태</Text>
-        <Text style={[styles.tableCell, styles.tableHeading]}>담당</Text>
-        <Text style={[styles.tableCell, styles.tableHeading]}>다음 작업</Text>
+        <Text style={[styles.tableCell, styles.tableHeading]}>{t(locale, "table.columns.category")}</Text>
+        <Text style={[styles.tableCell, styles.tableHeading]}>{t(locale, "table.columns.status")}</Text>
+        <Text style={[styles.tableCell, styles.tableHeading]}>{t(locale, "table.columns.owner")}</Text>
+        <Text style={[styles.tableCell, styles.tableHeading]}>{t(locale, "table.columns.nextStep")}</Text>
       </View>
       {rows.map((row) => (
         <Pressable
@@ -215,6 +221,7 @@ export function DataTable({ onRowPress, rows, selectedRowId }: DataTableProps) {
           onPress={() => onRowPress?.(row)}
           style={({ pressed }) => [
             styles.tableRow,
+            { borderLeftColor: toneColor(row.tone) },
             selectedRowId === row.id && styles.tableRowSelected,
             pressed && onRowPress && styles.buttonPressed
           ]}
@@ -235,25 +242,28 @@ type SidebarProps = {
   readonly compact: boolean;
   readonly items: readonly NavigationItem[];
   readonly activeId: NavigationItem["id"];
+  readonly locale: SupportedLocale;
   readonly onSelect: (id: NavigationItem["id"]) => void;
   readonly onThemeChange: (id: SidebarThemeId) => void;
   readonly theme: SidebarTheme;
 };
 
-export function Sidebar({ activeId, compact, items, onSelect, onThemeChange, theme }: SidebarProps) {
+export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeChange, theme }: SidebarProps) {
+  const sidebarThemes = getSidebarThemes(locale);
+
   return (
     <View style={[styles.sidebar, { backgroundColor: theme.sidebar }, compact && styles.sidebarCompact]}>
       <View style={[styles.brandBlock, compact && styles.brandBlockCompact]}>
         <View style={styles.brandRow}>
-          <Image accessibilityLabel="Bitween 회사 로고" source={{ uri: companyLogoUri }} style={styles.logoImage} />
+          <Image accessibilityLabel={t(locale, "shell.companyLogo")} source={{ uri: companyLogoUri }} style={styles.logoImage} />
           <View>
             <Label size="lg" weight="bold">Bitween</Label>
-            <Label size="sm" muted>업무 플랫폼</Label>
+            <Label size="sm" muted>{t(locale, "shell.brandSubtitle")}</Label>
           </View>
         </View>
       </View>
       <View style={[styles.themePanel, compact && styles.themePanelCompact]}>
-        <Label size="sm" weight="bold">메뉴 색상 옵션</Label>
+        <Label size="sm" weight="bold">{t(locale, "shell.themePanel.title")}</Label>
         <View style={styles.themeChips}>
           {sidebarThemes.map((item) => {
             const selected = item.id === theme.id;
@@ -307,8 +317,10 @@ export function Sidebar({ activeId, compact, items, onSelect, onThemeChange, the
 
 type ShellProps = PropsWithChildren<{
   readonly active: NavigationItem;
-  readonly employeeNumber?: string;
+  readonly employeeNumberLabel?: string;
   readonly items: readonly NavigationItem[];
+  readonly locale: SupportedLocale;
+  readonly logoutLabel: string;
   readonly onLogout?: () => void;
   readonly onSelect: (id: NavigationItem["id"]) => void;
   readonly onThemeChange: (id: SidebarThemeId) => void;
@@ -319,12 +331,14 @@ type ShellProps = PropsWithChildren<{
 export function AppShell({
   active,
   children,
-  employeeNumber,
+  employeeNumberLabel,
   items,
+  locale,
+  logoutLabel,
   onLogout,
   onSelect,
   onThemeChange,
-  sessionLabel = "법인 운영 콘솔",
+  sessionLabel,
   sidebarTheme
 }: ShellProps) {
   const { width } = useWindowDimensions();
@@ -332,7 +346,15 @@ export function AppShell({
 
   return (
     <View style={[styles.shell, compact && styles.shellCompact]}>
-      <Sidebar activeId={active.id} compact={compact} items={items} onSelect={onSelect} onThemeChange={onThemeChange} theme={sidebarTheme} />
+      <Sidebar
+        activeId={active.id}
+        compact={compact}
+        items={items}
+        locale={locale}
+        onSelect={onSelect}
+        onThemeChange={onThemeChange}
+        theme={sidebarTheme}
+      />
       <View style={styles.main}>
         <View style={[styles.header, compact && styles.headerCompact]}>
           <View style={styles.headerCopy}>
@@ -341,12 +363,29 @@ export function AppShell({
             <Label muted>{active.description}</Label>
           </View>
           <View style={styles.headerActions}>
-            <Badge tone="neutral">{sessionLabel}</Badge>
-            {employeeNumber ? <Badge tone="neutral">사번 {employeeNumber}</Badge> : null}
-            {onLogout ? <ActionButton onPress={onLogout} variant="ghost">로그아웃</ActionButton> : null}
+            {sessionLabel ? <Badge tone="neutral">{sessionLabel}</Badge> : null}
+            {employeeNumberLabel ? <Badge tone="neutral">{employeeNumberLabel}</Badge> : null}
+            {onLogout ? <ActionButton onPress={onLogout} variant="ghost">{logoutLabel}</ActionButton> : null}
           </View>
         </View>
-        <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]}>{children}</ScrollView>
+        <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]} style={styles.contentScroll}>
+          {children}
+        </ScrollView>
+        <View accessibilityLabel={t(locale, "shell.status.aria")} style={[styles.statusFooter, compact && styles.statusFooterCompact]}>
+          <View style={styles.statusFooterGroup}>
+            <View style={styles.statusDot} />
+            <Label size="sm" weight="bold">{t(locale, "shell.status.previewTitle")}</Label>
+            <Label size="sm" muted>{t(locale, "shell.status.demoCompany")}</Label>
+          </View>
+          <View style={styles.statusFooterGroup}>
+            <Badge tone="ready">{t(locale, "shell.status.uiOnly")}</Badge>
+            <Label size="sm" muted>{t(locale, "shell.status.logicUnchanged")}</Label>
+          </View>
+          <View style={styles.statusFooterGroup}>
+            <Badge tone="neutral">{t(locale, "shell.status.strictTs")}</Badge>
+            <Label size="sm" muted>{t(locale, "shell.status.reactNativeWebReady")}</Label>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -434,6 +473,9 @@ const styles = StyleSheet.create({
   },
   contentCompact: {
     padding: spacing.md
+  },
+  contentScroll: {
+    flex: 1
   },
   emptyMark: {
     color: colors.muted,
@@ -560,6 +602,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radius.lg,
     borderWidth: 1,
+    borderLeftWidth: 4,
     gap: spacing.sm,
     padding: spacing.md
   },
@@ -615,6 +658,35 @@ const styles = StyleSheet.create({
     borderRightWidth: 0,
     padding: spacing.md,
     width: "100%"
+  },
+  statusDot: {
+    backgroundColor: colors.success,
+    borderRadius: 999,
+    height: 8,
+    width: 8
+  },
+  statusFooter: {
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md,
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md
+  },
+  statusFooterCompact: {
+    alignItems: "flex-start",
+    paddingHorizontal: spacing.md
+  },
+  statusFooterGroup: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    minHeight: 30
   },
   themeChip: {
     alignItems: "center",
@@ -694,6 +766,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderTopColor: colors.divider,
     borderTopWidth: 1,
+    borderLeftWidth: 4,
     flexDirection: "row",
     gap: spacing.md,
     padding: spacing.md
