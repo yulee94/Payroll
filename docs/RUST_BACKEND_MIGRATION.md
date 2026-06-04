@@ -159,6 +159,38 @@ Verification evidence for this checkpoint:
 
 Slice spec: `docs/PAYROLL_RUST_ATTENDANCE_AGGREGATION_SLICE.md`.
 
+## Current implementation checkpoint: Rust payroll workplace-hours application
+
+Implemented on 2026-06-04 as the next payroll monthly-hours behavior slice:
+
+- `crates/payroll-api` now exposes `WorkplaceHoursPolicy`,
+  `WorkplaceHoursInvoice`, `WorkplaceMonthlyHoursResolution`,
+  `WorkplaceMonthlyHoursApplication`, `resolve_monthly_work_hours`, and
+  `apply_monthly_hours_to_invoice`.
+- `PayrollApiService::apply_monthly_hours_to_invoice` applies a supplied
+  workplace-hours policy to an invoice-compatible row without reading local
+  tenant/site settings or org alias repositories.
+- Rust preserves Python compatibility policy normalization, five mode values,
+  209-hour fallback behavior, non-positive invoice-hour fallback behavior, and
+  `_monthly_work_hours` / `_monthly_hours_source` metadata.
+- Python remains responsible for settings persistence, site/tenant/global policy
+  lookup, and canonical workplace aliases until those repository slices move to
+  Rust.
+- TypeScript and Python contract metadata now include workplace-hours policy,
+  invoice, resolution, and application DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo fmt --check`
+- `cargo test --workspace`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workplace_hours tests.test_payroll_api_contract -v`
+- `npm run typecheck --prefix frontend`
+- `git diff --check`
+- `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
+
+Slice spec: `docs/PAYROLL_RUST_WORKPLACE_HOURS_SLICE.md`.
+
 ## Current implementation checkpoint: Rust payroll fixed-hours application
 
 Implemented on 2026-06-04 as the next payroll record-generation behavior slice:

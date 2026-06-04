@@ -146,6 +146,42 @@ export interface PayrollAttendanceInvoiceRow {
   _attendance_input: true;
 }
 
+export type PayrollWorkplaceHoursMode =
+  | "fixed"
+  | "invoice_work_days"
+  | "invoice_base_days"
+  | "work_or_fixed"
+  | "base_or_fixed";
+
+export interface PayrollWorkplaceHoursPolicy {
+  mode: PayrollWorkplaceHoursMode;
+  hours: number;
+  daily_hours?: number;
+  break_minutes?: number;
+}
+
+export interface PayrollWorkplaceHoursInvoice {
+  workplace: string;
+  work_days: number;
+  base_days: number;
+  _monthly_work_hours?: number;
+  _monthly_hours_source: string;
+}
+
+export interface PayrollWorkplaceMonthlyHoursResolution {
+  hours: number;
+  source: string;
+  workplace: string;
+  policy: PayrollWorkplaceHoursPolicy;
+}
+
+export interface PayrollWorkplaceMonthlyHoursApplication {
+  hours: number;
+  source: string;
+  invoice: PayrollWorkplaceHoursInvoice;
+  policy: PayrollWorkplaceHoursPolicy;
+}
+
 export type PayrollFixedHoursPayType = "hourly" | "monthly_salary";
 
 export interface PayrollFixedHoursProfile {

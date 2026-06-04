@@ -293,6 +293,78 @@ def payroll_attendance_aggregation_example() -> dict[str, Any]:
     }
 
 
+def payroll_workplace_hours_application_example() -> dict[str, Any]:
+    """Return the Rust-owned workplace monthly-hours application contract shape."""
+    return {
+        "rust_entrypoint": "PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)",
+        "resolver_entrypoint": "resolve_monthly_work_hours(invoice, workplace, workplace_hours_policy)",
+        "calculator_entrypoint": "apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)",
+        "python_compatibility_source": "services.workplace_hours.apply_monthly_hours_to_invoice",
+        "settings_boundary": "Python compatibility code may still resolve tenant/site/global settings and canonical workplace aliases before supplying a policy to Rust.",
+        "mode_values": [
+            "fixed",
+            "invoice_work_days",
+            "invoice_base_days",
+            "work_or_fixed",
+            "base_or_fixed",
+        ],
+        "policy_fields": ["mode", "hours", "daily_hours", "break_minutes"],
+        "invoice_fields": [
+            "workplace",
+            "work_days",
+            "base_days",
+            "_monthly_work_hours",
+            "_monthly_hours_source",
+        ],
+        "example_policy": {
+            "mode": "invoice_work_days",
+            "hours": 209,
+            "daily_hours": 8,
+            "break_minutes": 60,
+        },
+        "example_invoice": {
+            "workplace": "청구장",
+            "work_days": 192,
+            "base_days": 209,
+        },
+        "example_resolution": {
+            "hours": 192,
+            "source": "청구장: 청구서 근무시간",
+            "workplace": "청구장",
+            "policy": {
+                "mode": "invoice_work_days",
+                "hours": 209,
+                "daily_hours": 8,
+                "break_minutes": 60,
+            },
+        },
+        "example_application": {
+            "hours": 192,
+            "source": "청구장: 청구서 근무시간",
+            "invoice": {
+                "workplace": "청구장",
+                "work_days": 192,
+                "base_days": 209,
+                "_monthly_work_hours": 192,
+                "_monthly_hours_source": "청구장: 청구서 근무시간",
+            },
+            "policy": {
+                "mode": "invoice_work_days",
+                "hours": 209,
+                "daily_hours": 8,
+                "break_minutes": 60,
+            },
+        },
+        "invariants": [
+            "invalid or missing modes fall back to fixed",
+            "missing, invalid, or non-positive policy hours fall back to 209",
+            "daily_hours is kept only when positive and break_minutes only when non-negative",
+            "invoice work/base hours are clamped at zero before mode selection",
+            "source labels preserve the Python compatibility Korean wording for all five modes",
+        ],
+    }
+
+
 def payroll_fixed_hours_application_example() -> dict[str, Any]:
     """Return the Rust-owned fixed-hours application contract shape."""
     return {
@@ -584,6 +656,7 @@ def payroll_api_contract() -> dict[str, Any]:
         },
         "input_types": list(PAYROLL_API_INPUT_TYPES),
         "attendance_aggregation": payroll_attendance_aggregation_example(),
+        "workplace_hours_application": payroll_workplace_hours_application_example(),
         "fixed_hours_application": payroll_fixed_hours_application_example(),
         "policy_resolution": payroll_policy_resolution_example(),
         "execution_plan": payroll_execution_plan_example(),
@@ -768,6 +841,7 @@ def payroll_api_contract() -> dict[str, Any]:
             "policy_resolution_entrypoint": "PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)",
             "execution_plan_entrypoint": "PayrollApiService::plan_run_request(request, policy_snapshot)",
             "attendance_aggregation_entrypoint": "PayrollApiService::aggregate_attendance_records(records, workplace, attendance_policy)",
+            "workplace_hours_application_entrypoint": "PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)",
             "fixed_hours_application_entrypoint": "PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)",
             "never_include": ["exception"],
         },

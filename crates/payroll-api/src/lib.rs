@@ -9,6 +9,7 @@ pub mod request;
 pub mod response;
 pub mod run;
 pub mod service;
+pub mod workplace_hours;
 
 pub use access::{
     authorize_payroll_request, PayrollAccessDecision, PayrollAction, PayrollPermission,
@@ -44,6 +45,12 @@ pub use run::{run_response_from_result, PayrollRunResponse, PayrollRunResult};
 pub use service::{
     HealthResponse, HealthStatus, PayrollApiService, ReadinessCheck, ReadinessResponse,
     ReadinessState, ServiceConfig,
+};
+pub use workplace_hours::{
+    apply_monthly_hours_to_invoice, resolve_monthly_work_hours, WorkplaceHoursInvoice,
+    WorkplaceHoursMode, WorkplaceHoursPolicy, WorkplaceMonthlyHoursApplication,
+    WorkplaceMonthlyHoursResolution, MODE_BASE_OR_FIXED, MODE_FIXED, MODE_INVOICE_BASE,
+    MODE_INVOICE_WORK, MODE_WORK_OR_FIXED,
 };
 
 pub const PAYROLL_API_VERSION: &str = "v1";
