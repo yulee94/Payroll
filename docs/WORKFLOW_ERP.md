@@ -106,6 +106,5 @@ python -m unittest tests.test_business_trip_lifecycle tests.test_business_trip_w
 | 비즈니스 | `core/workflow/service.py` |
 | 시드 | `core/workflow/seed.py` |
 | AI | `services/workflow_ai.py` |
-| Compatibility UI adapter | `ui/workflow_hub_panel.py` |
-| Platform registration | `core/platforms.py`, `app_ui.py` |
+| Production UI target | `apps/bitween-platform-ui/`, `frontend/` |
 | Production target | Rust workflow service under future `crates/` service crates |
