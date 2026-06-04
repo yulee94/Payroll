@@ -1,6 +1,7 @@
 pub mod access;
 pub mod error;
 pub mod policy;
+pub mod policy_resolution;
 pub mod request;
 pub mod response;
 pub mod run;
@@ -15,13 +16,16 @@ pub use policy::{
     AttendancePolicy, MissingClockPolicy, OperationPolicy, OperationPolicySnapshot,
     PayrollInputBasis,
 };
+pub use policy_resolution::{
+    resolve_operation_policy, OperationPolicySource, PayrollPolicySettings, ResolvedOperationPolicy,
+};
 pub use request::{
     parse_payroll_api_request, request_id_from_payload, PayrollInputType, PayrollRunRequest,
     PayrollScope,
 };
 pub use response::{
-    validate_payroll_api_payload, PayrollApiErrorResponse, PayrollApiResponse,
-    PayrollValidationResponse,
+    validate_payroll_api_payload, validate_payroll_api_payload_with_policy_settings,
+    PayrollApiErrorResponse, PayrollApiResponse, PayrollValidationResponse,
 };
 pub use run::{run_response_from_result, PayrollRunResponse, PayrollRunResult};
 pub use service::{

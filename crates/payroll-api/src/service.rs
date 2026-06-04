@@ -2,8 +2,12 @@ use crate::access::{
     authorize_payroll_request, PayrollAccessDecision, PayrollAction, PayrollPrincipal,
 };
 use crate::policy::OperationPolicySnapshot;
+use crate::policy_resolution::PayrollPolicySettings;
 use crate::request::PayrollRunRequest;
-use crate::response::{validate_payroll_api_payload, PayrollApiResponse};
+use crate::response::{
+    validate_payroll_api_payload, validate_payroll_api_payload_with_policy_settings,
+    PayrollApiResponse,
+};
 use crate::run::{run_response_from_result, PayrollRunResponse, PayrollRunResult};
 use serde::Serialize;
 use serde_json::Value;
@@ -100,6 +104,14 @@ impl PayrollApiService {
         policy_snapshot: impl Into<Option<OperationPolicySnapshot>>,
     ) -> PayrollApiResponse {
         validate_payroll_api_payload(payload, policy_snapshot)
+    }
+
+    pub fn validate_run_payload_with_policy_settings(
+        &self,
+        payload: Value,
+        settings: &PayrollPolicySettings,
+    ) -> PayrollApiResponse {
+        validate_payroll_api_payload_with_policy_settings(payload, settings)
     }
 
     pub fn authorize_run_request(

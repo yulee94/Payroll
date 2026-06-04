@@ -7,6 +7,7 @@ export const PAYROLL_API_READINESS_ENDPOINT = "/api/payroll/v1/readiness" as con
 export type PayrollInputType = "auto" | "invoice" | "attendance" | "mixed";
 export type PayrollInputBasis = "invoice" | "attendance" | "hybrid";
 export type PayrollMissingClockPolicy = "warn" | "ignore" | "deduct";
+export type PayrollOperationPolicySource = "site" | "tenant" | "global" | "";
 export type PayrollHealthStatus = "ok";
 export type PayrollReadinessState = "ready" | "degraded" | "not_ready";
 export type PayrollAction = "validate" | "run" | "settings";
@@ -83,6 +84,13 @@ export interface PayrollOperationPolicy {
   [key: string]: unknown;
 }
 
+export interface PayrollOperationPolicyResolution {
+  workplace: string;
+  policy: PayrollOperationPolicy;
+  source: Exclude<PayrollOperationPolicySource, "">;
+  has_site_override: boolean;
+}
+
 export interface PayrollApiBaseResponse {
   ok: boolean;
   status: "success" | "validated" | "error";
@@ -111,7 +119,7 @@ export interface PayrollSuccessResponse extends PayrollApiBaseResponse {
   payroll_audit?: Record<string, unknown>;
   roster?: Record<string, unknown>;
   operation_policy?: PayrollOperationPolicy;
-  operation_policy_source?: string;
+  operation_policy_source?: PayrollOperationPolicySource;
 }
 
 export interface PayrollValidationResponse extends PayrollApiBaseResponse {
@@ -130,7 +138,7 @@ export interface PayrollValidationResponse extends PayrollApiBaseResponse {
   paths: Partial<Record<"invoice" | "attendance", string>>;
   metadata_keys: string[];
   operation_policy: PayrollOperationPolicy;
-  operation_policy_source: string;
+  operation_policy_source: Exclude<PayrollOperationPolicySource, "">;
 }
 
 export interface PayrollValidationErrorResponse extends PayrollApiBaseResponse {
@@ -158,7 +166,7 @@ export interface PayrollRunFailureResponse extends PayrollApiBaseResponse {
   payroll_audit?: Record<string, unknown>;
   roster?: Record<string, unknown>;
   operation_policy?: PayrollOperationPolicy;
-  operation_policy_source?: string;
+  operation_policy_source?: PayrollOperationPolicySource;
 }
 
 export type PayrollErrorResponse = PayrollValidationErrorResponse | PayrollRunFailureResponse;
