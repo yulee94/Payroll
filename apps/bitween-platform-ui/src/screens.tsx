@@ -573,8 +573,12 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
           </View>
         </View>
         <View style={styles.listSummary}>
-          <Label weight="bold">{tScreen(locale, "module.list.count", { count: filteredRows.length })}</Label>
-          <Label size="sm" muted>{search ? tScreen(locale, "module.list.filteredWithSearch", { filter: activeFilter, search }) : tScreen(locale, "module.list.filtered", { filter: activeFilter })}</Label>
+          <View style={styles.listSummaryCount}>
+            <Label weight="bold">{tScreen(locale, "module.list.count", { count: filteredRows.length })}</Label>
+          </View>
+          <View style={styles.listSummaryCopy}>
+            <Label size="sm" muted>{search ? tScreen(locale, "module.list.filteredWithSearch", { filter: activeFilter, search }) : tScreen(locale, "module.list.filtered", { filter: activeFilter })}</Label>
+          </View>
         </View>
         {dashboard.rows.length > 0 ? (
           <DataTable locale={locale} onRowPress={selectRow} rows={filteredRows} selectedRowId={selectedRow?.id} />
@@ -1308,6 +1312,18 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm
+  },
+  listSummaryCopy: {
+    flex: 1,
+    minWidth: 160
+  },
+  listSummaryCount: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs
   },
   listToolbar: {
     alignItems: "flex-end",

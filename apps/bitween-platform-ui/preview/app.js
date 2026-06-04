@@ -661,7 +661,10 @@ function renderModule(id) {
         <div class="filters">${data.filters.map((filter) => `<button class="filter-chip ${state.filter === filter.id ? "active" : ""}" data-filter="${filter.id}">${filter.label}</button>`).join("")}</div>
         <label class="search-box" for="work-search"><span>${t("screens.module.search.label")}</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="${t("screens.module.search.placeholder")}" /></label>
       </div>
-      <div class="list-summary"><strong>${t("screens.module.list.count", { count: rows.length })}</strong><span class="helper">${state.search ? t("screens.module.list.filteredWithSearch", { filter: filterLabel, search: state.search }) : t("screens.module.list.filtered", { filter: filterLabel })}</span></div>
+      <div class="list-summary" aria-live="polite">
+        <strong class="list-summary-count">${t("screens.module.list.count", { count: rows.length })}</strong>
+        <span class="helper list-summary-copy">${state.search ? t("screens.module.list.filteredWithSearch", { filter: filterLabel, search: state.search }) : t("screens.module.list.filtered", { filter: filterLabel })}</span>
+      </div>
       ${table(rows, true)}
       ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
