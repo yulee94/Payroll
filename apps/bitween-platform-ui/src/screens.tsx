@@ -420,6 +420,12 @@ function PayrollIntegrationPanel({ locale, onSelect }: Pick<ScreenProps, "locale
 }
 
 function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonly CalendarEvent[]; readonly locale: SupportedLocale; readonly todos: readonly TodoItem[] }) {
+  const completedTodos = todos.filter((todo) => todo.completed).length;
+  const totalTodos = todos.length;
+  const pendingTodos = totalTodos - completedTodos;
+  const completionRatio = totalTodos > 0 ? completedTodos / totalTodos : 0;
+  const progressStyle = { width: `${Math.round(completionRatio * 100)}%` } as const;
+
   return (
     <View style={styles.homePlannerGrid}>
       <Card style={styles.homePlannerCard}>
@@ -443,6 +449,15 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
       </Card>
       <Card style={styles.homePlannerCard}>
         <SectionHeader title={tScreen(locale, "todo.title")} description={tScreen(locale, "todo.description")} />
+        <View style={styles.todoProgressPanel}>
+          <View style={styles.todoProgressHeader}>
+            <Label weight="bold">{tScreen(locale, "todo.progress.title", { done: completedTodos, total: totalTodos })}</Label>
+            <Label size="sm" muted>{tScreen(locale, "todo.progress.pending", { count: pendingTodos })}</Label>
+          </View>
+          <View style={styles.todoProgressTrack}>
+            <View style={[styles.todoProgressFill, progressStyle]} />
+          </View>
+        </View>
         <View style={styles.plannerList}>
           {todos.map((todo) => (
             <View key={todo.id} style={[styles.todoItem, todo.completed && styles.todoItemDone]}>
@@ -1579,6 +1594,32 @@ const styles = StyleSheet.create({
   todoItemDone: {
     backgroundColor: colors.input,
     opacity: 0.5
+  },
+  todoProgressFill: {
+    backgroundColor: colors.success,
+    borderRadius: 999,
+    minHeight: 8
+  },
+  todoProgressHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
+  },
+  todoProgressPanel: {
+    backgroundColor: colors.successSoft,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  todoProgressTrack: {
+    backgroundColor: colors.card,
+    borderRadius: 999,
+    minHeight: 8,
+    overflow: "hidden"
   },
   travelReviewCard: {
     backgroundColor: colors.card,
