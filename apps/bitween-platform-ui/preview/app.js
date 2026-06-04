@@ -719,7 +719,8 @@ function renderModule(id) {
           const selected = state.filter === filter.id;
           return `<button aria-pressed="${selected ? "true" : "false"}" class="filter-chip ${selected ? "active" : ""}" data-filter="${filter.id}">${selected ? '<span class="filter-chip-mark" aria-hidden="true"></span>' : ""}<span>${filter.label}</span></button>`;
         }).join("")}</div>
-        <label class="search-box" for="work-search"><span>${t("screens.module.search.label")}</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="${t("screens.module.search.placeholder")}" /></label>
+        ${state.search ? `<button class="btn ghost search-clear" data-clear-search="true" type="button">${t("screens.module.search.clear")}</button>` : ""}
+        <label class="search-box" for="work-search"><span>${t("screens.module.search.label")}</span><input aria-label="${t("screens.module.search.accessibilityLabel")}" id="work-search" type="search" value="${escapeText(state.search)}" placeholder="${t("screens.module.search.placeholder")}" /></label>
       </div>
       <div aria-atomic="true" aria-live="polite" class="list-summary" role="status"><strong>${t("screens.module.list.count", { count: rows.length })}</strong><span class="helper">${state.search ? t("screens.module.list.filteredWithSearch", { filter: filterLabel, search: state.search }) : t("screens.module.list.filtered", { filter: filterLabel })}</span></div>
       ${data.rows.length === 0 ? empty(t("table.empty.title"), t("table.empty.description")) : rows.length ? table(rows, true) : filteredEmpty()}
@@ -1080,6 +1081,16 @@ function bindEvents() {
       });
     });
   }
+
+  document.querySelectorAll("[data-clear-search]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.search = "";
+      state.selectedRowKey = "";
+      render();
+      window.requestAnimationFrame(() => document.getElementById("work-search")?.focus());
+      toast(t("preview.toast.searchClear"));
+    });
+  });
 
   const companyCode = document.getElementById("company-code");
   if (companyCode) {

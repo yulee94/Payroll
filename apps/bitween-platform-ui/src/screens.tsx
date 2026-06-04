@@ -631,6 +631,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
             <Label size="sm" weight="bold">{tScreen(locale, "module.search.label")}</Label>
             <TextInput
               autoCapitalize="none"
+              accessibilityLabel={tScreen(locale, "module.search.accessibilityLabel")}
               onChangeText={setSearch}
               placeholder={tScreen(locale, "module.search.placeholder")}
               placeholderTextColor={colors.muted}
@@ -638,6 +639,11 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
               style={styles.input}
               value={search}
             />
+            {search ? (
+              <ActionButton accessibilityLabel={tScreen(locale, "module.search.clearAccessibilityLabel")} onPress={() => setSearch("")} variant="ghost">
+                {tScreen(locale, "module.search.clear")}
+              </ActionButton>
+            ) : null}
           </View>
         </View>
         <View style={styles.listSummary}>
