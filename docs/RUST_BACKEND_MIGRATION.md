@@ -614,6 +614,34 @@ Verification evidence for this checkpoint:
 Slice spec: `docs/WORKFLOW_RUST_INBOX_CLASSIFICATION_SLICE.md`.
 
 
+## Current implementation checkpoint: Rust workflow form value core
+
+Implemented on 2026-06-04 as a workflow form validation and document-field
+shaping slice:
+
+- `crates/workflow-core::workflow_forms` now owns pure supplied-schema
+  validation, built-in form schema fallback, document-field shaping, and
+  attendance label-to-key mapping.
+- Rust preserves Python compatibility for required-field Korean error messages,
+  comma-stripped integer parsing, closing-month length checks, lexicographic
+  period start/end validation, default general-schema fallback, summary and
+  amount fallback order, invalid amount-to-zero behavior, payload value
+  trimming, `document_type` injection, and attendance `other` fallback.
+- Python still owns tenant/template-specific schema lookup, config-store and
+  form-template filesystem persistence, workflow document persistence/mutation,
+  service orchestration, and UI rendering.
+- Workflow contract metadata now names the Rust form DTOs, entrypoints,
+  document types, and invariants.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-workflow-core workflow_forms --lib`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_form_contracts -v`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_forms -v`
+
+Slice spec: `docs/WORKFLOW_RUST_FORM_VALUES_SLICE.md`.
+
+
 ## Current implementation checkpoint: Rust workflow document permission core
 
 Implemented on 2026-06-04 as a workflow document authorization slice:

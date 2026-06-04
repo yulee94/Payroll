@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from core.workflow import constants as c
+from core.workflow import forms as workflow_forms
 from core.workflow import inbox as workflow_inbox
 from core.workflow.business_trip import TRIP_SOURCE_KEYS, TRIP_VIEW_MODEL_KEYS
 
@@ -256,15 +257,56 @@ def workflow_inbox_example() -> dict[str, Any]:
     }
 
 
+def workflow_forms_example() -> dict[str, Any]:
+    """Return the Rust-owned pure workflow form value contract."""
+    return {
+        "rust_crate": "bitween-workflow-core",
+        "rust_module": "workflow_forms",
+        "rust_entrypoints": [
+            "builtin_form_schema",
+            "validate_form_values",
+            "validate_builtin_form_values",
+            "build_document_fields",
+            "attendance_type_key",
+        ],
+        "python_compatibility_source": "core.workflow.forms",
+        "python_boundary": (
+            "Python supplies tenant/template-specific schemas and Rust does not read config stores, "
+            "form-template files, workflow stores, sessions, or UI state. Python compatibility code may "
+            "still own get_form_schema tenant/template lookup, template persistence, document mutation, "
+            "service orchestration, and UI rendering."
+        ),
+        "form_dtos": [
+            "WorkflowFormFieldDef",
+            "WorkflowDocumentFields",
+        ],
+        "document_types": list(workflow_forms.FORM_SCHEMAS.keys()),
+        "form_invariants": [
+            "unknown document types fall back to the general draft schema",
+            "required fields use the Python-compatible Korean error message",
+            "number fields strip commas before integer parsing",
+            "closing_month shorter than seven characters is rejected",
+            "period_start and period_end are compared lexicographically after trimming",
+            "summary fallback order is summary/content/business_trip_purpose/purpose/reason then item_summary",
+            "amount fallback order is total_amount then estimated_amount",
+            "invalid amount fields build as zero",
+            "payload injects document_type after trimming supplied values",
+            "attendance_type_key returns other for unknown labels",
+        ],
+    }
+
+
 def workflow_api_contract() -> dict[str, Any]:
     """Return workflow API contract metadata for Rust migration slices."""
     return {
         "business_trip_lifecycle": workflow_business_trip_lifecycle_example(),
         "business_trip_permissions": workflow_business_trip_permissions_example(),
         "workflow_inbox": workflow_inbox_example(),
+        "workflow_forms": workflow_forms_example(),
         "response": {
             "business_trip_lifecycle_entrypoint": "bitween_workflow_core::business_trip::transition_trip_status(record, target, now_iso)",
             "business_trip_permissions_entrypoint": "bitween_workflow_core::business_trip_permissions::can_view_business_trip_lifecycle(input)",
             "workflow_inbox_entrypoint": "bitween_workflow_core::workflow_inbox::matches_inbox(input)",
+            "workflow_forms_entrypoint": "bitween_workflow_core::workflow_forms::validate_form_values(schema, values)",
         },
     }
