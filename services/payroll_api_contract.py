@@ -15,7 +15,9 @@ from services.payroll_scope import PayrollScope
 
 PAYROLL_API_VERSION = "v1"
 PAYROLL_API_ENDPOINT = "/api/payroll/v1/runs"
+PAYROLL_API_VALIDATE_ENDPOINT = "/api/payroll/v1/runs/validate"
 PAYROLL_API_ENTRYPOINT = "services.payroll_api_adapter.run_payroll_api(payload)"
+PAYROLL_API_VALIDATE_ENTRYPOINT = "services.payroll_api_adapter.validate_payroll_api_payload(payload)"
 PAYROLL_API_INPUT_TYPES: tuple[str, ...] = ("auto", "invoice", "attendance", "mixed")
 
 
@@ -50,6 +52,8 @@ def payroll_api_success_example() -> dict[str, Any]:
     return {
         "ok": True,
         "status": "success",
+        "will_run": True,
+        "can_run": True,
         "request_id": "payroll-run-2026-05-coss-site-a",
         "scope": "COSS/Site A/2026-05",
         "scope_key": PayrollScope("COSS", "Site A", "2026-05").key,
@@ -89,6 +93,8 @@ def payroll_api_error_example() -> dict[str, Any]:
     return {
         "ok": False,
         "status": "error",
+        "will_run": False,
+        "can_run": False,
         "request_id": "payroll-run-2026-05-coss-site-a",
         "error_code": "invalid_period",
         "error": "period는 YYYY-MM 형식이어야 합니다.",
@@ -100,17 +106,60 @@ def payroll_api_error_example() -> dict[str, Any]:
     }
 
 
+def payroll_api_validation_example() -> dict[str, Any]:
+    """Return a representative validation-only response shape."""
+    scope = PayrollScope("COSS", "Site A", "2026-05")
+    return {
+        "ok": True,
+        "status": "validated",
+        "will_run": False,
+        "can_run": True,
+        "request_id": "payroll-run-2026-05-coss-site-a",
+        "scope": "COSS/Site A/2026-05",
+        "scope_key": scope.key,
+        "affiliate": "COSS",
+        "workplace": "Site A",
+        "period": "2026-05",
+        "input_type": "mixed",
+        "requested_input_type": "mixed",
+        "tenant_id": "coss",
+        "paths": {
+            "invoice": "C:/Bitween/inbox/invoice_2026-05.xlsx",
+            "attendance": "C:/Bitween/inbox/attendance_2026-05.csv",
+        },
+        "metadata_keys": ["requested_by", "source_system"],
+        "operation_policy": {
+            "input_basis": "hybrid",
+            "payday": "25일",
+            "attendance": {
+                "enabled": True,
+                "rounding_minutes": 1,
+                "late_grace_minutes": 0,
+                "early_leave_grace_minutes": 0,
+                "missing_clock_policy": "warn",
+            },
+        },
+        "operation_policy_source": "tenant",
+        "warnings": [],
+        "error_code": "",
+        "details": {},
+        "error": "",
+    }
+
+
 def payroll_api_contract() -> dict[str, Any]:
     """Return the versioned contract used by docs and tests."""
     return {
         "version": PAYROLL_API_VERSION,
         "entrypoint": PAYROLL_API_ENTRYPOINT,
+        "validation_entrypoint": PAYROLL_API_VALIDATE_ENTRYPOINT,
         "http": {
             "method": "POST",
             "path": PAYROLL_API_ENDPOINT,
             "content_type": "application/json",
             "implemented": False,
             "notes": "HTTP wrapper is planned; the framework-neutral service entrypoint is implemented now.",
+            "validation_path": PAYROLL_API_VALIDATE_ENDPOINT,
         },
         "input_types": list(PAYROLL_API_INPUT_TYPES),
         "request": {
@@ -181,6 +230,13 @@ def payroll_api_contract() -> dict[str, Any]:
                     "required": False,
                     "description": "Caller-owned metadata; preserved on the internal request.",
                 },
+                {
+                    "name": "validate_only",
+                    "aliases": ["validateOnly", "dry_run", "dryRun", "metadata.validate_only"],
+                    "type": "boolean",
+                    "required": False,
+                    "description": "Validate the payload and return a normalized request response without running payroll.",
+                },
             ],
             "examples": {
                 "invoice": payroll_api_request_example(input_type="invoice"),
@@ -190,6 +246,7 @@ def payroll_api_contract() -> dict[str, Any]:
         },
         "response": {
             "success": payroll_api_success_example(),
+            "validation": payroll_api_validation_example(),
             "error": payroll_api_error_example(),
             "error_codes": {
                 "invalid_payload": "Request body is not a JSON object/dict.",
@@ -204,6 +261,8 @@ def payroll_api_contract() -> dict[str, Any]:
             "stable_fields": [
                 "ok",
                 "status",
+                "will_run",
+                "can_run",
                 "request_id",
                 "error_code",
                 "scope",
@@ -212,6 +271,7 @@ def payroll_api_contract() -> dict[str, Any]:
                 "workplace",
                 "period",
                 "input_type",
+                "requested_input_type",
                 "count",
                 "warnings",
                 "paths",
@@ -219,6 +279,7 @@ def payroll_api_contract() -> dict[str, Any]:
                 "roster",
                 "operation_policy",
                 "operation_policy_source",
+                "metadata_keys",
                 "details",
                 "error",
             ],

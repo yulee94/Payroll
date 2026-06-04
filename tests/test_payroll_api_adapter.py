@@ -9,6 +9,7 @@ from services.payroll_api_adapter import (
     payroll_api_response,
     run_payroll_api,
     scope_from_api_payload,
+    validate_payroll_api_payload,
 )
 from services.payroll_automation import PayrollAutomationResult
 from services.payroll_scope import PayrollScope
@@ -80,6 +81,8 @@ class PayrollApiAdapterTests(unittest.TestCase):
         payload = payroll_api_response(result, request_id="req-1")
 
         self.assertEqual(payload["status"], "error")
+        self.assertTrue(payload["will_run"])
+        self.assertFalse(payload["can_run"])
         self.assertEqual(payload["scope"], "Affiliate/Site A/2026-05")
         self.assertEqual(payload["scope_key"], PayrollScope("Affiliate", "Site A", "2026-05").key)
         self.assertEqual(payload["error_code"], "payroll_run_failed")
@@ -108,6 +111,8 @@ class PayrollApiAdapterTests(unittest.TestCase):
             )
 
         self.assertEqual(payload["status"], "success")
+        self.assertTrue(payload["will_run"])
+        self.assertTrue(payload["can_run"])
         self.assertEqual(payload["request_id"], "req-1")
         self.assertEqual(payload["count"], 2)
         self.assertEqual(payload["error_code"], "")
@@ -126,6 +131,8 @@ class PayrollApiAdapterTests(unittest.TestCase):
 
         self.assertFalse(payload["ok"])
         self.assertEqual(payload["status"], "error")
+        self.assertFalse(payload["will_run"])
+        self.assertFalse(payload["can_run"])
         self.assertEqual(payload["request_id"], "req-bad")
         self.assertEqual(payload["error_code"], "invalid_period")
         self.assertEqual(payload["details"]["period_format"], "YYYY-MM")
@@ -147,6 +154,8 @@ class PayrollApiAdapterTests(unittest.TestCase):
 
         self.assertFalse(payload["ok"])
         self.assertEqual(payload["status"], "error")
+        self.assertFalse(payload["will_run"])
+        self.assertFalse(payload["can_run"])
         self.assertEqual(payload["error_code"], "missing_input_path")
         self.assertEqual(payload["details"]["missing_fields"], ["attendance_path"])
         self.assertIn("attendancePath", payload["details"]["accepted_aliases"]["attendance_path"])
@@ -164,6 +173,8 @@ class PayrollApiAdapterTests(unittest.TestCase):
         )
 
         self.assertFalse(payload["ok"])
+        self.assertFalse(payload["will_run"])
+        self.assertFalse(payload["can_run"])
         self.assertEqual(payload["error_code"], "invalid_input_type")
         self.assertIn("mixed", payload["details"]["allowed_input_types"])
 
@@ -172,8 +183,102 @@ class PayrollApiAdapterTests(unittest.TestCase):
 
         self.assertFalse(payload["ok"])
         self.assertEqual(payload["status"], "error")
+        self.assertFalse(payload["will_run"])
+        self.assertFalse(payload["can_run"])
         self.assertEqual(payload["error_code"], "invalid_payload")
         self.assertIn("dict", payload["error"])
+
+    def test_validate_payroll_api_payload_returns_normalized_request(self) -> None:
+        with patch(
+            "services.payroll_policy_store.resolve_payroll_operation_policy",
+            return_value={
+                "policy": {"input_basis": "hybrid", "payday": "25일"},
+                "source": "tenant",
+            },
+        ), patch("services.payroll_api_adapter.run_payroll_automation") as run:
+            payload = validate_payroll_api_payload(
+                {
+                    "request_id": "req-validate",
+                    "scope": "Affiliate/Site A/2026-05",
+                    "invoice_path": "invoice.xlsx",
+                    "attendance_path": "attendance.csv",
+                    "input_type": "mixed",
+                    "tenant_id": "tenant-a",
+                    "metadata": {"requested_by": "frontend"},
+                }
+            )
+
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["status"], "validated")
+        self.assertFalse(payload["will_run"])
+        self.assertTrue(payload["can_run"])
+        self.assertEqual(payload["request_id"], "req-validate")
+        self.assertEqual(payload["scope"], "Affiliate/Site A/2026-05")
+        self.assertEqual(payload["scope_key"], PayrollScope("Affiliate", "Site A", "2026-05").key)
+        self.assertEqual(payload["input_type"], "mixed")
+        self.assertEqual(payload["requested_input_type"], "mixed")
+        self.assertEqual(payload["tenant_id"], "tenant-a")
+        self.assertEqual(payload["paths"], {"invoice": "invoice.xlsx", "attendance": "attendance.csv"})
+        self.assertEqual(payload["metadata_keys"], ["requested_by"])
+        self.assertEqual(payload["operation_policy"], {"input_basis": "hybrid", "payday": "25일"})
+        self.assertEqual(payload["operation_policy_source"], "tenant")
+        run.assert_not_called()
+
+    def test_run_payroll_api_validate_only_does_not_call_backend(self) -> None:
+        with patch(
+            "services.payroll_policy_store.resolve_payroll_operation_policy",
+            return_value={
+                "policy": {"input_basis": "invoice", "payday": "25일"},
+                "source": "tenant",
+            },
+        ), patch("services.payroll_api_adapter.run_payroll_automation") as run:
+            payload = run_payroll_api(
+                {
+                    "request_id": "req-dry",
+                    "affiliate": "Affiliate",
+                    "workplace": "Site A",
+                    "period": "2026-05",
+                    "invoice_path": "invoice.xlsx",
+                    "input_type": "invoice",
+                    "validate_only": True,
+                }
+            )
+
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["status"], "validated")
+        self.assertFalse(payload["will_run"])
+        self.assertTrue(payload["can_run"])
+        self.assertEqual(payload["paths"], {"invoice": "invoice.xlsx"})
+        self.assertEqual(payload["operation_policy_source"], "tenant")
+        run.assert_not_called()
+
+    def test_validate_only_preview_resolves_auto_input_from_policy(self) -> None:
+        with patch(
+            "services.payroll_policy_store.resolve_payroll_operation_policy",
+            return_value={
+                "policy": {"input_basis": "attendance", "payday": "25일"},
+                "source": "site",
+            },
+        ), patch("services.payroll_api_adapter.run_payroll_automation") as run:
+            payload = run_payroll_api(
+                {
+                    "request_id": "req-auto",
+                    "affiliate": "Affiliate",
+                    "workplace": "Site A",
+                    "period": "2026-05",
+                    "attendance_path": "attendance.csv",
+                    "input_type": "auto",
+                    "validate_only": True,
+                }
+            )
+
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["status"], "validated")
+        self.assertTrue(payload["can_run"])
+        self.assertEqual(payload["requested_input_type"], "auto")
+        self.assertEqual(payload["input_type"], "attendance")
+        self.assertEqual(payload["operation_policy_source"], "site")
+        run.assert_not_called()
 
 
 if __name__ == "__main__":

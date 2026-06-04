@@ -35,6 +35,8 @@ dist/
 # Logs
 *.log
 output/logs/
+.codex-run-logs/
+.codex-tcl/
 
 # OS / editor
 .DS_Store
