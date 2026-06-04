@@ -15,8 +15,10 @@ import {
 import {
   moduleDashboards,
   navigationItems,
+  payrollSettingsRows,
   payrollSteps,
   platformMetrics,
+  previewRows,
   readinessCards,
   workQueue
 } from "./data";
@@ -171,6 +173,24 @@ export function PayrollScreen({ onSelect }: ScreenProps) {
           <ActionButton onPress={() => onSelect("archive")} variant="secondary">월별 자료함</ActionButton>
           <ActionButton onPress={() => onSelect("ai")} variant="ghost">AI 검토 준비</ActionButton>
         </View>
+      </Card>
+      <Card>
+        <SectionHeader
+          eyebrow="Settings summary"
+          title="급여 산출 설정 요약"
+          description="기존 설정 화면의 핵심 항목을 RN에서 읽기 쉬운 검토 표면으로 옮긴 구조입니다."
+          action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">상세 설정</ActionButton>}
+        />
+        <DataTable rows={payrollSettingsRows} />
+      </Card>
+      <Card>
+        <SectionHeader
+          eyebrow="Preview and archive"
+          title="파일 미리보기 작업"
+          description="Excel 미리보기, 시트 선택, 필터 초기화, 수정본 업로드 같은 사용자 흐름을 분리했습니다."
+          action={<ActionButton onPress={() => onSelect("archive")} variant="secondary">자료함 열기</ActionButton>}
+        />
+        <DataTable rows={previewRows} />
       </Card>
     </View>
   );
