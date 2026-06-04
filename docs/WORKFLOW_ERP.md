@@ -12,7 +12,7 @@ Python 3 + Tkinter 데스크톱 앱에 확장 가능한 **전자결재·업무 �
 | 출장 lifecycle | 워크플로우 **양식함 → 출장 신청**, **실행업무**, **보고 → 출장 현황** |
 | 연동 표면 | 플랫폼 홈 **캘린더 / Daily To-Do**, KPI 허브 **개인 KPI** |
 
-## 결재함 (시장 표준 MVP)
+## 결재함 (시장 표준)
 
 다우오피스·네이버웍스·잔디·SAP Concur와 유사한 분류 (`core/workflow/inbox.py`):
 
@@ -90,7 +90,7 @@ python -m unittest tests.test_business_trip_lifecycle tests.test_business_trip_w
 - AI 기안 초안 (`services/workflow_ai.py`)
 - 샘플 시드 (본사·밀양·부산·경남, 샘플 기안/구매/지출/연차)
 
-## TODO (확장)
+## 향후 확장
 
 - HTTP REST 래퍼 (`/api/workflow/...`)
 - 첨부파일 실제 업로드 (metadata만 설계됨)
