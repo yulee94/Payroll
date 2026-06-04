@@ -1,6 +1,7 @@
 pub mod access;
 pub mod attendance;
 pub mod deductions;
+pub mod earnings;
 pub mod edi_insurance;
 pub mod employment_insurance_65;
 pub mod error;
@@ -25,6 +26,12 @@ pub use attendance::{AttendanceInvoiceRow, AttendanceSourceRecord, aggregate_att
 pub use deductions::{
     PayrollDeductionInput, PayrollDeductionResult, PayrollIncomeTaxResult, PayrollTaxMethod,
     calculate_payroll_income_tax, finalize_payroll_deductions, lookup_simplified_income_tax,
+};
+pub use earnings::{
+    HOLIDAY_PREMIUM, MEAL_ALLOWANCE_PER_DAY, MEAL_NON_TAXABLE_CAP, NIGHT_PREMIUM, OVERLAP_PREMIUM,
+    OVERTIME_PREMIUM, PayrollEarningsBreakdown, PayrollEarningsHours, PayrollEarningsInput,
+    PayrollEarningsResult, STANDARD_MONTHLY_HOURS, calculate_ordinary_hourly,
+    calculate_overlap_premium, calculate_payroll_earnings, calculate_weekly_holiday_pay,
 };
 pub use edi_insurance::{
     EdiInsuranceApplication, EdiInsuranceConfig, EdiInsuranceInvoice, EdiInsurancePremiumRecord,

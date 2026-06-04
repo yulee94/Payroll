@@ -5,6 +5,7 @@ PAYROLL_API_SRCS = [
     "src/deductions.rs",
     "src/error.rs",
     "src/edi_insurance.rs",
+    "src/earnings.rs",
     "src/employment_insurance_65.rs",
     "src/execution_plan.rs",
     "src/fixed_hours.rs",

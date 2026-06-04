@@ -21,6 +21,7 @@ Rust transition entry point:
 - Invoice audit row function: `PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)`
 - Invoice audit batch function: `PayrollApiService::audit_invoice_batch(items, workplace)`
 - Social-insurance calculation function: `PayrollApiService::calculate_social_insurance(input)`
+- Earnings calculation function: `PayrollApiService::calculate_payroll_earnings(input)`
 - Deduction finalization function: `PayrollApiService::finalize_payroll_deductions(input)`
 - Employment-insurance 65+ decision function: `PayrollApiService::resolve_ei_65_for_payroll(input)`
 - EDI insurance premium application function: `PayrollApiService::apply_edi_premiums_to_invoice(invoice, edi_record, edi_config, payroll_period)`
@@ -31,7 +32,7 @@ Rust transition entry point:
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, social-insurance calculation, final deduction/net-pay calculation, employment-insurance 65+ payroll decisions, EDI insurance premium payroll row application, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, social-insurance calculation, supplied-input earnings/gross/taxable-pay calculation, final deduction/net-pay calculation, employment-insurance 65+ payroll decisions, EDI insurance premium payroll row application, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -306,6 +307,62 @@ Example social-insurance output:
   "employment_insurance": 27000,
   "total": 282122,
   "insurance_exempt": false
+}
+```
+
+## Payroll Earnings Calculation
+
+Python compatibility code may still parse invoices, merge employee masters,
+normalize strings/cell values, calculate social insurance and taxes, finalize
+deductions, and assemble final payroll records. Once callers supply normalized
+numeric earnings inputs, Rust owns the pure earnings, gross-pay,
+non-taxable-pay, and taxable-pay calculation through
+`calculate_payroll_earnings(input)` and
+`PayrollApiService::calculate_payroll_earnings(input)`.
+
+Earnings invariants:
+
+1. Positive `ordinary_hourly` overrides `(base_salary + fixed_allowance) / 209`;
+   otherwise Rust calculates ordinary hourly from the supplied base/fixed pay.
+2. Overtime, night, holiday, overlap, weekly-holiday, meal, transport, other,
+   and additional pay use Python-compatible won rounding.
+3. Weekly holiday pay is prorated by
+   `min(weekly_work_hours, 40) / 40 * 8 * ordinary_hourly`.
+4. Raw overtime/night/holiday amounts are used only when computed pay is
+   non-positive and the raw value is not likely an hours value.
+5. Raw overtime amount updates returned overtime hours; raw night and holiday
+   amounts preserve the supplied hours.
+6. Non-positive base salary falls back to `ordinary_hourly * 209` when ordinary
+   hourly is positive.
+7. `non_taxable_pay` is the meal allowance capped at `200_000`, and
+   `taxable_pay` is `gross_pay - non_taxable_pay`.
+
+Example earnings output:
+
+```json
+{
+  "ordinary_hourly": 10478.47,
+  "hours": {
+    "overtime": 10.0,
+    "night": 4.0,
+    "holiday": 8.0
+  },
+  "earnings": {
+    "base_salary": 2090000,
+    "fixed_allowance": 100000,
+    "overtime": 157177,
+    "night": 20957,
+    "holiday": 125742,
+    "overlap_premium": 20957,
+    "weekly_holiday": 73349,
+    "meal": 121000,
+    "transport": 50000,
+    "other": 12346,
+    "additional": 100000
+  },
+  "gross_pay": 2871528,
+  "non_taxable_pay": 121000,
+  "taxable_pay": 2750528
 }
 ```
 
@@ -1085,6 +1142,7 @@ Frontend code must use `error_code`, not parse `error` text.
 - Rust owns supplied-input invoice audit row evaluation through `PayrollApiService::audit_invoice_row`; Python settings lookup, ledger matching, fixed-profile resolution, and workbook I/O remain compatibility-only boundaries.
 - Rust owns supplied-input invoice audit batch summarization through `PayrollApiService::audit_invoice_batch`; Python still supplies resolved row inputs and keeps UI text rendering compatibility.
 - Rust owns supplied-input social-insurance calculation through `PayrollApiService::calculate_social_insurance`; Python still parses identities, determines age/KCOMWEL eligibility, reads roster/master workbooks, applies EDI premium overrides, and mutates payroll rows.
+- Rust owns supplied-input earnings/gross/non-taxable/taxable-pay calculation through `PayrollApiService::calculate_payroll_earnings`; Python still parses invoices, merges employee masters, normalizes cells, calculates insurance/tax/deductions, and assembles final payroll records.
 - Rust owns supplied-input final deduction/net-pay calculation through `PayrollApiService::finalize_payroll_deductions`; Python still parses workbooks, matches rosters, resolves social insurance, and assembles final records.
 - Rust owns supplied-input employment-insurance 65+ payroll decisions through `PayrollApiService::resolve_ei_65_for_payroll`; Python still imports/persists KCOMWEL records, resolves settings/site management numbers, calls future live APIs, coordinates supplied EDI premium inputs, and mutates payroll rows.
 - Rust owns supplied-record EDI insurance premium application through `PayrollApiService::apply_edi_premiums_to_invoice`; Python still imports/stores EDI files, resolves settings/site management numbers, matches employees, and handles workbook I/O.

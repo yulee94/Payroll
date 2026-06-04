@@ -181,6 +181,27 @@ class PayrollApiContractTests(unittest.TestCase):
             response["deduction_finalization_entrypoint"],
         )
 
+    def test_contract_declares_rust_payroll_earnings_calculation(self) -> None:
+        contract = payroll_api_contract()
+        earnings = contract["earnings_calculation"]
+        response = contract["response"]
+
+        self.assertIn("calculate_payroll_earnings", earnings["rust_entrypoint"])
+        self.assertIn("calculator.calculate_salary", earnings["python_compatibility_source"])
+        self.assertIn("ordinary_hourly", earnings["input_fields"])
+        self.assertIn("overlap_premium", earnings["earnings_fields"])
+        self.assertEqual(earnings["constants"]["standard_monthly_hours"], 209)
+        self.assertEqual(earnings["constants"]["meal_allowance_per_day"], 5_500)
+        self.assertEqual(earnings["example_result"]["ordinary_hourly"], 10_478.47)
+        self.assertEqual(earnings["example_result"]["gross_pay"], 2_871_528)
+        self.assertEqual(earnings["example_result"]["non_taxable_pay"], 121_000)
+        self.assertEqual(earnings["example_raw_amount_result"]["hours"]["overtime"], 16.666666666666668)
+        self.assertEqual(earnings["example_raw_amount_result"]["non_taxable_pay"], 200_000)
+        self.assertIn(
+            "calculate_payroll_earnings",
+            response["earnings_calculation_entrypoint"],
+        )
+
     def test_contract_declares_rust_ei65_payroll_decision(self) -> None:
         contract = payroll_api_contract()
         ei65 = contract["ei65_payroll_decision"]
