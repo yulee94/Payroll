@@ -15,14 +15,16 @@ Rust transition entry point:
 - Rust crate: `crates/payroll-api`
 - Service facade: `bitween_payroll_api::PayrollApiService`
 - Validation function: `bitween_payroll_api::validate_payroll_api_payload(payload, policy_snapshot)`
+- Run-result response function: `PayrollApiService::run_response(result, request_id)`
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, stable response shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
 - `services.payroll_api_adapter.run_payroll_api(payload)` mirrors the contract until the Rust service replaces it.
+- `services.payroll_api_adapter.payroll_api_response(result, request_id=...)` remains the Python compatibility equivalent of `PayrollApiService::run_response(result, request_id)` while payroll execution is still Python-backed.
 - `services.payroll_api_adapter.validate_payroll_api_payload(payload)` validates payloads without running payroll generation.
 
 TypeScript frontend contract:
@@ -163,6 +165,51 @@ Fields:
   },
   "operation_policy_source": "tenant",
   "error": ""
+}
+```
+
+## Run Failure Response
+
+Run failures happen after a request has passed validation and execution was attempted. They keep `will_run: true`, use `can_run: false`, and include the same scope/result fields as a success response so operators can correlate the failed run. Validation errors are documented separately below and keep `will_run: false`.
+
+```json
+{
+  "ok": false,
+  "status": "error",
+  "will_run": true,
+  "can_run": false,
+  "request_id": "payroll-run-2026-05-coss-site-a",
+  "scope": "COSS/Site A/2026-05",
+  "scope_key": "COSS\u001fSite A\u001f2026-05",
+  "affiliate": "COSS",
+  "workplace": "Site A",
+  "period": "2026-05",
+  "input_type": "mixed",
+  "count": 0,
+  "warnings": ["급여 처리 실패"],
+  "paths": {},
+  "payroll_audit": {},
+  "roster": {},
+  "operation_policy": {
+    "input_basis": "hybrid",
+    "payday": "25일",
+    "show_setup_guide": true,
+    "policy_note": "",
+    "attendance": {
+      "enabled": true,
+      "source": "biometric",
+      "rounding_minutes": 1,
+      "late_grace_minutes": 0,
+      "early_leave_grace_minutes": 0,
+      "overtime_rounding_minutes": 1,
+      "missing_clock_policy": "warn",
+      "holiday_source": "invoice"
+    }
+  },
+  "operation_policy_source": "tenant",
+  "error_code": "payroll_run_failed",
+  "details": {},
+  "error": "급여 처리 실패"
 }
 ```
 
@@ -321,9 +368,9 @@ Readiness aggregates named checks. Any required `not_ready` check makes the whol
 }
 ```
 
-## Error Response
+## Validation Error Response
 
-Validation errors return stable JSON and never expose internal exception objects.
+Validation errors return stable JSON, keep `will_run: false`, and never expose internal exception objects.
 
 ```json
 {
@@ -368,6 +415,7 @@ Frontend code must use `error_code`, not parse `error` text.
 - `input_type` in validation responses is the resolved input type; `requested_input_type` preserves caller input.
 - Explicit `invoice`, `attendance`, and `mixed` requests preserve caller selection.
 - Responses include `operation_policy` and `operation_policy_source` so operators can audit which policy was applied.
+- Rust now owns run-result success and execution-failure envelope shaping through `PayrollApiService::run_response`; Python execution remains a compatibility source until the Rust executor and persistence slices land.
 - Rust normalizes `operation_policy` known fields before serializing responses: invalid input basis falls back to `hybrid`; attendance minute fields are clamped to Python-compatible ranges; missing-clock policy falls back to `warn`.
 - `PayrollApiService` now owns framework-neutral health/readiness DTOs; future Axum/Actix/Tauri/Kubernetes wrappers should call those Rust functions rather than inventing parallel probe payloads.
 - `PayrollApiService::authorize_run_request` owns tenant/RBAC/ABAC payroll action decisions; wrappers must supply trusted principals and must not authorize from frontend labels.

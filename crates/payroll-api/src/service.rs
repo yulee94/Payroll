@@ -4,6 +4,7 @@ use crate::access::{
 use crate::policy::OperationPolicySnapshot;
 use crate::request::PayrollRunRequest;
 use crate::response::{validate_payroll_api_payload, PayrollApiResponse};
+use crate::run::{run_response_from_result, PayrollRunResponse, PayrollRunResult};
 use serde::Serialize;
 use serde_json::Value;
 use std::time::Instant;
@@ -108,6 +109,14 @@ impl PayrollApiService {
         action: PayrollAction,
     ) -> PayrollAccessDecision {
         authorize_payroll_request(request, principal, action)
+    }
+
+    pub fn run_response(
+        &self,
+        result: PayrollRunResult,
+        request_id: impl Into<String>,
+    ) -> PayrollRunResponse {
+        run_response_from_result(result, request_id)
     }
 
     pub fn health(&self) -> HealthResponse {

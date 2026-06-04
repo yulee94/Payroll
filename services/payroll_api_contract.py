@@ -118,6 +118,33 @@ def payroll_api_error_example() -> dict[str, Any]:
     }
 
 
+def payroll_api_run_error_example() -> dict[str, Any]:
+    """Return the Rust-owned run-result error envelope shape."""
+    return {
+        "ok": False,
+        "status": "error",
+        "will_run": True,
+        "can_run": False,
+        "request_id": "payroll-run-2026-05-coss-site-a",
+        "scope": "COSS/Site A/2026-05",
+        "scope_key": PayrollScope("COSS", "Site A", "2026-05").key,
+        "affiliate": "COSS",
+        "workplace": "Site A",
+        "period": "2026-05",
+        "input_type": "mixed",
+        "count": 0,
+        "warnings": ["급여 처리 실패"],
+        "paths": {},
+        "payroll_audit": {},
+        "roster": {},
+        "operation_policy": payroll_operation_policy_example(),
+        "operation_policy_source": "tenant",
+        "error_code": "payroll_run_failed",
+        "details": {},
+        "error": "급여 처리 실패",
+    }
+
+
 def payroll_api_validation_example() -> dict[str, Any]:
     """Return a representative validation-only response shape."""
     scope = PayrollScope("COSS", "Site A", "2026-05")
@@ -378,6 +405,7 @@ def payroll_api_contract() -> dict[str, Any]:
                 "allowed": payroll_api_authorization_example(allowed=True),
                 "denied": payroll_api_authorization_example(allowed=False),
             },
+            "run_error": payroll_api_run_error_example(),
             "health": payroll_api_health_example(),
             "readiness": payroll_api_readiness_example(),
             "error_codes": {
@@ -420,6 +448,7 @@ def payroll_api_contract() -> dict[str, Any]:
                 "details",
                 "error",
             ],
+            "run_response_entrypoint": "PayrollApiService::run_response(result, request_id)",
             "never_include": ["exception"],
         },
     }

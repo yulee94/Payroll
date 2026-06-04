@@ -249,15 +249,17 @@ cargo test --workspace
 
 **Acceptance criteria:**
 
-- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, health, and readiness.
+- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, authorization, run-result response shaping, health, and readiness.
 - [ ] Python adapter is retained only as compatibility fallback while rollout is incomplete.
 - [x] Health/readiness behavior is defined in framework-neutral Rust DTOs and API contracts.
+- [x] Run-result success/error envelope behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [ ] Service-account permissions and initial latency/error budgets are defined for Kubernetes.
 
 **Verification:**
 
 - [x] Rust unit/integration tests pass.
 - [x] Contract parity tests pass against Python compatibility fixtures for the contract metadata slice.
+- [x] TypeScript payroll API DTO typecheck passes for the validation, authorization, probe, and run-result envelope shapes.
 - [x] TypeScript contract typecheck passes.
 
 **Dependencies:** Task 3

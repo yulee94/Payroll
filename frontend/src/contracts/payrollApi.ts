@@ -133,13 +133,35 @@ export interface PayrollValidationResponse extends PayrollApiBaseResponse {
   operation_policy_source: string;
 }
 
-export interface PayrollErrorResponse extends PayrollApiBaseResponse {
+export interface PayrollValidationErrorResponse extends PayrollApiBaseResponse {
   ok: false;
   status: "error";
   will_run: false;
   can_run: false;
   error_code: PayrollErrorCode | string;
 }
+
+export interface PayrollRunFailureResponse extends PayrollApiBaseResponse {
+  ok: false;
+  status: "error";
+  will_run: true;
+  can_run: false;
+  error_code: "payroll_run_failed";
+  scope: string;
+  scope_key: string;
+  affiliate: string;
+  workplace: string;
+  period: string;
+  input_type: PayrollInputType;
+  count: number;
+  paths: Record<string, string>;
+  payroll_audit?: Record<string, unknown>;
+  roster?: Record<string, unknown>;
+  operation_policy?: PayrollOperationPolicy;
+  operation_policy_source?: string;
+}
+
+export type PayrollErrorResponse = PayrollValidationErrorResponse | PayrollRunFailureResponse;
 
 export type PayrollApiResponse =
   | PayrollSuccessResponse

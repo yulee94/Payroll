@@ -103,6 +103,33 @@ Verification evidence for this checkpoint:
 
 Slice spec: `docs/PAYROLL_RUST_AUTHORIZATION_SLICE.md`.
 
+## Current implementation checkpoint: Rust payroll run-response envelope
+
+Implemented on 2026-06-04 as the next service-boundary behavior slice:
+
+- `crates/payroll-api` now exposes `PayrollRunResult`,
+  `PayrollRunResponse`, and `run_response_from_result`.
+- `PayrollApiService::run_response` formats supplied execution results into the
+  stable API success/error envelope previously shaped by the Python
+  compatibility adapter.
+- Rust preserves the contract distinction between validation errors
+  (`will_run=false`) and execution failures (`will_run=true`,
+  `error_code=payroll_run_failed`).
+- Rust normalizes known `operation_policy` fields before serializing run-result
+  responses and never exposes internal exception objects.
+- TypeScript and Python contract metadata now include the run-failure DTO shape
+  and the Rust response-shaping entrypoint.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-payroll-api run::tests`
+- `cargo test -p bitween-payroll-api service::tests`
+- Python adapter/contract tests for `tests.test_payroll_api_adapter` and
+  `tests.test_payroll_api_contract`
+- `npm run typecheck --prefix frontend`
+
+Slice spec: `docs/PAYROLL_RUST_RUN_RESPONSE_SLICE.md`.
+
 ## Required execution disciplines
 
 - **Incremental implementation:** migrate thin vertical slices behind stable contracts; no big-bang rewrite.
