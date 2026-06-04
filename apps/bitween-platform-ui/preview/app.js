@@ -142,6 +142,18 @@ const archiveDocuments = [
   ["부산 출장 업무일지", "PDF", "영업팀", "성과 연결", "neutral"]
 ];
 
+const aiRecommendations = [
+  ["급여 산출 오류 요약", "급여 준비 현황", "추천", "ready", "payroll"],
+  ["결재 의견 초안", "전자결재 대기 문서", "검토 필요", "attention", "workflow"],
+  ["자료함 문서 요약", "2026년 5월 급여 보고서", "미리보기", "neutral", "archive"]
+];
+
+const aiDraftCards = [
+  ["요약", "급여 기준 확인 요약", "누락된 입력자료, EDI 확인 전 상태, 산출 전 검토 항목을 짧게 정리합니다.", "ready"],
+  ["확인 질문", "관리자에게 물어볼 항목", "경영진 급여 열람 권한과 Branch 하위계정 범위를 확인하도록 제안합니다.", "attention"],
+  ["초안", "결재 의견 문장", "급여 지급 품의에 붙일 검토 의견 초안을 사람이 확인하기 전 상태로 표시합니다.", "neutral"]
+];
+
 const payrollSettingsRows = [
   ["설정 대상", "법인 기본", "급여 담당", "사업장별 예외 여부 확인", "neutral"],
   ["휴업수당 지급률", "법정 기준 확인", "급여 담당", "최저 기준 이상 입력값 검토", "attention"],
@@ -537,6 +549,7 @@ function renderModule(id) {
     ${id === "travel" ? travelWorklogPanel() : ""}
     ${id === "admin" ? adminAccountPanel() : ""}
     ${id === "archive" ? archiveLibraryPanel() : ""}
+    ${id === "ai" ? aiWorkspacePanel() : ""}
     ${id === "settings" ? i18nSettingsPanel() : ""}
     <section class="card">
       ${sectionHead("", "업무 목록", "필터로 상태를 좁히고 필요한 다음 작업을 확인합니다.", button(secondaryLabel(id), secondaryTarget(id), "secondary"))}
@@ -567,6 +580,32 @@ function i18nSettingsPanel() {
         <strong>${label}</strong><span class="helper">${state.selectedLanguage === code ? "선택됨" : status}</span>
       </button>
     `).join("")}</div>
+  </section>`;
+}
+
+function aiWorkspacePanel() {
+  return `<section class="card">
+    ${sectionHead("", "AI 업무 작업대", "급여, 결재, 자료함 문맥에서 추천 작업을 고르고 사람이 확인해야 할 초안과 질문을 분리합니다.", button("AI 사용 범위 확인", "settings", "secondary"))}
+    <div class="ai-workspace-grid">
+      <div class="ai-recommendation-list">${aiRecommendations.map(([title, source, status, tone, target]) => `
+        <button class="ai-recommendation-item" data-target="${target}" style="border-left-color:${toneColor(tone)}">
+          ${badge(status, tone)}
+          <div><strong>${title}</strong><span class="helper">${source}</span></div>
+        </button>
+      `).join("")}</div>
+      <div class="ai-preview-pane">
+        <span class="helper">사람 검토 필요</span>
+        <strong>AI가 만든 문장은 바로 확정하지 않고 담당자가 확인합니다.</strong>
+        <div class="ai-draft-grid">${aiDraftCards.map(([label, title, detail, tone]) => `
+          <article class="ai-draft-card" style="border-top-color:${toneColor(tone)}">
+            ${badge(label, tone)}
+            <strong>${title}</strong>
+            <span class="helper">${detail}</span>
+          </article>
+        `).join("")}</div>
+        <div class="action-row">${button("급여 문맥 열기", "payroll", "secondary")}${button("자료함 문서 보기", "archive", "ghost")}</div>
+      </div>
+    </div>
   </section>`;
 }
 

@@ -813,6 +813,61 @@ button {
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
+.ai-workspace-grid {
+  align-items: stretch;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+}
+
+.ai-recommendation-list,
+.ai-preview-pane {
+  display: grid;
+  gap: 10px;
+}
+
+.ai-recommendation-item {
+  align-items: start;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--muted);
+  border-radius: 8px;
+  color: var(--text);
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  text-align: left;
+}
+
+.ai-recommendation-item > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ai-preview-pane {
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.ai-draft-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.ai-draft-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  border-top: 4px solid var(--muted);
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
 .metric-card,
 .mini-card,
 .queue-card,
@@ -1090,6 +1145,10 @@ button {
   }
 
   .archive-preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-workspace-grid {
     grid-template-columns: 1fr;
   }
 

@@ -89,6 +89,18 @@ const archiveDocuments = [
   { id: "doc-travel", title: "부산 출장 업무일지", type: "PDF", owner: "영업팀", status: "성과 연결", tone: "neutral" }
 ] as const;
 
+const aiRecommendations = [
+  { id: "ai-payroll-errors", title: "급여 산출 오류 요약", source: "급여 준비 현황", status: "추천", tone: "ready", target: "payroll" },
+  { id: "ai-approval-comment", title: "결재 의견 초안", source: "전자결재 대기 문서", status: "검토 필요", tone: "attention", target: "workflow" },
+  { id: "ai-archive-summary", title: "자료함 문서 요약", source: "2026년 5월 급여 보고서", status: "미리보기", tone: "neutral", target: "archive" }
+] as const;
+
+const aiDraftCards = [
+  { id: "draft-summary", label: "요약", title: "급여 기준 확인 요약", detail: "누락된 입력자료, EDI 확인 전 상태, 산출 전 검토 항목을 짧게 정리합니다.", tone: "ready" },
+  { id: "draft-question", label: "확인 질문", title: "관리자에게 물어볼 항목", detail: "경영진 급여 열람 권한과 Branch 하위계정 범위를 확인하도록 제안합니다.", tone: "attention" },
+  { id: "draft-comment", label: "초안", title: "결재 의견 문장", detail: "급여 지급 품의에 붙일 검토 의견 초안을 사람이 확인하기 전 상태로 표시합니다.", tone: "neutral" }
+] as const;
+
 function isModuleId(id: PlatformId): id is ModuleId {
   return id !== "home" && id !== "payroll";
 }
@@ -462,6 +474,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
       {active.id === "travel" ? <TravelWorklogPanel /> : null}
       {active.id === "admin" ? <AdminAccountPanel /> : null}
       {active.id === "archive" ? <ArchiveLibraryPanel onSelect={onSelect} /> : null}
+      {active.id === "ai" ? <AiWorkspacePanel onSelect={onSelect} /> : null}
 
       {active.id === "settings" ? (
         <Card>
@@ -656,6 +669,53 @@ function ArchiveLibraryPanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
           <View style={styles.actionRow}>
             <ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 화면 열기</ActionButton>
             <ActionButton onPress={() => onSelect("admin")} variant="ghost">권한 확인</ActionButton>
+          </View>
+        </View>
+      </View>
+    </Card>
+  );
+}
+
+function AiWorkspacePanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
+  return (
+    <Card>
+      <SectionHeader
+        title="AI 업무 작업대"
+        description="급여, 결재, 자료함 문맥에서 추천 작업을 고르고 사람이 확인해야 할 초안과 질문을 분리합니다."
+        action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">AI 사용 범위 확인</ActionButton>}
+      />
+      <View style={styles.aiWorkspaceGrid}>
+        <View style={styles.aiRecommendationList}>
+          {aiRecommendations.map((item) => (
+            <Pressable
+              accessibilityRole="button"
+              key={item.id}
+              onPress={() => onSelect(item.target)}
+              style={({ pressed }) => [styles.aiRecommendationItem, { borderLeftColor: toneColor(item.tone) }, pressed && styles.buttonPressed]}
+            >
+              <Badge tone={item.tone}>{item.status}</Badge>
+              <View style={styles.plannerCopy}>
+                <Label weight="bold">{item.title}</Label>
+                <Label size="sm" muted>{item.source}</Label>
+              </View>
+            </Pressable>
+          ))}
+        </View>
+        <View style={styles.aiPreviewPane}>
+          <Label size="sm" muted>사람 검토 필요</Label>
+          <Label weight="bold">AI가 만든 문장은 바로 확정하지 않고 담당자가 확인합니다.</Label>
+          <View style={styles.aiDraftGrid}>
+            {aiDraftCards.map((card) => (
+              <View key={card.id} style={[styles.aiDraftCard, { borderTopColor: toneColor(card.tone) }]}>
+                <Badge tone={card.tone}>{card.label}</Badge>
+                <Label weight="bold">{card.title}</Label>
+                <Label size="sm" muted>{card.detail}</Label>
+              </View>
+            ))}
+          </View>
+          <View style={styles.actionRow}>
+            <ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 문맥 열기</ActionButton>
+            <ActionButton onPress={() => onSelect("archive")} variant="ghost">자료함 문서 보기</ActionButton>
           </View>
         </View>
       </View>
@@ -928,6 +988,54 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm
+  },
+  aiDraftCard: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 180,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  aiDraftGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  aiPreviewPane: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 340,
+    flexGrow: 1,
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  aiRecommendationItem: {
+    alignItems: "flex-start",
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderLeftWidth: 4,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  aiRecommendationList: {
+    flexBasis: 300,
+    flexGrow: 1,
+    gap: spacing.sm
+  },
+  aiWorkspaceGrid: {
+    alignItems: "stretch",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.lg
   },
   archiveDocumentItem: {
     alignItems: "flex-start",
