@@ -17,6 +17,8 @@ Bitween Payroll은 Python 3 + Tkinter 기반의 데스크톱 업무 플랫폼입
 
 - Windows 데스크톱
 - Python 3.11 이상 권장
+- Rust stable: 급여 API 검증/계약 코어 전환용
+- Node.js 20 이상: TypeScript 프론트 계약/클라이언트 전환용
 - 주요 의존성: `openpyxl`, `openai`, `windnd`, `matplotlib`, `requests`
 
 ```powershell
@@ -34,6 +36,8 @@ python main.py
 | `ui/` | 화면 패널과 다이얼로그 |
 | `core/` | 플랫폼, 권한, 테넌트, 워크플로우, 도메인 서비스 |
 | `services/` | 급여 자동화, 설정, 근태 변환, AI, 아카이브, 보고 등 응용 서비스 |
+| `crates/` | Rust 전환용 백엔드 도메인/계약 라이브러리 |
+| `frontend/` | TypeScript 프론트 계약과 향후 웹 UI 작업 영역 |
 | `tests/` | 기능별 단위 테스트 |
 
 ## 급여 자동화 구조
@@ -41,6 +45,8 @@ python main.py
 - `services/payroll_automation.py`가 청구서/근태/혼합 입력을 받는 공통 백엔드 진입점입니다.
 - `services/payroll_api_adapter.py`가 JSON에 가까운 API 요청/응답 형태를 내부 급여 자동화 요청으로 변환합니다.
 - `services.payroll_api_adapter.validate_payroll_api_payload()`로 산출 전 요청 검증만 수행할 수 있습니다.
+- `crates/payroll-api`가 같은 요청/응답 계약을 Rust 타입과 검증 코어로 제공합니다.
+- `frontend/src/contracts/payrollApi.ts`가 프론트엔드에서 사용하는 TypeScript 요청/응답 타입을 제공합니다.
 - `services/payroll_api_contract.py`와 `docs/PAYROLL_API_CONTRACT.md`가 향후 HTTP 래퍼/외부 연동에서 사용할 요청·응답 계약을 고정합니다.
 - `services/payroll_readiness.py`가 명부, 운영 기준, 산출 자료, API 계약 준비 상태를 UI/API 공통 스냅샷으로 제공합니다.
 - `services/payroll_policy_store.py`가 법인 기본값과 사업장별 운영 기준을 저장하고 해석합니다.
@@ -54,6 +60,15 @@ PR 자동검사와 동일한 핵심 테스트부터 실행합니다.
 
 ```powershell
 python -m unittest tests.test_attendance_import tests.test_payroll_api_adapter tests.test_payroll_api_contract tests.test_payroll_automation tests.test_payroll_operation_policy tests.test_payroll_readiness tests.test_payroll_ui_bridge tests.test_payroll_settings_ui_bridge tests.test_preview_grid_filter tests.test_workflow tests.test_org_access -v
+```
+
+Rust/TypeScript 전환 영역은 각 도구가 설치된 환경에서 실행합니다.
+
+```powershell
+cargo test --workspace
+cd frontend
+npm install
+npm run typecheck
 ```
 
 전체 테스트는 변경 범위가 넓을 때 실행합니다.

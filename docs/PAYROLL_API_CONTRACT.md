@@ -8,6 +8,17 @@ Bitween 급여 자동화는 현재 데스크톱 앱 내부 서비스로 구현�
 - 예정 HTTP 엔드포인트: `POST /api/payroll/v1/runs`
 - Content-Type: `application/json`
 
+Rust 전환 진입점:
+
+- Rust crate: `crates/payroll-api`
+- 검증 함수: `bitween_payroll_api::validate_payroll_api_payload(payload, policy_snapshot)`
+- 용도: Python UI를 유지하면서 급여 API 요청 검증, scope 파싱, 입력 방식 해석을 Rust 코어로 옮깁니다.
+
+TypeScript 프론트 계약:
+
+- 타입 파일: `frontend/src/contracts/payrollApi.ts`
+- 용도: 로그인 이후 홈/급여 메뉴/실행 전 검증 UI에서 같은 요청·응답 필드명을 사용합니다.
+
 실행 전 검증:
 
 - 내부 진입점: `services.payroll_api_adapter.validate_payroll_api_payload(payload)`
