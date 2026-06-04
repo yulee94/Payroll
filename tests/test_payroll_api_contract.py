@@ -94,6 +94,21 @@ class PayrollApiContractTests(unittest.TestCase):
             response["policy_resolution_entrypoint"],
         )
 
+    def test_contract_declares_rust_execution_planning(self) -> None:
+        contract = payroll_api_contract()
+        plan = contract["execution_plan"]
+        response = contract["response"]
+
+        self.assertIn("plan_run_request", plan["rust_entrypoint"])
+        self.assertIn("plan_payroll_execution", plan["planner_entrypoint"])
+        self.assertEqual(plan["backend_values"], ["python_compatibility"])
+        self.assertIn("attach_attendance_sheet", plan["step_kinds"])
+        self.assertEqual(plan["example_plan"]["backend"], "python_compatibility")
+        self.assertEqual(plan["example_plan"]["input_type"], "mixed")
+        self.assertEqual(plan["example_plan"]["requested_input_type"], "auto")
+        self.assertEqual(plan["example_plan"]["steps"][0]["kind"], "extract_attendance")
+        self.assertIn("plan_run_request", response["execution_plan_entrypoint"])
+
     def test_contract_declares_rust_authorization_decisions(self) -> None:
         contract = payroll_api_contract()
         authorization = contract["authorization"]

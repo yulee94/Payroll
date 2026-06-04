@@ -16,11 +16,12 @@ Rust transition entry point:
 - Service facade: `bitween_payroll_api::PayrollApiService`
 - Validation function: `bitween_payroll_api::validate_payroll_api_payload(payload, policy_snapshot)`
 - Policy-resolved validation function: `PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)`
+- Execution plan function: `PayrollApiService::plan_run_request(request, policy_snapshot)`
 - Run-result response function: `PayrollApiService::run_response(result, request_id)`
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -85,6 +86,86 @@ Resolver output shape:
 ```
 
 The selected policy is normalized in Rust before validation response serialization. Workplaces are trimmed, and alias/canonical matching is supported from the supplied settings snapshot; Rust-owned org configuration and settings persistence remain future slices.
+
+
+## Execution Planning
+
+Rust now owns deterministic payroll execution planning once a request has been parsed and an operation-policy snapshot has been resolved. The plan does not generate payroll outputs yet; it tells future HTTP, worker, Tauri, or Kubernetes wrappers which source paths and compatibility steps will run before the Python executor is replaced.
+
+Rust entry points:
+
+- `plan_payroll_execution(request, policy_snapshot)`
+- `PayrollApiService::plan_run_request(request, policy_snapshot)`
+
+Planner invariants:
+
+1. Explicit `invoice`, `attendance`, and `mixed` requests keep the caller-requested input type when required source paths exist.
+2. `auto` requests resolve the executable input type from the normalized Rust operation policy.
+3. `mixed` requests with only an attendance source plan an attendance fallback to preserve Python compatibility behavior.
+4. Every step currently names `backend: "python_compatibility"` until Rust owns payroll output generation.
+
+Example plan:
+
+```json
+{
+  "ok": true,
+  "scope": "COSS/Site A/2026-05",
+  "scope_key": "COSS\u001fSite A\u001f2026-05",
+  "affiliate": "COSS",
+  "workplace": "Site A",
+  "period": "2026-05",
+  "input_type": "mixed",
+  "requested_input_type": "auto",
+  "backend": "python_compatibility",
+  "compatibility_executor": "services.payroll_automation.run_payroll_automation",
+  "source_paths": {
+    "invoice": "s3://bitween-payroll/inbox/invoice_2026-05.xlsx",
+    "attendance": "s3://bitween-payroll/inbox/attendance_2026-05.csv"
+  },
+  "missing_source_paths": [],
+  "steps": [
+    {
+      "kind": "extract_attendance",
+      "backend": "python_compatibility",
+      "input": "s3://bitween-payroll/inbox/attendance_2026-05.csv",
+      "output": "attendance_rows",
+      "description": "Extract attendance rows before merging them into the invoice workbook."
+    },
+    {
+      "kind": "attach_attendance_sheet",
+      "backend": "python_compatibility",
+      "input": "s3://bitween-payroll/inbox/invoice_2026-05.xlsx + attendance_rows",
+      "output": "generated:mixed_invoice",
+      "description": "Attach the attendance sheet to the supplied invoice workbook."
+    },
+    {
+      "kind": "process_invoice",
+      "backend": "python_compatibility",
+      "input": "generated:mixed_invoice",
+      "output": "payroll_outputs",
+      "description": "Process the merged invoice workbook through the compatibility payroll executor."
+    }
+  ],
+  "operation_policy": {
+    "input_basis": "hybrid",
+    "payday": "25일",
+    "show_setup_guide": true,
+    "policy_note": "",
+    "attendance": {
+      "enabled": true,
+      "source": "biometric",
+      "rounding_minutes": 1,
+      "late_grace_minutes": 0,
+      "early_leave_grace_minutes": 0,
+      "overtime_rounding_minutes": 1,
+      "missing_clock_policy": "warn",
+      "holiday_source": "invoice"
+    }
+  },
+  "operation_policy_source": "tenant",
+  "warnings": []
+}
+```
 
 ## Kubernetes production behavior
 

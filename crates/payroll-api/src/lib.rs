@@ -1,5 +1,6 @@
 pub mod access;
 pub mod error;
+pub mod execution_plan;
 pub mod policy;
 pub mod policy_resolution;
 pub mod request;
@@ -12,6 +13,10 @@ pub use access::{
     PayrollPosition, PayrollPrincipal, PayrollRole,
 };
 pub use error::PayrollApiError;
+pub use execution_plan::{
+    plan_payroll_execution, PayrollExecutionBackend, PayrollExecutionPlan, PayrollExecutionStep,
+    PayrollExecutionStepKind, PAYROLL_PYTHON_COMPATIBILITY_EXECUTOR,
+};
 pub use policy::{
     AttendancePolicy, MissingClockPolicy, OperationPolicy, OperationPolicySnapshot,
     PayrollInputBasis,
