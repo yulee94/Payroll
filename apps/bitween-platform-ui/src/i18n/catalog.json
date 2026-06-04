@@ -6908,6 +6908,159 @@
         "zh-Hans-CN": "前往电子审批画面，继续查看待处理文档和附件状态。",
         "ja-JP": "電子承認画面へ移動し、待機文書と添付資料の状態を続けて確認します。"
       }
+    },
+    {
+      "key": "screens.hrPeople.title",
+      "values": {
+        "ko-KR": "인사 문서 / 배치 요약",
+        "en-US": "People documents / placement summary",
+        "zh-Hans-CN": "人事文档 / 配置摘要",
+        "ja-JP": "人事文書 / 配置サマリー"
+      }
+    },
+    {
+      "key": "screens.hrPeople.description",
+      "values": {
+        "ko-KR": "직원명부, 각종 증명서, 이력서/사직서, 채용 후보 배치를 HR 화면에서 먼저 정리합니다.",
+        "en-US": "Review roster, certificates, resumes/resignations, and candidate placement from the HR workspace first.",
+        "zh-Hans-CN": "先在 HR 工作区整理员工名册、各类证明、简历/离职书和候选人配置。",
+        "ja-JP": "HR 画面で社員名簿、各種証明書、履歴書/退職届、採用候補の配置を先に整理します。"
+      }
+    },
+    {
+      "key": "screens.hrPeople.action",
+      "values": {
+        "ko-KR": "채용 배치 보기",
+        "en-US": "View recruiting placement",
+        "zh-Hans-CN": "查看招聘配置",
+        "ja-JP": "採用配置を見る"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.roster.label",
+      "values": {
+        "ko-KR": "직원명부",
+        "en-US": "Employee roster",
+        "zh-Hans-CN": "员工名册",
+        "ja-JP": "社員名簿"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.roster.status",
+      "values": {
+        "ko-KR": "최신",
+        "en-US": "Current",
+        "zh-Hans-CN": "最新",
+        "ja-JP": "最新"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.roster.title",
+      "values": {
+        "ko-KR": "근태 확인과 명부 연결",
+        "en-US": "Connect roster with attendance checks",
+        "zh-Hans-CN": "将名册与考勤检查连接",
+        "ja-JP": "名簿と勤怠確認を連携"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.roster.detail",
+      "values": {
+        "ko-KR": "직원명부와 출퇴근 상태를 같이 보려면 출퇴근 화면으로 이동합니다.",
+        "en-US": "Open Attendance to review employee roster context with check-in/out status.",
+        "zh-Hans-CN": "前往考勤画面，将员工名册与上下班状态一起查看。",
+        "ja-JP": "勤怠画面で社員名簿と出退勤状態をあわせて確認します。"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.certificates.label",
+      "values": {
+        "ko-KR": "증명서",
+        "en-US": "Certificates",
+        "zh-Hans-CN": "证明文件",
+        "ja-JP": "証明書"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.certificates.status",
+      "values": {
+        "ko-KR": "정리 필요",
+        "en-US": "Needs sorting",
+        "zh-Hans-CN": "需要整理",
+        "ja-JP": "整理が必要"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.certificates.title",
+      "values": {
+        "ko-KR": "재직/경력 증명서 보관",
+        "en-US": "Employment/career certificate storage",
+        "zh-Hans-CN": "在职/经历证明存档",
+        "ja-JP": "在職/経歴証明書の保管"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.certificates.detail",
+      "values": {
+        "ko-KR": "증명서와 인사 첨부문서를 자료함에서 함께 검토합니다.",
+        "en-US": "Review certificates and HR attachments together in Archive.",
+        "zh-Hans-CN": "在资料库中一起复核证明文件和人事附件。",
+        "ja-JP": "資料箱で証明書と人事添付文書をまとめて確認します。"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.placement.label",
+      "values": {
+        "ko-KR": "인재 배치",
+        "en-US": "Talent placement",
+        "zh-Hans-CN": "人才配置",
+        "ja-JP": "人材配置"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.placement.status",
+      "values": {
+        "ko-KR": "공유 중",
+        "en-US": "Shared",
+        "zh-Hans-CN": "共享中",
+        "ja-JP": "共有中"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.placement.title",
+      "values": {
+        "ko-KR": "경력/자격 기반 배치",
+        "en-US": "Career/credential-based placement",
+        "zh-Hans-CN": "基于经历/资格的配置",
+        "ja-JP": "経歴/資格ベースの配置"
+      }
+    },
+    {
+      "key": "screens.hrPeople.cards.placement.detail",
+      "values": {
+        "ko-KR": "채용 화면에서 지원자 경력, 자격, 부서 필요도를 이어서 봅니다.",
+        "en-US": "Continue to Recruit to compare applicant careers, credentials, and department needs.",
+        "zh-Hans-CN": "前往招聘画面，继续比较申请人经历、资格和部门需求。",
+        "ja-JP": "採用画面で応募者の経歴、資格、部門ニーズを続けて比較します。"
+      }
+    },
+    {
+      "key": "screens.hrPeople.notice.badge",
+      "values": {
+        "ko-KR": "HR 표시 흐름",
+        "en-US": "HR display flow",
+        "zh-Hans-CN": "HR 显示流程",
+        "ja-JP": "HR 表示フロー"
+      }
+    },
+    {
+      "key": "screens.hrPeople.notice.description",
+      "values": {
+        "ko-KR": "이 패널은 실제 인사 데이터를 저장하지 않고, 관련 업무 화면으로 이동하는 UI 안내만 제공합니다.",
+        "en-US": "This panel does not store HR data; it only guides users to related workspaces.",
+        "zh-Hans-CN": "此面板不存储人事数据，仅引导用户前往相关工作区。",
+        "ja-JP": "このパネルは人事データを保存せず、関連画面への移動を案内するだけです。"
+      }
     }
   ],
   "languageDisplayNames": [
