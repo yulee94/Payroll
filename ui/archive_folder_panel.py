@@ -19,7 +19,7 @@ from ui.theme import COLORS, FONT
 
 
 class ArchiveFolderPanel(ttk.Frame):
-    """COSS → 계열사 → 사업장 → 급여월 → 파일/보고서 계층 탐색."""
+    """COSS -> 계열사 -> 사업장 -> 급여월 -> 파일/보고서 계층 탐색."""
 
     def __init__(
         self,
@@ -55,13 +55,23 @@ class ArchiveFolderPanel(ttk.Frame):
         self.tree.heading("name", text="이름")
         self.tree.heading("kind", text="구분")
         self.tree.heading("hint", text="설명")
-        self.tree.column("name", width=200, minwidth=120)
-        self.tree.column("kind", width=72, minwidth=56)
-        self.tree.column("hint", width=180, minwidth=100)
+        self.tree.column("name", width=220, minwidth=140)
+        self.tree.column("kind", width=82, minwidth=64, anchor=tk.CENTER)
+        self.tree.column("hint", width=220, minwidth=130)
         scroll = ttk.Scrollbar(table_wrap, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscrollcommand=scroll.set)
         self.tree.grid(row=0, column=0, sticky="nsew")
         scroll.grid(row=0, column=1, sticky="ns")
+
+        self._hint_label = tk.Label(
+            self,
+            text="폴더는 더블클릭으로 이동하고, 파일은 클릭하면 오른쪽 미리보기에 표시됩니다.",
+            anchor=tk.W,
+            bg=COLORS["bg"],
+            fg=COLORS["muted"],
+            font=(FONT, 8),
+        )
+        self._hint_label.pack(fill=tk.X, pady=(8, 0))
 
         self.tree.bind("<<TreeviewSelect>>", self._on_select)
         self.tree.bind("<Double-1>", self._on_double_click)
@@ -70,15 +80,6 @@ class ArchiveFolderPanel(ttk.Frame):
     def _on_tree_mousewheel(self, event) -> None:
         self.tree.yview_scroll(int(-1 * (event.delta / 120)), "units")
         return "break"
-
-        tk.Label(
-            self,
-            text="폴더는 더블클릭 · 「..」 로 상위 이동 · 파일은 클릭 시 미리보기",
-            anchor=tk.W,
-            bg=COLORS["bg"],
-            fg=COLORS["muted"],
-            font=(FONT, 8),
-        ).pack(fill=tk.X, pady=(8, 0))
 
     @property
     def browser(self) -> ArchiveBrowser:
@@ -168,20 +169,31 @@ class ArchiveFolderPanel(ttk.Frame):
                 )
                 for entry in entries
             ]
-            for iid, values in rows:
-                self.tree.insert("", tk.END, iid=iid, values=values)
+            if not rows:
+                self.tree.insert(
+                    "",
+                    tk.END,
+                    iid="__empty__",
+                    values=(
+                        "표시할 자료가 없습니다",
+                        "빈 상태",
+                        "급여월을 처리했거나 필터 조건이 맞는지 확인하세요",
+                    ),
+                )
+            else:
+                for iid, values in rows:
+                    self.tree.insert("", tk.END, iid=iid, values=values)
         finally:
             self.tree.bind("<<TreeviewSelect>>", self._on_select)
             self._suppress_select = False
 
         if not entries:
+            if self._on_file_select:
+                self._on_file_select(None)
             return
-        # 기존 선택 유지 (가능하면)
         if prev_sel and any(e.entry_id == prev_sel[0] for e in entries):
             self.tree.selection_set(prev_sel[0])
             return
-        # 자동 미리보기로 인한 Excel 파싱(버벅임)을 줄이기 위해,
-        # 첫 항목만 선택하고 미리보기는 사용자가 클릭할 때만 실행합니다.
         self.tree.selection_set(entries[0].entry_id)
         if self._on_file_select:
             self._on_file_select(None)
@@ -189,7 +201,6 @@ class ArchiveFolderPanel(ttk.Frame):
     def _on_select(self, _event=None) -> None:
         if self._suppress_select:
             return
-        # 연속 클릭 시 미리보기(Excel 파싱)가 겹치지 않도록 디바운스
         if self._select_job is not None:
             try:
                 self.after_cancel(self._select_job)

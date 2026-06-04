@@ -133,12 +133,21 @@ class ModuleHubPanel(tk.Frame):
             card = tk.Frame(wrap, bg=COLORS["card"], highlightbackground=COLORS["border"], highlightthickness=1)
             card.grid(row=0, column=i, sticky="nsew", padx=(0 if i == 0 else 6, 0), pady=0)
             card.grid_columnconfigure(0, weight=1)
-            val = tk.Label(card, text="—", bg=COLORS["card"], fg=self._spec.accent, font=(FONT, 18, "bold"))
+            val = tk.Label(card, text="—", bg=COLORS["card"], fg=self._spec.accent, font=(FONT, 18, "bold"), anchor=tk.W)
             val.grid(row=0, column=0, sticky="w", padx=14, pady=(12, 0))
-            lbl = tk.Label(card, text="", bg=COLORS["card"], fg=COLORS["text"], font=(FONT, 10, "bold"))
-            lbl.grid(row=1, column=0, sticky="w", padx=14)
-            hint = tk.Label(card, text="", bg=COLORS["card"], fg=COLORS["muted"], font=(FONT, 8))
-            hint.grid(row=2, column=0, sticky="w", padx=14, pady=(0, 12))
+            lbl = tk.Label(card, text="", bg=COLORS["card"], fg=COLORS["text"], font=(FONT, 10, "bold"), anchor=tk.W)
+            lbl.grid(row=1, column=0, sticky="ew", padx=14)
+            hint = tk.Label(
+                card,
+                text="",
+                bg=COLORS["card"],
+                fg=COLORS["muted"],
+                font=(FONT, 8),
+                anchor=tk.W,
+                justify=tk.LEFT,
+                wraplength=190,
+            )
+            hint.grid(row=2, column=0, sticky="ew", padx=14, pady=(0, 12))
             self._kpi_frames.append(card)
             self._kpi_labels.extend([val, lbl, hint])
 
@@ -203,6 +212,17 @@ class ModuleHubPanel(tk.Frame):
                 self._kpi_labels[idx + 1].configure(text="")
                 self._kpi_labels[idx + 2].configure(text="")
 
+    def _empty_values(self, cols: tuple[tuple[str, str, int], ...]) -> list[str]:
+        values: list[str] = []
+        for idx, _col in enumerate(cols):
+            if idx == 0:
+                values.append("표시할 데이터가 없습니다")
+            elif idx == 1:
+                values.append("등록 또는 필터 확인")
+            else:
+                values.append("")
+        return values
+
     def _reload_tree(self) -> None:
         if self._tree is None:
             return
@@ -212,12 +232,16 @@ class ModuleHubPanel(tk.Frame):
         self._tree["columns"] = [c[0] for c in cols]
         for key, header, width in cols:
             self._tree.heading(key, text=header)
-            self._tree.column(key, width=width, minwidth=40, stretch=key in ("title", "memo", "note", "name", "plan"))
+            self._tree.column(key, width=width, minwidth=44, stretch=key in ("title", "memo", "note", "name", "plan"))
+        self._tree.tag_configure("empty", foreground=COLORS["muted"])
         try:
             rows = self._spec.list_fn(self._active_tab)
         except Exception as exc:
             messagebox.showerror("조회 오류", str(exc), parent=self.winfo_toplevel())
             rows = []
+        if not rows:
+            self._tree.insert("", tk.END, values=self._empty_values(cols), tags=("empty",))
+            return
         for row in rows:
             values = []
             for key, _h, _w in cols:
