@@ -107,6 +107,13 @@ const aiDraftDefinitions = [
   { id: "draft-comment", tone: "neutral" }
 ] as const satisfies readonly ToneDefinition[];
 
+const settingsPreferenceDefinitions = [
+  { id: "density", target: "home", tone: "ready" },
+  { id: "notice", target: "workflow", tone: "neutral" },
+  { id: "security", target: "admin", tone: "attention" },
+  { id: "payroll", target: "payroll", tone: "attention" }
+] as const satisfies readonly TargetToneDefinition[];
+
 const tScreen = (locale: SupportedLocale, key: string, params?: Readonly<Record<string, string | number>>) =>
   t(locale, `screens.${key}`, params);
 
@@ -272,7 +279,7 @@ export function LauncherScreen({ locale, onSelect }: ScreenProps) {
         <MetricGrid items={platformMetrics} />
       </Card>
 
-      <CalendarTodoPanel events={calendarEvents} locale={locale} todos={todayTodos} />
+      <CalendarTodoPanel events={calendarEvents} locale={locale} onSelect={onSelect} todos={todayTodos} />
 
       <Card>
         <SectionHeader title={tScreen(locale, "launcher.workQueue.title")} description={tScreen(locale, "launcher.workQueue.description")} />
@@ -419,7 +426,17 @@ function PayrollIntegrationPanel({ locale, onSelect }: Pick<ScreenProps, "locale
   );
 }
 
-function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonly CalendarEvent[]; readonly locale: SupportedLocale; readonly todos: readonly TodoItem[] }) {
+function CalendarTodoPanel({
+  events,
+  locale,
+  onSelect,
+  todos
+}: {
+  readonly events: readonly CalendarEvent[];
+  readonly locale: SupportedLocale;
+  readonly onSelect: (id: PlatformId) => void;
+  readonly todos: readonly TodoItem[];
+}) {
   return (
     <View style={styles.homePlannerGrid}>
       <Card style={styles.homePlannerCard}>
@@ -431,13 +448,18 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
         </View>
         <View style={styles.plannerList}>
           {events.map((event) => (
-            <View key={event.id} style={styles.plannerItem}>
+            <Pressable
+              accessibilityRole="button"
+              key={event.id}
+              onPress={() => onSelect(event.target)}
+              style={({ pressed }) => [styles.plannerItem, pressed && styles.buttonPressed]}
+            >
               <Badge tone={event.tone}>{event.timeLabel}</Badge>
               <View style={styles.plannerCopy}>
                 <Label weight="bold">{event.title}</Label>
-                <Label size="sm" muted>{event.dateLabel}</Label>
+                <Label size="sm" muted>{event.dateLabel} · {tScreen(locale, "workDetail.actions.openRelated")}</Label>
               </View>
-            </View>
+            </Pressable>
           ))}
         </View>
       </Card>
@@ -445,13 +467,18 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
         <SectionHeader title={tScreen(locale, "todo.title")} description={tScreen(locale, "todo.description")} />
         <View style={styles.plannerList}>
           {todos.map((todo) => (
-            <View key={todo.id} style={[styles.todoItem, todo.completed && styles.todoItemDone]}>
+            <Pressable
+              accessibilityRole="button"
+              key={todo.id}
+              onPress={() => onSelect(todo.target)}
+              style={({ pressed }) => [styles.todoItem, todo.completed && styles.todoItemDone, pressed && styles.buttonPressed]}
+            >
               <Badge tone={todo.tone}>{todo.timeLabel}</Badge>
               <View style={styles.plannerCopy}>
                 <Label weight="bold">{todo.title}</Label>
-                <Label size="sm" muted>{todo.owner}</Label>
+                <Label size="sm" muted>{todo.owner} · {tScreen(locale, "workDetail.actions.openRelated")}</Label>
               </View>
-            </View>
+            </Pressable>
           ))}
         </View>
       </Card>
@@ -555,6 +582,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
           </View>
         </Card>
       ) : null}
+      {active.id === "settings" ? <SettingsControlPanel locale={locale} onSelect={onSelect} /> : null}
 
       <Card>
         <SectionHeader
@@ -785,6 +813,38 @@ function AiWorkspacePanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "on
             <ActionButton onPress={() => onSelect("archive")} variant="ghost">{tScreen(locale, "ai.preview.actions.archive")}</ActionButton>
           </View>
         </View>
+      </View>
+    </Card>
+  );
+}
+
+function SettingsControlPanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "onSelect">) {
+  return (
+    <Card>
+      <SectionHeader
+        title={tScreen(locale, "settingsControl.title")}
+        description={tScreen(locale, "settingsControl.description")}
+        action={<ActionButton onPress={() => onSelect("admin")} variant="secondary">{tScreen(locale, "settingsControl.action")}</ActionButton>}
+      />
+      <View style={styles.settingsGrid}>
+        {settingsPreferenceDefinitions.map((item) => (
+          <Pressable
+            accessibilityRole="button"
+            key={item.id}
+            onPress={() => onSelect(item.target)}
+            style={({ pressed }) => [styles.settingsPreferenceCard, { borderTopColor: toneColor(item.tone) }, pressed && styles.buttonPressed]}
+          >
+            <View style={styles.settingsPreferenceHead}>
+              <Label size="sm" muted>{tScreen(locale, `settingsControl.cards.${item.id}.label`)}</Label>
+              <Badge tone={item.tone}>{tScreen(locale, `settingsControl.cards.${item.id}.value`)}</Badge>
+            </View>
+            <Label size="sm">{tScreen(locale, `settingsControl.cards.${item.id}.detail`)}</Label>
+          </Pressable>
+        ))}
+      </View>
+      <View style={styles.settingsNotice}>
+        <Badge tone="neutral">{tScreen(locale, "settingsControl.notice.badge")}</Badge>
+        <Label size="sm" muted>{tScreen(locale, "settingsControl.notice.description")}</Label>
       </View>
     </Card>
   );
@@ -1328,6 +1388,40 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.md
+  },
+  settingsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  settingsNotice: {
+    alignItems: "center",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  settingsPreferenceCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 220,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  settingsPreferenceHead: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
   },
   plannerCopy: {
     flex: 1,
