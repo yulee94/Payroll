@@ -445,8 +445,20 @@ function workDetail([category, status, owner, next, tone]) {
       <div class="detail-item"><span class="helper">담당</span><strong>${escapeText(owner)}</strong></div>
       <div class="detail-item"><span class="helper">다음 작업</span><span>${escapeText(next)}</span></div>
     </div>
-    <div class="action-row">${button("상세 보기", state.activeId, "secondary")}${button("담당자 확인", state.activeId, "ghost")}</div>
+    <div class="action-row">${button("관련 화면 열기", workRowTarget([category, status, owner, next, tone]), "secondary")}${button("담당자 확인", state.activeId, "ghost")}</div>
   </div>`;
+}
+
+function workRowTarget(row) {
+  const haystack = row.slice(0, 4).join(" ");
+  if (haystack.includes("급여") || haystack.includes("산출") || haystack.includes("월 기본근로시간")) return "payroll";
+  if (haystack.includes("결재") || haystack.includes("회람") || haystack.includes("기안")) return "workflow";
+  if (haystack.includes("자료") || haystack.includes("보고서") || haystack.includes("파일") || haystack.includes("폴더")) return "archive";
+  if (haystack.includes("권한") || haystack.includes("사용자") || haystack.includes("역할") || haystack.includes("법인")) return "admin";
+  if (haystack.includes("설정") || haystack.includes("알림") || haystack.includes("환경")) return "settings";
+  if (haystack.includes("AI") || haystack.includes("요약") || haystack.includes("초안")) return "ai";
+  if (haystack.includes("근태") || haystack.includes("증명서") || haystack.includes("직원")) return "hr";
+  return "home";
 }
 
 function filterRows(rows) {
