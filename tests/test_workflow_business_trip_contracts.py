@@ -61,6 +61,17 @@ class BusinessTripLifecycleContractTests(unittest.TestCase):
         self.assertIn("Requester/executor ownership does not imply overdue evaluation authority", permissions["overdue_invariants"])
         self.assertIn("admin/executive/finance", permissions["administer_invariants"][0])
 
+    def test_contract_declares_rust_business_trip_document_scope(self) -> None:
+        contract = workflow_api_contract()
+        permissions = contract["business_trip_permissions"]
+
+        self.assertIn("BusinessTripPermissionDocument", permissions["permission_dtos"])
+        self.assertIn("is_business_trip_related_document", permissions["rust_entrypoints"])
+        self.assertIn("is_business_trip_document_legal_scope_allowed", permissions["rust_entrypoints"])
+        self.assertIn("Non-business-trip documents pass unchanged", permissions["document_scope_invariants"])
+        self.assertIn("document origin_tenant_id wins over content tenant fields", permissions["document_scope_invariants"])
+        self.assertIn("sibling legal-tenant principals fail related-document scope", permissions["document_scope_invariants"])
+
     def test_status_taxonomy_is_frozen_and_separate_from_kpi_reflection(self) -> None:
         self.assertEqual(
             c.TRIP_STATUSES,

@@ -588,6 +588,30 @@ Verification evidence for this checkpoint:
 Slice spec: `docs/PAYROLL_RUST_EXECUTION_PLAN_SLICE.md`.
 
 
+## Current implementation checkpoint: Rust business-trip document legal-scope core
+
+Implemented on 2026-06-04 as a workflow document authorization slice:
+
+- `crates/workflow-core::business_trip_permissions` now owns pure business-trip
+  document relatedness and document legal-scope predicates for supplied
+  principal/document DTOs.
+- Rust preserves Python compatibility for `BUSINESS_TRIP_REQUEST` document type,
+  payload `trip_id` relatedness, unrelated-document pass-through, origin/legal
+  tenant fallback order, workflow storage-tenant row scoping, missing principal
+  tenant compatibility, workflow-root access, and sibling legal-tenant denial.
+- Python still owns `UserSession` conversion, document JSON/content extraction,
+  workflow persistence, profile lookup, approval mutation, document/task/report/
+  KPI side effects, notifications, calendar/To-Do links, and UI bridge behavior.
+- Workflow contract metadata now names the Rust document DTO, relatedness and
+  legal-scope entrypoints, and document-scope invariants.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-workflow-core business_trip_permissions --lib`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_business_trip_contracts.BusinessTripLifecycleContractTests.test_contract_declares_rust_business_trip_document_scope -v`
+
+Slice spec: `docs/WORKFLOW_RUST_BUSINESS_TRIP_DOCUMENT_SCOPE_SLICE.md`.
+
 ## Current implementation checkpoint: Rust business-trip overdue permission core
 
 Implemented on 2026-06-04 as a follow-up workflow authorization slice:

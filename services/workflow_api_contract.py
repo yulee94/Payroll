@@ -93,6 +93,8 @@ def workflow_business_trip_permissions_example() -> dict[str, Any]:
         "rust_entrypoints": [
             "workflow_roles",
             "is_business_trip_legal_scope_allowed",
+            "is_business_trip_document_legal_scope_allowed",
+            "is_business_trip_related_document",
             "can_view_business_trip_lifecycle",
             "can_manage_business_trip_lifecycle",
             "can_evaluate_business_trip_overdue",
@@ -128,6 +130,7 @@ def workflow_business_trip_permissions_example() -> dict[str, Any]:
             "BusinessTripProfile",
             "BusinessTripPermissionTrip",
             "BusinessTripPermissionInput",
+            "BusinessTripPermissionDocument",
         ],
         "legal_scope_invariants": [
             "row tenant_id must match requested workflow storage tenant when present",
@@ -164,6 +167,16 @@ def workflow_business_trip_permissions_example() -> dict[str, Any]:
             "Department manager/site manager/HR evaluation is department scoped",
             "Requester/executor ownership does not imply overdue evaluation authority",
             "Viewer and explicit approver grants do not imply overdue evaluation authority",
+        ],
+        "document_scope_invariants": [
+            "BUSINESS_TRIP_REQUEST documents are business-trip related",
+            "content trip_id marks a document as business-trip related",
+            "Non-business-trip documents pass unchanged",
+            "document origin_tenant_id wins over content tenant fields",
+            "content origin_tenant_id wins over content legal_tenant_id",
+            "related documents use the requested workflow storage tenant as row tenant",
+            "missing principal tenant preserves legacy document-scope compatibility",
+            "sibling legal-tenant principals fail related-document scope",
         ],
     }
 

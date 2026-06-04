@@ -258,6 +258,7 @@ cargo test --workspace
 - [x] Business-trip lifecycle normalization and status-transition behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the workflow persistence/document/task/report/KPI side-effect bridge.
 - [x] Business-trip lifecycle legal-scope, visibility, and manage permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile resolver and side-effect bridge.
 - [x] Business-trip lifecycle administration and overdue-evaluator permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile resolver and side-effect bridge.
+- [x] Business-trip document relatedness and legal-scope predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the document/content resolver and side-effect bridge.
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
 - [x] Invoice audit row and batch behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/fixed-profile resolver and workbook/UI bridge.
@@ -725,6 +726,35 @@ git diff --check
 cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
 ```
 
+
+## Implementation checkpoint: Rust business-trip document legal-scope core
+
+Completed on 2026-06-04 as a workflow document authorization slice:
+
+- `crates/workflow-core::business_trip_permissions` owns pure business-trip
+  document relatedness and document legal-scope predicates for supplied
+  principal/document DTOs.
+- Rust preserves `BUSINESS_TRIP_REQUEST` and payload `trip_id` relatedness,
+  unrelated-document pass-through, origin/legal tenant fallback order, workflow
+  storage-tenant row scoping, workflow-root access, and sibling legal-tenant
+  denial.
+- Python remains the `UserSession` adapter, document JSON/content resolver,
+  workflow store, profile resolver, approval mutation owner, document/task/
+  report/KPI side-effect owner, notification/calendar/To-Do producer, and UI
+  bridge.
+- Slice spec: `docs/WORKFLOW_RUST_BUSINESS_TRIP_DOCUMENT_SCOPE_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo test -p bitween-workflow-core business_trip_permissions --lib
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_business_trip_contracts.BusinessTripLifecycleContractTests.test_contract_declares_rust_business_trip_document_scope -v
+```
+
+Task 5 acceptance status:
+
+- [x] Business-trip document legal-scope predicates are Rust-owned behind parity
+      contract tests.
 
 ## Implementation checkpoint: Rust business-trip overdue permission core
 
