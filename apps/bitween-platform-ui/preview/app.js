@@ -122,10 +122,23 @@ const adminPermissionRows = [
   ["일반 사원", "본인 자료", "차단", "공유 자료", "attention"]
 ];
 
+const payrollIntegrationChecks = [
+  ["법인/사업장 입력자료", "3곳", "근태문서와 청구서 유형을 사업장별로 구분합니다.", "attention"],
+  ["건강보험EDI", "확인 전", "급여 작업 전 보험료 변동 확인이 필요한 상태입니다.", "attention"],
+  ["양식 매핑", "2종", "근태문서/청구서 입력 양식 연결 예정입니다.", "neutral"],
+  ["산출 진입", "대기", "backend API 계약 후 실제 검증 흐름으로 전환합니다.", "ready"]
+];
+
 const payrollSettingsRows = [
   ["설정 대상", "법인 기본", "급여 담당", "사업장별 예외 여부 확인", "neutral"],
   ["휴업수당 지급률", "법정 기준 확인", "급여 담당", "최저 기준 이상 입력값 검토", "attention"],
   ["월 기본근로시간", "209시간", "운영 관리자", "사업장별 고정/대체 방식 표시", "ready"]
+];
+
+const payrollIntegrationRows = [
+  ["Bitween Demo / 본사", "근태문서 2종", "건강보험EDI 확인 전", "급여 작업 전 보험료 공제금액 확인 필요", "attention"],
+  ["Bitween Demo / 부산지점", "청구서 매핑 대기", "사업장 담당", "사업장별 청구서 양식과 근태문서 연결", "neutral"],
+  ["협력 사업장", "입력자료 준비", "급여 담당", "법인/사업장별 입력 정책 확인 후 산출 진입", "ready"]
 ];
 
 const previewRows = [
@@ -425,6 +438,7 @@ function renderPayroll() {
       `).join("")}</div>
       ${selectedReadiness ? payrollReadinessDetail(selectedReadiness) : ""}
     </section>
+    ${payrollIntegrationPanel()}
     <section class="card">
       ${sectionHead("Payroll flow", "급여 산출 작업 흐름", "운영 기준 확인부터 입력 자료 준비, 결과 검토, 자료함 저장까지 순서대로 진행합니다.", button("급여 설정 확인", "settings", "secondary"))}
       <div class="step-grid">${payrollSteps.map(([index, title, detail, status, tone]) => `
@@ -447,6 +461,21 @@ function renderPayroll() {
       ${table(previewRows)}
     </section>
   `;
+}
+
+function payrollIntegrationPanel() {
+  return `<section class="card">
+    ${sectionHead("", "급여 연동 준비 점검", "법인/사업장별 근태문서, 청구서, 건강보험EDI 확인 상태를 산출 전 화면에서 먼저 정리합니다.", button("Branch 권한 확인", "admin", "secondary"))}
+    <div class="integration-grid">${payrollIntegrationChecks.map(([label, value, detail, tone]) => `
+      <article class="integration-card" style="border-top-color:${toneColor(tone)}">
+        <span class="helper">${label}</span>
+        <strong class="metric-value" style="color:${toneColor(tone)}">${value}</strong>
+        <span>${detail}</span>
+      </article>
+    `).join("")}</div>
+    ${table(payrollIntegrationRows)}
+    <div class="notice">${badge("Frontend 준비", "neutral")}<span class="helper">실제 건강보험EDI 조회, 보험료 공제금액 반영, 사업장별 입력 양식 검증은 backend/API 계약 후 연결합니다.</span></div>
+  </section>`;
 }
 
 function payrollCardKey(row) {

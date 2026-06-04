@@ -737,6 +737,22 @@ button {
   padding: 10px;
 }
 
+.integration-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.integration-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  border-top: 4px solid var(--muted);
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
 .metric-card,
 .mini-card,
 .queue-card,

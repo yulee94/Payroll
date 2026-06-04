@@ -15,6 +15,7 @@ import {
 import {
   calendarEvents,
   moduleDashboards,
+  payrollIntegrationRows,
   navigationItems,
   payrollSettingsRows,
   payrollSteps,
@@ -66,6 +67,13 @@ const adminPermissionRows = [
   { id: "role-owner", role: "Branch 관리자", payroll: "전체", executive: "요청 승인", archive: "전체", tone: "ready" },
   { id: "role-manager", role: "경영진", payroll: "열람", executive: "열람", archive: "경영 자료", tone: "neutral" },
   { id: "role-employee", role: "일반 사원", payroll: "본인 자료", executive: "차단", archive: "공유 자료", tone: "attention" }
+] as const;
+
+const payrollIntegrationChecks = [
+  { id: "branch-docs", label: "법인/사업장 입력자료", value: "3곳", detail: "근태문서와 청구서 유형을 사업장별로 구분합니다.", tone: "attention" },
+  { id: "edi", label: "건강보험EDI", value: "확인 전", detail: "급여 작업 전 보험료 변동 확인이 필요한 상태입니다.", tone: "attention" },
+  { id: "mapping", label: "양식 매핑", value: "2종", detail: "근태문서/청구서 입력 양식 연결 예정입니다.", tone: "neutral" },
+  { id: "policy", label: "산출 진입", value: "대기", detail: "backend API 계약 후 실제 검증 흐름으로 전환합니다.", tone: "ready" }
 ] as const;
 
 function isModuleId(id: PlatformId): id is ModuleId {
@@ -274,6 +282,7 @@ export function PayrollScreen({ onSelect }: ScreenProps) {
     <View style={styles.stack}>
       <PayrollReadiness onSelect={onSelect} selectedId={selectedReadiness?.id} onSelectCard={(card) => setSelectedReadinessId(card.id)} />
       {selectedReadiness ? <PayrollReadinessDetail card={selectedReadiness} /> : null}
+      <PayrollIntegrationPanel onSelect={onSelect} />
       <Card>
         <SectionHeader
           eyebrow="Payroll flow"
@@ -309,6 +318,32 @@ export function PayrollScreen({ onSelect }: ScreenProps) {
         </View>
       </Card>
     </View>
+  );
+}
+
+function PayrollIntegrationPanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
+  return (
+    <Card>
+      <SectionHeader
+        title="급여 연동 준비 점검"
+        description="법인/사업장별 근태문서, 청구서, 건강보험EDI 확인 상태를 산출 전 화면에서 먼저 정리합니다."
+        action={<ActionButton onPress={() => onSelect("admin")} variant="secondary">Branch 권한 확인</ActionButton>}
+      />
+      <View style={styles.integrationGrid}>
+        {payrollIntegrationChecks.map((item) => (
+          <View key={item.id} style={[styles.integrationCard, { borderTopColor: toneColor(item.tone) }]}>
+            <Label size="sm" muted>{item.label}</Label>
+            <Text style={[styles.integrationValue, { color: toneColor(item.tone) }]}>{item.value}</Text>
+            <Label size="sm">{item.detail}</Label>
+          </View>
+        ))}
+      </View>
+      <DataTable rows={payrollIntegrationRows} />
+      <View style={styles.inlineNotice}>
+        <Badge tone="neutral">Frontend 준비</Badge>
+        <Label size="sm" muted>실제 건강보험EDI 조회, 보험료 공제금액 반영, 사업장별 입력 양식 검증은 backend/API 계약 후 연결합니다.</Label>
+      </View>
+    </Card>
   );
 }
 
@@ -984,6 +1019,27 @@ const styles = StyleSheet.create({
     minHeight: 44,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md
+  },
+  integrationCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 210,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  integrationGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  integrationValue: {
+    fontSize: 20,
+    fontWeight: "800",
+    lineHeight: 26
   },
   homePlannerCard: {
     flexBasis: 320,

@@ -212,6 +212,33 @@ export const payrollSettingsRows: readonly ModuleRow[] = [
   }
 ];
 
+export const payrollIntegrationRows: readonly ModuleRow[] = [
+  {
+    id: "payroll-integration-1",
+    category: "Bitween Demo / 본사",
+    status: "근태문서 2종",
+    owner: "건강보험EDI 확인 전",
+    nextStep: "급여 작업 전 보험료 공제금액 확인 필요",
+    tone: "attention"
+  },
+  {
+    id: "payroll-integration-2",
+    category: "Bitween Demo / 부산지점",
+    status: "청구서 매핑 대기",
+    owner: "사업장 담당",
+    nextStep: "사업장별 청구서 양식과 근태문서 연결",
+    tone: "neutral"
+  },
+  {
+    id: "payroll-integration-3",
+    category: "협력 사업장",
+    status: "입력자료 준비",
+    owner: "급여 담당",
+    nextStep: "법인/사업장별 입력 정책 확인 후 산출 진입",
+    tone: "ready"
+  }
+];
+
 export const previewRows: readonly ModuleRow[] = [
   {
     id: "preview-1",
