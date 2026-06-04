@@ -408,13 +408,18 @@ function render() {
   if (!state.catalog) return;
   document.documentElement.lang = state.locale.split("-")[0];
   document.title = t("preview.documentTitle");
+  const skipLink = document.querySelector("[data-skip-link]");
+  if (skipLink) {
+    skipLink.textContent = t("preview.skipLink");
+    skipLink.setAttribute("aria-label", t("preview.skipLink"));
+  }
   document.getElementById("app").innerHTML = state.authed ? renderShell() : renderLogin();
   bindEvents();
 }
 
 function renderLogin() {
   return html`
-    <section class="login-page">
+    <section class="login-page" id="main-content" tabindex="-1">
       <div class="login-grid">
         <div class="login-hero">
           ${badge(t("screens.login.hero.badge"), "ready")}
@@ -509,7 +514,7 @@ function renderShell() {
             <button class="btn ghost compact-btn" data-logout="true">${t("shell.logout")}</button>
           </div>
         </header>
-        <div class="content">${renderScreen(active.id)}</div>
+        <div class="content" id="main-content" tabindex="-1">${renderScreen(active.id)}</div>
         <footer class="shell-status" aria-label="${t("shell.status.aria")}">
           <div class="shell-status-group">
             <span class="status-dot" aria-hidden="true"></span>

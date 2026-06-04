@@ -6575,6 +6575,15 @@
         "zh-Hans-CN": "React Native/Web 就绪",
         "ja-JP": "React Native/Web 対応準備済み"
       }
+    },
+    {
+      "key": "preview.skipLink",
+      "values": {
+        "ko-KR": "본문으로 건너뛰기",
+        "en-US": "Skip to main content",
+        "zh-Hans-CN": "跳到主要内容",
+        "ja-JP": "本文へスキップ"
+      }
     }
   ],
   "languageDisplayNames": [
