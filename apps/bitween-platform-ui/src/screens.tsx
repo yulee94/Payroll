@@ -441,13 +441,18 @@ function CalendarTodoPanel({
         </View>
         <View style={styles.plannerList}>
           {events.map((event) => (
-            <View key={event.id} style={styles.plannerItem}>
+            <Pressable
+              accessibilityRole="button"
+              key={event.id}
+              onPress={() => onSelect(event.target)}
+              style={({ pressed }) => [styles.plannerItem, pressed && styles.buttonPressed]}
+            >
               <Badge tone={event.tone}>{event.timeLabel}</Badge>
               <View style={styles.plannerCopy}>
                 <Label weight="bold">{event.title}</Label>
                 <Label size="sm" muted>{event.dateLabel}</Label>
               </View>
-            </View>
+            </Pressable>
           ))}
         </View>
       </Card>
