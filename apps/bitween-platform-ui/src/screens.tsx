@@ -13,6 +13,7 @@ import {
   SectionHeader
 } from "./components";
 import {
+  calendarEvents,
   moduleDashboards,
   navigationItems,
   payrollSettingsRows,
@@ -20,10 +21,11 @@ import {
   platformMetrics,
   previewRows,
   readinessCards,
+  todayTodos,
   workQueue
 } from "./data";
 import { colors, radius, spacing, toneColor } from "./theme";
-import type { ModuleRow, NavigationItem, PayrollStep, PlatformId, ReadinessCard, WorkQueueItem } from "./types";
+import type { CalendarEvent, ModuleRow, NavigationItem, PayrollStep, PlatformId, ReadinessCard, TodoItem, WorkQueueItem } from "./types";
 
 type ScreenProps = {
   readonly active: NavigationItem;
@@ -37,6 +39,14 @@ const demoAccount = {
   password: "admin",
   userId: "admin"
 } as const;
+
+const languageOptions = [
+  { code: "ko", label: "한국어", status: "현재 적용" },
+  { code: "en", label: "English", status: "준비" },
+  { code: "zh", label: "中文", status: "준비" }
+] as const;
+
+type LanguageCode = (typeof languageOptions)[number]["code"];
 
 function isModuleId(id: PlatformId): id is ModuleId {
   return id !== "home" && id !== "payroll";
@@ -164,13 +174,14 @@ export function LauncherScreen({ onSelect }: ScreenProps) {
     <View style={styles.stack}>
       <Card>
         <SectionHeader
-          eyebrow="Overview"
           title="오늘의 플랫폼 상태"
           description="중요한 업무 상태를 먼저 보고 필요한 메뉴로 바로 이동합니다."
           action={<ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 준비 확인</ActionButton>}
         />
         <MetricGrid items={platformMetrics} />
       </Card>
+
+      <CalendarTodoPanel events={calendarEvents} todos={todayTodos} />
 
       <Card>
         <SectionHeader title="오늘의 업무" description="처리 우선순위가 높은 업무를 카드로 정리합니다." />
@@ -281,6 +292,46 @@ export function PayrollScreen({ onSelect }: ScreenProps) {
   );
 }
 
+function CalendarTodoPanel({ events, todos }: { readonly events: readonly CalendarEvent[]; readonly todos: readonly TodoItem[] }) {
+  return (
+    <View style={styles.homePlannerGrid}>
+      <Card style={styles.homePlannerCard}>
+        <SectionHeader title="오늘 일정" description="2026년 6월 4일 기준 주요 일정을 확인합니다." />
+        <View style={styles.calendarDay}>
+          <Text style={styles.calendarMonth}>2026.06</Text>
+          <Text style={styles.calendarDate}>04</Text>
+          <Label size="sm" muted>목요일</Label>
+        </View>
+        <View style={styles.plannerList}>
+          {events.map((event) => (
+            <View key={event.id} style={styles.plannerItem}>
+              <Badge tone={event.tone}>{event.timeLabel}</Badge>
+              <View style={styles.plannerCopy}>
+                <Label weight="bold">{event.title}</Label>
+                <Label size="sm" muted>{event.dateLabel}</Label>
+              </View>
+            </View>
+          ))}
+        </View>
+      </Card>
+      <Card style={styles.homePlannerCard}>
+        <SectionHeader title="To-do list" description="오늘 업무는 계속 표시하고, 실행한 항목은 흐리게 표시합니다." />
+        <View style={styles.plannerList}>
+          {todos.map((todo) => (
+            <View key={todo.id} style={[styles.todoItem, todo.completed && styles.todoItemDone]}>
+              <Badge tone={todo.tone}>{todo.timeLabel}</Badge>
+              <View style={styles.plannerCopy}>
+                <Label weight="bold">{todo.title}</Label>
+                <Label size="sm" muted>{todo.owner}</Label>
+              </View>
+            </View>
+          ))}
+        </View>
+      </Card>
+    </View>
+  );
+}
+
 export function ModuleScreen({ active, onSelect }: ScreenProps) {
   if (!isModuleId(active.id)) {
     return (
@@ -293,6 +344,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
   const dashboard = moduleDashboards[active.id];
   const defaultFilter = dashboard.filters[0] ?? "전체";
   const [activeFilter, setActiveFilter] = useState<string>(defaultFilter);
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>("ko");
   const [search, setSearch] = useState("");
   const [selectedRowId, setSelectedRowId] = useState<string | undefined>(dashboard.rows[0]?.id);
   const filteredRows = useMemo(() => {
@@ -332,13 +384,33 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
     <View style={styles.stack}>
       <Card>
         <SectionHeader
-          eyebrow={active.eyebrow}
           title={dashboard.title}
-          description={dashboard.subtitle}
           action={<ActionButton onPress={() => onSelect(dashboard.primaryAction.target)}>{dashboard.primaryAction.label}</ActionButton>}
         />
         <MetricGrid items={dashboard.metrics} />
       </Card>
+
+      {active.id === "settings" ? (
+        <Card>
+          <SectionHeader title="국제화 설정" description="한국어, 영어, 중국어 화면 전환을 준비합니다." />
+          <View style={styles.languageGrid}>
+            {languageOptions.map((option) => {
+              const selected = option.code === selectedLanguage;
+              return (
+                <Pressable
+                  accessibilityRole="button"
+                  key={option.code}
+                  onPress={() => setSelectedLanguage(option.code)}
+                  style={({ pressed }) => [styles.languageOption, selected && styles.languageOptionSelected, pressed && styles.buttonPressed]}
+                >
+                  <Label weight="bold">{option.label}</Label>
+                  <Label size="sm" muted>{selected ? "선택됨" : option.status}</Label>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Card>
+      ) : null}
 
       <Card>
         <SectionHeader
@@ -560,6 +632,10 @@ function workRowTarget(row: ModuleRow): PlatformId {
     return "admin";
   }
 
+  if (haystack.includes("채용") || haystack.includes("지원자") || haystack.includes("자격") || haystack.includes("배치")) {
+    return "recruit";
+  }
+
   if (haystack.includes("설정") || haystack.includes("알림") || haystack.includes("환경")) {
     return "settings";
   }
@@ -592,6 +668,27 @@ const styles = StyleSheet.create({
   },
   buttonPressed: {
     opacity: 0.86
+  },
+  calendarDate: {
+    color: colors.accent,
+    fontSize: 34,
+    fontWeight: "800",
+    lineHeight: 40
+  },
+  calendarDay: {
+    alignItems: "center",
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.xs,
+    padding: spacing.lg
+  },
+  calendarMonth: {
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: "800",
+    lineHeight: 18
   },
   detailGrid: {
     flexDirection: "row",
@@ -684,6 +781,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md
   },
+  homePlannerCard: {
+    flexBasis: 320,
+    flexGrow: 1
+  },
+  homePlannerGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.lg
+  },
+  languageGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  languageOption: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 160,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  languageOptionSelected: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent
+  },
   listSummary: {
     alignItems: "center",
     backgroundColor: colors.input,
@@ -701,6 +826,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.md
+  },
+  plannerCopy: {
+    flex: 1,
+    gap: spacing.xs,
+    minWidth: 0
+  },
+  plannerItem: {
+    alignItems: "flex-start",
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  plannerList: {
+    gap: spacing.sm
   },
   launcherCard: {
     backgroundColor: colors.bg,
@@ -831,5 +974,19 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 12,
     fontWeight: "800"
+  },
+  todoItem: {
+    alignItems: "flex-start",
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  todoItemDone: {
+    backgroundColor: colors.input,
+    opacity: 0.5
   }
 });

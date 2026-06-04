@@ -49,6 +49,7 @@ export default function App() {
       <StatusBar style="dark" />
       <AppShell
         active={active}
+        employeeNumber={session.employeeNumber}
         items={navigationItems}
         onLogout={logout}
         onSelect={select}

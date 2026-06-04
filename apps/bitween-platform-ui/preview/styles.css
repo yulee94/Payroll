@@ -257,7 +257,10 @@ button {
 }
 
 .brand-block {
+  align-items: center;
   border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
   padding-bottom: 16px;
 }
 
@@ -272,6 +275,12 @@ button {
 .muted,
 .helper {
   color: var(--muted);
+}
+
+.company-logo {
+  border-radius: 8px;
+  height: 38px;
+  width: 38px;
 }
 
 .sidebar-options {
@@ -505,11 +514,94 @@ button {
 .card-grid,
 .step-grid,
 .queue-grid,
+.planner-grid,
 .launcher-grid,
 .action-panels {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.planner-card {
+  align-content: start;
+}
+
+.calendar-day {
+  align-items: center;
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  padding: 16px;
+}
+
+.calendar-day span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.calendar-day strong {
+  color: var(--accent);
+  font-size: 34px;
+  line-height: 1;
+}
+
+.calendar-day em {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 750;
+}
+
+.planner-list {
+  display: grid;
+  gap: 8px;
+}
+
+.planner-item {
+  align-items: start;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+}
+
+.planner-item div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.todo-item.done {
+  background: var(--input);
+  opacity: 0.5;
+}
+
+.language-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.language-option {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  text-align: left;
+}
+
+.language-option.selected {
+  background: var(--accent-soft);
+  border-color: var(--accent);
 }
 
 .metric-card,

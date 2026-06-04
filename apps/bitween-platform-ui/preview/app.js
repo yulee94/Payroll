@@ -12,11 +12,15 @@ const demoAccount = {
 };
 
 const sessionLabel = "Bitween Demo · admin · 0000";
+const employeeNumber = "BW-0001";
+const companyLogoUri =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F3864'/%3E%3Cpath d='M18 18h18c7 0 11 4 11 9 0 4-2 7-6 8 5 1 8 5 8 10 0 6-5 10-13 10H18V18zm11 14h6c3 0 5-1 5-4s-2-4-5-4h-6v8zm0 17h7c4 0 6-2 6-5s-2-5-6-5h-7v10z' fill='white'/%3E%3C/svg%3E";
 
 const navItems = [
   ["home", "플랫폼 홈", "Launcher", "오늘의 업무, 빠른 실행, 플랫폼 상태를 한 화면에서 확인합니다.", "#64748B"],
   ["payroll", "급여", "Payroll", "급여 자동화 준비 상태, 산출 진입, 월별 보고와 설정을 관리합니다.", "#1F3864"],
-  ["hr", "HR", "People", "직원 명부, 근태, 연차, 계약, 증명서 흐름을 정리합니다.", "#0D9488"],
+  ["hr", "HR", "People", "직원 명부, 이력서, 사직서, 증명서 흐름을 정리합니다.", "#0D9488"],
+  ["recruit", "채용", "Recruit", "지원자 경력, 자격, 부서 배치 후보를 관리합니다.", "#9333EA"],
   ["workflow", "전자결재", "Workflow", "기안, 결재 대기, 진행 문서, 회람 상태를 추적합니다.", "#2563EB"],
   ["archive", "자료함", "Archive", "법인, 사업장, 월별 산출 자료와 보고서를 찾고 미리 봅니다.", "#475569"],
   ["ai", "AI", "Assistant", "업무 문맥을 기반으로 요약, 초안, 확인 질문을 도와줍니다.", "#7C3AED"],
@@ -31,6 +35,12 @@ const sidebarThemes = [
   ["navy", "딥 네이비", "가장 강한 기업용 대비"]
 ].map(([id, label, description]) => ({ id, label, description }));
 
+const languageOptions = [
+  ["ko", "한국어", "현재 적용"],
+  ["en", "English", "준비"],
+  ["zh", "中文", "준비"]
+];
+
 const state = {
   activeId: "home",
   authed: false,
@@ -41,6 +51,7 @@ const state = {
   selectedPayrollCardKey: "",
   selectedPayrollStepKey: "",
   selectedQueueKey: "",
+  selectedLanguage: "ko",
   search: "",
   selectedRowKey: "",
   sidebarTheme: "steel",
@@ -74,6 +85,18 @@ const workQueue = [
   ["자료함 최근 보고서", "아카이브", "운영팀", "상시", "미리보기 가능", "ready"]
 ];
 
+const calendarEvents = [
+  ["2026.06.04", "10:00", "급여 산출 기준 확인", "attention"],
+  ["2026.06.04", "14:00", "전자결재 대기 문서 검토", "neutral"],
+  ["2026.06.05", "09:30", "채용 후보자 부서 배치 회의", "ready"]
+];
+
+const todayTodos = [
+  ["6월 급여 산출 준비", "급여 담당", "오늘", "attention", false],
+  ["전자결재 대기 문서", "승인권자", "오늘", "neutral", false],
+  ["자료함 최근 보고서 확인", "운영팀", "완료", "ready", true]
+];
+
 const payrollSettingsRows = [
   ["설정 대상", "법인 기본", "급여 담당", "사업장별 예외 여부 확인", "neutral"],
   ["휴업수당 지급률", "법정 기준 확인", "급여 담당", "최저 기준 이상 입력값 검토", "attention"],
@@ -87,13 +110,22 @@ const previewRows = [
 ];
 
 const dashboards = {
-  hr: dashboard("HR 운영 현황", "직원 명부, 근태, 증명서 요청을 한 화면에서 추적합니다.", ["전체", "입사/퇴사", "근태", "증명서"], [
+  hr: dashboard("HR 운영 현황", "직원 명부, 이력서, 사직서, 재직/경력증명서 요청을 한 화면에서 추적합니다.", ["전체", "직원명부", "이력서", "사직서", "증명서"], [
     ["재직 직원", "48명", "법인 전체", "ready"],
     ["근태 확인", "6건", "월말 마감 전 확인", "attention"],
     ["증명서 요청", "2건", "담당자 처리 대기", "neutral"]
   ], [
-    ["근태 누락", "확인 필요", "인사 담당", "6월 2주차 누락 항목 확인", "attention"],
-    ["재직증명서", "접수", "운영팀", "발급 양식 검토", "neutral"]
+    ["직원명부 업데이트", "확인 필요", "인사 담당", "부서/직무 최신 정보 확인", "attention"],
+    ["재직증명서/경력증명서", "접수", "운영팀", "발급 양식 검토", "neutral"],
+    ["이력서/사직서 관리", "정리 중", "인사 담당", "입사/퇴사 문서 분류", "ready"]
+  ]),
+  recruit: dashboard("채용 인재 관리", "지원자 경력과 자격 정보를 공유하고 부서별 필요 인재를 배치합니다.", ["전체", "지원자", "경력", "자격", "배치"], [
+    ["지원자", "8명", "공유 가능 후보", "ready"],
+    ["자격 검토", "3건", "부서 확인 대기", "attention"],
+    ["배치 후보", "4명", "직무 적합 후보", "neutral"]
+  ], [
+    ["지원자 경력 공유", "검토 중", "채용 담당", "부서장 열람 권한 확인", "attention"],
+    ["자격사항 매칭", "추천", "운영팀", "필요 부서 후보 배치", "ready"]
   ]),
   workflow: dashboard("전자결재 업무함", "기안, 승인, 반려, 회람 문서를 상태별로 정리합니다.", ["전체", "결재 대기", "진행 중", "반려"], [
     ["결재 대기", "3건", "오늘 처리 권장", "attention"],
@@ -211,7 +243,10 @@ function renderShell() {
   return html`
     <section class="shell sidebar-theme-${state.sidebarTheme}">
       <aside class="sidebar">
-        <div class="brand-block"><strong>Bitween</strong><span>Business Platform</span></div>
+        <div class="brand-block">
+          <img class="company-logo" src="${companyLogoUri}" alt="Bitween 회사 로고" />
+          <div><strong>Bitween</strong><span>업무 플랫폼</span></div>
+        </div>
         <div class="sidebar-options" aria-label="sidebar color options">
           <span class="sidebar-options-title">메뉴 색상 옵션</span>
           <div class="sidebar-theme-grid">
@@ -224,9 +259,9 @@ function renderShell() {
           </div>
         </div>
         <nav class="nav" aria-label="platform menu">
-          ${navItems.map((item) => `
+            ${navItems.map((item) => `
             <button class="nav-button ${item.id === active.id ? "active" : ""}" data-target="${item.id}" style="${item.id === active.id ? `border-left-color:${item.accent}` : ""}">
-              <span>${item.eyebrow}</span><strong>${item.label}</strong>
+              <strong>${item.label}</strong>
             </button>
           `).join("")}
         </nav>
@@ -234,12 +269,11 @@ function renderShell() {
       <div class="main">
         <header class="topbar">
           <div class="topbar-copy">
-            <span class="eyebrow">${active.eyebrow}</span>
             <h1>${active.label}</h1>
-            <span class="muted">${active.description}</span>
           </div>
           <div class="top-actions">
             ${badge(sessionLabel, "neutral")}
+            ${badge(`사번 ${employeeNumber}`, "neutral")}
             <button class="btn ghost compact-btn" data-logout="true">로그아웃</button>
           </div>
         </header>
@@ -261,8 +295,23 @@ function renderHome() {
 
   return html`
     <section class="card">
-      ${sectionHead("Overview", "오늘의 플랫폼 상태", "중요한 업무 상태를 먼저 보고 필요한 메뉴로 바로 이동합니다.", button("급여 준비 확인", "payroll", "secondary"))}
+      ${sectionHead("", "오늘의 플랫폼 상태", "중요한 업무 상태를 먼저 보고 필요한 메뉴로 바로 이동합니다.", button("급여 준비 확인", "payroll", "secondary"))}
       ${metrics(platformMetrics)}
+    </section>
+    <section class="planner-grid">
+      <div class="card planner-card">
+        ${sectionHead("", "오늘 일정", "2026년 6월 4일 기준 주요 일정을 확인합니다.")}
+        <div class="calendar-day"><span>2026.06</span><strong>04</strong><em>목요일</em></div>
+        <div class="planner-list">${calendarEvents.map(([date, time, title, tone]) => `
+          <div class="planner-item">${badge(time, tone)}<div><strong>${title}</strong><span class="helper">${date}</span></div></div>
+        `).join("")}</div>
+      </div>
+      <div class="card planner-card">
+        ${sectionHead("", "To-do list", "오늘 업무는 계속 표시하고 실행한 항목은 흐리게 표시합니다.")}
+        <div class="planner-list">${todayTodos.map(([title, owner, time, tone, done]) => `
+          <div class="planner-item todo-item ${done ? "done" : ""}">${badge(time, tone)}<div><strong>${title}</strong><span class="helper">${owner}</span></div></div>
+        `).join("")}</div>
+      </div>
     </section>
     <section class="card">
       ${sectionHead("", "오늘의 업무", "처리 우선순위가 높은 업무를 카드로 정리합니다.")}
@@ -394,9 +443,10 @@ function renderModule(id) {
   const selectedRow = selectedWorkRow(rows);
   return html`
     <section class="card">
-      ${sectionHead(navItems.find((item) => item.id === id)?.eyebrow || "", data.title, data.subtitle, button(primaryLabel(id), id, "primary"))}
+      ${sectionHead("", data.title, "", button(primaryLabel(id), id, "primary"))}
       ${metrics(data.metrics)}
     </section>
+    ${id === "settings" ? i18nSettingsPanel() : ""}
     <section class="card">
       ${sectionHead("", "업무 목록", "필터로 상태를 좁히고 필요한 다음 작업을 확인합니다.", button(secondaryLabel(id), secondaryTarget(id), "secondary"))}
       <div class="list-toolbar">
@@ -415,7 +465,18 @@ function renderModule(id) {
 }
 
 function sectionHead(eyebrow, title, desc, action = "") {
-  return `<div class="section-head"><div class="section-title">${eyebrow ? `<span class="eyebrow">${eyebrow}</span>` : ""}<h2>${title}</h2><p>${desc}</p></div>${action}</div>`;
+  return `<div class="section-head"><div class="section-title">${eyebrow ? `<span class="eyebrow">${eyebrow}</span>` : ""}<h2>${title}</h2>${desc ? `<p>${desc}</p>` : ""}</div>${action}</div>`;
+}
+
+function i18nSettingsPanel() {
+  return `<section class="card">
+    ${sectionHead("", "국제화 설정", "한국어, 영어, 중국어 화면 전환을 준비합니다.")}
+    <div class="language-grid">${languageOptions.map(([code, label, status]) => `
+      <button class="language-option ${state.selectedLanguage === code ? "selected" : ""}" data-language="${code}">
+        <strong>${label}</strong><span class="helper">${state.selectedLanguage === code ? "선택됨" : status}</span>
+      </button>
+    `).join("")}</div>
+  </section>`;
 }
 
 function metrics(items) {
@@ -474,6 +535,7 @@ function workRowTarget(row) {
   if (haystack.includes("결재") || haystack.includes("회람") || haystack.includes("기안")) return "workflow";
   if (haystack.includes("자료") || haystack.includes("보고서") || haystack.includes("파일") || haystack.includes("폴더")) return "archive";
   if (haystack.includes("권한") || haystack.includes("사용자") || haystack.includes("역할") || haystack.includes("법인")) return "admin";
+  if (haystack.includes("채용") || haystack.includes("지원자") || haystack.includes("자격") || haystack.includes("배치")) return "recruit";
   if (haystack.includes("설정") || haystack.includes("알림") || haystack.includes("환경")) return "settings";
   if (haystack.includes("AI") || haystack.includes("요약") || haystack.includes("초안")) return "ai";
   if (haystack.includes("근태") || haystack.includes("증명서") || haystack.includes("직원")) return "hr";
@@ -506,6 +568,7 @@ function toneColor(tone) {
 function primaryLabel(id) {
   return ({
     hr: "직원 명부 보기",
+    recruit: "지원자 보기",
     workflow: "결재함 열기",
     archive: "최근 자료 보기",
     ai: "추천 작업 보기",
@@ -517,6 +580,7 @@ function primaryLabel(id) {
 function secondaryLabel(id) {
   return ({
     hr: "급여 준비로 이동",
+    recruit: "HR로 이동",
     workflow: "자료함 확인",
     archive: "급여 화면으로 이동",
     ai: "설정 확인",
@@ -528,6 +592,7 @@ function secondaryLabel(id) {
 function secondaryTarget(id) {
   return ({
     hr: "payroll",
+    recruit: "hr",
     workflow: "archive",
     archive: "payroll",
     ai: "settings",
@@ -575,6 +640,14 @@ function bindEvents() {
       state.sidebarTheme = el.dataset.sidebarTheme || "steel";
       render();
       toast("사이드 메뉴 색상 옵션을 적용했습니다.");
+    });
+  });
+
+  document.querySelectorAll("[data-language]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.selectedLanguage = el.dataset.language || "ko";
+      render();
+      toast("국제화 설정을 선택했습니다.");
     });
   });
 

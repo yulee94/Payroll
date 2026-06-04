@@ -2,6 +2,7 @@ export type PlatformId =
   | "home"
   | "payroll"
   | "hr"
+  | "recruit"
   | "workflow"
   | "archive"
   | "ai"
@@ -46,6 +47,23 @@ export type WorkQueueItem = {
   readonly owner: string;
   readonly due: string;
   readonly status: string;
+  readonly tone: ReadinessTone;
+};
+
+export type CalendarEvent = {
+  readonly id: string;
+  readonly dateLabel: string;
+  readonly title: string;
+  readonly timeLabel: string;
+  readonly tone: ReadinessTone;
+};
+
+export type TodoItem = {
+  readonly id: string;
+  readonly completed: boolean;
+  readonly owner: string;
+  readonly title: string;
+  readonly timeLabel: string;
   readonly tone: ReadinessTone;
 };
 

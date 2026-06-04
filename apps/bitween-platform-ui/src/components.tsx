@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ReactNode } from "react";
 import {
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,6 +12,9 @@ import type { StyleProp, ViewStyle } from "react-native";
 
 import { colors, radius, sidebarThemes, spacing, toneBackground, toneColor } from "./theme";
 import type { MetricItem, ModuleRow, NavigationItem, ReadinessTone, SidebarTheme, SidebarThemeId } from "./types";
+
+const companyLogoUri =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F3864'/%3E%3Cpath d='M18 18h18c7 0 11 4 11 9 0 4-2 7-6 8 5 1 8 5 8 10 0 6-5 10-13 10H18V18zm11 14h6c3 0 5-1 5-4s-2-4-5-4h-6v8zm0 17h7c4 0 6-2 6-5s-2-5-6-5h-7v10z' fill='white'/%3E%3C/svg%3E";
 
 type TextProps = PropsWithChildren<{
   readonly muted?: boolean;
@@ -240,8 +244,13 @@ export function Sidebar({ activeId, compact, items, onSelect, onThemeChange, the
   return (
     <View style={[styles.sidebar, { backgroundColor: theme.sidebar }, compact && styles.sidebarCompact]}>
       <View style={[styles.brandBlock, compact && styles.brandBlockCompact]}>
-        <Label size="lg" weight="bold">Bitween</Label>
-        <Label size="sm" muted>Business Platform</Label>
+        <View style={styles.brandRow}>
+          <Image accessibilityLabel="Bitween 회사 로고" source={{ uri: companyLogoUri }} style={styles.logoImage} />
+          <View>
+            <Label size="lg" weight="bold">Bitween</Label>
+            <Label size="sm" muted>업무 플랫폼</Label>
+          </View>
+        </View>
       </View>
       <View style={[styles.themePanel, compact && styles.themePanelCompact]}>
         <Label size="sm" weight="bold">메뉴 색상 옵션</Label>
@@ -287,7 +296,6 @@ export function Sidebar({ activeId, compact, items, onSelect, onThemeChange, the
                 active && { backgroundColor: theme.activeBackground, borderLeftColor: item.accent }
               ]}
             >
-              <Text style={[styles.navEyebrow, active && { color: theme.activeText }]}>{item.eyebrow}</Text>
               <Text style={[styles.navLabel, active && { color: theme.activeText }]}>{item.label}</Text>
             </Pressable>
           );
@@ -299,6 +307,7 @@ export function Sidebar({ activeId, compact, items, onSelect, onThemeChange, the
 
 type ShellProps = PropsWithChildren<{
   readonly active: NavigationItem;
+  readonly employeeNumber?: string;
   readonly items: readonly NavigationItem[];
   readonly onLogout?: () => void;
   readonly onSelect: (id: NavigationItem["id"]) => void;
@@ -310,6 +319,7 @@ type ShellProps = PropsWithChildren<{
 export function AppShell({
   active,
   children,
+  employeeNumber,
   items,
   onLogout,
   onSelect,
@@ -326,12 +336,11 @@ export function AppShell({
       <View style={styles.main}>
         <View style={[styles.header, compact && styles.headerCompact]}>
           <View style={styles.headerCopy}>
-            <Label size="sm" muted>{active.eyebrow}</Label>
             <Label size="xl" weight="bold">{active.label}</Label>
-            <Label muted>{active.description}</Label>
           </View>
           <View style={styles.headerActions}>
             <Badge tone="neutral">{sessionLabel}</Badge>
+            {employeeNumber ? <Badge tone="neutral">사번 {employeeNumber}</Badge> : null}
             {onLogout ? <ActionButton onPress={onLogout} variant="ghost">로그아웃</ActionButton> : null}
           </View>
         </View>
@@ -365,6 +374,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
     marginBottom: spacing.md,
     paddingBottom: 0
+  },
+  brandRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm
   },
   button: {
     alignItems: "center",
@@ -489,6 +503,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
     flex: 1
   },
+  logoImage: {
+    borderRadius: radius.lg,
+    height: 38,
+    width: 38
+  },
   metricCard: {
     backgroundColor: colors.bg,
     borderColor: colors.border,
@@ -512,11 +531,6 @@ const styles = StyleSheet.create({
   },
   muted: {
     color: colors.muted
-  },
-  navEyebrow: {
-    color: colors.muted,
-    fontSize: 11,
-    fontWeight: "700"
   },
   navItem: {
     borderLeftColor: "transparent",

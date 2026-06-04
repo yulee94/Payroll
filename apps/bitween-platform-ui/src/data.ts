@@ -1,10 +1,12 @@
 import type {
+  CalendarEvent,
   MetricItem,
   ModuleDashboard,
   ModuleRow,
   NavigationItem,
   PayrollStep,
   ReadinessCard,
+  TodoItem,
   WorkQueueItem
 } from "./types";
 
@@ -29,8 +31,15 @@ export const navigationItems = [
     id: "hr",
     label: "HR",
     eyebrow: "People",
-    description: "직원 명부, 근태, 연차, 계약, 증명서 흐름을 정리합니다.",
+    description: "직원 명부, 이력서, 사직서, 증명서 흐름을 정리합니다.",
     accent: "#0D9488"
+  },
+  {
+    id: "recruit",
+    label: "채용",
+    eyebrow: "Recruit",
+    description: "지원자 경력, 자격, 부서 배치 후보를 관리합니다.",
+    accent: "#9333EA"
   },
   {
     id: "workflow",
@@ -246,12 +255,63 @@ export const workQueue: readonly WorkQueueItem[] = [
   }
 ];
 
+export const calendarEvents: readonly CalendarEvent[] = [
+  {
+    dateLabel: "2026.06.04",
+    id: "calendar-payroll",
+    timeLabel: "10:00",
+    title: "급여 산출 기준 확인",
+    tone: "attention"
+  },
+  {
+    dateLabel: "2026.06.04",
+    id: "calendar-approval",
+    timeLabel: "14:00",
+    title: "전자결재 대기 문서 검토",
+    tone: "neutral"
+  },
+  {
+    dateLabel: "2026.06.05",
+    id: "calendar-recruit",
+    timeLabel: "09:30",
+    title: "채용 후보자 부서 배치 회의",
+    tone: "ready"
+  }
+];
+
+export const todayTodos: readonly TodoItem[] = [
+  {
+    completed: false,
+    id: "todo-payroll",
+    owner: "급여 담당",
+    timeLabel: "오늘",
+    title: "6월 급여 산출 준비",
+    tone: "attention"
+  },
+  {
+    completed: false,
+    id: "todo-approval",
+    owner: "승인권자",
+    timeLabel: "오늘",
+    title: "전자결재 대기 문서",
+    tone: "neutral"
+  },
+  {
+    completed: true,
+    id: "todo-archive",
+    owner: "운영팀",
+    timeLabel: "완료",
+    title: "자료함 최근 보고서 확인",
+    tone: "ready"
+  }
+];
+
 export const moduleDashboards = {
   hr: {
     id: "hr",
     title: "HR 운영 현황",
-    subtitle: "직원 명부, 근태, 증명서 요청을 한 화면에서 추적합니다.",
-    filters: ["전체", "입사/퇴사", "근태", "증명서"],
+    subtitle: "직원 명부, 이력서, 사직서, 재직/경력증명서 요청을 한 화면에서 추적합니다.",
+    filters: ["전체", "직원명부", "이력서", "사직서", "증명서"],
     metrics: [
       { id: "employees", label: "재직 직원", value: "48명", helper: "법인 전체", tone: "ready" },
       { id: "attendance", label: "근태 확인", value: "6건", helper: "월말 마감 전 확인", tone: "attention" },
@@ -260,19 +320,27 @@ export const moduleDashboards = {
     rows: [
       {
         id: "hr-1",
-        category: "근태 누락",
+        category: "직원명부 업데이트",
         status: "확인 필요",
         owner: "인사 담당",
-        nextStep: "6월 2주차 누락 항목 확인",
+        nextStep: "부서/직무 최신 정보 확인",
         tone: "attention"
       },
       {
         id: "hr-2",
-        category: "재직증명서",
+        category: "재직증명서/경력증명서",
         status: "접수",
         owner: "운영팀",
         nextStep: "발급 양식 검토",
         tone: "neutral"
+      },
+      {
+        id: "hr-3",
+        category: "이력서/사직서 관리",
+        status: "정리 중",
+        owner: "인사 담당",
+        nextStep: "입사/퇴사 문서 분류",
+        tone: "ready"
       }
     ],
     primaryAction: {
@@ -286,7 +354,48 @@ export const moduleDashboards = {
       target: "payroll"
     },
     emptyTitle: "표시할 HR 업무가 없습니다.",
-    emptyDescription: "명부 또는 근태 업무가 생기면 처리 대기 항목이 표시됩니다."
+    emptyDescription: "명부, 이력서, 사직서, 증명서 업무가 생기면 처리 대기 항목이 표시됩니다."
+  },
+  recruit: {
+    id: "recruit",
+    title: "채용 인재 관리",
+    subtitle: "지원자 경력과 자격 정보를 공유하고 부서별 필요 인재를 배치합니다.",
+    filters: ["전체", "지원자", "경력", "자격", "배치"],
+    metrics: [
+      { id: "applicants", label: "지원자", value: "8명", helper: "공유 가능 후보", tone: "ready" },
+      { id: "qualified", label: "자격 검토", value: "3건", helper: "부서 확인 대기", tone: "attention" },
+      { id: "placement", label: "배치 후보", value: "4명", helper: "직무 적합 후보", tone: "neutral" }
+    ],
+    rows: [
+      {
+        id: "recruit-1",
+        category: "지원자 경력 공유",
+        status: "검토 중",
+        owner: "채용 담당",
+        nextStep: "부서장 열람 권한 확인",
+        tone: "attention"
+      },
+      {
+        id: "recruit-2",
+        category: "자격사항 매칭",
+        status: "추천",
+        owner: "운영팀",
+        nextStep: "필요 부서 후보 배치",
+        tone: "ready"
+      }
+    ],
+    primaryAction: {
+      label: "지원자 보기",
+      description: "지원자 경력과 자격 정보를 검토합니다.",
+      target: "recruit"
+    },
+    secondaryAction: {
+      label: "HR로 이동",
+      description: "직원 전환 후 문서 흐름을 확인합니다.",
+      target: "hr"
+    },
+    emptyTitle: "표시할 채용 업무가 없습니다.",
+    emptyDescription: "지원자 경력 또는 자격 검토 항목이 생기면 표시됩니다."
   },
   workflow: {
     id: "workflow",
