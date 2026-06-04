@@ -304,7 +304,7 @@ function renderLogin() {
           ${field("법인 코드", "company-code", "0000", "text", state.companyCode)}
           ${field("아이디", "user-id", "admin", "text", state.userId)}
           ${field("비밀번호", "password", "admin", "password", state.password)}
-          ${state.loginFeedback ? `<div class="inline-warning">${badge("확인 필요", "attention")}<span>${state.loginFeedback}</span></div>` : ""}
+          ${state.loginFeedback ? `<div aria-live="assertive" class="inline-warning" role="alert">${badge("확인 필요", "attention")}<span>${state.loginFeedback}</span></div>` : ""}
           <div class="login-actions">
             <button class="btn primary" type="submit">플랫폼 홈으로 이동</button>
             <button class="btn secondary" type="button" data-demo-login="true">Demo 계정으로 접속</button>
@@ -362,7 +362,7 @@ function renderShell() {
         <div class="content">${renderScreen(active.id)}</div>
       </div>
     </section>
-    <div class="toast" id="toast">화면이 업데이트되었습니다.</div>
+    <div aria-atomic="true" aria-live="polite" class="toast" id="toast" role="status">화면이 업데이트되었습니다.</div>
   `;
 }
 
@@ -557,7 +557,7 @@ function renderModule(id) {
         <div class="filters">${data.filters.map((filter) => `<button class="filter-chip ${state.filter === filter ? "active" : ""}" data-filter="${filter}">${filter}</button>`).join("")}</div>
         <label class="search-box" for="work-search"><span>검색</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="업무, 상태, 담당자 검색" /></label>
       </div>
-      <div class="list-summary"><strong>${rows.length}건</strong><span class="helper">${state.filter} 필터${state.search ? ` · "${escapeText(state.search)}" 검색` : ""}</span></div>
+      <div aria-atomic="true" aria-live="polite" class="list-summary" role="status"><strong>${rows.length}건</strong><span class="helper">${state.filter} 필터${state.search ? ` · "${escapeText(state.search)}" 검색` : ""}</span></div>
       ${table(rows, true)}
       ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
@@ -768,7 +768,7 @@ function filterRows(rows) {
 }
 
 function empty(title, desc) {
-  return `<div class="empty"><strong>${title}</strong><span class="helper">${desc}</span></div>`;
+  return `<div aria-live="polite" class="empty" role="status"><strong>${title}</strong><span class="helper">${desc}</span></div>`;
 }
 
 function toneColor(tone) {
