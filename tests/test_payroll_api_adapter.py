@@ -82,6 +82,8 @@ class PayrollApiAdapterTests(unittest.TestCase):
         self.assertEqual(payload["status"], "error")
         self.assertEqual(payload["scope"], "Affiliate/Site A/2026-05")
         self.assertEqual(payload["scope_key"], PayrollScope("Affiliate", "Site A", "2026-05").key)
+        self.assertEqual(payload["error_code"], "payroll_run_failed")
+        self.assertEqual(payload["details"], {})
         self.assertEqual(payload["error"], "boom")
         self.assertEqual(payload["request_id"], "req-1")
         self.assertNotIn("exception", payload)
@@ -108,6 +110,7 @@ class PayrollApiAdapterTests(unittest.TestCase):
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["request_id"], "req-1")
         self.assertEqual(payload["count"], 2)
+        self.assertEqual(payload["error_code"], "")
         self.assertEqual(run.call_args.args[0].invoice_path, Path("invoice.xlsx"))
 
     def test_run_payroll_api_returns_error_response_for_invalid_payload(self) -> None:
@@ -124,14 +127,52 @@ class PayrollApiAdapterTests(unittest.TestCase):
         self.assertFalse(payload["ok"])
         self.assertEqual(payload["status"], "error")
         self.assertEqual(payload["request_id"], "req-bad")
+        self.assertEqual(payload["error_code"], "invalid_period")
+        self.assertEqual(payload["details"]["period_format"], "YYYY-MM")
         self.assertIn("YYYY-MM", payload["error"])
         run.assert_not_called()
+
+    def test_run_payroll_api_returns_error_code_for_missing_required_path(self) -> None:
+        with patch("services.payroll_api_adapter.run_payroll_automation") as run:
+            payload = run_payroll_api(
+                {
+                    "request_id": "req-missing-path",
+                    "affiliate": "Affiliate",
+                    "workplace": "Site A",
+                    "period": "2026-05",
+                    "input_type": "mixed",
+                    "invoice_path": "invoice.xlsx",
+                }
+            )
+
+        self.assertFalse(payload["ok"])
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["error_code"], "missing_input_path")
+        self.assertEqual(payload["details"]["missing_fields"], ["attendance_path"])
+        self.assertIn("attendancePath", payload["details"]["accepted_aliases"]["attendance_path"])
+        run.assert_not_called()
+
+    def test_run_payroll_api_returns_error_code_for_invalid_input_type(self) -> None:
+        payload = run_payroll_api(
+            {
+                "affiliate": "Affiliate",
+                "workplace": "Site A",
+                "period": "2026-05",
+                "input_type": "spreadsheet",
+                "invoice_path": "invoice.xlsx",
+            }
+        )
+
+        self.assertFalse(payload["ok"])
+        self.assertEqual(payload["error_code"], "invalid_input_type")
+        self.assertIn("mixed", payload["details"]["allowed_input_types"])
 
     def test_run_payroll_api_returns_error_response_for_non_mapping_payload(self) -> None:
         payload = run_payroll_api("bad")  # type: ignore[arg-type]
 
         self.assertFalse(payload["ok"])
         self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["error_code"], "invalid_payload")
         self.assertIn("dict", payload["error"])
 
 

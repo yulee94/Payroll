@@ -96,6 +96,8 @@ Bitween 급여 자동화는 현재 데스크톱 앱 내부 서비스로 구현�
     "payslip": "C:/Bitween/output/COSS/Site A/2026-05/급여명세서.xlsx",
     "payment": "C:/Bitween/output/COSS/Site A/2026-05/지급내역.xlsx"
   },
+  "error_code": "",
+  "details": {},
   "operation_policy_source": "tenant",
   "error": ""
 }
@@ -110,17 +112,38 @@ Bitween 급여 자동화는 현재 데스크톱 앱 내부 서비스로 구현�
   "ok": false,
   "status": "error",
   "request_id": "payroll-run-2026-05-coss-site-a",
+  "error_code": "invalid_period",
   "error": "period는 YYYY-MM 형식이어야 합니다.",
-  "warnings": ["period는 YYYY-MM 형식이어야 합니다."]
+  "warnings": ["period는 YYYY-MM 형식이어야 합니다."],
+  "details": {
+    "period": "202605",
+    "period_format": "YYYY-MM"
+  }
 }
 ```
 
 응답에는 내부 예외 객체인 `exception`을 포함하지 않습니다.
 `scope`는 외부 표시/연동용 문자열이고, `scope_key`는 기존 데스크톱 저장 구조와 호환되는 내부 키입니다.
 
+### Error Codes
+
+프론트엔드는 `error` 문구를 파싱하지 말고 `error_code`를 기준으로 화면 문구와 입력 포커스를 결정하면 됩니다.
+
+| error_code | Meaning |
+| --- | --- |
+| `invalid_payload` | 요청 본문이 JSON object/dict 형태가 아닙니다. |
+| `invalid_scope` | `scope`가 지원 형식이 아닙니다. |
+| `missing_scope_fields` | `affiliate`, `workplace`, `period` 중 필수값이 없습니다. |
+| `invalid_period` | `period`가 `YYYY-MM` 형식이 아닙니다. |
+| `invalid_input_type` | `input_type`이 `auto`, `invoice`, `attendance`, `mixed` 중 하나가 아닙니다. |
+| `missing_input_path` | 입력 방식에 필요한 `invoice_path` 또는 `attendance_path`가 없습니다. |
+| `payroll_run_failed` | 요청 형식은 맞지만 급여 산출 처리 중 실패했습니다. |
+| `validation_error` | 더 구체적인 코드가 없는 검증 실패입니다. |
+
 ## Implementation Notes
 
 - `input_type=auto`는 테넌트/사업장 운영 기준이 있으면 그 기준을 우선 해석합니다.
+- `auto`는 `invoice_path` 또는 `attendance_path` 중 최소 하나가 필요하고, 명시적인 `mixed`는 두 경로가 모두 필요합니다.
 - 명시적인 `invoice`, `attendance`, `mixed` 요청은 호출자가 고른 입력 방식을 유지합니다.
 - 결과에는 `operation_policy`와 `operation_policy_source`가 포함되어, 산출 당시 어떤 급여 운영 기준이 적용됐는지 API에서도 확인할 수 있습니다.
 - 실제 직원 명부, 급여 파일, 사용자 데이터, API 키, 그룹웨어 쿠키는 GitHub에 커밋하지 않습니다.

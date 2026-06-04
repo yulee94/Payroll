@@ -40,6 +40,15 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertNotIn("exception", response["success"])
         self.assertNotIn("exception", response["error"])
 
+    def test_response_contract_declares_frontend_error_codes(self) -> None:
+        response = payroll_api_contract()["response"]
+
+        self.assertIn("error_code", response["stable_fields"])
+        self.assertIn("details", response["stable_fields"])
+        self.assertEqual(response["success"]["error_code"], "")
+        self.assertEqual(response["error"]["error_code"], "invalid_period")
+        self.assertIn("missing_input_path", response["error_codes"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -21,7 +21,22 @@ from services.payroll_automation import (
 from services.payroll_scope import PayrollScope
 
 _PERIOD_RE = re.compile(r"^\d{4}-\d{2}$")
-_INPUT_TYPES = {"auto", "invoice", "attendance", "mixed"}
+_INPUT_TYPES = ("auto", "invoice", "attendance", "mixed")
+
+
+class PayrollApiValidationError(ValueError):
+    """Validation error with a stable code for frontend/API callers."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str,
+        details: Mapping[str, Any] | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.code = code
+        self.details = dict(details or {})
 
 
 def _text(value: Any) -> str:
@@ -32,7 +47,11 @@ def _payload_mapping(payload: Mapping[str, Any] | None) -> Mapping[str, Any]:
     if payload is None:
         return {}
     if not isinstance(payload, Mapping):
-        raise TypeError("급여 자동화 요청은 dict 형태여야 합니다.")
+        raise PayrollApiValidationError(
+            "급여 자동화 요청은 dict 형태여야 합니다.",
+            code="invalid_payload",
+            details={"expected": "object"},
+        )
     return payload
 
 
@@ -46,7 +65,7 @@ def _scope_payload(payload: Mapping[str, Any]) -> Mapping[str, Any]:
 def _request_id(payload: Mapping[str, Any] | None) -> str:
     try:
         data = _payload_mapping(payload)
-    except TypeError:
+    except ValueError:
         return ""
     metadata = data.get("metadata") if isinstance(data.get("metadata"), Mapping) else {}
     return _text(
@@ -66,7 +85,11 @@ def _scope_from_api_string(value: str) -> PayrollScope | None:
         return None
     affiliate, workplace, period = parts
     if not _PERIOD_RE.match(period):
-        raise ValueError("period는 YYYY-MM 형식이어야 합니다.")
+        raise PayrollApiValidationError(
+            "period는 YYYY-MM 형식이어야 합니다.",
+            code="invalid_period",
+            details={"period": period, "period_format": "YYYY-MM"},
+        )
     return PayrollScope(affiliate, workplace, period)
 
 
@@ -81,8 +104,18 @@ def scope_from_api_payload(payload: Mapping[str, Any] | None) -> PayrollScope:
     if isinstance(raw_scope, str):
         scope = _scope_from_api_string(raw_scope)
         if scope is None:
-            raise ValueError("scope 키 형식이 올바르지 않습니다.")
+            raise PayrollApiValidationError(
+                "scope 키 형식이 올바르지 않습니다.",
+                code="invalid_scope",
+                details={"scope_format": "affiliate/workplace/YYYY-MM"},
+            )
         return scope
+    if raw_scope is not None and not isinstance(raw_scope, Mapping):
+        raise PayrollApiValidationError(
+            "scope는 문자열 또는 객체 형태여야 합니다.",
+            code="invalid_scope",
+            details={"accepted_forms": ["affiliate/workplace/YYYY-MM", "scope object"]},
+        )
 
     scope_data = _scope_payload(data)
     affiliate = _text(scope_data.get("affiliate"))
@@ -98,9 +131,17 @@ def scope_from_api_payload(payload: Mapping[str, Any] | None) -> PayrollScope:
         if not value
     ]
     if missing:
-        raise ValueError(f"scope 필드가 부족합니다: {', '.join(missing)}")
+        raise PayrollApiValidationError(
+            f"scope 필드가 부족합니다: {', '.join(missing)}",
+            code="missing_scope_fields",
+            details={"missing_fields": missing},
+        )
     if not _PERIOD_RE.match(period):
-        raise ValueError("period는 YYYY-MM 형식이어야 합니다.")
+        raise PayrollApiValidationError(
+            "period는 YYYY-MM 형식이어야 합니다.",
+            code="invalid_period",
+            details={"period": period, "period_format": "YYYY-MM"},
+        )
     return PayrollScope(affiliate, workplace, period)
 
 
@@ -115,19 +156,68 @@ def _path_from_payload(payload: Mapping[str, Any], *keys: str) -> Path | None:
 def _input_type_from_payload(payload: Mapping[str, Any]) -> PayrollInputType:
     value = _text(payload.get("input_type") or payload.get("inputType") or "auto").lower()
     if value not in _INPUT_TYPES:
-        raise ValueError(f"지원하지 않는 급여 입력 방식입니다: {value}")
+        raise PayrollApiValidationError(
+            f"지원하지 않는 급여 입력 방식입니다: {value}",
+            code="invalid_input_type",
+            details={"input_type": value, "allowed_input_types": list(_INPUT_TYPES)},
+        )
     return value  # type: ignore[return-value]
+
+
+def _validate_required_paths(
+    input_type: PayrollInputType,
+    *,
+    invoice_path: Path | None,
+    attendance_path: Path | None,
+) -> None:
+    missing: list[str] = []
+    if input_type == "auto" and not invoice_path and not attendance_path:
+        missing.extend(["invoice_path", "attendance_path"])
+    elif input_type == "invoice" and not invoice_path:
+        missing.append("invoice_path")
+    elif input_type == "attendance" and not attendance_path:
+        missing.append("attendance_path")
+    elif input_type == "mixed":
+        if not invoice_path:
+            missing.append("invoice_path")
+        if not attendance_path:
+            missing.append("attendance_path")
+    if not missing:
+        return
+
+    alias_hint = {
+        "invoice_path": ["invoice_path", "invoicePath"],
+        "attendance_path": ["attendance_path", "attendancePath"],
+    }
+    raise PayrollApiValidationError(
+        "급여 입력 파일 경로가 부족합니다: " + ", ".join(missing),
+        code="missing_input_path",
+        details={
+            "input_type": input_type,
+            "missing_fields": missing,
+            "accepted_aliases": {key: alias_hint[key] for key in missing},
+        },
+    )
 
 
 def build_payroll_api_request(payload: Mapping[str, Any] | None) -> PayrollAutomationRequest:
     """Convert a JSON-like payload into the internal automation request."""
     data = _payload_mapping(payload)
     metadata = data.get("metadata") if isinstance(data.get("metadata"), Mapping) else {}
+    scope = scope_from_api_payload(data)
+    input_type = _input_type_from_payload(data)
+    invoice_path = _path_from_payload(data, "invoice_path", "invoicePath")
+    attendance_path = _path_from_payload(data, "attendance_path", "attendancePath")
+    _validate_required_paths(
+        input_type,
+        invoice_path=invoice_path,
+        attendance_path=attendance_path,
+    )
     return PayrollAutomationRequest(
-        scope=scope_from_api_payload(data),
-        invoice_path=_path_from_payload(data, "invoice_path", "invoicePath"),
-        attendance_path=_path_from_payload(data, "attendance_path", "attendancePath"),
-        input_type=_input_type_from_payload(data),
+        scope=scope,
+        invoice_path=invoice_path,
+        attendance_path=attendance_path,
+        input_type=input_type,
         tenant_id=_text(data.get("tenant_id") or data.get("tenantId")) or None,
         interactive_parent=None,
         metadata=dict(metadata),
@@ -144,9 +234,21 @@ def payroll_api_response(
     payload["scope_key"] = payload.get("scope", "")
     payload["scope"] = _scope_display(result.scope)
     payload["status"] = "success" if result.ok else "error"
+    payload["error_code"] = "" if result.ok else "payroll_run_failed"
+    payload["details"] = {}
     if request_id:
         payload["request_id"] = request_id
     return payload
+
+
+def _api_error_code(exc: Exception) -> str:
+    code = getattr(exc, "code", "")
+    return str(code or "validation_error")
+
+
+def _api_error_details(exc: Exception) -> dict[str, Any]:
+    details = getattr(exc, "details", {})
+    return dict(details) if isinstance(details, Mapping) else {}
 
 
 def payroll_api_error_response(
@@ -158,8 +260,10 @@ def payroll_api_error_response(
     payload: dict[str, Any] = {
         "ok": False,
         "status": "error",
+        "error_code": _api_error_code(exc),
         "error": message,
         "warnings": [message],
+        "details": _api_error_details(exc),
     }
     if request_id:
         payload["request_id"] = request_id
@@ -171,6 +275,6 @@ def run_payroll_api(payload: Mapping[str, Any] | None) -> dict[str, Any]:
     request_id = _request_id(payload)
     try:
         request = build_payroll_api_request(payload)
-    except (TypeError, ValueError) as exc:
+    except ValueError as exc:
         return payroll_api_error_response(exc, request_id=request_id)
     return payroll_api_response(run_payroll_automation(request), request_id=request_id)

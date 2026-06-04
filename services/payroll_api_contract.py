@@ -78,6 +78,8 @@ def payroll_api_success_example() -> dict[str, Any]:
             },
         },
         "operation_policy_source": "tenant",
+        "error_code": "",
+        "details": {},
         "error": "",
     }
 
@@ -88,8 +90,13 @@ def payroll_api_error_example() -> dict[str, Any]:
         "ok": False,
         "status": "error",
         "request_id": "payroll-run-2026-05-coss-site-a",
+        "error_code": "invalid_period",
         "error": "period는 YYYY-MM 형식이어야 합니다.",
         "warnings": ["period는 YYYY-MM 형식이어야 합니다."],
+        "details": {
+            "period": "202605",
+            "period_format": "YYYY-MM",
+        },
     }
 
 
@@ -145,13 +152,21 @@ def payroll_api_contract() -> dict[str, Any]:
                     "name": "invoice_path",
                     "aliases": ["invoicePath"],
                     "type": "string path",
-                    "required_when": ["input_type=invoice", "input_type=mixed"],
+                    "required_when": [
+                        "input_type=invoice",
+                        "input_type=mixed",
+                        "input_type=auto and attendance_path is missing",
+                    ],
                 },
                 {
                     "name": "attendance_path",
                     "aliases": ["attendancePath"],
                     "type": "string path",
-                    "required_when": ["input_type=attendance", "input_type=mixed"],
+                    "required_when": [
+                        "input_type=attendance",
+                        "input_type=mixed",
+                        "input_type=auto and invoice_path is missing",
+                    ],
                 },
                 {
                     "name": "tenant_id",
@@ -176,10 +191,21 @@ def payroll_api_contract() -> dict[str, Any]:
         "response": {
             "success": payroll_api_success_example(),
             "error": payroll_api_error_example(),
+            "error_codes": {
+                "invalid_payload": "Request body is not a JSON object/dict.",
+                "invalid_scope": "Scope is not one of the accepted forms.",
+                "missing_scope_fields": "Required scope fields are missing.",
+                "invalid_period": "Period is not YYYY-MM.",
+                "invalid_input_type": "Input type is not one of the supported values.",
+                "missing_input_path": "Required invoice/attendance path is missing for the input type.",
+                "payroll_run_failed": "Request was valid, but payroll processing failed.",
+                "validation_error": "Validation failed without a more specific code.",
+            },
             "stable_fields": [
                 "ok",
                 "status",
                 "request_id",
+                "error_code",
                 "scope",
                 "scope_key",
                 "affiliate",
@@ -193,6 +219,7 @@ def payroll_api_contract() -> dict[str, Any]:
                 "roster",
                 "operation_policy",
                 "operation_policy_source",
+                "details",
                 "error",
             ],
             "never_include": ["exception"],
