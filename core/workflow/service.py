@@ -158,16 +158,11 @@ def _trip_artifact_kind_from_document(doc: dict[str, Any]) -> str:
     return ""
 
 
-def _sync_business_trip_artifact_for_document(
+def _business_trip_artifact_target(
     db: dict[str, Any],
     tenant_id: str,
     doc: dict[str, Any],
-    *,
-    actor_id: str,
-    audit_action: str,
-    complete_report: bool = False,
-) -> dict[str, Any] | None:
-    """Link diary/report documents to an existing lifecycle and gate completion."""
+) -> tuple[str, dict[str, Any]] | None:
     artifact_kind = _trip_artifact_kind_from_document(doc)
     if not artifact_kind:
         return None
@@ -178,6 +173,47 @@ def _sync_business_trip_artifact_for_document(
         raise LookupError("연계 출장 lifecycle을 찾을 수 없습니다.")
     if str(trip.get("tenant_id") or "").strip() != str(tenant_id or "").strip():
         raise PermissionError("다른 테넌트의 출장 lifecycle에는 연결할 수 없습니다.")
+    return artifact_kind, trip
+
+
+def _assert_business_trip_report_approval_allowed(
+    db: dict[str, Any],
+    tenant_id: str,
+    doc: dict[str, Any],
+) -> None:
+    target = _business_trip_artifact_target(db, tenant_id, doc)
+    if not target:
+        return
+    artifact_kind, trip = target
+    if artifact_kind != "report":
+        return
+    if trip.get("status") not in (TRIP_STATUS_DIARY_DUE, TRIP_STATUS_OVERDUE, TRIP_STATUS_COMPLETED):
+        raise ValueError("출장 실행업무 완료 후 출장보고서 승인이 가능합니다.")
+
+
+def _business_trip_report_document_is_approved(db: dict[str, Any], trip: dict[str, Any]) -> bool:
+    report_document_id = str(trip.get("report_document_id") or "").strip()
+    if not report_document_id:
+        return False
+    report = next((doc for doc in db.get("documents") or [] if doc.get("id") == report_document_id), None)
+    return bool(report and report.get("status") == DOC_STATUS_APPROVED)
+
+
+def _sync_business_trip_artifact_for_document(
+    db: dict[str, Any],
+    tenant_id: str,
+    doc: dict[str, Any],
+    *,
+    actor_id: str,
+    audit_action: str,
+    complete_report: bool = False,
+) -> dict[str, Any] | None:
+    """Link diary/report documents to an existing lifecycle and gate completion."""
+    target = _business_trip_artifact_target(db, tenant_id, doc)
+    if not target:
+        return None
+    artifact_kind, trip = target
+    trip_id = str(trip.get("trip_id") or trip.get("id") or "")
 
     from core.workflow.business_trip import transition_trip_status
 
@@ -187,12 +223,10 @@ def _sync_business_trip_artifact_for_document(
     elif artifact_kind == "report":
         trip["report_document_id"] = str(doc.get("id") or "")
         if complete_report:
-            if trip.get("status") == TRIP_STATUS_APPROVED:
-                trip.update(transition_trip_status(trip, TRIP_STATUS_IN_PROGRESS))
-            if trip.get("status") == TRIP_STATUS_IN_PROGRESS:
-                trip.update(transition_trip_status(trip, TRIP_STATUS_DIARY_DUE))
             if trip.get("status") in (TRIP_STATUS_DIARY_DUE, TRIP_STATUS_OVERDUE):
                 trip.update(transition_trip_status(trip, TRIP_STATUS_COMPLETED))
+            elif trip.get("status") != TRIP_STATUS_COMPLETED:
+                raise ValueError("출장 실행업무 완료 후 출장보고서 승인이 가능합니다.")
     trip["updated_at"] = _now_iso()
     if trip == before:
         return trip
@@ -836,10 +870,12 @@ def approve_document(
         current = next((s for s in steps if s.get("status") == STEP_PENDING), None)
         if not current:
             raise ValueError("대기 중인 결재 단계가 없습니다.")
+        pending = [s for s in steps if s.get("status") == STEP_PENDING and s.get("id") != current.get("id")]
+        if not pending:
+            _assert_business_trip_report_approval_allowed(db, tenant_id, doc)
         current["status"] = STEP_APPROVED
         current["approved_at"] = _now_iso()
         current["comment"] = comment
-        pending = [s for s in steps if s.get("status") == STEP_PENDING and s.get("id") != current.get("id")]
         if pending:
             doc["status"] = DOC_STATUS_IN_REVIEW
             nxt = pending[0]
@@ -862,12 +898,14 @@ def approve_document(
                 actor_id=_uid(sess),
                 audit_action="business_trip_lifecycle_approved_from_document",
             )
-            executor_id = _spawn_execution_tasks(
-                db,
-                doc,
-                actor_id=_uid(sess),
-                trip_id=str((trip or {}).get("trip_id") or ""),
-            )
+            executor_id = ""
+            if not _trip_artifact_kind_from_document(doc):
+                executor_id = _spawn_execution_tasks(
+                    db,
+                    doc,
+                    actor_id=_uid(sess),
+                    trip_id=str((trip or {}).get("trip_id") or ""),
+                )
             from core.workflow.follow_up import sync_approval_complete_follow_up
 
             try:
@@ -1308,8 +1346,8 @@ def transition_business_trip_lifecycle(
         for row in db.get("business_trips") or []:
             if row.get("trip_id") != trip_id and row.get("id") != trip_id:
                 continue
-            if status == TRIP_STATUS_COMPLETED and not str(row.get("report_document_id") or "").strip():
-                raise ValueError("출장보고서 연결 후 완료 전이가 가능합니다.")
+            if status == TRIP_STATUS_COMPLETED and not _business_trip_report_document_is_approved(db, row):
+                raise ValueError("승인된 출장보고서 연결 후 완료 전이가 가능합니다.")
             before = deepcopy(row)
             updated = transition_trip_status(row, status)
             if updated == before:
@@ -1499,8 +1537,8 @@ def reflect_business_trip_kpi(
         if status == KPI_REFLECTION_BLOCKED:
             raise ValueError("출장 실행 완료 후 실적 반영이 가능합니다.")
         source = row.get("source") if isinstance(row.get("source"), dict) else {}
-        if source.get("kind") == TRIP_SOURCE_KIND_WORKFLOW and not str(row.get("report_document_id") or "").strip():
-            raise ValueError("출장보고서 연결 후 실적 반영이 가능합니다.")
+        if source.get("kind") == TRIP_SOURCE_KIND_WORKFLOW and not _business_trip_report_document_is_approved(db, row):
+            raise ValueError("승인된 출장보고서 연결 후 실적 반영이 가능합니다.")
         kpi_record = kpi_svc.upsert_business_trip_reflection(tenant_id, row)
         if status != KPI_REFLECTION_REFLECTED:
             before = deepcopy(row)

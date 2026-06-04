@@ -21,6 +21,7 @@ from core.workflow.constants import (
     KPI_REFLECTION_NOT_APPLICABLE,
     KPI_REFLECTION_READY,
     TASK_COMPLETED,
+    TASK_PENDING,
     TRIP_STATUS_APPROVED,
     TRIP_STATUS_CANCELLED,
     TRIP_STATUS_COMPLETED,
@@ -136,6 +137,63 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         self.assertEqual(completed_trip["status"], TRIP_STATUS_COMPLETED)
         self.assertEqual(completed_trip["kpi_reflection_status"], KPI_REFLECTION_READY)
         self.assertEqual(completed_trip["report_document_id"], report["id"])
+
+    def test_report_approval_cannot_complete_trip_before_execution_task(self) -> None:
+        sess = self._session()
+        doc = self._create_business_trip_document(session=sess)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=sess)
+        task = wf_svc.list_execution_tasks(self._tenant, session=sess)[0]
+
+        report = wf_svc.create_document(
+            self._tenant,
+            document_type=DOC_TYPE_GENERAL,
+            title="출장보고서",
+            summary="출장 결과 보고",
+            payload={
+                "trip_id": trip_id,
+                "source_document_id": doc["id"],
+                "template_name": "출장보고서",
+                "business_trip_artifact": "trip_report",
+                "report_body": "업무 결과",
+            },
+            session=sess,
+        )
+        wf_svc.submit_document(
+            self._tenant,
+            report["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+
+        with self.assertRaises(ValueError):
+            wf_svc.approve_document(self._tenant, report["id"], session=sess)
+
+        blocked_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+        blocked_report = wf_svc.get_document(self._tenant, report["id"], session=sess)
+        tasks = wf_svc.list_execution_tasks(self._tenant, session=sess)
+        self.assertEqual(blocked_trip["status"], TRIP_STATUS_APPROVED)
+        self.assertEqual(blocked_trip["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
+        self.assertEqual(blocked_report["status"], DOC_STATUS_IN_REVIEW)
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(tasks[0]["id"], task["id"])
+        self.assertEqual(tasks[0]["status"], TASK_PENDING)
+
+        wf_svc.complete_execution_task(self._tenant, task["id"], session=sess)
+        approved_report = wf_svc.approve_document(self._tenant, report["id"], session=sess)
+        completed_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+        tasks_after_report = wf_svc.list_execution_tasks(self._tenant, session=sess)
+        self.assertEqual(approved_report["status"], DOC_STATUS_APPROVED)
+        self.assertEqual(completed_trip["status"], TRIP_STATUS_COMPLETED)
+        self.assertEqual(completed_trip["kpi_reflection_status"], KPI_REFLECTION_READY)
+        self.assertEqual(completed_trip["report_document_id"], report["id"])
+        self.assertEqual(len(tasks_after_report), 1)
 
     def test_reject_and_cancel_paths_update_lifecycle_without_duplicate_rows(self) -> None:
         sess = self._session()
@@ -272,7 +330,7 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         with self.assertRaises(PermissionError):
             wf_svc.transition_business_trip_lifecycle(self._tenant, trip_id, TRIP_STATUS_PLANNED, session=viewer)
 
-    def test_direct_completion_transition_requires_report_link(self) -> None:
+    def test_direct_completion_transition_requires_approved_report_link(self) -> None:
         sess = self._session()
         doc = self._create_business_trip_document(session=sess)
         trip_id = doc["content_json"]["trip_id"]
@@ -288,6 +346,34 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             wf_svc.transition_business_trip_lifecycle(self._tenant, trip_id, TRIP_STATUS_COMPLETED, session=sess)
+
+        draft_report = wf_svc.create_document(
+            self._tenant,
+            document_type=DOC_TYPE_GENERAL,
+            title="출장보고서",
+            summary="출장 결과 보고",
+            payload={
+                "trip_id": trip_id,
+                "source_document_id": doc["id"],
+                "template_name": "출장보고서",
+                "business_trip_artifact": "trip_report",
+                "report_body": "업무 결과",
+            },
+            session=sess,
+        )
+        with self.assertRaises(ValueError):
+            wf_svc.transition_business_trip_lifecycle(self._tenant, trip_id, TRIP_STATUS_COMPLETED, session=sess)
+
+        wf_svc.submit_document(
+            self._tenant,
+            draft_report["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+        approved_report = wf_svc.approve_document(self._tenant, draft_report["id"], session=sess)
+        completed_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+        self.assertEqual(approved_report["status"], DOC_STATUS_APPROVED)
+        self.assertEqual(completed_trip["status"], TRIP_STATUS_COMPLETED)
 
 
 if __name__ == "__main__":
