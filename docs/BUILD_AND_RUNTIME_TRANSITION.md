@@ -262,6 +262,7 @@ cargo test --workspace
 - [x] Workflow document view/edit/submit/approve permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile/org-capability resolver and approval mutation bridge.
 - [x] Workflow inbox classification is defined in framework-neutral Rust DTOs and API contracts while Python remains the session/permission/document hydration/count/filter/UI bridge.
 - [x] Workflow form validation and document-field shaping are defined in framework-neutral Rust DTOs and API contracts while Python remains the tenant/template/config/persistence/UI bridge.
+- [x] Workflow submission/completion follow-up planning is defined in framework-neutral Rust DTOs and API contracts while Python remains the workspace-store side-effect bridge.
 - [x] Workflow site-report, month-close, and execution-task management permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile/task/site resolver and side-effect bridge.
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
@@ -786,6 +787,35 @@ Task 5 acceptance status:
 
 - [x] Workflow form validation and field shaping are Rust-owned behind parity
       contract tests.
+
+## Implementation checkpoint: Rust workflow follow-up planner core
+
+Completed on 2026-06-04 as a workflow submission/completion follow-up slice:
+
+- `crates/workflow-core::workflow_follow_up` owns pure follow-up intent
+  planning for requester calendar/To-Do, approver approval To-Dos/calendars,
+  cc reference To-Dos, requester execution confirmation, and distinct executor
+  execution To-Dos/calendars.
+- Rust preserves title/type-label defaults, requester/session fallback, period
+  and due fallback order, original approval-step numbering, blank/duplicate
+  approver suppression, cc skip rules, source-key formats, source values, and
+  trip-id propagation.
+- Python remains the `UserSession` adapter, document hydrator, document-type
+  label resolver, `content_json` trip-id extractor, workspace-store side-effect
+  executor/idempotency owner, persistence owner, and UI renderer.
+- Slice spec: `docs/WORKFLOW_RUST_FOLLOW_UP_PLANNER_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo test -p bitween-workflow-core workflow_follow_up --lib
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_follow_up_contracts -v
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_business_trip_followup_kpi_manager tests.test_workflow_forms -v
+```
+
+Task 5 acceptance status:
+
+- [x] Workflow follow-up planning is Rust-owned behind parity contract tests.
 
 ## Implementation checkpoint: Rust workflow document permissions core
 

@@ -296,6 +296,56 @@ def workflow_forms_example() -> dict[str, Any]:
     }
 
 
+def workflow_follow_up_example() -> dict[str, Any]:
+    """Return the Rust-owned pure workflow follow-up planning contract."""
+    return {
+        "rust_crate": "bitween-workflow-core",
+        "rust_module": "workflow_follow_up",
+        "rust_entrypoints": [
+            "plan_submission_follow_up",
+            "plan_approval_complete_follow_up",
+        ],
+        "python_compatibility_source": "core.workflow.follow_up",
+        "python_boundary": (
+            "Python executes workspace_store side effects and Rust does not read sessions, "
+            "workflow stores, content_json dictionaries, DOC_TYPE_LABELS, or workspace files. "
+            "Python compatibility code may still own UserSession adaptation, document hydration, "
+            "document-type label lookup, trip-id extraction, idempotent store updates, persistence, "
+            "and UI rendering."
+        ),
+        "follow_up_dtos": [
+            "WorkflowFollowUpDocument",
+            "WorkflowFollowUpApprovalStep",
+            "WorkflowFollowUpAction",
+            "WorkflowSubmissionFollowUpInput",
+            "WorkflowApprovalCompleteFollowUpInput",
+        ],
+        "action_types": ["todo", "calendar"],
+        "sources": [
+            "workflow",
+            "workflow_approval",
+            "workflow_cc",
+            "workflow_execution",
+        ],
+        "follow_up_invariants": [
+            "submission planning creates requester calendar and requester To-Do intents",
+            "document title defaults to 문서",
+            "document type label defaults to 문서 when Python does not supply one",
+            "submission requester falls back to the session user",
+            "period_start falls back to requested_date",
+            "period_end falls back to due_date and then period_start",
+            "approval-step numbering preserves original enumerate positions",
+            "blank and duplicate approver IDs are skipped after trimming",
+            "cc To-Dos skip blank users, approval-line users, and the requester",
+            "approval completion creates requester execution-confirmation To-Do",
+            "executor completion To-Do and calendar are created only for a distinct supplied executor",
+            "executor completion calendar is omitted when executor equals requester",
+            "trip_id is propagated into all To-Do intents",
+            "source_key formats stay compatible with workspace_store idempotency",
+        ],
+    }
+
+
 def workflow_api_contract() -> dict[str, Any]:
     """Return workflow API contract metadata for Rust migration slices."""
     return {
@@ -303,10 +353,12 @@ def workflow_api_contract() -> dict[str, Any]:
         "business_trip_permissions": workflow_business_trip_permissions_example(),
         "workflow_inbox": workflow_inbox_example(),
         "workflow_forms": workflow_forms_example(),
+        "workflow_follow_up": workflow_follow_up_example(),
         "response": {
             "business_trip_lifecycle_entrypoint": "bitween_workflow_core::business_trip::transition_trip_status(record, target, now_iso)",
             "business_trip_permissions_entrypoint": "bitween_workflow_core::business_trip_permissions::can_view_business_trip_lifecycle(input)",
             "workflow_inbox_entrypoint": "bitween_workflow_core::workflow_inbox::matches_inbox(input)",
             "workflow_forms_entrypoint": "bitween_workflow_core::workflow_forms::validate_form_values(schema, values)",
+            "workflow_follow_up_entrypoint": "bitween_workflow_core::workflow_follow_up::plan_submission_follow_up(input)",
         },
     }
