@@ -4,6 +4,7 @@ export const PAYROLL_API_VALIDATE_ENDPOINT = "/api/payroll/v1/runs/validate" as 
 
 export type PayrollInputType = "auto" | "invoice" | "attendance" | "mixed";
 export type PayrollInputBasis = "invoice" | "attendance" | "hybrid";
+export type PayrollMissingClockPolicy = "warn" | "ignore" | "deduct";
 
 export type PayrollErrorCode =
   | "invalid_payload"
@@ -45,10 +46,24 @@ export interface PayrollApiRequest {
   dryRun?: boolean;
 }
 
+export interface PayrollAttendancePolicy {
+  enabled: boolean;
+  source: string;
+  rounding_minutes: number;
+  late_grace_minutes: number;
+  early_leave_grace_minutes: number;
+  overtime_rounding_minutes: number;
+  missing_clock_policy: PayrollMissingClockPolicy;
+  holiday_source: string;
+  [key: string]: unknown;
+}
+
 export interface PayrollOperationPolicy {
-  input_basis?: PayrollInputBasis;
-  payday?: string;
-  attendance?: Record<string, unknown>;
+  input_basis: PayrollInputBasis;
+  payday: string;
+  show_setup_guide: boolean;
+  policy_note: string;
+  attendance: PayrollAttendancePolicy;
   [key: string]: unknown;
 }
 

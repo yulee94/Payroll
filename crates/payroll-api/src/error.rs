@@ -5,9 +5,15 @@ use std::{error::Error, fmt};
 pub enum PayrollApiError {
     InvalidPayload,
     InvalidScope,
-    MissingScopeFields { missing_fields: Vec<String> },
-    InvalidPeriod { period: String },
-    InvalidInputType { input_type: String },
+    MissingScopeFields {
+        missing_fields: Vec<String>,
+    },
+    InvalidPeriod {
+        period: String,
+    },
+    InvalidInputType {
+        input_type: String,
+    },
     MissingInputPath {
         input_type: String,
         missing_fields: Vec<String>,
@@ -70,7 +76,11 @@ impl fmt::Display for PayrollApiError {
                 write!(f, "지원하지 않는 급여 입력 방식입니다: {input_type}")
             }
             Self::MissingInputPath { missing_fields, .. } => {
-                write!(f, "급여 입력 파일 경로가 부족합니다: {}", missing_fields.join(", "))
+                write!(
+                    f,
+                    "급여 입력 파일 경로가 부족합니다: {}",
+                    missing_fields.join(", ")
+                )
             }
         }
     }

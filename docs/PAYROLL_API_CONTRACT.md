@@ -136,6 +136,22 @@ Fields:
   },
   "error_code": "",
   "details": {},
+  "operation_policy": {
+    "input_basis": "hybrid",
+    "payday": "25일",
+    "show_setup_guide": true,
+    "policy_note": "",
+    "attendance": {
+      "enabled": true,
+      "source": "biometric",
+      "rounding_minutes": 1,
+      "late_grace_minutes": 0,
+      "early_leave_grace_minutes": 0,
+      "overtime_rounding_minutes": 1,
+      "missing_clock_policy": "warn",
+      "holiday_source": "invoice"
+    }
+  },
   "operation_policy_source": "tenant",
   "error": ""
 }
@@ -166,12 +182,17 @@ Fields:
   "operation_policy": {
     "input_basis": "hybrid",
     "payday": "25일",
+    "show_setup_guide": true,
+    "policy_note": "",
     "attendance": {
       "enabled": true,
+      "source": "biometric",
       "rounding_minutes": 1,
       "late_grace_minutes": 0,
       "early_leave_grace_minutes": 0,
-      "missing_clock_policy": "warn"
+      "overtime_rounding_minutes": 1,
+      "missing_clock_policy": "warn",
+      "holiday_source": "invoice"
     }
   },
   "operation_policy_source": "tenant",
@@ -229,3 +250,4 @@ Frontend code must use `error_code`, not parse `error` text.
 - `input_type` in validation responses is the resolved input type; `requested_input_type` preserves caller input.
 - Explicit `invoice`, `attendance`, and `mixed` requests preserve caller selection.
 - Responses include `operation_policy` and `operation_policy_source` so operators can audit which policy was applied.
+- Rust normalizes `operation_policy` known fields before serializing responses: invalid input basis falls back to `hybrid`; attendance minute fields are clamped to Python-compatible ranges; missing-clock policy falls back to `warn`.

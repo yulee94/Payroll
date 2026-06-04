@@ -49,6 +49,7 @@ impl PayrollValidationResponse {
         request: &PayrollRunRequest,
         policy_snapshot: OperationPolicySnapshot,
     ) -> Self {
+        let policy_snapshot = policy_snapshot.normalize();
         let mut paths = BTreeMap::new();
         if let Some(path) = request.invoice_path.as_ref() {
             paths.insert("invoice".to_owned(), path.to_string_lossy().into_owned());
@@ -124,16 +125,16 @@ pub fn validate_payroll_api_payload(
             &request,
             policy_snapshot.into().unwrap_or_default(),
         )),
-        Err(error) => PayrollApiResponse::Error(PayrollApiErrorResponse::from_error(
-            error, request_id,
-        )),
+        Err(error) => {
+            PayrollApiResponse::Error(PayrollApiErrorResponse::from_error(error, request_id))
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::policy::{OperationPolicy, PayrollInputBasis};
+    use crate::policy::{AttendancePolicy, MissingClockPolicy, OperationPolicy, PayrollInputBasis};
     use crate::request::{PayrollInputType, PayrollScope};
     use serde_json::json;
 
@@ -249,5 +250,62 @@ mod tests {
         assert_eq!(value["error_code"], "invalid_payload");
         assert_eq!(value["will_run"], false);
         assert_eq!(value["can_run"], false);
+    }
+
+    #[test]
+    fn validation_response_serializes_normalized_operation_policy() {
+        let mut policy = OperationPolicy::new(PayrollInputBasis::Attendance);
+        policy.payday = Some(String::new());
+        policy.policy_note = "  reviewed by payroll ops  ".to_owned();
+        policy.attendance = AttendancePolicy {
+            rounding_minutes: -30,
+            late_grace_minutes: 9999,
+            early_leave_grace_minutes: -1,
+            overtime_rounding_minutes: 0,
+            missing_clock_policy: MissingClockPolicy::Deduct,
+            ..AttendancePolicy::default()
+        };
+
+        let response = validate_payroll_api_payload(
+            json!({
+                "request_id": "req-policy",
+                "affiliate": "Affiliate",
+                "workplace": "Site A",
+                "period": "2026-05",
+                "attendance_path": "attendance.csv",
+                "input_type": "auto"
+            }),
+            Some(OperationPolicySnapshot::new(policy, "site")),
+        );
+        let value = serde_json::to_value(response).unwrap();
+
+        assert_eq!(value["status"], "validated");
+        assert_eq!(value["input_type"], "attendance");
+        assert_eq!(value["operation_policy"]["input_basis"], "attendance");
+        assert_eq!(value["operation_policy"]["payday"], "25일");
+        assert_eq!(
+            value["operation_policy"]["policy_note"],
+            "reviewed by payroll ops"
+        );
+        assert_eq!(
+            value["operation_policy"]["attendance"]["rounding_minutes"],
+            1
+        );
+        assert_eq!(
+            value["operation_policy"]["attendance"]["late_grace_minutes"],
+            240
+        );
+        assert_eq!(
+            value["operation_policy"]["attendance"]["early_leave_grace_minutes"],
+            0
+        );
+        assert_eq!(
+            value["operation_policy"]["attendance"]["overtime_rounding_minutes"],
+            1
+        );
+        assert_eq!(
+            value["operation_policy"]["attendance"]["missing_clock_policy"],
+            "deduct"
+        );
     }
 }

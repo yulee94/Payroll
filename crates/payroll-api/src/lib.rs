@@ -4,7 +4,10 @@ pub mod request;
 pub mod response;
 
 pub use error::PayrollApiError;
-pub use policy::{OperationPolicy, OperationPolicySnapshot, PayrollInputBasis};
+pub use policy::{
+    AttendancePolicy, MissingClockPolicy, OperationPolicy, OperationPolicySnapshot,
+    PayrollInputBasis,
+};
 pub use request::{
     parse_payroll_api_request, request_id_from_payload, PayrollInputType, PayrollRunRequest,
     PayrollScope,
