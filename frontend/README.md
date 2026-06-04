@@ -1,18 +1,19 @@
 # Bitween Frontend Contracts
 
-This folder is the TypeScript boundary for the future Bitween web frontend.
+This folder is the TypeScript contract boundary for Bitween frontend clients.
 
 Current scope:
 
 - Keep API DTOs, type guards, and small request builders here.
-- Build UI pages in TypeScript without importing Python modules.
 - Treat `frontend/src/contracts/payrollApi.ts` as the source of truth for payroll run and validation responses on the frontend side.
+- Keep field names aligned with Rust backend contracts.
+- Frontend code should call HTTP/client adapters, not payroll calculation internals.
 
 Backend boundaries:
 
-- Python desktop services remain under `services/`, `core/`, and `ui/`.
-- Rust backend transition work lives under `crates/`.
-- Frontend code should call HTTP/client adapters, not payroll calculation internals.
+- Rust backend transition work lives under `crates/` and future Rust service crates.
+- Compatibility adapters under `services/` and `core/` remain characterization sources only until Rust parity is proven.
+- Production frontend traffic goes through Kubernetes-exposed API services.
 
 Local checks:
 
