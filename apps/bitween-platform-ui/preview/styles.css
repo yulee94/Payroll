@@ -39,6 +39,12 @@ button {
   cursor: pointer;
 }
 
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(31, 56, 100, 0.32);
+  outline-offset: 2px;
+}
+
 .login-page {
   align-items: center;
   display: flex;
@@ -147,6 +153,13 @@ button {
   padding: 10px 12px;
 }
 
+.field input:focus,
+.field input:focus-visible {
+  background: var(--card);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(232, 242, 252, 0.85);
+}
+
 .btn {
   align-items: center;
   border: 1px solid transparent;
@@ -164,6 +177,10 @@ button {
 
 .btn:active {
   opacity: 0.86;
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 4px rgba(232, 242, 252, 0.9);
 }
 
 .btn.primary {
@@ -323,6 +340,12 @@ button {
   border-color: var(--border);
 }
 
+.sidebar-theme-chip:focus-visible {
+  background: var(--card);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(232, 242, 252, 0.9);
+}
+
 .sidebar-theme-chip.active {
   box-shadow: inset 3px 0 0 var(--nav-active-text);
 }
@@ -379,6 +402,11 @@ button {
 
 .nav-button:hover {
   background: var(--nav-hover-bg);
+}
+
+.nav-button:focus-visible {
+  background: var(--nav-hover-bg);
+  box-shadow: 0 0 0 4px rgba(232, 242, 252, 0.9);
 }
 
 .nav-button.active {
@@ -648,6 +676,10 @@ button {
   color: var(--accent);
 }
 
+.punch:focus-visible {
+  box-shadow: 0 0 0 4px rgba(232, 242, 252, 0.9);
+}
+
 .location-notice {
   background: var(--bg);
   border: 1px solid var(--border);
@@ -682,6 +714,12 @@ button {
 .language-option.selected {
   background: var(--accent-soft);
   border-color: var(--accent);
+}
+
+.language-option:focus-visible {
+  background: var(--card);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(232, 242, 252, 0.9);
 }
 
 .travel-stage-grid,
@@ -771,6 +809,12 @@ button {
   text-align: left;
 }
 
+.archive-folder-card:focus-visible {
+  background: var(--card);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(232, 242, 252, 0.9);
+}
+
 .archive-preview-grid {
   align-items: stretch;
   display: grid;
@@ -839,6 +883,12 @@ button {
   text-align: left;
 }
 
+.ai-recommendation-item:focus-visible {
+  background: var(--card);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(232, 242, 252, 0.9);
+}
+
 .ai-recommendation-item > div {
   display: grid;
   gap: 4px;
@@ -892,6 +942,12 @@ button {
   background: var(--accent-soft);
 }
 
+.select-card:focus-visible {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(232, 242, 252, 0.9);
+}
+
 .select-card.selected {
   border-color: var(--accent);
 }
@@ -937,6 +993,13 @@ button {
   color: var(--card);
 }
 
+.filter-chip:focus-visible {
+  background: var(--card);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(232, 242, 252, 0.9);
+  color: var(--accent);
+}
+
 .list-toolbar {
   align-items: end;
   display: grid;
@@ -962,6 +1025,13 @@ button {
   color: var(--text);
   min-height: 40px;
   padding: 9px 11px;
+}
+
+.search-box input:focus,
+.search-box input:focus-visible {
+  background: var(--card);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(232, 242, 252, 0.85);
 }
 
 .list-summary {
@@ -1003,6 +1073,11 @@ button {
 .row-button:hover,
 .row-button.selected {
   background: var(--accent-soft);
+}
+
+.row-button:focus-visible {
+  background: var(--accent-soft);
+  box-shadow: inset 4px 0 0 var(--accent), 0 0 0 4px rgba(232, 242, 252, 0.9);
 }
 
 .row-button.selected {
