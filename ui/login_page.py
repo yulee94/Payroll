@@ -93,8 +93,10 @@ class LoginPagePanel(tk.Frame):
             font=(FONT, 28, "bold"),
             anchor=tk.W,
         ).grid(row=0, column=0, sticky="w")
+        logo_host = tk.Frame(brand_row, bg=COLORS["hero_bg"])
+        logo_host.grid(row=0, column=1, sticky="e", padx=(16, 0))
         attach_bitween_logo_label(
-            brand_row,
+            logo_host,
             self._photo_refs,
             self.winfo_toplevel(),
             max_width=132,
