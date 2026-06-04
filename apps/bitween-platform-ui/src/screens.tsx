@@ -163,6 +163,8 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">법인 코드</Label>
           <TextInput
+            accessibilityHint="Demo 계정은 법인코드 0000을 사용합니다."
+            accessibilityLabel="법인 코드"
             autoCapitalize="characters"
             autoComplete="organization"
             onChangeText={setCompanyCode}
@@ -176,6 +178,8 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">아이디</Label>
           <TextInput
+            accessibilityHint="Demo 계정은 아이디 admin을 사용합니다."
+            accessibilityLabel="아이디"
             autoCapitalize="none"
             autoComplete="username"
             onChangeText={setUserId}
@@ -189,6 +193,8 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">비밀번호</Label>
           <TextInput
+            accessibilityHint="Demo 계정은 비밀번호 admin을 사용합니다."
+            accessibilityLabel="비밀번호"
             autoComplete="password"
             onChangeText={setPassword}
             placeholder="admin"
@@ -206,8 +212,19 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
           </View>
         ) : null}
         <View style={styles.loginActions}>
-          <ActionButton onPress={handleLogin}>{canSubmit ? "플랫폼 홈으로 이동" : "로그인"}</ActionButton>
-          <ActionButton onPress={handleDemoLogin} variant="secondary">Demo 계정으로 접속</ActionButton>
+          <ActionButton
+            accessibilityLabel={canSubmit ? "입력한 demo 계정으로 플랫폼 홈 이동" : "로그인 정보 확인"}
+            onPress={handleLogin}
+          >
+            {canSubmit ? "플랫폼 홈으로 이동" : "로그인"}
+          </ActionButton>
+          <ActionButton
+            accessibilityLabel="법인코드 0000, 아이디 admin, 비밀번호 admin demo 계정으로 접속"
+            onPress={handleDemoLogin}
+            variant="secondary"
+          >
+            Demo 계정으로 접속
+          </ActionButton>
         </View>
         <View style={styles.inlineNotice}>
           <Badge tone="neutral">Demo 계정</Badge>

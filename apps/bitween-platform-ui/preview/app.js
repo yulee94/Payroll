@@ -317,7 +317,7 @@ function renderLogin() {
 }
 
 function field(label, id, placeholder, type = "text", value = "") {
-  return `<label class="field" for="${id}"><span>${label}</span><input id="${id}" type="${type}" value="${escapeText(value)}" placeholder="${placeholder}" /></label>`;
+  return `<label class="field" for="${id}"><span>${label}</span><input aria-label="${label}" id="${id}" type="${type}" value="${escapeText(value)}" placeholder="${placeholder}" /></label>`;
 }
 
 function renderShell() {
