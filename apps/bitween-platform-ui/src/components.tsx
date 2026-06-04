@@ -187,6 +187,7 @@ export function DataTable({ locale, onRowPress, rows, selectedRowId }: Localized
         {rows.map((row) => (
           <Pressable
             accessibilityRole={onRowPress ? "button" : undefined}
+            accessibilityState={selectedRowId === row.id ? { selected: true } : undefined}
             key={row.id}
             onPress={() => onRowPress?.(row)}
             style={({ pressed }) => [
@@ -219,6 +220,7 @@ export function DataTable({ locale, onRowPress, rows, selectedRowId }: Localized
       {rows.map((row) => (
         <Pressable
           accessibilityRole={onRowPress ? "button" : undefined}
+          accessibilityState={selectedRowId === row.id ? { selected: true } : undefined}
           key={row.id}
           onPress={() => onRowPress?.(row)}
           style={({ pressed }) => [
@@ -271,7 +273,10 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
             const selected = item.id === theme.id;
             return (
               <Pressable
+                accessibilityHint={item.description}
+                accessibilityLabel={t(locale, "shell.themePanel.optionLabel", { label: item.label, description: item.description })}
                 accessibilityRole="button"
+                accessibilityState={{ selected }}
                 key={item.id}
                 onPress={() => onThemeChange(item.id)}
                 style={({ pressed }) => [
@@ -288,6 +293,13 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
             );
           })}
         </View>
+        <View style={styles.themeCurrent}>
+          <View style={[styles.themeCurrentRail, { backgroundColor: theme.activeText }]} />
+          <View style={styles.themeCurrentCopy}>
+            <Label size="sm" weight="bold">{t(locale, "shell.themePanel.current", { theme: theme.label })}</Label>
+            <Label size="sm" muted>{theme.description}</Label>
+          </View>
+        </View>
       </View>
       <ScrollView
         horizontal={compact}
@@ -300,6 +312,7 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
           return (
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ selected: active }}
               key={item.id}
               onPress={() => onSelect(item.id)}
               style={[
@@ -360,7 +373,9 @@ export function AppShell({
       <View style={styles.main}>
         <View style={[styles.header, compact && styles.headerCompact]}>
           <View style={styles.headerCopy}>
+            <Label size="sm" muted>{active.eyebrow}</Label>
             <Label size="xl" weight="bold">{active.label}</Label>
+            <Label muted>{active.description}</Label>
           </View>
           <View style={styles.headerActions}>
             {sessionLabel ? <Badge tone="neutral">{sessionLabel}</Badge> : null}
@@ -719,6 +734,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     lineHeight: 16
+  },
+  themeCurrent: {
+    alignItems: "stretch",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.sm,
+    padding: spacing.sm
+  },
+  themeCurrentCopy: {
+    flex: 1,
+    gap: spacing.xs,
+    minWidth: 0
+  },
+  themeCurrentRail: {
+    borderRadius: 999,
+    width: 4
   },
   themePanel: {
     backgroundColor: "rgba(255, 255, 255, 0.54)",
