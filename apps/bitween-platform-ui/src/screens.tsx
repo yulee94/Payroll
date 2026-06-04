@@ -95,6 +95,12 @@ const archiveDocumentDefinitions = [
   { id: "doc-travel", tone: "neutral" }
 ] as const satisfies readonly ToneDefinition[];
 
+const archiveReviewDefinitions = [
+  { id: "payrollOutputs", target: "payroll", tone: "ready" },
+  { id: "accessReview", target: "admin", tone: "attention" },
+  { id: "approvalFiles", target: "workflow", tone: "neutral" }
+] as const satisfies readonly TargetToneDefinition[];
+
 const aiRecommendationDefinitions = [
   { id: "ai-payroll-errors", tone: "ready", target: "payroll" },
   { id: "ai-approval-comment", tone: "attention", target: "workflow" },
@@ -695,6 +701,26 @@ function ArchiveLibraryPanel({ locale, onSelect }: Pick<ScreenProps, "locale" | 
           </Pressable>
         ))}
       </View>
+      <View style={styles.archiveReviewPanel}>
+        <SectionHeader title={tScreen(locale, "archive.review.title")} description={tScreen(locale, "archive.review.description")} />
+        <View style={styles.archiveReviewGrid}>
+          {archiveReviewDefinitions.map((item) => (
+            <Pressable
+              accessibilityRole="button"
+              key={item.id}
+              onPress={() => onSelect(item.target)}
+              style={({ pressed }) => [styles.archiveReviewCard, { borderTopColor: toneColor(item.tone) }, pressed && styles.buttonPressed]}
+            >
+              <View style={styles.archiveReviewHead}>
+                <Label size="sm" muted>{tScreen(locale, `archive.review.cards.${item.id}.label`)}</Label>
+                <Badge tone={item.tone}>{tScreen(locale, `archive.review.cards.${item.id}.status`)}</Badge>
+              </View>
+              <Label weight="bold">{tScreen(locale, `archive.review.cards.${item.id}.title`)}</Label>
+              <Label size="sm" muted>{tScreen(locale, `archive.review.cards.${item.id}.detail`)}</Label>
+            </Pressable>
+          ))}
+        </View>
+      </View>
       <View style={styles.archivePreviewGrid}>
         <View style={styles.archiveDocumentList}>
           {archiveDocumentDefinitions.map((document) => (
@@ -1083,6 +1109,37 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexBasis: 320,
     flexGrow: 1,
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  archiveReviewCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 220,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  archiveReviewGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  archiveReviewHead: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
+  },
+  archiveReviewPanel: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
     gap: spacing.md,
     padding: spacing.md
   },

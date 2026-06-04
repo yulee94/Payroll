@@ -136,6 +136,12 @@ const archiveDocumentDefs = [
   ["doc-travel", "neutral"]
 ].map(([id, tone]) => ({ id, tone }));
 
+const archiveReviewDefs = [
+  ["payrollOutputs", "ready", "payroll"],
+  ["accessReview", "attention", "admin"],
+  ["approvalFiles", "neutral", "workflow"]
+].map(([id, tone, target]) => ({ id, target, tone }));
+
 const aiRecommendationDefs = [
   ["ai-payroll-errors", "ready", "payroll"],
   ["ai-approval-comment", "attention", "workflow"],
@@ -724,6 +730,16 @@ function archiveLibraryPanel() {
         <span class="helper">${t(`screens.archive.folders.${item.id}.owner`)}</span>
       </button>
     `).join("")}</div>
+    <div class="archive-review-panel">
+      ${sectionHead("", t("screens.archive.review.title"), t("screens.archive.review.description"))}
+      <div class="archive-review-grid">${archiveReviewDefs.map((item) => `
+        <button class="archive-review-card" data-target="${item.target}" style="border-top-color:${toneColor(item.tone)}">
+          <div class="archive-review-head"><span class="helper">${t(`screens.archive.review.cards.${item.id}.label`)}</span>${badge(t(`screens.archive.review.cards.${item.id}.status`), item.tone)}</div>
+          <strong>${t(`screens.archive.review.cards.${item.id}.title`)}</strong>
+          <span class="helper">${t(`screens.archive.review.cards.${item.id}.detail`)}</span>
+        </button>
+      `).join("")}</div>
+    </div>
     <div class="archive-preview-grid">
       <div class="archive-document-list">${archiveDocumentDefs.map((item) => `
         <article class="archive-document-item">${badge(t(`screens.archive.documents.${item.id}.status`), item.tone)}<div><strong>${t(`screens.archive.documents.${item.id}.title`)}</strong><span class="helper">${t("screens.archive.documents.meta", { type: t(`screens.archive.documents.${item.id}.type`), owner: t(`screens.archive.documents.${item.id}.owner`) })}</span></div></article>
