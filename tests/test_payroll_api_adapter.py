@@ -71,10 +71,11 @@ class PayrollApiAdapterTests(unittest.TestCase):
             exception=ValueError("boom"),
         )
 
-        payload = payroll_api_response(result)
+        payload = payroll_api_response(result, request_id="req-1")
 
         self.assertEqual(payload["status"], "error")
         self.assertEqual(payload["error"], "boom")
+        self.assertEqual(payload["request_id"], "req-1")
         self.assertNotIn("exception", payload)
 
     def test_run_payroll_api_uses_backend_and_returns_response(self) -> None:
@@ -87,6 +88,7 @@ class PayrollApiAdapterTests(unittest.TestCase):
         with patch("services.payroll_api_adapter.run_payroll_automation", return_value=result) as run:
             payload = run_payroll_api(
                 {
+                    "requestId": "req-1",
                     "affiliate": "Affiliate",
                     "workplace": "Site A",
                     "period": "2026-05",
@@ -96,8 +98,33 @@ class PayrollApiAdapterTests(unittest.TestCase):
             )
 
         self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["request_id"], "req-1")
         self.assertEqual(payload["count"], 2)
         self.assertEqual(run.call_args.args[0].invoice_path, Path("invoice.xlsx"))
+
+    def test_run_payroll_api_returns_error_response_for_invalid_payload(self) -> None:
+        with patch("services.payroll_api_adapter.run_payroll_automation") as run:
+            payload = run_payroll_api(
+                {
+                    "request_id": "req-bad",
+                    "affiliate": "Affiliate",
+                    "workplace": "Site A",
+                    "period": "202605",
+                }
+            )
+
+        self.assertFalse(payload["ok"])
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["request_id"], "req-bad")
+        self.assertIn("YYYY-MM", payload["error"])
+        run.assert_not_called()
+
+    def test_run_payroll_api_returns_error_response_for_non_mapping_payload(self) -> None:
+        payload = run_payroll_api("bad")  # type: ignore[arg-type]
+
+        self.assertFalse(payload["ok"])
+        self.assertEqual(payload["status"], "error")
+        self.assertIn("dict", payload["error"])
 
 
 if __name__ == "__main__":
