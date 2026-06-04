@@ -45,6 +45,32 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
+.skip-link {
+  background: var(--accent);
+  border-radius: 6px;
+  color: var(--card);
+  font-size: 14px;
+  font-weight: 800;
+  left: 16px;
+  padding: 10px 14px;
+  position: fixed;
+  text-decoration: none;
+  top: 12px;
+  transform: translateY(-160%);
+  transition: transform 120ms ease;
+  z-index: 20;
+}
+
+.skip-link:focus {
+  outline: 3px solid rgba(31, 56, 100, 0.32);
+  outline-offset: 2px;
+  transform: translateY(0);
+}
+
+#main-content:focus {
+  outline: none;
+}
+
 .login-page {
   align-items: center;
   display: flex;
