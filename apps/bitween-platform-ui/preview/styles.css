@@ -1070,6 +1070,12 @@ button {
   text-align: center;
 }
 
+.filtered-empty {
+  align-items: start;
+  display: grid;
+  gap: 12px;
+}
+
 .detail-panel {
   background: var(--input);
   border: 1px solid var(--border);

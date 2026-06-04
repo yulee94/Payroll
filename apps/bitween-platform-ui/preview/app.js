@@ -670,7 +670,7 @@ function renderModule(id) {
         <label class="search-box" for="work-search"><span>${t("screens.module.search.label")}</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="${t("screens.module.search.placeholder")}" /></label>
       </div>
       <div class="list-summary"><strong>${t("screens.module.list.count", { count: rows.length })}</strong><span class="helper">${state.search ? t("screens.module.list.filteredWithSearch", { filter: filterLabel, search: state.search }) : t("screens.module.list.filtered", { filter: filterLabel })}</span></div>
-      ${table(rows, true)}
+      ${data.rows.length === 0 ? empty(t("table.empty.title"), t("table.empty.description")) : rows.length ? table(rows, true) : filteredEmpty()}
       ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
     <div class="action-panels">
@@ -872,6 +872,13 @@ function empty(title, desc) {
   return `<div class="empty"><strong>${title}</strong><span class="helper">${desc}</span></div>`;
 }
 
+function filteredEmpty() {
+  return `<div class="filtered-empty">
+    ${empty(t("screens.module.filteredEmpty.title"), t("screens.module.filteredEmpty.description"))}
+    <button class="btn secondary" data-reset-list>${t("screens.module.filteredEmpty.reset")}</button>
+  </div>`;
+}
+
 function toneColor(tone) {
   return {
     ready: "#047857",
@@ -932,6 +939,16 @@ function bindEvents() {
       state.filter = "all";
       render();
       toast(t("preview.toast.languageSelected"));
+    });
+  });
+
+  document.querySelectorAll("[data-reset-list]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.filter = "all";
+      state.search = "";
+      state.selectedRowKey = "";
+      render();
+      toast(t("preview.toast.filtersReset"));
     });
   });
 

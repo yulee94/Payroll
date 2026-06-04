@@ -6350,6 +6350,42 @@
         "zh-Hans-CN": "此画面仅构成显示状态，不执行实际保存。运营设置保存将在 backend/API 契约确认后连接。",
         "ja-JP": "この画面は実保存を行わず表示状態のみ構成します。運用設定の保存は backend/API 契約後に接続します。"
       }
+    },
+    {
+      "key": "screens.module.filteredEmpty.title",
+      "values": {
+        "ko-KR": "검색 결과가 없습니다.",
+        "en-US": "No search results.",
+        "zh-Hans-CN": "没有搜索结果。",
+        "ja-JP": "検索結果がありません。"
+      }
+    },
+    {
+      "key": "screens.module.filteredEmpty.description",
+      "values": {
+        "ko-KR": "필터나 검색어를 조정하면 업무 목록을 다시 확인할 수 있습니다.",
+        "en-US": "Adjust the filter or search term to check the work list again.",
+        "zh-Hans-CN": "调整筛选或搜索词后，可以重新查看工作列表。",
+        "ja-JP": "フィルターや検索語を調整すると、業務一覧を再確認できます。"
+      }
+    },
+    {
+      "key": "screens.module.filteredEmpty.reset",
+      "values": {
+        "ko-KR": "필터 초기화",
+        "en-US": "Reset filters",
+        "zh-Hans-CN": "重置筛选",
+        "ja-JP": "フィルター初期化"
+      }
+    },
+    {
+      "key": "preview.toast.filtersReset",
+      "values": {
+        "ko-KR": "필터와 검색어를 초기화했습니다.",
+        "en-US": "Reset the filter and search term.",
+        "zh-Hans-CN": "已重置筛选和搜索词。",
+        "ja-JP": "フィルターと検索語を初期化しました。"
+      }
     }
   ],
   "languageDisplayNames": [

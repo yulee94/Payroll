@@ -535,6 +535,11 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
   const selectRow = (row: ModuleRow) => {
     setSelectedRowId(row.id);
   };
+  const resetListFilters = () => {
+    setActiveFilter(defaultFilter);
+    setSearch("");
+    setSelectedRowId(dashboard.rows[0]?.id);
+  };
 
   return (
     <View style={styles.stack}>
@@ -604,10 +609,15 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
           <Label weight="bold">{tScreen(locale, "module.list.count", { count: filteredRows.length })}</Label>
           <Label size="sm" muted>{search ? tScreen(locale, "module.list.filteredWithSearch", { filter: activeFilter, search }) : tScreen(locale, "module.list.filtered", { filter: activeFilter })}</Label>
         </View>
-        {dashboard.rows.length > 0 ? (
+        {dashboard.rows.length === 0 ? (
+          <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />
+        ) : filteredRows.length > 0 ? (
           <DataTable locale={locale} onRowPress={selectRow} rows={filteredRows} selectedRowId={selectedRow?.id} />
         ) : (
-          <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />
+          <View style={styles.filteredEmptyState}>
+            <EmptyState title={tScreen(locale, "module.filteredEmpty.title")} description={tScreen(locale, "module.filteredEmpty.description")} />
+            <ActionButton onPress={resetListFilters} variant="secondary">{tScreen(locale, "module.filteredEmpty.reset")}</ActionButton>
+          </View>
         )}
         {selectedRow ? <WorkDetailPanel locale={locale} row={selectedRow} onSelect={onSelect} /> : null}
       </Card>
@@ -1252,6 +1262,10 @@ const styles = StyleSheet.create({
   },
   formGroup: {
     gap: spacing.xs
+  },
+  filteredEmptyState: {
+    alignItems: "flex-start",
+    gap: spacing.md
   },
   heroCopy: {
     color: colors.card,
