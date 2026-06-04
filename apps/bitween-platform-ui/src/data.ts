@@ -154,7 +154,7 @@ const moduleDefinitions = {
     rows: [
       { id: "travel-1", target: "travel", tone: "attention" },
       { id: "travel-2", target: "travel", tone: "neutral" },
-      { id: "travel-3", target: "travel", tone: "ready" }
+      { id: "travel-3", target: "archive", tone: "ready" }
     ],
     primaryAction: { target: "travel" },
     secondaryAction: { target: "workflow" }
@@ -168,7 +168,7 @@ const moduleDefinitions = {
     ],
     rows: [
       { id: "wf-1", target: "workflow", tone: "attention" },
-      { id: "wf-2", target: "workflow", tone: "neutral" }
+      { id: "wf-2", target: "archive", tone: "neutral" }
     ],
     primaryAction: { target: "workflow" },
     secondaryAction: { target: "archive" }
@@ -182,7 +182,7 @@ const moduleDefinitions = {
     ],
     rows: [
       { id: "ar-1", target: "archive", tone: "ready" },
-      { id: "ar-2", target: "archive", tone: "attention" }
+      { id: "ar-2", target: "attendance", tone: "attention" }
     ],
     primaryAction: { target: "archive" },
     secondaryAction: { target: "payroll" }
@@ -195,8 +195,8 @@ const moduleDefinitions = {
       { id: "policy", tone: "neutral" }
     ],
     rows: [
-      { id: "ai-1", target: "ai", tone: "ready" },
-      { id: "ai-2", target: "ai", tone: "attention" }
+      { id: "ai-1", target: "payroll", tone: "ready" },
+      { id: "ai-2", target: "workflow", tone: "attention" }
     ],
     primaryAction: { target: "ai" },
     secondaryAction: { target: "settings" }
@@ -225,7 +225,7 @@ const moduleDefinitions = {
       { id: "notice", tone: "neutral" }
     ],
     rows: [
-      { id: "st-1", target: "settings", tone: "attention" },
+      { id: "st-1", target: "payroll", tone: "attention" },
       { id: "st-2", target: "settings", tone: "ready" }
     ],
     primaryAction: { target: "settings" },

@@ -53,6 +53,12 @@ const demoAccount = {
   userId: "admin"
 } as const;
 
+const demoCredentialCards = [
+  { id: "company", value: demoAccount.companyCode },
+  { id: "user", value: demoAccount.userId },
+  { id: "password", value: demoAccount.password }
+] as const;
+
 const heroStatusIds = ["roleMenu", "workflowStatus", "dataProtection"] as const;
 
 const attendanceLogDefinitions = [
@@ -106,6 +112,13 @@ const aiDraftDefinitions = [
   { id: "draft-question", tone: "attention" },
   { id: "draft-comment", tone: "neutral" }
 ] as const satisfies readonly ToneDefinition[];
+
+const settingsPreferenceDefinitions = [
+  { id: "density", target: "home", tone: "ready" },
+  { id: "notice", target: "workflow", tone: "neutral" },
+  { id: "security", target: "admin", tone: "attention" },
+  { id: "payroll", target: "payroll", tone: "attention" }
+] as const satisfies readonly TargetToneDefinition[];
 
 const tScreen = (locale: SupportedLocale, key: string, params?: Readonly<Record<string, string | number>>) =>
   t(locale, `screens.${key}`, params);
@@ -171,6 +184,22 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
           title={tScreen(locale, "login.form.title")}
           description={tScreen(locale, "login.form.description")}
         />
+        <View style={styles.loginCredentialPanel}>
+          <View style={styles.loginCredentialHeader}>
+            <Badge tone="neutral">{tScreen(locale, "login.demo.badge")}</Badge>
+            <Label size="sm" muted>{tScreen(locale, "login.demo.panel.helper")}</Label>
+          </View>
+          <View style={styles.loginCredentialGrid}>
+            {demoCredentialCards.map((item) => (
+              <View key={item.id} style={styles.loginCredentialItem}>
+                <Label size="sm" muted>{tScreen(locale, `login.demo.credentials.${item.id}.label`)}</Label>
+                <Label weight="bold">{item.value}</Label>
+                <Label size="sm" muted>{tScreen(locale, `login.demo.credentials.${item.id}.helper`)}</Label>
+              </View>
+            ))}
+          </View>
+          <Label size="sm" muted>{tScreen(locale, "login.demo.panel.disclaimer")}</Label>
+        </View>
         <View style={styles.languageGrid}>
           {languageOptions.map((option) => {
             const selected = option.locale === locale;
@@ -235,10 +264,6 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.loginActions}>
           <ActionButton onPress={handleLogin}>{tScreen(locale, canSubmit ? "login.actions.enterHome" : "login.actions.login")}</ActionButton>
           <ActionButton onPress={handleDemoLogin} variant="secondary">{tScreen(locale, "login.actions.demo")}</ActionButton>
-        </View>
-        <View style={styles.inlineNotice}>
-          <Badge tone="neutral">{tScreen(locale, "login.demo.badge")}</Badge>
-          <Label size="sm" muted>{tScreen(locale, "login.demo.summary", demoParams)}</Label>
         </View>
       </Card>
     </View>
@@ -450,7 +475,7 @@ function CalendarTodoPanel({
               <Badge tone={event.tone}>{event.timeLabel}</Badge>
               <View style={styles.plannerCopy}>
                 <Label weight="bold">{event.title}</Label>
-                <Label size="sm" muted>{event.dateLabel}</Label>
+                <Label size="sm" muted>{event.dateLabel} · {tScreen(locale, "workDetail.actions.openRelated")}</Label>
               </View>
             </Pressable>
           ))}
@@ -469,7 +494,7 @@ function CalendarTodoPanel({
               <Badge tone={todo.tone}>{todo.timeLabel}</Badge>
               <View style={styles.plannerCopy}>
                 <Label weight="bold">{todo.title}</Label>
-                <Label size="sm" muted>{todo.owner}</Label>
+                <Label size="sm" muted>{todo.owner} · {tScreen(locale, "workDetail.actions.openRelated")}</Label>
               </View>
             </Pressable>
           ))}
@@ -528,6 +553,11 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
   const selectRow = (row: ModuleRow) => {
     setSelectedRowId(row.id);
   };
+  const resetListFilters = () => {
+    setActiveFilter(defaultFilter);
+    setSearch("");
+    setSelectedRowId(dashboard.rows[0]?.id);
+  };
 
   return (
     <View style={styles.stack}>
@@ -570,6 +600,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
           </View>
         </Card>
       ) : null}
+      {active.id === "settings" ? <SettingsControlPanel locale={locale} onSelect={onSelect} /> : null}
 
       <Card>
         <SectionHeader
@@ -596,10 +627,15 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
           <Label weight="bold">{tScreen(locale, "module.list.count", { count: filteredRows.length })}</Label>
           <Label size="sm" muted>{search ? tScreen(locale, "module.list.filteredWithSearch", { filter: activeFilter, search }) : tScreen(locale, "module.list.filtered", { filter: activeFilter })}</Label>
         </View>
-        {dashboard.rows.length > 0 ? (
+        {dashboard.rows.length === 0 ? (
+          <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />
+        ) : filteredRows.length > 0 ? (
           <DataTable locale={locale} onRowPress={selectRow} rows={filteredRows} selectedRowId={selectedRow?.id} />
         ) : (
-          <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />
+          <View style={styles.filteredEmptyState}>
+            <EmptyState title={tScreen(locale, "module.filteredEmpty.title")} description={tScreen(locale, "module.filteredEmpty.description")} />
+            <ActionButton onPress={resetListFilters} variant="secondary">{tScreen(locale, "module.filteredEmpty.reset")}</ActionButton>
+          </View>
         )}
         {selectedRow ? <WorkDetailPanel locale={locale} row={selectedRow} onSelect={onSelect} /> : null}
       </Card>
@@ -795,6 +831,38 @@ function AiWorkspacePanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "on
             <ActionButton onPress={() => onSelect("archive")} variant="ghost">{tScreen(locale, "ai.preview.actions.archive")}</ActionButton>
           </View>
         </View>
+      </View>
+    </Card>
+  );
+}
+
+function SettingsControlPanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "onSelect">) {
+  return (
+    <Card>
+      <SectionHeader
+        title={tScreen(locale, "settingsControl.title")}
+        description={tScreen(locale, "settingsControl.description")}
+        action={<ActionButton onPress={() => onSelect("admin")} variant="secondary">{tScreen(locale, "settingsControl.action")}</ActionButton>}
+      />
+      <View style={styles.settingsGrid}>
+        {settingsPreferenceDefinitions.map((item) => (
+          <Pressable
+            accessibilityRole="button"
+            key={item.id}
+            onPress={() => onSelect(item.target)}
+            style={({ pressed }) => [styles.settingsPreferenceCard, { borderTopColor: toneColor(item.tone) }, pressed && styles.buttonPressed]}
+          >
+            <View style={styles.settingsPreferenceHead}>
+              <Label size="sm" muted>{tScreen(locale, `settingsControl.cards.${item.id}.label`)}</Label>
+              <Badge tone={item.tone}>{tScreen(locale, `settingsControl.cards.${item.id}.value`)}</Badge>
+            </View>
+            <Label size="sm">{tScreen(locale, `settingsControl.cards.${item.id}.detail`)}</Label>
+          </Pressable>
+        ))}
+      </View>
+      <View style={styles.settingsNotice}>
+        <Badge tone="neutral">{tScreen(locale, "settingsControl.notice.badge")}</Badge>
+        <Label size="sm" muted>{tScreen(locale, "settingsControl.notice.description")}</Label>
       </View>
     </Card>
   );
@@ -1213,6 +1281,10 @@ const styles = StyleSheet.create({
   formGroup: {
     gap: spacing.xs
   },
+  filteredEmptyState: {
+    alignItems: "flex-start",
+    gap: spacing.md
+  },
   heroCopy: {
     color: colors.card,
     fontSize: 15,
@@ -1334,6 +1406,40 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.md
+  },
+  settingsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  settingsNotice: {
+    alignItems: "center",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  settingsPreferenceCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 220,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  settingsPreferenceHead: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
   },
   plannerCopy: {
     flex: 1,
@@ -1502,6 +1608,35 @@ const styles = StyleSheet.create({
   loginCard: {
     flexBasis: 360,
     flexGrow: 1
+  },
+  loginCredentialGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  loginCredentialHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  loginCredentialItem: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexBasis: 120,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.sm
+  },
+  loginCredentialPanel: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.sm,
+    padding: spacing.md
   },
   searchGroup: {
     flexBasis: 240,
