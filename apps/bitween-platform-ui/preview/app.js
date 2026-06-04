@@ -177,25 +177,25 @@ const moduleDefs = {
   travel: {
     filters: ["all", "plan", "run", "diary", "result", "review"],
     metrics: [["plans", "neutral"], ["diary", "attention"], ["completed", "ready"]],
-    rows: [["travel-1", "attention", "travel", ["plan", "run", "diary"]], ["travel-2", "neutral", "travel", ["review", "result"]], ["travel-3", "ready", "travel", ["result"]]],
+    rows: [["travel-1", "attention", "travel", ["plan", "run", "diary"]], ["travel-2", "neutral", "travel", ["review", "result"]], ["travel-3", "ready", "archive", ["result"]]],
     secondaryTarget: "workflow"
   },
   workflow: {
     filters: ["all", "pending", "ongoing", "returned"],
     metrics: [["pending", "attention"], ["drafts", "neutral"], ["done", "ready"]],
-    rows: [["wf-1", "attention", "workflow", ["pending"]], ["wf-2", "neutral", "workflow", ["ongoing"]]],
+    rows: [["wf-1", "attention", "workflow", ["pending"]], ["wf-2", "neutral", "archive", ["ongoing"]]],
     secondaryTarget: "archive"
   },
   archive: {
     filters: ["all", "payroll", "contract", "report"],
     metrics: [["reports", "ready"], ["missing", "attention"], ["shared", "ready"]],
-    rows: [["ar-1", "ready", "archive", ["payroll", "report"]], ["ar-2", "attention", "archive", ["report"]]],
+    rows: [["ar-1", "ready", "archive", ["payroll", "report"]], ["ar-2", "attention", "attendance", ["report"]]],
     secondaryTarget: "payroll"
   },
   ai: {
     filters: ["all", "summary", "draft", "review"],
     metrics: [["prompts", "ready"], ["reviews", "attention"], ["policy", "neutral"]],
-    rows: [["ai-1", "ready", "ai", ["summary"]], ["ai-2", "attention", "ai", ["draft", "review"]]],
+    rows: [["ai-1", "ready", "payroll", ["summary"]], ["ai-2", "attention", "workflow", ["draft", "review"]]],
     secondaryTarget: "settings"
   },
   admin: {
@@ -207,7 +207,7 @@ const moduleDefs = {
   settings: {
     filters: ["all", "personal", "payroll", "notification"],
     metrics: [["profile", "ready"], ["payroll", "attention"], ["notice", "neutral"]],
-    rows: [["st-1", "attention", "settings", ["payroll"]], ["st-2", "ready", "settings", ["personal"]]],
+    rows: [["st-1", "attention", "payroll", ["payroll"]], ["st-2", "ready", "settings", ["personal"]]],
     secondaryTarget: "payroll"
   }
 };
