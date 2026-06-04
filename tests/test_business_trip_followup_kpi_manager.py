@@ -14,11 +14,13 @@ from core.session_service import UserSession, logout
 from core.workflow import service as wf_svc
 from core.workflow.constants import (
     DOC_TYPE_BUSINESS_TRIP_REQUEST,
+    DOC_TYPE_GENERAL,
     KPI_REFLECTION_BLOCKED,
     KPI_REFLECTION_READY,
     KPI_REFLECTION_REFLECTED,
     TASK_DELAYED,
     TRIP_STATUS_COMPLETED,
+    TRIP_STATUS_DIARY_DUE,
     TRIP_STATUS_IN_PROGRESS,
     TRIP_STATUS_OVERDUE,
 )
@@ -107,6 +109,28 @@ class BusinessTripFollowUpKpiManagerTests(unittest.TestCase):
         task = next(t for t in wf_svc.list_execution_tasks(self._tenant, session=sess) if t["trip_id"] == trip_id)
         return approved, trip_id, task
 
+    def _approve_trip_report(self, trip_id: str, source_document_id: str, *, session: UserSession) -> dict:
+        report = wf_svc.create_document(
+            self._tenant,
+            document_type=DOC_TYPE_GENERAL,
+            title="출장보고서",
+            summary="출장 결과",
+            payload={
+                "trip_id": trip_id,
+                "source_document_id": source_document_id,
+                "template_name": "출장보고서",
+                "business_trip_artifact": "trip_report",
+            },
+            session=session,
+        )
+        wf_svc.submit_document(
+            self._tenant,
+            report["id"],
+            [{"approver_id": session.user_id, "approver_role": "admin"}],
+            session=session,
+        )
+        return wf_svc.approve_document(self._tenant, report["id"], session=session)
+
     def test_follow_up_source_links_are_idempotent(self) -> None:
         sess = self._session("requester", role="admin")
         doc = self._create_trip_document(requester=sess, executor_id="executor")
@@ -167,6 +191,29 @@ class BusinessTripFollowUpKpiManagerTests(unittest.TestCase):
         self.assertEqual(len([t for t in manager_todos if t.get("source") == "business_trip_overdue"]), 1)
         self.assertEqual(manager_todos[0]["trip_id"], trip_id)
 
+    def test_overdue_evaluator_requires_authorized_tenant_manager(self) -> None:
+        admin = self._session("requester", role="admin")
+        self._approve_trip(requester=admin, executor_id="executor", period_end="2026-06-01")
+
+        with self.assertRaises(PermissionError):
+            wf_svc.evaluate_business_trip_overdues(
+                self._tenant,
+                session=self._session("executor", role="staff"),
+                today="2026-06-04",
+            )
+        with self.assertRaises(PermissionError):
+            wf_svc.evaluate_business_trip_overdues(
+                self._tenant,
+                session=UserSession(
+                    user_id="requester",
+                    tenant_id="other-tenant",
+                    username="requester",
+                    display_name="requester",
+                    role="admin",
+                ),
+                today="2026-06-04",
+            )
+
     def test_kpi_reflection_adapter_is_stateful_and_idempotent(self) -> None:
         admin = self._session("requester", role="admin")
         _doc, trip_id, task = self._approve_trip(requester=admin, executor_id="executor")
@@ -176,6 +223,11 @@ class BusinessTripFollowUpKpiManagerTests(unittest.TestCase):
             session=self._session("executor", role="staff"),
         )
         self.assertEqual(ready_task["status"], "completed")
+        diary_due = wf_svc.get_business_trip(self._tenant, trip_id, session=admin)
+        self.assertEqual(diary_due["status"], TRIP_STATUS_DIARY_DUE)
+        self.assertEqual(diary_due["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
+
+        self._approve_trip_report(trip_id, _doc["id"], session=admin)
 
         ready_rows = wf_svc.list_business_trip_kpi_reflections(
             self._tenant,

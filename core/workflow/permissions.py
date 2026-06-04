@@ -185,3 +185,80 @@ def can_view_business_trip_lifecycle(
         if (site_id and site_id in scoped_sites) or (dept_id and dept_id in scoped_departments):
             return True
     return False
+
+def can_manage_business_trip_lifecycle(
+    user: dict[str, Any] | UserSession, trip: dict[str, Any], *, tenant_id: str
+) -> bool:
+    """Write predicate for business-trip lifecycle transitions.
+
+    Read visibility is broader than mutation authority. Lifecycle changes are
+    restricted to admins/executives/finance plus direct requester/executor owners
+    within the tenant boundary.
+    """
+    if str(trip.get("tenant_id") or "").strip() != str(tenant_id or "").strip():
+        return False
+    uid = _user_id(user)
+    profile = get_user_profile(tenant_id, uid)
+    roles = _workflow_roles(user, profile)
+    if WF_ROLE_ADMIN in roles or WF_ROLE_EXECUTIVE in roles or WF_ROLE_FINANCE in roles:
+        return True
+    requester_id = str(trip.get("requester_id") or trip.get("traveler_user_id") or "")
+    executor_id = str(trip.get("executor_id") or "")
+    return uid in {requester_id, executor_id}
+
+
+def can_administer_business_trip_lifecycle(user: dict[str, Any] | UserSession, *, tenant_id: str) -> bool:
+    """Tenant-wide mutation authority for repair jobs and batch evaluators."""
+    uid = _user_id(user)
+    profile = get_user_profile(tenant_id, uid)
+    roles = _workflow_roles(user, profile)
+    return WF_ROLE_ADMIN in roles or WF_ROLE_EXECUTIVE in roles or WF_ROLE_FINANCE in roles
+
+
+def can_run_business_trip_overdue_evaluator(user: dict[str, Any] | UserSession, *, tenant_id: str) -> bool:
+    """Whether a user may invoke overdue evaluation side effects at all."""
+    uid = _user_id(user)
+    profile = get_user_profile(tenant_id, uid)
+    roles = _workflow_roles(user, profile)
+    return any(
+        role in roles
+        for role in (
+            WF_ROLE_ADMIN,
+            WF_ROLE_EXECUTIVE,
+            WF_ROLE_FINANCE,
+            WF_ROLE_SITE_MANAGER,
+            WF_ROLE_DEPT_MANAGER,
+            WF_ROLE_HR,
+        )
+    )
+
+
+def can_evaluate_business_trip_overdue(
+    user: dict[str, Any] | UserSession, trip: dict[str, Any], *, tenant_id: str
+) -> bool:
+    """Scoped authority for overdue evaluation side effects.
+
+    Direct travelers/executors can view their trips, but marking delayed tasks
+    and escalating to managers is an operational control reserved for tenant
+    admins/executives/finance or managers over the trip's site/department.
+    """
+    if str(trip.get("tenant_id") or "").strip() != str(tenant_id or "").strip():
+        return False
+    uid = _user_id(user)
+    profile = get_user_profile(tenant_id, uid)
+    roles = _workflow_roles(user, profile)
+    if WF_ROLE_ADMIN in roles or WF_ROLE_EXECUTIVE in roles or WF_ROLE_FINANCE in roles:
+        return True
+    if not profile:
+        return False
+    site_id = str(trip.get("site_id") or "")
+    dept_id = str(trip.get("department_id") or trip.get("org_unit_id") or "")
+    allowed_sites = {str(v) for v in (profile.get("site_ids") or [])}
+    allowed_departments = {str(v) for v in (profile.get("department_ids") or profile.get("org_unit_ids") or [])}
+    if site_id and site_id in allowed_sites and (WF_ROLE_SITE_MANAGER in roles or WF_ROLE_HR in roles):
+        return True
+    return bool(
+        dept_id
+        and dept_id in allowed_departments
+        and (WF_ROLE_DEPT_MANAGER in roles or WF_ROLE_SITE_MANAGER in roles or WF_ROLE_HR in roles)
+    )

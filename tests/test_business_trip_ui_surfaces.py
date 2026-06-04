@@ -14,7 +14,7 @@ from core.kpi import service as kpi_svc
 from core.module_store import load_module_db
 from core.session_service import UserSession, logout
 from core.workflow import service as wf_svc
-from core.workflow.constants import DOC_TYPE_BUSINESS_TRIP_REQUEST, KPI_REFLECTION_REFLECTED
+from core.workflow.constants import DOC_TYPE_BUSINESS_TRIP_REQUEST, DOC_TYPE_GENERAL, KPI_REFLECTION_REFLECTED
 from services import workspace_store as ws
 from ui.workflow_hub_panel import WorkflowHubPanel, format_business_trip_dashboard_lines
 from ui.workspace_labels import workspace_source_label
@@ -75,6 +75,29 @@ class BusinessTripUiSurfaceTests(unittest.TestCase):
         )
         return approved, trip_id, task
 
+    def _approve_trip_report(self, trip_id: str, source_document_id: str) -> dict:
+        sess = self._session("requester", role="admin")
+        report = wf_svc.create_document(
+            self._tenant,
+            document_type=DOC_TYPE_GENERAL,
+            title="출장보고서",
+            summary="출장 결과",
+            payload={
+                "trip_id": trip_id,
+                "source_document_id": source_document_id,
+                "template_name": "출장보고서",
+                "business_trip_artifact": "trip_report",
+            },
+            session=sess,
+        )
+        wf_svc.submit_document(
+            self._tenant,
+            report["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+        return wf_svc.approve_document(self._tenant, report["id"], session=sess)
+
     def test_workspace_source_labels_cover_workflow_trip_items(self) -> None:
         self.assertEqual(workspace_source_label({"source": "workflow"}), "전자결재")
         self.assertEqual(workspace_source_label({"source": "workflow_approval"}), "결재")
@@ -110,6 +133,11 @@ class BusinessTripUiSurfaceTests(unittest.TestCase):
 
     def test_workflow_hub_trip_dashboard_tk_smoke_renders_overdue_path(self) -> None:
         self._approve_trip(period_end="2026-06-01")
+        wf_svc.evaluate_business_trip_overdues(
+            self._tenant,
+            session=self._session("requester", role="admin"),
+            today="2026-06-04",
+        )
         try:
             root = tk.Tk()
         except tk.TclError as exc:
@@ -128,6 +156,7 @@ class BusinessTripUiSurfaceTests(unittest.TestCase):
     def test_kpi_hub_dashboard_counts_reflected_trip_results(self) -> None:
         approved, trip_id, task = self._approve_trip(period_end="2026-06-03")
         wf_svc.complete_execution_task(self._tenant, task["id"], session=self._session("executor", role="staff"))
+        self._approve_trip_report(trip_id, approved["id"])
         reflected = wf_svc.reflect_business_trip_kpi(self._tenant, trip_id, session=self._session("requester", "admin"))
         self.assertEqual(reflected["kpi_reflection_status"], KPI_REFLECTION_REFLECTED)
 

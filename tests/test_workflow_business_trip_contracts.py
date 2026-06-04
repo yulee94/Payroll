@@ -41,7 +41,9 @@ class BusinessTripLifecycleContractTests(unittest.TestCase):
         self.assertNotIn(c.KPI_REFLECTION_REFLECTED, c.TRIP_STATUSES)
 
         trip = default_business_trip_record("tenant-a", status=c.TRIP_STATUS_IN_PROGRESS)
-        completed = transition_trip_status(trip, c.TRIP_STATUS_COMPLETED)
+        self.assertFalse(can_transition_trip_status(c.TRIP_STATUS_IN_PROGRESS, c.TRIP_STATUS_COMPLETED))
+        diary_due = transition_trip_status(trip, c.TRIP_STATUS_DIARY_DUE)
+        completed = transition_trip_status(diary_due, c.TRIP_STATUS_COMPLETED)
 
         self.assertEqual(completed["status"], c.TRIP_STATUS_COMPLETED)
         self.assertEqual(completed["kpi_reflection_status"], c.KPI_REFLECTION_READY)

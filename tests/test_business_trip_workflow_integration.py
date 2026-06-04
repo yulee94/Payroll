@@ -16,6 +16,7 @@ from core.workflow.constants import (
     DOC_STATUS_IN_REVIEW,
     DOC_STATUS_REJECTED,
     DOC_TYPE_BUSINESS_TRIP_REQUEST,
+    DOC_TYPE_GENERAL,
     KPI_REFLECTION_BLOCKED,
     KPI_REFLECTION_NOT_APPLICABLE,
     KPI_REFLECTION_READY,
@@ -23,6 +24,7 @@ from core.workflow.constants import (
     TRIP_STATUS_APPROVED,
     TRIP_STATUS_CANCELLED,
     TRIP_STATUS_COMPLETED,
+    TRIP_STATUS_DIARY_DUE,
     TRIP_STATUS_DRAFT,
     TRIP_STATUS_PLANNED,
 )
@@ -65,6 +67,29 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
             session=sess,
         )
 
+    def _approve_trip_report(self, trip_id: str, source_document_id: str, *, session: UserSession) -> dict:
+        report = wf_svc.create_document(
+            self._tenant,
+            document_type=DOC_TYPE_GENERAL,
+            title="출장보고서",
+            summary="출장 결과 보고",
+            payload={
+                "trip_id": trip_id,
+                "source_document_id": source_document_id,
+                "template_name": "출장보고서",
+                "business_trip_artifact": "trip_report",
+                "report_body": "업무 결과",
+            },
+            session=session,
+        )
+        wf_svc.submit_document(
+            self._tenant,
+            report["id"],
+            [{"approver_id": session.user_id, "approver_role": "admin"}],
+            session=session,
+        )
+        return wf_svc.approve_document(self._tenant, report["id"], session=session)
+
     def test_submit_approve_and_task_completion_keep_status_domains_separate(self) -> None:
         sess = self._session()
         doc = self._create_business_trip_document(session=sess)
@@ -95,15 +120,22 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         self.assertEqual(tasks[0]["trip_id"], trip_id)
 
         completed_task = wf_svc.complete_execution_task(self._tenant, tasks[0]["id"], session=sess)
-        completed_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+        diary_due_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
         self.assertEqual(completed_task["status"], TASK_COMPLETED)
-        self.assertEqual(completed_trip["status"], TRIP_STATUS_COMPLETED)
-        self.assertEqual(completed_trip["kpi_reflection_status"], KPI_REFLECTION_READY)
-        self.assertNotEqual(completed_trip["status"], completed_trip["kpi_reflection_status"])
+        self.assertEqual(diary_due_trip["status"], TRIP_STATUS_DIARY_DUE)
+        self.assertEqual(diary_due_trip["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
+        self.assertNotEqual(diary_due_trip["status"], diary_due_trip["kpi_reflection_status"])
 
         audit_count = len(_load_raw(self._tenant)["audit_logs"])
         wf_svc.complete_execution_task(self._tenant, tasks[0]["id"], session=sess)
         self.assertEqual(len(_load_raw(self._tenant)["audit_logs"]), audit_count)
+
+        report = self._approve_trip_report(trip_id, doc["id"], session=sess)
+        completed_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+        self.assertEqual(report["status"], DOC_STATUS_APPROVED)
+        self.assertEqual(completed_trip["status"], TRIP_STATUS_COMPLETED)
+        self.assertEqual(completed_trip["kpi_reflection_status"], KPI_REFLECTION_READY)
+        self.assertEqual(completed_trip["report_document_id"], report["id"])
 
     def test_reject_and_cancel_paths_update_lifecycle_without_duplicate_rows(self) -> None:
         sess = self._session()
@@ -163,6 +195,30 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         self.assertEqual(trips[0]["title"], "부산 출장 수정")
         self.assertNotIn("trip_id", updated_audit["after_json"].get("content_json") or {})
 
+    def test_trip_dedupe_key_links_multiple_documents_to_one_lifecycle(self) -> None:
+        sess = self._session()
+        first = wf_svc.create_document(
+            self._tenant,
+            document_type=DOC_TYPE_BUSINESS_TRIP_REQUEST,
+            title="외부 출장 1",
+            summary="중복 키 테스트",
+            payload={"recommended_executor_id": sess.user_id, "trip_dedupe_key": "external-trip-42"},
+            session=sess,
+        )
+        second = wf_svc.create_document(
+            self._tenant,
+            document_type=DOC_TYPE_BUSINESS_TRIP_REQUEST,
+            title="외부 출장 2",
+            summary="중복 키 테스트",
+            payload={"recommended_executor_id": sess.user_id, "trip_dedupe_key": "external-trip-42"},
+            session=sess,
+        )
+        trips = wf_svc.list_business_trips(self._tenant, session=sess)
+
+        self.assertEqual(len(trips), 1)
+        self.assertEqual(first["content_json"]["trip_id"], second["content_json"]["trip_id"])
+        self.assertEqual(trips[0]["dedupe_key"], "business-trip:external-trip-42")
+
     def test_direct_upsert_uses_service_tenant_over_payload_tenant(self) -> None:
         sess = self._session()
         trip = wf_svc.upsert_business_trip_lifecycle(
@@ -215,6 +271,23 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         self.assertEqual([row["trip_id"] for row in visible], [trip_id])
         with self.assertRaises(PermissionError):
             wf_svc.transition_business_trip_lifecycle(self._tenant, trip_id, TRIP_STATUS_PLANNED, session=viewer)
+
+    def test_direct_completion_transition_requires_report_link(self) -> None:
+        sess = self._session()
+        doc = self._create_business_trip_document(session=sess)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=sess)
+        task = wf_svc.list_execution_tasks(self._tenant, session=sess)[0]
+        wf_svc.complete_execution_task(self._tenant, task["id"], session=sess)
+
+        with self.assertRaises(ValueError):
+            wf_svc.transition_business_trip_lifecycle(self._tenant, trip_id, TRIP_STATUS_COMPLETED, session=sess)
 
 
 if __name__ == "__main__":

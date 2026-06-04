@@ -66,12 +66,9 @@ def _load_raw(tenant_id: str) -> dict[str, Any]:
             empty = _empty_db()
             for key in empty:
                 data.setdefault(key, deepcopy(empty[key]) if isinstance(empty[key], list) else empty[key])
-            try:
-                from core.workflow.business_trip import migrate_business_trips
+            from core.workflow.business_trip import migrate_business_trips
 
-                migrate_business_trips(data, tenant_id)
-            except Exception:
-                pass
+            migrate_business_trips(data, tenant_id)
             if data != original:
                 _save_raw(tenant_id, data)
             return data

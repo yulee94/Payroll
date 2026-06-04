@@ -82,10 +82,17 @@ def _is_business_trip_document(doc: dict[str, Any]) -> bool:
 
 def _business_trip_source_for_document(doc: dict[str, Any]) -> dict[str, str]:
     document_id = str(doc.get("id") or "").strip()
+    payload = doc.get("content_json") if isinstance(doc.get("content_json"), dict) else {}
+    explicit_dedupe = str(payload.get("trip_dedupe_key") or "").strip()
+    dedupe_key = ""
+    if explicit_dedupe:
+        dedupe_key = explicit_dedupe if explicit_dedupe.startswith("business-trip:") else f"business-trip:{explicit_dedupe}"
+    elif document_id:
+        dedupe_key = f"business-trip:{document_id}"
     return {
         "kind": TRIP_SOURCE_KIND_WORKFLOW,
         "document_id": document_id,
-        "dedupe_key": f"business-trip:{document_id}" if document_id else "",
+        "dedupe_key": dedupe_key,
     }
 
 
@@ -124,6 +131,81 @@ def _link_document_to_trip(doc: dict[str, Any], trip: dict[str, Any]) -> None:
     payload["trip_id"] = trip.get("trip_id") or trip.get("id") or ""
     payload["business_trip_source"] = deepcopy(trip.get("source") or _business_trip_source_for_document(doc))
     doc["updated_at"] = _now_iso()
+
+
+def _trip_artifact_kind_from_document(doc: dict[str, Any]) -> str:
+    """Classify non-request documents that are explicitly linked to a trip."""
+    if _is_business_trip_document(doc):
+        return ""
+    payload = doc.get("content_json") if isinstance(doc.get("content_json"), dict) else {}
+    if not str(payload.get("trip_id") or "").strip():
+        return ""
+    raw = " ".join(
+        str(v or "")
+        for v in (
+            payload.get("business_trip_artifact"),
+            payload.get("artifact_type"),
+            payload.get("template_name"),
+            payload.get("template_id"),
+            doc.get("title"),
+            doc.get("summary"),
+        )
+    ).lower()
+    if "출장보고" in raw or "trip_report" in raw or str(payload.get("source_document_id") or "").strip():
+        return "report"
+    if "업무일지" in raw or "diary" in raw or "daily" in raw:
+        return "diary"
+    return ""
+
+
+def _sync_business_trip_artifact_for_document(
+    db: dict[str, Any],
+    tenant_id: str,
+    doc: dict[str, Any],
+    *,
+    actor_id: str,
+    audit_action: str,
+    complete_report: bool = False,
+) -> dict[str, Any] | None:
+    """Link diary/report documents to an existing lifecycle and gate completion."""
+    artifact_kind = _trip_artifact_kind_from_document(doc)
+    if not artifact_kind:
+        return None
+    payload = doc.get("content_json") if isinstance(doc.get("content_json"), dict) else {}
+    trip_id = str(payload.get("trip_id") or "").strip()
+    trip = _business_trip_by_id(db, trip_id)
+    if not trip:
+        raise LookupError("연계 출장 lifecycle을 찾을 수 없습니다.")
+    if str(trip.get("tenant_id") or "").strip() != str(tenant_id or "").strip():
+        raise PermissionError("다른 테넌트의 출장 lifecycle에는 연결할 수 없습니다.")
+
+    from core.workflow.business_trip import transition_trip_status
+
+    before = deepcopy(trip)
+    if artifact_kind == "diary":
+        trip["diary_document_id"] = str(doc.get("id") or "")
+    elif artifact_kind == "report":
+        trip["report_document_id"] = str(doc.get("id") or "")
+        if complete_report:
+            if trip.get("status") == TRIP_STATUS_APPROVED:
+                trip.update(transition_trip_status(trip, TRIP_STATUS_IN_PROGRESS))
+            if trip.get("status") == TRIP_STATUS_IN_PROGRESS:
+                trip.update(transition_trip_status(trip, TRIP_STATUS_DIARY_DUE))
+            if trip.get("status") in (TRIP_STATUS_DIARY_DUE, TRIP_STATUS_OVERDUE):
+                trip.update(transition_trip_status(trip, TRIP_STATUS_COMPLETED))
+    trip["updated_at"] = _now_iso()
+    if trip == before:
+        return trip
+    append_audit(
+        db,
+        actor_id=actor_id,
+        action=audit_action,
+        entity_type="BusinessTripLifecycle",
+        entity_id=str(trip.get("trip_id") or trip_id),
+        before=before,
+        after=trip,
+    )
+    return trip
 
 
 def _sync_business_trip_lifecycle_for_document(
@@ -243,7 +325,7 @@ def _complete_business_trip_lifecycle_for_task(
         if row.get("status") == TRIP_STATUS_APPROVED:
             updated = transition_trip_status(updated, TRIP_STATUS_IN_PROGRESS)
         if updated.get("status") == TRIP_STATUS_IN_PROGRESS:
-            updated = transition_trip_status(updated, TRIP_STATUS_COMPLETED)
+            updated = transition_trip_status(updated, TRIP_STATUS_DIARY_DUE)
         if updated == before:
             return
         row.clear()
@@ -251,7 +333,7 @@ def _complete_business_trip_lifecycle_for_task(
         append_audit(
             db,
             actor_id=actor_id,
-            action="business_trip_lifecycle_completed_from_task",
+            action="business_trip_lifecycle_diary_due_from_task",
             entity_type="BusinessTripLifecycle",
             entity_id=str(row.get("trip_id") or trip_id),
             before=before,
@@ -525,6 +607,13 @@ def create_document(
             actor_id=_uid(sess),
             audit_action="business_trip_lifecycle_created_from_document",
         )
+        _sync_business_trip_artifact_for_document(
+            db,
+            wf_tid,
+            doc,
+            actor_id=_uid(sess),
+            audit_action="business_trip_artifact_linked_from_document",
+        )
         return doc
 
     doc = with_db(wf_tid)(mut)
@@ -582,6 +671,13 @@ def update_document(
                 target_status="",
                 actor_id=_uid(sess),
                 audit_action="business_trip_lifecycle_updated_from_document",
+            )
+            _sync_business_trip_artifact_for_document(
+                db,
+                tenant_id,
+                d,
+                actor_id=_uid(sess),
+                audit_action="business_trip_artifact_linked_from_update",
             )
             return
         raise LookupError("문서를 찾을 수 없습니다.")
@@ -695,6 +791,13 @@ def submit_document(
             actor_id=_uid(sess),
             audit_action="business_trip_lifecycle_planned_from_submit",
         )
+        _sync_business_trip_artifact_for_document(
+            db,
+            tenant_id,
+            doc,
+            actor_id=_uid(sess),
+            audit_action="business_trip_artifact_linked_from_submit",
+        )
 
     with_db(tenant_id)(mut)
     doc = get_document(tenant_id, document_id, session=sess)
@@ -771,6 +874,14 @@ def approve_document(
                 sync_approval_complete_follow_up(doc, session=sess, executor_id=executor_id or "")
             except Exception:
                 pass
+            _sync_business_trip_artifact_for_document(
+                db,
+                tenant_id,
+                doc,
+                actor_id=_uid(sess),
+                audit_action="business_trip_artifact_completed_from_approval",
+                complete_report=True,
+            )
         doc["updated_at"] = _now_iso()
         append_audit(db, actor_id=_uid(sess), action="document_approved", entity_type="WorkflowDocument", entity_id=document_id)
 
@@ -1186,6 +1297,10 @@ def transition_business_trip_lifecycle(
     """Advance a business-trip lifecycle through the frozen state machine."""
     tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    if _resolve_tenant(sess.tenant_id) != tenant_id:
+        raise PermissionError("출장 lifecycle을 변경할 권한이 없습니다.")
+    if not wf_perm.can_administer_business_trip_lifecycle(sess, tenant_id=tenant_id):
+        raise PermissionError("출장 lifecycle을 변경할 권한이 없습니다.")
 
     def mut(db: dict[str, Any]) -> dict[str, Any]:
         from core.workflow.business_trip import transition_trip_status
@@ -1193,8 +1308,8 @@ def transition_business_trip_lifecycle(
         for row in db.get("business_trips") or []:
             if row.get("trip_id") != trip_id and row.get("id") != trip_id:
                 continue
-            if not wf_perm.can_manage_business_trip_lifecycle(sess, row, tenant_id=tenant_id):
-                raise PermissionError("출장 lifecycle을 변경할 권한이 없습니다.")
+            if status == TRIP_STATUS_COMPLETED and not str(row.get("report_document_id") or "").strip():
+                raise ValueError("출장보고서 연결 후 완료 전이가 가능합니다.")
             before = deepcopy(row)
             updated = transition_trip_status(row, status)
             if updated == before:
@@ -1226,6 +1341,10 @@ def evaluate_business_trip_overdues(
     """Mark overdue business-trip execution tasks and escalate once per task/user."""
     tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    if _resolve_tenant(sess.tenant_id) != tenant_id:
+        raise PermissionError("출장 지연 평가 권한이 없습니다.")
+    if not wf_perm.can_run_business_trip_overdue_evaluator(sess, tenant_id=tenant_id):
+        raise PermissionError("출장 지연 평가 권한이 없습니다.")
     as_of = _today_str(today)
 
     def mut(db: dict[str, Any]) -> dict[str, Any]:
@@ -1245,6 +1364,8 @@ def evaluate_business_trip_overdues(
                 continue
             trip = _business_trip_by_id(db, str(task.get("trip_id") or ""))
             if not trip:
+                continue
+            if not wf_perm.can_evaluate_business_trip_overdue(sess, trip, tenant_id=tenant_id):
                 continue
             if trip.get("status") in (TRIP_STATUS_COMPLETED, TRIP_STATUS_CANCELLED):
                 continue
@@ -1377,6 +1498,9 @@ def reflect_business_trip_kpi(
             raise ValueError("취소 또는 반려된 출장은 실적 반영 대상이 아닙니다.")
         if status == KPI_REFLECTION_BLOCKED:
             raise ValueError("출장 실행 완료 후 실적 반영이 가능합니다.")
+        source = row.get("source") if isinstance(row.get("source"), dict) else {}
+        if source.get("kind") == TRIP_SOURCE_KIND_WORKFLOW and not str(row.get("report_document_id") or "").strip():
+            raise ValueError("출장보고서 연결 후 실적 반영이 가능합니다.")
         kpi_record = kpi_svc.upsert_business_trip_reflection(tenant_id, row)
         if status != KPI_REFLECTION_REFLECTED:
             before = deepcopy(row)

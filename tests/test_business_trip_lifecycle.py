@@ -25,6 +25,7 @@ from core.workflow.constants import (
     KPI_REFLECTION_STATUSES,
     TRIP_STATUS_APPROVED,
     TRIP_STATUS_COMPLETED,
+    TRIP_STATUS_DIARY_DUE,
     TRIP_STATUS_DRAFT,
     TRIP_STATUS_IN_PROGRESS,
     TRIP_STATUS_PLANNED,
@@ -100,12 +101,21 @@ class BusinessTripLifecycleTests(unittest.TestCase):
         self.assertEqual(tuple(business_trip_view_model(migrated).keys()), TRIP_VIEW_MODEL_KEYS)
         self.assertEqual(TRIP_SOURCE_KEYS, ("kind", "document_id", "dedupe_key"))
 
+    def test_store_surfaces_business_trip_migration_failures(self) -> None:
+        _save_raw(self._tenant, {"business_trips": [{"trip_id": "bad"}]})
+
+        with patch("core.workflow.business_trip.migrate_business_trips", side_effect=RuntimeError("migration boom")):
+            with self.assertRaisesRegex(RuntimeError, "migration boom"):
+                _load_raw(self._tenant)
+
     def test_state_machine_allows_approved_path_only(self) -> None:
         self.assertTrue(can_transition_trip_status(TRIP_STATUS_DRAFT, TRIP_STATUS_PLANNED))
         self.assertFalse(can_transition_trip_status(TRIP_STATUS_DRAFT, TRIP_STATUS_COMPLETED))
         record = default_business_trip_record(self._tenant, trip_id="trip-1", status=TRIP_STATUS_APPROVED)
         in_progress = transition_trip_status(record, TRIP_STATUS_IN_PROGRESS)
-        completed = transition_trip_status(in_progress, TRIP_STATUS_COMPLETED)
+        self.assertFalse(can_transition_trip_status(TRIP_STATUS_IN_PROGRESS, TRIP_STATUS_COMPLETED))
+        diary_due = transition_trip_status(in_progress, TRIP_STATUS_DIARY_DUE)
+        completed = transition_trip_status(diary_due, TRIP_STATUS_COMPLETED)
         self.assertEqual(completed["status"], TRIP_STATUS_COMPLETED)
         self.assertEqual(completed["kpi_reflection_status"], KPI_REFLECTION_READY)
         with self.assertRaises(ValueError):

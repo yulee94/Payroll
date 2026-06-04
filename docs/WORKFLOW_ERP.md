@@ -37,9 +37,9 @@ REST API (`/api/workflow/...`)는 **서비스 함수**로 구현되어 있으며
 |------|-------------|------|
 | 출장계획 | `draft → planned` | `출장신청서` 작성·상신 시 lifecycle 1건 생성/갱신 |
 | 출장승인 | `approved` | 최종 승인 시 실행업무 자동 생성, 캘린더·To-Do source link 생성 |
-| 출장실행 | `in_progress / overdue` | 실행업무 완료 또는 지연 평가로 상태 전이, 지연 시 상급자 escalation |
-| 업무일지/보고 | `일일업무일지`, `출장보고서` | 양식함 필드에 `trip_id` 연결, 보고서는 필수 연결 |
-| 실적반영 | `blocked → ready → reflected` | 실행 완료 후 KPI 반영 가능, KPI 개인 실적 row로 idempotent 반영 |
+| 출장실행 | `in_progress / diary_due / overdue` | 실행업무 완료 시 업무일지/보고 단계로 전이, 지연 평가는 권한 있는 관리자 명령으로 escalation |
+| 업무일지/보고 | `일일업무일지`, `출장보고서` | 양식함 필드에 `trip_id` 연결, 출장보고서 승인 후 lifecycle 완료 |
+| 실적반영 | `blocked → ready → reflected` | 출장보고서까지 완료된 건만 KPI 반영 가능, KPI 개인 실적 row로 idempotent 반영 |
 
 관리자/상급자 조회는 `core/workflow/permissions.py`의 site/department/manager access matrix를 통과한
 출장만 표시합니다. Workflow Hub 보고 탭의 **출장 현황**은 진행/완료/지연 섹션과 KPI 반영 상태를 표시합니다.
