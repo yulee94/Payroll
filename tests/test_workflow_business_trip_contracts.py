@@ -64,8 +64,12 @@ class BusinessTripLifecycleContractTests(unittest.TestCase):
         self.assertEqual(migrated["id"], "legacy-1")
         self.assertEqual(migrated["trip_id"], "legacy-1")
         self.assertEqual(migrated["tenant_id"], "tenant-a")
+        self.assertEqual(migrated["origin_tenant_id"], "tenant-a")
         self.assertEqual(migrated["status"], c.TRIP_STATUS_DRAFT)
         self.assertEqual(migrated["kpi_reflection_status"], c.KPI_REFLECTION_BLOCKED)
+        self.assertIn("traveler_user_id", migrated)
+        self.assertIn("execution_task_id", migrated)
+        self.assertEqual(migrated["escalation_level"], 0)
         self.assertEqual(migrated["source"], {"kind": c.TRIP_SOURCE_KIND_MANUAL, "document_id": "DOC-7", "dedupe_key": "DOC-7"})
         self.assertEqual(migrated["dedupe_key"], "DOC-7")
         self.assertEqual(migrated["legacy_note"], "kept")
@@ -81,6 +85,7 @@ class BusinessTripLifecycleContractTests(unittest.TestCase):
         self.assertEqual(db["business_trip_seq"], 0)
         self.assertEqual(db["business_trips"][0]["trip_id"], "trip-1")
         self.assertEqual(db["business_trips"][0]["tenant_id"], "tenant-a")
+        self.assertEqual(db["business_trips"][0]["origin_tenant_id"], "tenant-a")
         self.assertEqual(db["business_trips"][0]["kpi_reflection_status"], c.KPI_REFLECTION_BLOCKED)
 
     def test_tenant_bound_visibility_matrix_basics(self) -> None:

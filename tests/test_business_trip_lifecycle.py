@@ -96,8 +96,12 @@ class BusinessTripLifecycleTests(unittest.TestCase):
         migrated = db["business_trips"][0]
         self.assertEqual(migrated["trip_id"], "legacy-id")
         self.assertEqual(migrated["tenant_id"], self._tenant)
+        self.assertEqual(migrated["origin_tenant_id"], self._tenant)
         self.assertEqual(migrated["status"], TRIP_STATUS_DRAFT)
         self.assertEqual(migrated["dedupe_key"], "doc-1")
+        self.assertIn("execution_task_id", migrated)
+        self.assertIn("overdue_at", migrated)
+        self.assertEqual(migrated["escalation_target_user_ids"], [])
         self.assertEqual(tuple(business_trip_view_model(migrated).keys()), TRIP_VIEW_MODEL_KEYS)
         self.assertEqual(TRIP_SOURCE_KEYS, ("kind", "document_id", "dedupe_key"))
 

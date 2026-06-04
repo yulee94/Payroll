@@ -33,18 +33,37 @@ from core.workflow.store import _new_id, _now_iso
 TRIP_VIEW_MODEL_KEYS: tuple[str, ...] = (
     "trip_id",
     "tenant_id",
+    "origin_tenant_id",
+    "legal_entity_id",
     "status",
     "kpi_reflection_status",
+    "kpi_record_id",
     "title",
     "requester_id",
+    "traveler_user_id",
+    "traveler_name",
     "executor_id",
     "site_id",
     "department_id",
+    "planned_start",
+    "planned_end",
     "period_start",
     "period_end",
+    "actual_start",
+    "actual_end",
+    "diary_due_at",
+    "completed_at",
+    "overdue_at",
+    "plan_document_id",
+    "attendance_request_id",
+    "execution_task_id",
     "approved_document_id",
     "diary_document_id",
     "report_document_id",
+    "escalation_level",
+    "last_escalated_at",
+    "escalation_target_user_ids",
+    "follow_up_source_keys",
     "source",
     "dedupe_key",
     "created_at",
@@ -85,31 +104,82 @@ def normalize_trip_source(source: dict[str, Any] | None) -> dict[str, str]:
     return {"kind": kind, "document_id": document_id, "dedupe_key": dedupe_key}
 
 
+def _string_list(value: Any) -> list[str]:
+    if isinstance(value, (list, tuple, set)):
+        return [str(v).strip() for v in value if str(v).strip()]
+    text = str(value or "").strip()
+    return [text] if text else []
+
+
+def _int_or_zero(value: Any) -> int:
+    try:
+        return max(0, int(value or 0))
+    except (TypeError, ValueError):
+        return 0
+
+
 def default_business_trip_record(default_tenant_id: str, **fields: Any) -> dict[str, Any]:
     source = normalize_trip_source(fields.get("source"))
     now = _now_iso()
     trip_id = str(fields.get("trip_id") or fields.get("id") or _new_id()).strip()
+    planned_start = str(fields.get("planned_start") or fields.get("period_start") or "").strip()
+    planned_end = str(fields.get("planned_end") or fields.get("period_end") or "").strip()
+    requester_id = str(fields.get("requester_id") or fields.get("traveler_user_id") or fields.get("traveler_id") or "").strip()
+    traveler_user_id = str(fields.get("traveler_user_id") or requester_id).strip()
     record = {
         "id": trip_id,
         "trip_id": trip_id,
         "tenant_id": str(fields.get("tenant_id") or default_tenant_id or "").strip(),
+        "origin_tenant_id": str(
+            fields.get("origin_tenant_id")
+            or fields.get("legal_tenant_id")
+            or fields.get("tenant_origin_id")
+            or fields.get("tenant_id")
+            or default_tenant_id
+            or ""
+        ).strip(),
+        "legal_entity_id": str(fields.get("legal_entity_id") or fields.get("entity_id") or "").strip(),
         "status": normalize_trip_status(fields.get("status")),
         "kpi_reflection_status": normalize_kpi_reflection_status(fields.get("kpi_reflection_status")),
+        "kpi_record_id": str(fields.get("kpi_record_id") or "").strip(),
         "title": str(fields.get("title") or "").strip(),
-        "requester_id": str(fields.get("requester_id") or "").strip(),
+        "requester_id": requester_id or traveler_user_id,
+        "traveler_user_id": traveler_user_id or requester_id,
+        "traveler_name": str(fields.get("traveler_name") or fields.get("requester_name") or "").strip(),
         "executor_id": str(fields.get("executor_id") or "").strip(),
         "site_id": str(fields.get("site_id") or "").strip(),
         "department_id": str(fields.get("department_id") or "").strip(),
-        "period_start": str(fields.get("period_start") or "").strip(),
-        "period_end": str(fields.get("period_end") or "").strip(),
+        "planned_start": planned_start,
+        "planned_end": planned_end,
+        "period_start": str(fields.get("period_start") or planned_start).strip(),
+        "period_end": str(fields.get("period_end") or planned_end).strip(),
+        "actual_start": str(fields.get("actual_start") or "").strip(),
+        "actual_end": str(fields.get("actual_end") or "").strip(),
+        "diary_due_at": str(fields.get("diary_due_at") or "").strip(),
+        "completed_at": str(fields.get("completed_at") or "").strip(),
+        "overdue_at": str(fields.get("overdue_at") or "").strip(),
+        "plan_document_id": str(fields.get("plan_document_id") or fields.get("approved_document_id") or "").strip(),
+        "attendance_request_id": str(fields.get("attendance_request_id") or "").strip(),
+        "execution_task_id": str(fields.get("execution_task_id") or "").strip(),
         "approved_document_id": str(fields.get("approved_document_id") or "").strip(),
         "diary_document_id": str(fields.get("diary_document_id") or "").strip(),
         "report_document_id": str(fields.get("report_document_id") or "").strip(),
+        "escalation_level": _int_or_zero(fields.get("escalation_level")),
+        "last_escalated_at": str(fields.get("last_escalated_at") or "").strip(),
+        "escalation_target_user_ids": _string_list(fields.get("escalation_target_user_ids")),
+        "follow_up_source_keys": _string_list(fields.get("follow_up_source_keys")),
         "source": source,
         "dedupe_key": str(fields.get("dedupe_key") or source.get("dedupe_key") or trip_id).strip(),
         "created_at": str(fields.get("created_at") or now),
         "updated_at": str(fields.get("updated_at") or now),
     }
+    if record["status"] == TRIP_STATUS_CANCELLED:
+        record["kpi_reflection_status"] = KPI_REFLECTION_NOT_APPLICABLE
+    elif record["status"] != TRIP_STATUS_COMPLETED and record["kpi_reflection_status"] in (
+        KPI_REFLECTION_READY,
+        KPI_REFLECTION_REFLECTED,
+    ):
+        record["kpi_reflection_status"] = KPI_REFLECTION_BLOCKED
     return record
 
 
@@ -153,7 +223,17 @@ def transition_trip_status(record: dict[str, Any], target: str) -> dict[str, Any
     updated = migrate_business_trip_record(str(record.get("tenant_id") or ""), record)
     updated["status"] = target
     updated["updated_at"] = _now_iso()
+    if target == TRIP_STATUS_IN_PROGRESS and not updated.get("actual_start"):
+        updated["actual_start"] = updated["updated_at"]
+    if target == TRIP_STATUS_DIARY_DUE:
+        updated["actual_start"] = updated.get("actual_start") or updated["updated_at"]
+        updated["actual_end"] = updated.get("actual_end") or updated["updated_at"]
+        updated["diary_due_at"] = updated.get("diary_due_at") or updated["updated_at"]
+    if target == TRIP_STATUS_OVERDUE:
+        updated["overdue_at"] = updated.get("overdue_at") or updated["updated_at"]
     if target == TRIP_STATUS_COMPLETED and updated.get("kpi_reflection_status") == KPI_REFLECTION_BLOCKED:
+        updated["actual_end"] = updated.get("actual_end") or updated["updated_at"]
+        updated["completed_at"] = updated.get("completed_at") or updated["updated_at"]
         updated["kpi_reflection_status"] = KPI_REFLECTION_READY
     if target in (TRIP_STATUS_CANCELLED,):
         updated["kpi_reflection_status"] = KPI_REFLECTION_NOT_APPLICABLE

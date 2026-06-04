@@ -50,6 +50,44 @@ def _user_id(user: dict[str, Any] | UserSession) -> str:
     return str(user.get("user_id") or user.get("id") or "")
 
 
+def _user_tenant_id(user: dict[str, Any] | UserSession) -> str:
+    if isinstance(user, UserSession):
+        return str(user.tenant_id or "").strip()
+    return str(user.get("tenant_id") or user.get("origin_tenant_id") or "").strip()
+
+
+def is_business_trip_legal_scope_allowed(
+    user: dict[str, Any] | UserSession,
+    trip: dict[str, Any],
+    *,
+    tenant_id: str,
+) -> bool:
+    """Separate legal-tenant authority from shared workflow-root storage.
+
+    Workflow documents may be stored in a group root tenant for cross-entity
+    approvals. Business-trip lifecycle rows remain legal-entity scoped:
+    sibling tenant admins do not inherit read/write authority simply because
+    they share the same workflow DB. The workflow root itself is treated as the
+    explicit group-HQ scope.
+    """
+    storage_tenant = str(tenant_id or "").strip()
+    row_storage_tenant = str(trip.get("tenant_id") or "").strip()
+    if row_storage_tenant and row_storage_tenant != storage_tenant:
+        return False
+    origin_tenant = str(
+        trip.get("origin_tenant_id")
+        or trip.get("legal_tenant_id")
+        or row_storage_tenant
+        or storage_tenant
+    ).strip()
+    user_tenant = _user_tenant_id(user)
+    if not user_tenant:
+        return True
+    if user_tenant == origin_tenant:
+        return True
+    return bool(storage_tenant and user_tenant == storage_tenant and storage_tenant != origin_tenant)
+
+
 def can_view_document(user: dict[str, Any] | UserSession, document: dict[str, Any], *, tenant_id: str) -> bool:
     uid = _user_id(user)
     profile = get_user_profile(tenant_id, uid)
@@ -149,7 +187,7 @@ def can_view_business_trip_lifecycle(
     inside the requested tenant boundary and through admin/executive/finance,
     direct ownership, or manager site/department scope.
     """
-    if str(trip.get("tenant_id") or "").strip() != str(tenant_id or "").strip():
+    if not is_business_trip_legal_scope_allowed(user, trip, tenant_id=tenant_id):
         return False
     uid = _user_id(user)
     profile = get_user_profile(tenant_id, uid)
@@ -195,7 +233,7 @@ def can_manage_business_trip_lifecycle(
     restricted to admins/executives/finance plus direct requester/executor owners
     within the tenant boundary.
     """
-    if str(trip.get("tenant_id") or "").strip() != str(tenant_id or "").strip():
+    if not is_business_trip_legal_scope_allowed(user, trip, tenant_id=tenant_id):
         return False
     uid = _user_id(user)
     profile = get_user_profile(tenant_id, uid)
@@ -242,7 +280,7 @@ def can_evaluate_business_trip_overdue(
     and escalating to managers is an operational control reserved for tenant
     admins/executives/finance or managers over the trip's site/department.
     """
-    if str(trip.get("tenant_id") or "").strip() != str(tenant_id or "").strip():
+    if not is_business_trip_legal_scope_allowed(user, trip, tenant_id=tenant_id):
         return False
     uid = _user_id(user)
     profile = get_user_profile(tenant_id, uid)

@@ -45,8 +45,16 @@ REST API (`/api/workflow/...`)는 **서비스 함수**로 구현되어 있으며
 출장만 표시합니다. Workflow Hub 보고 탭의 **출장 현황**은 진행/완료/지연 섹션과 KPI 반영 상태를 표시합니다.
 Workspace Hub는 workflow에서 생성된 캘린더/To-Do 항목에 `전자결재`, `결재`, `실행업무`, `출장 지연`
 라벨을 붙입니다. KPI Hub의 개인 KPI 카드에는 출장 실적 반영 건수가 표시됩니다.
-수기/보정 lifecycle API도 동일하게 완료된 실행업무와 승인된 출장보고서 없이는 `completed/ready/reflected`
-상태를 만들거나 실적반영할 수 없습니다.
+그룹 루트 DB에 여러 법인 workflow가 저장되더라도 출장 lifecycle은 `origin_tenant_id` / `legal_entity_id`로
+법인 권한을 다시 검증합니다. 따라서 같은 그룹의 형제 법인 관리자는 명시적 그룹 HQ 권한이 없는 한
+다른 법인의 출장 현황, 실행업무, 출장보고서 side effect, KPI 반영을 볼 수 없습니다.
+수기/보정 lifecycle API도 동일하게 실행업무 증빙 없이는 `diary_due/overdue`, 완료된 실행업무와 승인된
+동일 출장보고서 없이는 `completed/ready/reflected` 상태를 만들거나 실적반영할 수 없습니다.
+
+Lifecycle row에는 운영 감사와 상급자 view에 필요한 durable evidence도 함께 저장합니다.
+주요 필드: `traveler_user_id`, `traveler_name`, `plan_document_id`, `execution_task_id`,
+`planned_start/planned_end`, `actual_start/actual_end`, `diary_due_at`, `completed_at`, `overdue_at`,
+`kpi_record_id`, `escalation_level`, `last_escalated_at`, `escalation_target_user_ids`.
 
 ## 데이터 저장
 

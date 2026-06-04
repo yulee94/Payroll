@@ -188,6 +188,14 @@ class BusinessTripFollowUpKpiManagerTests(unittest.TestCase):
         self.assertEqual(second["delayed_tasks"], 0)
         self.assertEqual(delayed_task["status"], TASK_DELAYED)
         self.assertEqual(overdue_trip["status"], TRIP_STATUS_OVERDUE)
+        self.assertEqual(overdue_trip["execution_task_id"], task["id"])
+        self.assertTrue(overdue_trip["overdue_at"])
+        self.assertEqual(overdue_trip["escalation_level"], 1)
+        self.assertTrue(overdue_trip["last_escalated_at"])
+        self.assertEqual(
+            set(overdue_trip["escalation_target_user_ids"]),
+            {"requester", "executor", "requester-manager", "executor-manager", "site-manager", "dept-manager"},
+        )
         self.assertEqual(len({n["user_id"] for n in notifications}), 6)
         self.assertEqual(len(notifications), 6)
         self.assertEqual(len([t for t in manager_todos if t.get("source") == "business_trip_overdue"]), 1)
@@ -246,6 +254,7 @@ class BusinessTripFollowUpKpiManagerTests(unittest.TestCase):
         self.assertEqual(first["kpi_reflection_status"], KPI_REFLECTION_REFLECTED)
         self.assertEqual(second["kpi_record"]["id"], first["kpi_record"]["id"])
         self.assertEqual(reflected_trip["kpi_reflection_status"], KPI_REFLECTION_REFLECTED)
+        self.assertEqual(reflected_trip["kpi_record_id"], first["kpi_record"]["id"])
         self.assertEqual(len(reflected_records), 1)
 
     def test_manual_trip_cannot_reflect_kpi_without_report_and_execution_proof(self) -> None:
@@ -369,21 +378,19 @@ class BusinessTripFollowUpKpiManagerTests(unittest.TestCase):
 
     def test_manager_dashboard_filters_visible_trips_and_sections(self) -> None:
         admin = self._session("admin", role="admin")
-        visible_overdue = wf_svc.upsert_business_trip_lifecycle(
-            self._tenant,
-            fields={
-                "trip_id": "trip-visible-overdue",
-                "title": "현장 A 지연 출장",
-                "status": TRIP_STATUS_OVERDUE,
-                "kpi_reflection_status": KPI_REFLECTION_BLOCKED,
-                "requester_id": "requester-a",
-                "executor_id": "executor-a",
-                "site_id": "site-a",
-                "department_id": "dept-a",
-                "source": {"kind": "manual", "dedupe_key": "manual:visible-overdue"},
-            },
-            session=admin,
+        _visible_doc, visible_trip_id, visible_task = self._approve_trip(
+            requester=admin,
+            executor_id="executor-a",
+            site_id="site-a",
+            department_id="dept-a",
+            period_end="2026-06-01",
         )
+        wf_svc.evaluate_business_trip_overdues(self._tenant, session=admin, today="2026-06-04")
+        visible_overdue = wf_svc.get_business_trip(self._tenant, visible_trip_id, session=admin)
+        self.assertEqual(visible_overdue["status"], TRIP_STATUS_OVERDUE)
+        self.assertEqual(visible_overdue["execution_task_id"], visible_task["id"])
+        self.assertTrue(visible_overdue["overdue_at"])
+        self.assertEqual(visible_overdue["escalation_level"], 1)
         hidden_doc, hidden_trip_id, hidden_task = self._approve_trip(
             requester=admin,
             executor_id="executor-b",
@@ -420,7 +427,7 @@ class BusinessTripFollowUpKpiManagerTests(unittest.TestCase):
         visible_ids = {row["trip_id"] for row in dashboard["trips"]}
 
         self.assertEqual(visible_ids, {visible_overdue["trip_id"], "trip-visible-ongoing"})
-        self.assertEqual([row["trip_id"] for row in dashboard["sections"]["overdue"]], ["trip-visible-overdue"])
+        self.assertEqual([row["trip_id"] for row in dashboard["sections"]["overdue"]], [visible_overdue["trip_id"]])
         self.assertEqual([row["trip_id"] for row in dashboard["sections"]["ongoing"]], ["trip-visible-ongoing"])
         self.assertEqual(dashboard["counts"]["completed"], 0)
         self.assertEqual(dashboard["kpi_summary"][KPI_REFLECTION_BLOCKED], 2)

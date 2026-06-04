@@ -119,17 +119,27 @@ def _business_trip_fields_from_document(
     payload = doc.get("content_json") if isinstance(doc.get("content_json"), dict) else {}
     source = _business_trip_source_for_document(doc)
     title = str(doc.get("title") or payload.get("title") or "").strip()
+    requester_id = str(doc.get("requester_id") or payload.get("traveler_user_id") or payload.get("traveler_id") or "").strip()
+    planned_start = str(doc.get("period_start") or payload.get("period_start") or payload.get("planned_start") or "").strip()
+    planned_end = str(doc.get("period_end") or payload.get("period_end") or payload.get("planned_end") or "").strip()
     return {
         "trip_id": trip_id or str(payload.get("trip_id") or "").strip(),
         "tenant_id": tenant_id,
+        "origin_tenant_id": str(doc.get("origin_tenant_id") or tenant_id).strip(),
+        "legal_entity_id": str(doc.get("legal_entity_id") or payload.get("legal_entity_id") or "").strip(),
         "status": status or TRIP_STATUS_DRAFT,
         "title": title,
-        "requester_id": str(doc.get("requester_id") or payload.get("traveler_user_id") or "").strip(),
+        "requester_id": requester_id,
+        "traveler_user_id": str(payload.get("traveler_user_id") or payload.get("traveler_id") or requester_id).strip(),
+        "traveler_name": str(payload.get("traveler_name") or payload.get("traveler") or payload.get("requester_name") or "").strip(),
         "executor_id": str(payload.get("recommended_executor_id") or payload.get("executor_id") or "").strip(),
         "site_id": str(doc.get("site_id") or payload.get("site_id") or "").strip(),
         "department_id": str(doc.get("department_id") or payload.get("department_id") or "").strip(),
-        "period_start": str(doc.get("period_start") or payload.get("period_start") or "").strip(),
-        "period_end": str(doc.get("period_end") or payload.get("period_end") or "").strip(),
+        "planned_start": planned_start,
+        "planned_end": planned_end,
+        "period_start": planned_start,
+        "period_end": planned_end,
+        "plan_document_id": str(doc.get("id") or "").strip(),
         "approved_document_id": str(doc.get("id") or "").strip(),
         "source": source,
         "dedupe_key": source["dedupe_key"],
@@ -210,10 +220,23 @@ def _assert_business_trip_report_approval_allowed(
 
 def _business_trip_execution_task_is_completed(db: dict[str, Any], trip: dict[str, Any]) -> bool:
     trip_id = str(trip.get("trip_id") or trip.get("id") or "").strip()
-    if not trip_id:
+    execution_task_id = str(trip.get("execution_task_id") or "").strip()
+    if not trip_id and not execution_task_id:
         return False
     return any(
-        task.get("trip_id") == trip_id and task.get("status") == TASK_COMPLETED
+        (task.get("trip_id") == trip_id or (execution_task_id and task.get("id") == execution_task_id))
+        and task.get("status") == TASK_COMPLETED
+        for task in db.get("execution_tasks") or []
+    )
+
+
+def _business_trip_execution_task_exists(db: dict[str, Any], trip: dict[str, Any]) -> bool:
+    trip_id = str(trip.get("trip_id") or trip.get("id") or "").strip()
+    execution_task_id = str(trip.get("execution_task_id") or "").strip()
+    if not trip_id and not execution_task_id:
+        return False
+    return any(
+        task.get("trip_id") == trip_id or (execution_task_id and task.get("id") == execution_task_id)
         for task in db.get("execution_tasks") or []
     )
 
@@ -221,6 +244,11 @@ def _business_trip_execution_task_is_completed(db: dict[str, Any], trip: dict[st
 def _assert_business_trip_execution_task_completed(db: dict[str, Any], trip: dict[str, Any]) -> None:
     if not _business_trip_execution_task_is_completed(db, trip):
         raise ValueError("출장 실행업무 완료 후 출장보고서 승인 또는 완료 전이가 가능합니다.")
+
+
+def _assert_business_trip_execution_task_exists(db: dict[str, Any], trip: dict[str, Any]) -> None:
+    if not _business_trip_execution_task_exists(db, trip):
+        raise ValueError("출장 실행업무 생성 후 지연 상태 전이가 가능합니다.")
 
 
 def _business_trip_report_document_is_approved(db: dict[str, Any], trip: dict[str, Any]) -> bool:
@@ -244,13 +272,31 @@ def _assert_business_trip_completion_prerequisites(db: dict[str, Any], trip: dic
 
 
 def _assert_business_trip_terminal_fields_allowed(db: dict[str, Any], trip: dict[str, Any]) -> None:
-    if trip.get("status") == TRIP_STATUS_DIARY_DUE:
+    status = trip.get("status")
+    kpi_status = trip.get("kpi_reflection_status")
+    if status == TRIP_STATUS_DIARY_DUE:
         _assert_business_trip_execution_task_completed(db, trip)
-    if trip.get("status") == TRIP_STATUS_COMPLETED or trip.get("kpi_reflection_status") in (
+    if status == TRIP_STATUS_OVERDUE:
+        _assert_business_trip_execution_task_exists(db, trip)
+    if kpi_status in (KPI_REFLECTION_READY, KPI_REFLECTION_REFLECTED) and status != TRIP_STATUS_COMPLETED:
+        raise ValueError("출장 완료 상태에서만 실적 반영 대기/완료 상태가 가능합니다.")
+    if status == TRIP_STATUS_COMPLETED or kpi_status in (
         KPI_REFLECTION_READY,
         KPI_REFLECTION_REFLECTED,
     ):
         _assert_business_trip_completion_prerequisites(db, trip)
+
+
+def _normalize_business_trip_service_state(db: dict[str, Any], trip: dict[str, Any]) -> dict[str, Any]:
+    if (
+        trip.get("status") == TRIP_STATUS_COMPLETED
+        and (trip.get("kpi_reflection_status") or KPI_REFLECTION_BLOCKED) == KPI_REFLECTION_BLOCKED
+    ):
+        _assert_business_trip_completion_prerequisites(db, trip)
+        trip = dict(trip)
+        trip["kpi_reflection_status"] = KPI_REFLECTION_READY
+        trip["updated_at"] = _now_iso()
+    return trip
 
 
 def _assert_business_trip_artifact_link_allowed(
@@ -264,7 +310,7 @@ def _assert_business_trip_artifact_link_allowed(
         return
     requester_id = str(doc.get("requester_id") or "").strip()
     if requester_id and wf_perm.can_manage_business_trip_lifecycle(
-        {"user_id": requester_id},
+        {"user_id": requester_id, "tenant_id": str(doc.get("origin_tenant_id") or tenant_id)},
         trip,
         tenant_id=tenant_id,
     ):
@@ -447,6 +493,11 @@ def _complete_business_trip_lifecycle_for_task(
             updated = transition_trip_status(updated, TRIP_STATUS_IN_PROGRESS)
         if updated.get("status") == TRIP_STATUS_IN_PROGRESS:
             updated = transition_trip_status(updated, TRIP_STATUS_DIARY_DUE)
+        completed_at = str(task.get("completed_at") or _now_iso())
+        updated["execution_task_id"] = str(task.get("id") or updated.get("execution_task_id") or "")
+        updated["actual_start"] = updated.get("actual_start") or completed_at
+        updated["actual_end"] = updated.get("actual_end") or completed_at
+        updated["diary_due_at"] = updated.get("diary_due_at") or completed_at
         if updated == before:
             return
         row.clear()
@@ -475,6 +526,22 @@ def _business_trip_by_id(db: dict[str, Any], trip_id: str) -> dict[str, Any] | N
         ),
         None,
     )
+
+
+def _origin_scoped_trip_for_task(db: dict[str, Any], task: dict[str, Any], tenant_id: str) -> dict[str, Any]:
+    origin_tenant_id = str(task.get("origin_tenant_id") or "").strip()
+    trip = _business_trip_by_id(db, str(task.get("trip_id") or ""))
+    if trip:
+        origin_tenant_id = origin_tenant_id or str(trip.get("origin_tenant_id") or "").strip()
+    if not origin_tenant_id:
+        doc_id = str(task.get("document_id") or "").strip()
+        doc = next((d for d in db.get("documents") or [] if d.get("id") == doc_id), None)
+        if doc:
+            origin_tenant_id = str(doc.get("origin_tenant_id") or "").strip()
+    return {
+        "tenant_id": tenant_id,
+        "origin_tenant_id": origin_tenant_id or tenant_id,
+    }
 
 
 def _today_str(value: str | date | None = None) -> str:
@@ -516,6 +583,13 @@ def _add_notification_once(
         related_task_id=related_task_id,
     )
     return True
+
+
+def _nonnegative_int(value: Any) -> int:
+    try:
+        return max(0, int(value or 0))
+    except (TypeError, ValueError):
+        return 0
 
 
 def _business_trip_escalation_user_ids(db: dict[str, Any], trip: dict[str, Any], task: dict[str, Any]) -> list[str]:
@@ -1180,6 +1254,7 @@ def _spawn_execution_tasks(db: dict[str, Any], doc: dict[str, Any], *, actor_id:
         "id": _new_id(),
         "document_id": doc_id,
         "trip_id": trip_id,
+        "origin_tenant_id": str(doc.get("origin_tenant_id") or "").strip(),
         "title": f"실행: {doc.get('title', '')}",
         "description": doc.get("summary", ""),
         "executor_id": executor_id or doc.get("requester_id", ""),
@@ -1194,6 +1269,21 @@ def _spawn_execution_tasks(db: dict[str, Any], doc: dict[str, Any], *, actor_id:
         "updated_at": _now_iso(),
     }
     db.setdefault("execution_tasks", []).append(task)
+    if trip_id:
+        trip = _business_trip_by_id(db, trip_id)
+        if trip and not trip.get("execution_task_id"):
+            before_trip = deepcopy(trip)
+            trip["execution_task_id"] = str(task.get("id") or "")
+            trip["updated_at"] = _now_iso()
+            append_audit(
+                db,
+                actor_id=actor_id,
+                action="business_trip_execution_task_linked",
+                entity_type="BusinessTripLifecycle",
+                entity_id=str(trip.get("trip_id") or trip_id),
+                before=before_trip,
+                after=trip,
+            )
     add_notification(
         db,
         user_id=task["executor_id"],
@@ -1218,7 +1308,15 @@ def list_execution_tasks(
     sess = session or require_session()
     _assert_session_tenant(sess, tenant_id, "실행업무를 조회할 권한이 없습니다.")
     db = _load_raw(tenant_id)
-    tasks = list(db.get("execution_tasks") or [])
+    tasks = [
+        t
+        for t in (db.get("execution_tasks") or [])
+        if wf_perm.is_business_trip_legal_scope_allowed(
+            sess,
+            _origin_scoped_trip_for_task(db, t, tenant_id),
+            tenant_id=tenant_id,
+        )
+    ]
     profile = get_user_profile(tenant_id, _uid(sess))
     roles = wf_perm._workflow_roles(sess, profile)  # noqa: SLF001
     if mine_only or not (WF_ROLE_ADMIN in roles or WF_ROLE_EXECUTIVE in roles or WF_ROLE_FINANCE in roles):
@@ -1243,6 +1341,12 @@ def complete_execution_task(
         for t in db.get("execution_tasks") or []:
             if t.get("id") != task_id:
                 continue
+            if not wf_perm.is_business_trip_legal_scope_allowed(
+                sess,
+                _origin_scoped_trip_for_task(db, t, tenant_id),
+                tenant_id=tenant_id,
+            ):
+                raise PermissionError("실행업무를 완료할 권한이 없습니다.")
             if not wf_perm.can_manage_execution_task(sess, t, tenant_id=tenant_id):
                 raise PermissionError("실행업무를 완료할 권한이 없습니다.")
             if t.get("status") == TASK_COMPLETED:
@@ -1402,6 +1506,7 @@ def upsert_business_trip_lifecycle(
 
         payload = dict(fields or {})
         payload["tenant_id"] = tenant_id
+        payload.setdefault("origin_tenant_id", sess.tenant_id)
         payload.setdefault("requester_id", _uid(sess))
         existing = find_business_trip_by_source(db, source=payload.get("source") or {})
         rows = db.setdefault("business_trips", [])
@@ -1409,6 +1514,7 @@ def upsert_business_trip_lifecycle(
             existing = next((row for row in rows if row.get("trip_id") == payload.get("trip_id")), None)
         if existing is None:
             record = default_business_trip_record(tenant_id, **payload)
+            record = _normalize_business_trip_service_state(db, record)
             if not wf_perm.can_manage_business_trip_lifecycle(sess, record, tenant_id=tenant_id):
                 raise PermissionError("출장 lifecycle을 생성할 권한이 없습니다.")
             _assert_business_trip_terminal_fields_allowed(db, record)
@@ -1426,6 +1532,7 @@ def upsert_business_trip_lifecycle(
             raise PermissionError("출장 lifecycle을 변경할 권한이 없습니다.")
         before = deepcopy(existing)
         updated = migrate_business_trip_record(tenant_id, {**existing, **payload})
+        updated = _normalize_business_trip_service_state(db, updated)
         _assert_business_trip_terminal_fields_allowed(db, updated)
         existing.clear()
         existing.update(updated)
@@ -1466,8 +1573,12 @@ def transition_business_trip_lifecycle(
         for row in db.get("business_trips") or []:
             if row.get("trip_id") != trip_id and row.get("id") != trip_id:
                 continue
+            if not wf_perm.can_manage_business_trip_lifecycle(sess, row, tenant_id=tenant_id):
+                raise PermissionError("출장 lifecycle을 변경할 권한이 없습니다.")
             if target_status in (TRIP_STATUS_DIARY_DUE, TRIP_STATUS_COMPLETED):
                 _assert_business_trip_execution_task_completed(db, row)
+            if target_status == TRIP_STATUS_OVERDUE:
+                _assert_business_trip_execution_task_exists(db, row)
             if target_status == TRIP_STATUS_COMPLETED and not _business_trip_report_document_is_approved(db, row):
                 raise ValueError("승인된 출장보고서 연결 후 완료 전이가 가능합니다.")
             before = deepcopy(row)
@@ -1529,6 +1640,7 @@ def evaluate_business_trip_overdues(
                 continue
             if trip.get("status") in (TRIP_STATUS_COMPLETED, TRIP_STATUS_CANCELLED):
                 continue
+            escalation_user_ids = _business_trip_escalation_user_ids(db, trip, task)
             before_task = deepcopy(task)
             task["status"] = TASK_DELAYED
             task["delayed_at"] = _now_iso()
@@ -1547,6 +1659,12 @@ def evaluate_business_trip_overdues(
 
             before_trip = deepcopy(trip)
             updated_trip = _overdue_trip_update(trip)
+            updated_trip["execution_task_id"] = str(task.get("id") or updated_trip.get("execution_task_id") or "")
+            updated_trip["diary_due_at"] = updated_trip.get("diary_due_at") or due
+            updated_trip["overdue_at"] = updated_trip.get("overdue_at") or _now_iso()
+            updated_trip["escalation_level"] = max(_nonnegative_int(updated_trip.get("escalation_level")), 1)
+            updated_trip["last_escalated_at"] = _now_iso()
+            updated_trip["escalation_target_user_ids"] = escalation_user_ids
             if updated_trip != before_trip:
                 trip.clear()
                 trip.update(updated_trip)
@@ -1566,7 +1684,7 @@ def evaluate_business_trip_overdues(
 
             title = f"출장 지연 확인: {trip.get('title') or task.get('title') or ''}".strip()
             message = f"기한 {due}까지 완료되지 않은 출장 실행업무입니다."
-            for uid in _business_trip_escalation_user_ids(db, trip, task):
+            for uid in escalation_user_ids:
                 if _add_notification_once(
                     db,
                     user_id=uid,
@@ -1621,6 +1739,7 @@ def list_business_trip_kpi_reflections(
                 "title": row.get("title", ""),
                 "status": row.get("status", ""),
                 "kpi_reflection_status": kpi_status,
+                "kpi_record_id": row.get("kpi_record_id", ""),
                 "blocking_reason": blocking_reason,
                 "ready": kpi_status == KPI_REFLECTION_READY,
                 "reflected": kpi_status == KPI_REFLECTION_REFLECTED,
@@ -1664,6 +1783,7 @@ def reflect_business_trip_kpi(
         if status != KPI_REFLECTION_REFLECTED:
             before = deepcopy(row)
             row["kpi_reflection_status"] = KPI_REFLECTION_REFLECTED
+            row["kpi_record_id"] = str(kpi_record.get("id") or "")
             row["kpi_reflected_at"] = _now_iso()
             row["updated_at"] = _now_iso()
             append_audit(

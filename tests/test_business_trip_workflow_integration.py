@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from core.group_store import create_group
 from core.session_service import UserSession, logout
 from core.workflow import service as wf_svc
 from core.workflow.constants import (
@@ -28,6 +29,7 @@ from core.workflow.constants import (
     TRIP_STATUS_DIARY_DUE,
     TRIP_STATUS_DRAFT,
     TRIP_STATUS_IN_PROGRESS,
+    TRIP_STATUS_OVERDUE,
     TRIP_STATUS_PLANNED,
 )
 from core.workflow.store import _load_raw, _save_raw
@@ -38,9 +40,15 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         self._tmpdir = tempfile.mkdtemp()
         self._tenant = "trip_workflow_integration"
         self._patch_root = patch("core.workflow.store.WORKFLOW_ROOT", Path(self._tmpdir) / "workflow")
+        self._patch_group_file = patch("core.group_store.GROUPS_FILE", Path(self._tmpdir) / "groups" / "registry.json")
+        self._patch_config_root = patch("core.workflow.config_store.CONFIG_ROOT", Path(self._tmpdir) / "groups")
         self._patch_root.start()
+        self._patch_group_file.start()
+        self._patch_config_root.start()
 
     def tearDown(self) -> None:
+        self._patch_config_root.stop()
+        self._patch_group_file.stop()
         self._patch_root.stop()
         logout()
         shutil.rmtree(self._tmpdir, ignore_errors=True)
@@ -138,6 +146,16 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         self.assertEqual(completed_trip["status"], TRIP_STATUS_COMPLETED)
         self.assertEqual(completed_trip["kpi_reflection_status"], KPI_REFLECTION_READY)
         self.assertEqual(completed_trip["report_document_id"], report["id"])
+        self.assertEqual(completed_trip["origin_tenant_id"], self._tenant)
+        self.assertEqual(completed_trip["traveler_user_id"], sess.user_id)
+        self.assertEqual(completed_trip["plan_document_id"], doc["id"])
+        self.assertEqual(completed_trip["execution_task_id"], tasks[0]["id"])
+        self.assertEqual(completed_trip["planned_start"], "2026-06-10")
+        self.assertEqual(completed_trip["planned_end"], "2026-06-12")
+        self.assertTrue(completed_trip["actual_start"])
+        self.assertTrue(completed_trip["actual_end"])
+        self.assertTrue(completed_trip["diary_due_at"])
+        self.assertTrue(completed_trip["completed_at"])
 
     def test_report_approval_cannot_complete_trip_before_execution_task(self) -> None:
         sess = self._session()
@@ -364,6 +382,57 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         ready_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=owner)
         self.assertEqual(ready_trip["kpi_reflection_status"], KPI_REFLECTION_READY)
 
+    def test_same_group_sibling_admin_cannot_read_or_mutate_origin_tenant_trip(self) -> None:
+        create_group(
+            name="Trip Workflow Group",
+            root_tenant_id=self._tenant,
+            tenant_ids=(self._tenant, "sibling-tenant"),
+            group_id="trip-workflow-group",
+        )
+        owner = self._session("owner", role="admin")
+        doc = self._create_business_trip_document(session=owner)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": owner.user_id, "approver_role": "admin"}],
+            session=owner,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=owner)
+        task = wf_svc.list_execution_tasks(self._tenant, session=owner)[0]
+        wf_svc.complete_execution_task(self._tenant, task["id"], session=owner)
+        self._approve_trip_report(trip_id, doc["id"], session=owner)
+        sibling_admin = UserSession(
+            user_id="sibling-admin",
+            tenant_id="sibling-tenant",
+            username="sibling-admin",
+            display_name="sibling-admin",
+            role="admin",
+        )
+
+        self.assertEqual(wf_svc.list_business_trips(self._tenant, session=sibling_admin), [])
+        self.assertEqual(wf_svc.business_trip_manager_dashboard(self._tenant, session=sibling_admin)["counts"]["total"], 0)
+        self.assertEqual(wf_svc.list_execution_tasks(self._tenant, session=sibling_admin), [])
+        with self.assertRaises(PermissionError):
+            wf_svc.get_business_trip(self._tenant, trip_id, session=sibling_admin)
+        with self.assertRaises(PermissionError):
+            wf_svc.reflect_business_trip_kpi(self._tenant, trip_id, session=sibling_admin)
+
+        with self.assertRaises(PermissionError):
+            wf_svc.create_document(
+                self._tenant,
+                document_type=DOC_TYPE_GENERAL,
+                title="출장보고서",
+                summary="형제 법인 관리자 보고",
+                payload={
+                    "trip_id": trip_id,
+                    "source_document_id": doc["id"],
+                    "template_name": "출장보고서",
+                    "business_trip_artifact": "trip_report",
+                },
+                session=sibling_admin,
+            )
+
     def test_cross_tenant_admin_cannot_mutate_trip_report_documents(self) -> None:
         owner = self._session("owner", role="admin")
         doc = self._create_business_trip_document(session=owner)
@@ -547,6 +616,59 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
                 },
                 session=sess,
             )
+
+    def test_direct_upsert_cannot_seed_overdue_or_kpi_ready_without_lifecycle_proof(self) -> None:
+        sess = self._session()
+        with self.assertRaises(ValueError):
+            wf_svc.upsert_business_trip_lifecycle(
+                self._tenant,
+                fields={
+                    "trip_id": "manual-overdue-without-task",
+                    "title": "실행업무 없는 지연 출장",
+                    "status": TRIP_STATUS_OVERDUE,
+                    "requester_id": sess.user_id,
+                    "executor_id": sess.user_id,
+                    "site_id": "site-a",
+                    "department_id": "dept-a",
+                    "source": {"kind": "manual", "dedupe_key": "manual:overdue-without-task"},
+                },
+                session=sess,
+            )
+        rejected = wf_svc.upsert_business_trip_lifecycle(
+            self._tenant,
+            fields={
+                "trip_id": "manual-ready-non-completed",
+                "title": "완료 전 실적대기 오염 입력",
+                "status": TRIP_STATUS_IN_PROGRESS,
+                "kpi_reflection_status": KPI_REFLECTION_READY,
+                "requester_id": sess.user_id,
+                "executor_id": sess.user_id,
+                "site_id": "site-a",
+                "department_id": "dept-a",
+                "source": {"kind": "manual", "dedupe_key": "manual:ready-non-completed"},
+            },
+            session=sess,
+        )
+        self.assertEqual(rejected["status"], TRIP_STATUS_IN_PROGRESS)
+        self.assertEqual(rejected["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
+
+    def test_admin_repair_cannot_transition_to_overdue_without_execution_task(self) -> None:
+        sess = self._session()
+        doc = self._create_business_trip_document(session=sess)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=sess)
+        db = _load_raw(self._tenant)
+        db["execution_tasks"] = []
+        _save_raw(self._tenant, db)
+
+        with self.assertRaises(ValueError):
+            wf_svc.transition_business_trip_lifecycle(self._tenant, trip_id, TRIP_STATUS_OVERDUE, session=sess)
 
     def test_cross_tenant_session_cannot_complete_execution_task(self) -> None:
         owner = self._session("owner", role="admin")
