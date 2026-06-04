@@ -13,27 +13,39 @@ import {
   SectionHeader
 } from "./components";
 import {
-  calendarEvents,
-  moduleDashboards,
-  payrollIntegrationRows,
-  navigationItems,
-  payrollSettingsRows,
-  payrollSteps,
-  platformMetrics,
-  previewRows,
-  readinessCards,
-  todayTodos,
-  workQueue
+  getCalendarEvents,
+  getModuleDashboards,
+  getNavigationItems,
+  getPayrollIntegrationRows,
+  getPayrollSettingsRows,
+  getPayrollSteps,
+  getPlatformMetrics,
+  getPreviewRows,
+  getReadinessCards,
+  getTodayTodos,
+  getWorkQueue
 } from "./data";
+import { getLanguageOptions, t, type SupportedLocale } from "./i18n";
 import { colors, radius, spacing, toneColor } from "./theme";
-import type { CalendarEvent, ModuleRow, NavigationItem, PayrollStep, PlatformId, ReadinessCard, TodoItem, WorkQueueItem } from "./types";
+import type { CalendarEvent, ModuleRow, NavigationItem, PayrollStep, PlatformId, ReadinessCard, ReadinessTone, TodoItem, WorkQueueItem } from "./types";
 
 type ScreenProps = {
   readonly active: NavigationItem;
+  readonly locale: SupportedLocale;
   readonly onSelect: (id: PlatformId) => void;
 };
 
-type ModuleId = keyof typeof moduleDashboards;
+type LoginScreenProps = Pick<ScreenProps, "locale" | "onSelect"> & {
+  readonly onLocaleChange: (locale: SupportedLocale) => void;
+};
+
+type LocalizedScreenProps = ScreenProps & {
+  readonly onLocaleChange: (locale: SupportedLocale) => void;
+};
+
+type ModuleId = Exclude<PlatformId, "home" | "payroll">;
+type ToneDefinition = { readonly id: string; readonly tone: ReadinessTone };
+type TargetToneDefinition = ToneDefinition & { readonly target: PlatformId };
 
 const demoAccount = {
   companyCode: "0000",
@@ -41,80 +53,79 @@ const demoAccount = {
   userId: "admin"
 } as const;
 
-const languageOptions = [
-  { code: "ko", label: "한국어", status: "현재 적용" },
-  { code: "en", label: "English", status: "준비" },
-  { code: "zh", label: "中文", status: "준비" }
-] as const;
+const heroStatusIds = ["roleMenu", "workflowStatus", "dataProtection"] as const;
 
-type LanguageCode = (typeof languageOptions)[number]["code"];
+const attendanceLogDefinitions = [
+  { id: "att-log-1", time: "09:02", tone: "ready" },
+  { id: "att-log-2", time: "13:40", tone: "attention" },
+  { id: "att-log-3", time: "--:--", tone: "neutral" }
+] as const satisfies readonly (ToneDefinition & { readonly time: string })[];
 
-const attendanceLogs = [
-  { id: "att-log-1", label: "출근", place: "본사", time: "09:02", tone: "ready" },
-  { id: "att-log-2", label: "외근", place: "고객사", time: "13:40", tone: "attention" },
-  { id: "att-log-3", label: "퇴근", place: "대기", time: "--:--", tone: "neutral" }
-] as const;
+const travelWorkflowStageDefinitions = [
+  { id: "travel-plan", tone: "neutral" },
+  { id: "travel-run", tone: "attention" },
+  { id: "travel-diary", tone: "attention" },
+  { id: "travel-result", tone: "neutral" },
+  { id: "travel-review", tone: "ready" }
+] as const satisfies readonly ToneDefinition[];
 
-const travelWorkflowStages = [
-  { id: "travel-plan", label: "출장계획", detail: "출장신청서와 일정 목적을 먼저 정리합니다.", status: "작성/승인", tone: "neutral" },
-  { id: "travel-run", label: "출장실행", detail: "현장 방문, 이동, 고객 미팅 상태를 표시합니다.", status: "진행 중", tone: "attention" },
-  { id: "travel-diary", label: "업무일지", detail: "출장 중 처리한 업무와 후속 조치를 기록합니다.", status: "오늘 작성", tone: "attention" },
-  { id: "travel-result", label: "실적반영", detail: "계약, 매출, 고객 대응 결과를 성과에 연결합니다.", status: "검토 대기", tone: "neutral" },
-  { id: "travel-review", label: "상급자 view", detail: "on-going과 Completed 상태를 관리자가 나눠 확인합니다.", status: "view 준비", tone: "ready" }
-] as const;
+const adminPermissionDefinitions = [
+  { id: "role-owner", tone: "ready" },
+  { id: "role-manager", tone: "neutral" },
+  { id: "role-employee", tone: "attention" }
+] as const satisfies readonly ToneDefinition[];
 
-const adminPermissionRows = [
-  { id: "role-owner", role: "Branch 관리자", payroll: "전체", executive: "요청 승인", archive: "전체", tone: "ready" },
-  { id: "role-manager", role: "경영진", payroll: "열람", executive: "열람", archive: "경영 자료", tone: "neutral" },
-  { id: "role-employee", role: "일반 사원", payroll: "본인 자료", executive: "차단", archive: "공유 자료", tone: "attention" }
-] as const;
+const payrollIntegrationCheckDefinitions = [
+  { id: "branch-docs", tone: "attention" },
+  { id: "edi", tone: "attention" },
+  { id: "mapping", tone: "neutral" },
+  { id: "policy", tone: "ready" }
+] as const satisfies readonly ToneDefinition[];
 
-const payrollIntegrationChecks = [
-  { id: "branch-docs", label: "법인/사업장 입력자료", value: "3곳", detail: "근태문서와 청구서 유형을 사업장별로 구분합니다.", tone: "attention" },
-  { id: "edi", label: "건강보험EDI", value: "확인 전", detail: "급여 작업 전 보험료 변동 확인이 필요한 상태입니다.", tone: "attention" },
-  { id: "mapping", label: "양식 매핑", value: "2종", detail: "근태문서/청구서 입력 양식 연결 예정입니다.", tone: "neutral" },
-  { id: "policy", label: "산출 진입", value: "대기", detail: "backend API 계약 후 실제 검증 흐름으로 전환합니다.", tone: "ready" }
-] as const;
+const archiveFolderDefinitions = [
+  { id: "folder-payroll", tone: "ready", target: "payroll" },
+  { id: "folder-attendance", tone: "attention", target: "attendance" },
+  { id: "folder-approval", tone: "neutral", target: "workflow" },
+  { id: "folder-travel", tone: "ready", target: "travel" }
+] as const satisfies readonly TargetToneDefinition[];
 
-const archiveFolders = [
-  { id: "folder-payroll", label: "급여 산출물", count: "12개", owner: "급여 담당", tone: "ready", target: "payroll" },
-  { id: "folder-attendance", label: "근태 원본", count: "4개", owner: "운영팀", tone: "attention", target: "attendance" },
-  { id: "folder-approval", label: "결재 첨부", count: "8개", owner: "승인권자", tone: "neutral", target: "workflow" },
-  { id: "folder-travel", label: "출장/업무일지", count: "7개", owner: "영업팀", tone: "ready", target: "travel" }
-] as const;
+const archiveDocumentDefinitions = [
+  { id: "doc-payroll", tone: "ready" },
+  { id: "doc-attendance", tone: "attention" },
+  { id: "doc-travel", tone: "neutral" }
+] as const satisfies readonly ToneDefinition[];
 
-const archiveDocuments = [
-  { id: "doc-payroll", title: "2026년 5월 급여 보고서", type: "Excel", owner: "급여 담당", status: "보관됨", tone: "ready" },
-  { id: "doc-attendance", title: "6월 1주차 근태 원본", type: "CSV", owner: "운영팀", status: "분류 대기", tone: "attention" },
-  { id: "doc-travel", title: "부산 출장 업무일지", type: "PDF", owner: "영업팀", status: "성과 연결", tone: "neutral" }
-] as const;
+const aiRecommendationDefinitions = [
+  { id: "ai-payroll-errors", tone: "ready", target: "payroll" },
+  { id: "ai-approval-comment", tone: "attention", target: "workflow" },
+  { id: "ai-archive-summary", tone: "neutral", target: "archive" }
+] as const satisfies readonly TargetToneDefinition[];
 
-const aiRecommendations = [
-  { id: "ai-payroll-errors", title: "급여 산출 오류 요약", source: "급여 준비 현황", status: "추천", tone: "ready", target: "payroll" },
-  { id: "ai-approval-comment", title: "결재 의견 초안", source: "전자결재 대기 문서", status: "검토 필요", tone: "attention", target: "workflow" },
-  { id: "ai-archive-summary", title: "자료함 문서 요약", source: "2026년 5월 급여 보고서", status: "미리보기", tone: "neutral", target: "archive" }
-] as const;
+const aiDraftDefinitions = [
+  { id: "draft-summary", tone: "ready" },
+  { id: "draft-question", tone: "attention" },
+  { id: "draft-comment", tone: "neutral" }
+] as const satisfies readonly ToneDefinition[];
 
-const aiDraftCards = [
-  { id: "draft-summary", label: "요약", title: "급여 기준 확인 요약", detail: "누락된 입력자료, EDI 확인 전 상태, 산출 전 검토 항목을 짧게 정리합니다.", tone: "ready" },
-  { id: "draft-question", label: "확인 질문", title: "관리자에게 물어볼 항목", detail: "경영진 급여 열람 권한과 Branch 하위계정 범위를 확인하도록 제안합니다.", tone: "attention" },
-  { id: "draft-comment", label: "초안", title: "결재 의견 문장", detail: "급여 지급 품의에 붙일 검토 의견 초안을 사람이 확인하기 전 상태로 표시합니다.", tone: "neutral" }
-] as const;
+const tScreen = (locale: SupportedLocale, key: string, params?: Readonly<Record<string, string | number>>) =>
+  t(locale, `screens.${key}`, params);
 
 function isModuleId(id: PlatformId): id is ModuleId {
   return id !== "home" && id !== "payroll";
 }
 
-export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
+export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenProps) {
   const [companyCode, setCompanyCode] = useState("");
-  const [feedback, setFeedback] = useState("");
+  const [feedbackKey, setFeedbackKey] = useState<string | undefined>();
   const [password, setPassword] = useState("");
   const [userId, setUserId] = useState("");
   const canSubmit = companyCode.trim().length > 0 && userId.trim().length > 0 && password.trim().length > 0;
+  const languageOptions = useMemo(() => getLanguageOptions(locale), [locale]);
+  const demoParams = demoAccount;
 
   const handleLogin = () => {
     if (!canSubmit) {
-      setFeedback("demo 계정은 법인코드 0000, 아이디 admin, 비밀번호 admin입니다.");
+      setFeedbackKey("login.feedback.missingDemo");
       return;
     }
     if (
@@ -122,10 +133,10 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
       userId.trim() !== demoAccount.userId ||
       password.trim() !== demoAccount.password
     ) {
-      setFeedback("demo 계정 정보가 일치하지 않습니다. 법인코드 0000, 아이디 admin, 비밀번호 admin으로 입력하세요.");
+      setFeedbackKey("login.feedback.invalidDemo");
       return;
     }
-    setFeedback("");
+    setFeedbackKey(undefined);
     onSelect("home");
   };
 
@@ -133,40 +144,56 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
     setCompanyCode(demoAccount.companyCode);
     setUserId(demoAccount.userId);
     setPassword(demoAccount.password);
-    setFeedback("");
+    setFeedbackKey(undefined);
     onSelect("home");
   };
 
   return (
     <View style={styles.loginLayout}>
       <View style={styles.loginHero}>
-        <Badge tone="ready">B2B operations</Badge>
+        <Badge tone="ready">{tScreen(locale, "login.hero.badge")}</Badge>
         <View style={styles.loginHeroCopy}>
           <Text style={styles.heroBrand}>Bitween</Text>
-          <Text style={styles.heroTitle}>로그인 후 권한에 맞는 업무 화면으로 이동합니다.</Text>
-          <Text style={styles.heroCopy}>급여, HR, 전자결재, 자료함, AI, 관리자 화면을 하나의 업무 플랫폼 경험으로 정리합니다.</Text>
+          <Text style={styles.heroTitle}>{tScreen(locale, "login.hero.title")}</Text>
+          <Text style={styles.heroCopy}>{tScreen(locale, "login.hero.copy")}</Text>
         </View>
         <View style={styles.heroStatusGrid}>
-          {["권한 기반 메뉴", "업무별 상태", "자료 보호"].map((item) => (
+          {heroStatusIds.map((item) => (
             <View key={item} style={styles.heroStatus}>
-              <Text style={styles.heroStatusText}>{item}</Text>
+              <Text style={styles.heroStatusText}>{tScreen(locale, `login.hero.status.${item}`)}</Text>
             </View>
           ))}
         </View>
       </View>
       <Card style={styles.loginCard}>
         <SectionHeader
-          eyebrow="Secure sign in"
-          title="로그인"
-          description="법인 계정으로 접속하면 권한에 맞는 업무 화면으로 이동합니다."
+          eyebrow={tScreen(locale, "login.form.eyebrow")}
+          title={tScreen(locale, "login.form.title")}
+          description={tScreen(locale, "login.form.description")}
         />
+        <View style={styles.languageGrid}>
+          {languageOptions.map((option) => {
+            const selected = option.locale === locale;
+            return (
+              <Pressable
+                accessibilityRole="button"
+                key={option.locale}
+                onPress={() => onLocaleChange(option.locale)}
+                style={({ pressed }) => [styles.languageOption, selected && styles.languageOptionSelected, pressed && styles.buttonPressed]}
+              >
+                <Label weight="bold">{option.label}</Label>
+                <Label size="sm" muted>{t(locale, selected ? "settings.i18n.status.selected" : "settings.i18n.status.available")}</Label>
+              </Pressable>
+            );
+          })}
+        </View>
         <View style={styles.formGroup}>
-          <Label size="sm" weight="bold">법인 코드</Label>
+          <Label size="sm" weight="bold">{tScreen(locale, "login.form.companyCode")}</Label>
           <TextInput
             autoCapitalize="characters"
             autoComplete="organization"
             onChangeText={setCompanyCode}
-            placeholder="0000"
+            placeholder={demoAccount.companyCode}
             placeholderTextColor={colors.muted}
             returnKeyType="next"
             style={styles.input}
@@ -174,12 +201,12 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
           />
         </View>
         <View style={styles.formGroup}>
-          <Label size="sm" weight="bold">아이디</Label>
+          <Label size="sm" weight="bold">{tScreen(locale, "login.form.userId")}</Label>
           <TextInput
             autoCapitalize="none"
             autoComplete="username"
             onChangeText={setUserId}
-            placeholder="admin"
+            placeholder={demoAccount.userId}
             placeholderTextColor={colors.muted}
             returnKeyType="next"
             style={styles.input}
@@ -187,11 +214,11 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
           />
         </View>
         <View style={styles.formGroup}>
-          <Label size="sm" weight="bold">비밀번호</Label>
+          <Label size="sm" weight="bold">{tScreen(locale, "login.form.password")}</Label>
           <TextInput
             autoComplete="password"
             onChangeText={setPassword}
-            placeholder="admin"
+            placeholder={demoAccount.password}
             placeholderTextColor={colors.muted}
             returnKeyType="done"
             secureTextEntry
@@ -199,45 +226,56 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
             value={password}
           />
         </View>
-        {feedback ? (
+        {feedbackKey ? (
           <View style={styles.inlineNotice}>
-            <Badge tone="attention">확인 필요</Badge>
-            <Label size="sm" muted>{feedback}</Label>
+            <Badge tone="attention">{tScreen(locale, "login.feedback.badge")}</Badge>
+            <Label size="sm" muted>{tScreen(locale, feedbackKey, demoParams)}</Label>
           </View>
         ) : null}
         <View style={styles.loginActions}>
-          <ActionButton onPress={handleLogin}>{canSubmit ? "플랫폼 홈으로 이동" : "로그인"}</ActionButton>
-          <ActionButton onPress={handleDemoLogin} variant="secondary">Demo 계정으로 접속</ActionButton>
+          <ActionButton onPress={handleLogin}>{tScreen(locale, canSubmit ? "login.actions.enterHome" : "login.actions.login")}</ActionButton>
+          <ActionButton onPress={handleDemoLogin} variant="secondary">{tScreen(locale, "login.actions.demo")}</ActionButton>
         </View>
         <View style={styles.inlineNotice}>
-          <Badge tone="neutral">Demo 계정</Badge>
-          <Label size="sm" muted>법인코드 0000 · 아이디 admin · 비밀번호 admin</Label>
+          <Badge tone="neutral">{tScreen(locale, "login.demo.badge")}</Badge>
+          <Label size="sm" muted>{tScreen(locale, "login.demo.summary", demoParams)}</Label>
         </View>
       </Card>
     </View>
   );
 }
 
-export function LauncherScreen({ onSelect }: ScreenProps) {
-  const launcherItems = useMemo(() => navigationItems.filter((item) => item.id !== "home"), []);
+export function LauncherScreen({ locale, onSelect }: ScreenProps) {
+  const navigationItems = useMemo(() => getNavigationItems(locale), [locale]);
+  const platformMetrics = useMemo(() => getPlatformMetrics(locale), [locale]);
+  const workQueue = useMemo(() => getWorkQueue(locale), [locale]);
+  const calendarEvents = useMemo(() => getCalendarEvents(locale), [locale]);
+  const todayTodos = useMemo(() => getTodayTodos(locale), [locale]);
+  const payrollSettingsRows = useMemo(() => getPayrollSettingsRows(locale), [locale]);
+  const previewRows = useMemo(() => getPreviewRows(locale), [locale]);
+  const launcherItems = useMemo(() => navigationItems.filter((item) => item.id !== "home"), [navigationItems]);
   const [selectedQueueId, setSelectedQueueId] = useState<string | undefined>(workQueue[0]?.id);
   const selectedQueue = workQueue.find((item) => item.id === selectedQueueId) ?? workQueue[0];
+
+  useEffect(() => {
+    setSelectedQueueId(workQueue[0]?.id);
+  }, [workQueue]);
 
   return (
     <View style={styles.stack}>
       <Card>
         <SectionHeader
-          title="오늘의 플랫폼 상태"
-          description="중요한 업무 상태를 먼저 보고 필요한 메뉴로 바로 이동합니다."
-          action={<ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 준비 확인</ActionButton>}
+          title={tScreen(locale, "launcher.platformStatus.title")}
+          description={tScreen(locale, "launcher.platformStatus.description")}
+          action={<ActionButton onPress={() => onSelect("payroll")} variant="secondary">{tScreen(locale, "launcher.platformStatus.action")}</ActionButton>}
         />
         <MetricGrid items={platformMetrics} />
       </Card>
 
-      <CalendarTodoPanel events={calendarEvents} todos={todayTodos} />
+      <CalendarTodoPanel events={calendarEvents} locale={locale} todos={todayTodos} />
 
       <Card>
-        <SectionHeader title="오늘의 업무" description="처리 우선순위가 높은 업무를 카드로 정리합니다." />
+        <SectionHeader title={tScreen(locale, "launcher.workQueue.title")} description={tScreen(locale, "launcher.workQueue.description")} />
         <View style={styles.queueGrid}>
           {workQueue.map((item) => (
             <Pressable
@@ -255,65 +293,72 @@ export function LauncherScreen({ onSelect }: ScreenProps) {
                 <Label size="sm" muted>{item.due}</Label>
               </View>
               <Label weight="bold">{item.title}</Label>
-              <Label size="sm" muted>{item.meta} · {item.owner}</Label>
+              <Label size="sm" muted>{tScreen(locale, "launcher.workQueue.metaOwner", { meta: item.meta, owner: item.owner })}</Label>
             </Pressable>
           ))}
         </View>
-        {selectedQueue ? <WorkQueueDetailPanel item={selectedQueue} onSelect={onSelect} /> : null}
+        {selectedQueue ? <WorkQueueDetailPanel item={selectedQueue} locale={locale} onSelect={onSelect} /> : null}
       </Card>
 
       <Card>
-        <SectionHeader title="플랫폼 바로가기" description="업무별 화면이 같은 구조로 이어지도록 정리했습니다." />
+        <SectionHeader title={tScreen(locale, "launcher.shortcuts.title")} description={tScreen(locale, "launcher.shortcuts.description")} />
         <View style={styles.launcherGrid}>
           {launcherItems.map((item) => (
             <View key={item.id} style={[styles.launcherCard, { borderTopColor: item.accent }]}>
               <Label size="sm" muted>{item.eyebrow}</Label>
               <Label weight="bold">{item.label}</Label>
               <Label size="sm" muted>{item.description}</Label>
-              <ActionButton onPress={() => onSelect(item.id)} variant="ghost">열기</ActionButton>
+              <ActionButton onPress={() => onSelect(item.id)} variant="ghost">{tScreen(locale, "actions.open")}</ActionButton>
             </View>
           ))}
         </View>
       </Card>
       <Card>
         <SectionHeader
-          eyebrow="Settings summary"
-          title="급여 산출 설정 요약"
-          description="산출 전 확인해야 할 핵심 급여 기준을 한눈에 검토합니다."
-          action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">상세 설정</ActionButton>}
+          eyebrow={tScreen(locale, "launcher.settingsSummary.eyebrow")}
+          title={tScreen(locale, "launcher.settingsSummary.title")}
+          description={tScreen(locale, "launcher.settingsSummary.description")}
+          action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">{tScreen(locale, "launcher.settingsSummary.action")}</ActionButton>}
         />
-        <DataTable rows={payrollSettingsRows} />
+        <DataTable locale={locale} rows={payrollSettingsRows} />
       </Card>
       <Card>
         <SectionHeader
-          eyebrow="Preview and archive"
-          title="파일 미리보기 작업"
-          description="Excel 미리보기, 시트 선택, 필터 초기화, 수정본 업로드 같은 사용자 흐름을 분리했습니다."
-          action={<ActionButton onPress={() => onSelect("archive")} variant="secondary">자료함 열기</ActionButton>}
+          eyebrow={tScreen(locale, "launcher.previewArchive.eyebrow")}
+          title={tScreen(locale, "launcher.previewArchive.title")}
+          description={tScreen(locale, "launcher.previewArchive.description")}
+          action={<ActionButton onPress={() => onSelect("archive")} variant="secondary">{tScreen(locale, "launcher.previewArchive.action")}</ActionButton>}
         />
-        <DataTable rows={previewRows} />
+        <DataTable locale={locale} rows={previewRows} />
       </Card>
     </View>
   );
 }
 
-export function PayrollScreen({ onSelect }: ScreenProps) {
+export function PayrollScreen({ locale, onSelect }: ScreenProps) {
+  const readinessCards = useMemo(() => getReadinessCards(locale), [locale]);
+  const payrollSteps = useMemo(() => getPayrollSteps(locale), [locale]);
   const [selectedReadinessId, setSelectedReadinessId] = useState<string | undefined>(readinessCards[0]?.id);
   const [selectedStepId, setSelectedStepId] = useState<string | undefined>(payrollSteps[0]?.id);
   const selectedReadiness = readinessCards.find((card) => card.id === selectedReadinessId) ?? readinessCards[0];
   const selectedStep = payrollSteps.find((step) => step.id === selectedStepId) ?? payrollSteps[0];
 
+  useEffect(() => {
+    setSelectedReadinessId(readinessCards[0]?.id);
+    setSelectedStepId(payrollSteps[0]?.id);
+  }, [payrollSteps, readinessCards]);
+
   return (
     <View style={styles.stack}>
-      <PayrollReadiness onSelect={onSelect} selectedId={selectedReadiness?.id} onSelectCard={(card) => setSelectedReadinessId(card.id)} />
-      {selectedReadiness ? <PayrollReadinessDetail card={selectedReadiness} /> : null}
-      <PayrollIntegrationPanel onSelect={onSelect} />
+      <PayrollReadiness cards={readinessCards} locale={locale} onSelect={onSelect} selectedId={selectedReadiness?.id} onSelectCard={(card) => setSelectedReadinessId(card.id)} />
+      {selectedReadiness ? <PayrollReadinessDetail card={selectedReadiness} locale={locale} /> : null}
+      <PayrollIntegrationPanel locale={locale} onSelect={onSelect} />
       <Card>
         <SectionHeader
-          eyebrow="Payroll flow"
-          title="급여 산출 작업 흐름"
-          description="운영 기준 확인부터 입력 자료 준비, 결과 검토, 자료함 저장까지 순서대로 진행합니다."
-          action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">급여 설정 확인</ActionButton>}
+          eyebrow={tScreen(locale, "payroll.flow.eyebrow")}
+          title={tScreen(locale, "payroll.flow.title")}
+          description={tScreen(locale, "payroll.flow.description")}
+          action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">{tScreen(locale, "payroll.flow.action")}</ActionButton>}
         />
         <View style={styles.stepGrid}>
           {payrollSteps.map((step, index) => (
@@ -335,52 +380,54 @@ export function PayrollScreen({ onSelect }: ScreenProps) {
             </Pressable>
           ))}
         </View>
-        {selectedStep ? <PayrollStepDetail step={selectedStep} /> : null}
+        {selectedStep ? <PayrollStepDetail locale={locale} step={selectedStep} /> : null}
         <View style={styles.actionRow}>
-          <ActionButton onPress={() => onSelect("payroll")}>산출 화면 유지</ActionButton>
-          <ActionButton onPress={() => onSelect("archive")} variant="secondary">월별 자료함</ActionButton>
-          <ActionButton onPress={() => onSelect("ai")} variant="ghost">AI 검토 준비</ActionButton>
+          <ActionButton onPress={() => onSelect("payroll")}>{tScreen(locale, "payroll.actions.keepPayroll")}</ActionButton>
+          <ActionButton onPress={() => onSelect("archive")} variant="secondary">{tScreen(locale, "payroll.actions.monthlyArchive")}</ActionButton>
+          <ActionButton onPress={() => onSelect("ai")} variant="ghost">{tScreen(locale, "payroll.actions.prepareAiReview")}</ActionButton>
         </View>
       </Card>
     </View>
   );
 }
 
-function PayrollIntegrationPanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
+function PayrollIntegrationPanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "onSelect">) {
+  const payrollIntegrationRows = useMemo(() => getPayrollIntegrationRows(locale), [locale]);
+
   return (
     <Card>
       <SectionHeader
-        title="급여 연동 준비 점검"
-        description="법인/사업장별 근태문서, 청구서, 건강보험EDI 확인 상태를 산출 전 화면에서 먼저 정리합니다."
-        action={<ActionButton onPress={() => onSelect("admin")} variant="secondary">Branch 권한 확인</ActionButton>}
+        title={tScreen(locale, "payroll.integration.title")}
+        description={tScreen(locale, "payroll.integration.description")}
+        action={<ActionButton onPress={() => onSelect("admin")} variant="secondary">{tScreen(locale, "payroll.integration.action")}</ActionButton>}
       />
       <View style={styles.integrationGrid}>
-        {payrollIntegrationChecks.map((item) => (
+        {payrollIntegrationCheckDefinitions.map((item) => (
           <View key={item.id} style={[styles.integrationCard, { borderTopColor: toneColor(item.tone) }]}>
-            <Label size="sm" muted>{item.label}</Label>
-            <Text style={[styles.integrationValue, { color: toneColor(item.tone) }]}>{item.value}</Text>
-            <Label size="sm">{item.detail}</Label>
+            <Label size="sm" muted>{tScreen(locale, `payroll.integrationChecks.${item.id}.label`)}</Label>
+            <Text style={[styles.integrationValue, { color: toneColor(item.tone) }]}>{tScreen(locale, `payroll.integrationChecks.${item.id}.value`)}</Text>
+            <Label size="sm">{tScreen(locale, `payroll.integrationChecks.${item.id}.detail`)}</Label>
           </View>
         ))}
       </View>
-      <DataTable rows={payrollIntegrationRows} />
+      <DataTable locale={locale} rows={payrollIntegrationRows} />
       <View style={styles.inlineNotice}>
-        <Badge tone="neutral">Frontend 준비</Badge>
-        <Label size="sm" muted>실제 건강보험EDI 조회, 보험료 공제금액 반영, 사업장별 입력 양식 검증은 backend/API 계약 후 연결합니다.</Label>
+        <Badge tone="neutral">{tScreen(locale, "payroll.integration.notice.badge")}</Badge>
+        <Label size="sm" muted>{tScreen(locale, "payroll.integration.notice.description")}</Label>
       </View>
     </Card>
   );
 }
 
-function CalendarTodoPanel({ events, todos }: { readonly events: readonly CalendarEvent[]; readonly todos: readonly TodoItem[] }) {
+function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonly CalendarEvent[]; readonly locale: SupportedLocale; readonly todos: readonly TodoItem[] }) {
   return (
     <View style={styles.homePlannerGrid}>
       <Card style={styles.homePlannerCard}>
-        <SectionHeader title="오늘 일정" description="2026년 6월 4일 기준 주요 일정을 확인합니다." />
+        <SectionHeader title={tScreen(locale, "calendar.title")} description={tScreen(locale, "calendar.description")} />
         <View style={styles.calendarDay}>
           <Text style={styles.calendarMonth}>2026.06</Text>
           <Text style={styles.calendarDate}>04</Text>
-          <Label size="sm" muted>목요일</Label>
+          <Label size="sm" muted>{tScreen(locale, "calendar.weekday")}</Label>
         </View>
         <View style={styles.plannerList}>
           {events.map((event) => (
@@ -395,7 +442,7 @@ function CalendarTodoPanel({ events, todos }: { readonly events: readonly Calend
         </View>
       </Card>
       <Card style={styles.homePlannerCard}>
-        <SectionHeader title="To-do list" description="오늘 업무는 계속 표시하고, 실행한 항목은 흐리게 표시합니다." />
+        <SectionHeader title={tScreen(locale, "todo.title")} description={tScreen(locale, "todo.description")} />
         <View style={styles.plannerList}>
           {todos.map((todo) => (
             <View key={todo.id} style={[styles.todoItem, todo.completed && styles.todoItemDone]}>
@@ -412,30 +459,32 @@ function CalendarTodoPanel({ events, todos }: { readonly events: readonly Calend
   );
 }
 
-export function ModuleScreen({ active, onSelect }: ScreenProps) {
+export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: LocalizedScreenProps) {
+  const moduleDashboards = useMemo(() => getModuleDashboards(locale), [locale]);
+
   if (!isModuleId(active.id)) {
     return (
       <Card>
-        <EmptyState title="화면을 준비하고 있습니다." description="선택한 메뉴는 전용 화면으로 이동됩니다." />
+        <EmptyState title={tScreen(locale, "module.unavailable.title")} description={tScreen(locale, "module.unavailable.description")} />
       </Card>
     );
   }
 
   const dashboard = moduleDashboards[active.id];
-  const defaultFilter = dashboard.filters[0] ?? "전체";
+  const defaultFilter = dashboard.filters[0] ?? tScreen(locale, "filters.all");
   const [activeFilter, setActiveFilter] = useState<string>(defaultFilter);
-  const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>("ko");
   const [search, setSearch] = useState("");
   const [selectedRowId, setSelectedRowId] = useState<string | undefined>(dashboard.rows[0]?.id);
+  const languageOptions = useMemo(() => getLanguageOptions(locale), [locale]);
   const filteredRows = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
     return dashboard.rows.filter((row) => {
       const haystack = [row.category, row.status, row.owner, row.nextStep].join(" ").toLowerCase();
-      const matchesFilter = activeFilter === "전체" || haystack.includes(activeFilter.toLowerCase());
+      const matchesFilter = activeFilter === defaultFilter || row.category.includes(activeFilter) || row.status.includes(activeFilter);
       const matchesSearch = normalizedSearch.length === 0 || haystack.includes(normalizedSearch);
       return matchesFilter && matchesSearch;
     });
-  }, [activeFilter, dashboard.rows, search]);
+  }, [activeFilter, dashboard.rows, defaultFilter, search]);
   const selectedRow = useMemo(
     () => filteredRows.find((row) => row.id === selectedRowId) ?? filteredRows[0],
     [filteredRows, selectedRowId]
@@ -475,48 +524,52 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
         <MetricGrid items={dashboard.metrics} />
       </Card>
 
-      {active.id === "attendance" ? <AttendancePhonePanel /> : null}
-      {active.id === "travel" ? <TravelWorklogPanel /> : null}
-      {active.id === "admin" ? <AdminAccountPanel /> : null}
-      {active.id === "archive" ? <ArchiveLibraryPanel onSelect={onSelect} /> : null}
-      {active.id === "ai" ? <AiWorkspacePanel onSelect={onSelect} /> : null}
+      {active.id === "attendance" ? <AttendancePhonePanel locale={locale} /> : null}
+      {active.id === "travel" ? <TravelWorklogPanel locale={locale} /> : null}
+      {active.id === "admin" ? <AdminAccountPanel locale={locale} /> : null}
+      {active.id === "archive" ? <ArchiveLibraryPanel locale={locale} onSelect={onSelect} /> : null}
+      {active.id === "ai" ? <AiWorkspacePanel locale={locale} onSelect={onSelect} /> : null}
 
       {active.id === "settings" ? (
         <Card>
-          <SectionHeader title="국제화 설정" description="한국어, 영어, 중국어 화면 전환을 준비합니다." />
+          <SectionHeader title={t(locale, "settings.i18n.title")} description={t(locale, "settings.i18n.description")} />
           <View style={styles.languageGrid}>
             {languageOptions.map((option) => {
-              const selected = option.code === selectedLanguage;
+              const selected = option.locale === locale;
               return (
                 <Pressable
                   accessibilityRole="button"
-                  key={option.code}
-                  onPress={() => setSelectedLanguage(option.code)}
+                  key={option.locale}
+                  onPress={() => onLocaleChange(option.locale)}
                   style={({ pressed }) => [styles.languageOption, selected && styles.languageOptionSelected, pressed && styles.buttonPressed]}
                 >
                   <Label weight="bold">{option.label}</Label>
-                  <Label size="sm" muted>{selected ? "선택됨" : option.status}</Label>
+                  <Label size="sm" muted>{t(locale, selected ? "settings.i18n.status.selected" : "settings.i18n.status.available")}</Label>
                 </Pressable>
               );
             })}
+          </View>
+          <View style={styles.inlineNotice}>
+            <Badge tone="neutral">{t(locale, "settings.i18n.catalogRule.title")}</Badge>
+            <Label size="sm" muted>{t(locale, "settings.i18n.catalogRule.description")}</Label>
           </View>
         </Card>
       ) : null}
 
       <Card>
         <SectionHeader
-          title="업무 목록"
-          description="필터로 상태를 좁히고 필요한 다음 작업을 확인합니다."
+          title={tScreen(locale, "module.list.title")}
+          description={tScreen(locale, "module.list.description")}
           action={<ActionButton onPress={() => onSelect(dashboard.secondaryAction.target)} variant="secondary">{dashboard.secondaryAction.label}</ActionButton>}
         />
         <View style={styles.listToolbar}>
           <FilterBar active={activeFilter} filters={dashboard.filters} onSelect={setActiveFilter} />
           <View style={styles.searchGroup}>
-            <Label size="sm" weight="bold">검색</Label>
+            <Label size="sm" weight="bold">{tScreen(locale, "module.search.label")}</Label>
             <TextInput
               autoCapitalize="none"
               onChangeText={setSearch}
-              placeholder="업무, 상태, 담당자 검색"
+              placeholder={tScreen(locale, "module.search.placeholder")}
               placeholderTextColor={colors.muted}
               returnKeyType="search"
               style={styles.input}
@@ -525,20 +578,20 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
           </View>
         </View>
         <View style={styles.listSummary}>
-          <Label weight="bold">{filteredRows.length}건</Label>
-          <Label size="sm" muted>{activeFilter} 필터{search ? ` · "${search}" 검색` : ""}</Label>
+          <Label weight="bold">{tScreen(locale, "module.list.count", { count: filteredRows.length })}</Label>
+          <Label size="sm" muted>{search ? tScreen(locale, "module.list.filteredWithSearch", { filter: activeFilter, search }) : tScreen(locale, "module.list.filtered", { filter: activeFilter })}</Label>
         </View>
         {dashboard.rows.length === 0 ? (
           <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />
         ) : filteredRows.length > 0 ? (
-          <DataTable onRowPress={selectRow} rows={filteredRows} selectedRowId={selectedRow?.id} />
+          <DataTable locale={locale} onRowPress={selectRow} rows={filteredRows} selectedRowId={selectedRow?.id} />
         ) : (
           <View style={styles.filteredEmptyState}>
-            <EmptyState title="검색 결과가 없습니다." description="필터나 검색어를 조정하면 업무 목록을 다시 확인할 수 있습니다." />
-            <ActionButton onPress={resetListFilters} variant="secondary">필터 초기화</ActionButton>
+            <EmptyState title={tScreen(locale, "module.filteredEmpty.title")} description={tScreen(locale, "module.filteredEmpty.description")} />
+            <ActionButton onPress={resetListFilters} variant="secondary">{tScreen(locale, "module.filteredEmpty.reset")}</ActionButton>
           </View>
         )}
-        {selectedRow ? <WorkDetailPanel row={selectedRow} onSelect={onSelect} /> : null}
+        {selectedRow ? <WorkDetailPanel locale={locale} row={selectedRow} onSelect={onSelect} /> : null}
       </Card>
 
       <View style={styles.actionPanels}>
@@ -546,7 +599,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
           <Card key={action.label} compact style={styles.actionPanelCard}>
             <Label weight="bold">{action.label}</Label>
             <Label size="sm" muted>{action.description}</Label>
-            <ActionButton onPress={() => onSelect(action.target)} variant="ghost">이동</ActionButton>
+            <ActionButton onPress={() => onSelect(action.target)} variant="ghost">{tScreen(locale, "actions.move")}</ActionButton>
           </Card>
         ))}
       </View>
@@ -554,22 +607,23 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
   );
 }
 
-type PayrollReadinessProps = Pick<ScreenProps, "onSelect"> & {
+type PayrollReadinessProps = Pick<ScreenProps, "locale" | "onSelect"> & {
+  readonly cards: readonly ReadinessCard[];
   readonly onSelectCard: (card: ReadinessCard) => void;
   readonly selectedId?: string;
 };
 
-function PayrollReadiness({ onSelect, onSelectCard, selectedId }: PayrollReadinessProps) {
+function PayrollReadiness({ cards, locale, onSelect, onSelectCard, selectedId }: PayrollReadinessProps) {
   return (
     <Card>
       <SectionHeader
-        eyebrow="Readiness"
-        title="급여 자동화 준비 현황"
-        description="산출 전 필요한 기준과 자료 상태를 먼저 확인합니다."
-        action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">설정 확인</ActionButton>}
+        eyebrow={tScreen(locale, "payroll.readiness.eyebrow")}
+        title={tScreen(locale, "payroll.readiness.title")}
+        description={tScreen(locale, "payroll.readiness.description")}
+        action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">{tScreen(locale, "payroll.readiness.action")}</ActionButton>}
       />
       <View style={styles.readinessGrid}>
-        {readinessCards.map((card) => (
+        {cards.map((card) => (
           <Pressable
             accessibilityRole="button"
             key={card.id}
@@ -591,94 +645,97 @@ function PayrollReadiness({ onSelect, onSelectCard, selectedId }: PayrollReadine
   );
 }
 
-function PayrollReadinessDetail({ card }: { readonly card: ReadinessCard }) {
+function PayrollReadinessDetail({ card, locale }: { readonly card: ReadinessCard; readonly locale: SupportedLocale }) {
   return (
     <View style={styles.detailPanel}>
       <View style={styles.detailHeader}>
         <View style={styles.detailTitle}>
-          <Label size="sm" muted>선택한 준비 항목</Label>
+          <Label size="sm" muted>{tScreen(locale, "payroll.readinessDetail.label")}</Label>
           <Label weight="bold">{card.title}</Label>
         </View>
         <Badge tone={card.tone}>{card.value}</Badge>
       </View>
       <Label>{card.detail}</Label>
       <View style={styles.actionRow}>
-        <ActionButton onPress={() => undefined} variant="secondary">준비 상태 확인</ActionButton>
-        <ActionButton onPress={() => undefined} variant="ghost">관련 자료 보기</ActionButton>
+        <ActionButton onPress={() => undefined} variant="secondary">{tScreen(locale, "payroll.readinessDetail.actions.status")}</ActionButton>
+        <ActionButton onPress={() => undefined} variant="ghost">{tScreen(locale, "payroll.readinessDetail.actions.materials")}</ActionButton>
       </View>
     </View>
   );
 }
 
-function PayrollStepDetail({ step }: { readonly step: PayrollStep }) {
+function PayrollStepDetail({ locale, step }: { readonly locale: SupportedLocale; readonly step: PayrollStep }) {
   return (
     <View style={styles.detailPanel}>
       <View style={styles.detailHeader}>
         <View style={styles.detailTitle}>
-          <Label size="sm" muted>선택한 산출 단계</Label>
+          <Label size="sm" muted>{tScreen(locale, "payroll.stepDetail.label")}</Label>
           <Label weight="bold">{step.title}</Label>
         </View>
         <Badge tone={step.tone}>{step.status}</Badge>
       </View>
       <Label>{step.detail}</Label>
       <View style={styles.actionRow}>
-        <ActionButton onPress={() => undefined} variant="secondary">단계 작업 보기</ActionButton>
-        <ActionButton onPress={() => undefined} variant="ghost">도움말 확인</ActionButton>
+        <ActionButton onPress={() => undefined} variant="secondary">{tScreen(locale, "payroll.stepDetail.actions.work")}</ActionButton>
+        <ActionButton onPress={() => undefined} variant="ghost">{tScreen(locale, "payroll.stepDetail.actions.help")}</ActionButton>
       </View>
     </View>
   );
 }
 
-function ArchiveLibraryPanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
+function ArchiveLibraryPanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "onSelect">) {
   return (
     <Card>
       <SectionHeader
-        title="자료함 작업대"
-        description="급여 산출물, 근태 원본, 결재 첨부, 출장/업무일지 자료를 폴더별로 확인하고 최근 문서를 바로 미리봅니다."
-        action={<ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 자료 확인</ActionButton>}
+        title={tScreen(locale, "archive.title")}
+        description={tScreen(locale, "archive.description")}
+        action={<ActionButton onPress={() => onSelect("payroll")} variant="secondary">{tScreen(locale, "archive.action")}</ActionButton>}
       />
       <View style={styles.archiveFolderGrid}>
-        {archiveFolders.map((folder) => (
+        {archiveFolderDefinitions.map((folder) => (
           <Pressable
             accessibilityRole="button"
             key={folder.id}
             onPress={() => onSelect(folder.target)}
             style={({ pressed }) => [styles.archiveFolderCard, { borderTopColor: toneColor(folder.tone) }, pressed && styles.buttonPressed]}
           >
-            <Badge tone={folder.tone}>{folder.count}</Badge>
-            <Label weight="bold">{folder.label}</Label>
-            <Label size="sm" muted>{folder.owner}</Label>
+            <Badge tone={folder.tone}>{tScreen(locale, `archive.folders.${folder.id}.count`)}</Badge>
+            <Label weight="bold">{tScreen(locale, `archive.folders.${folder.id}.label`)}</Label>
+            <Label size="sm" muted>{tScreen(locale, `archive.folders.${folder.id}.owner`)}</Label>
           </Pressable>
         ))}
       </View>
       <View style={styles.archivePreviewGrid}>
         <View style={styles.archiveDocumentList}>
-          {archiveDocuments.map((document) => (
+          {archiveDocumentDefinitions.map((document) => (
             <View key={document.id} style={styles.archiveDocumentItem}>
-              <Badge tone={document.tone}>{document.status}</Badge>
+              <Badge tone={document.tone}>{tScreen(locale, `archive.documents.${document.id}.status`)}</Badge>
               <View style={styles.plannerCopy}>
-                <Label weight="bold">{document.title}</Label>
-                <Label size="sm" muted>{document.type} · {document.owner}</Label>
+                <Label weight="bold">{tScreen(locale, `archive.documents.${document.id}.title`)}</Label>
+                <Label size="sm" muted>{tScreen(locale, "archive.documents.meta", {
+                  type: tScreen(locale, `archive.documents.${document.id}.type`),
+                  owner: tScreen(locale, `archive.documents.${document.id}.owner`)
+                })}</Label>
               </View>
             </View>
           ))}
         </View>
         <View style={styles.archivePreviewPane}>
-          <Label size="sm" muted>선택 문서 미리보기</Label>
-          <Label weight="bold">2026년 5월 급여 보고서</Label>
+          <Label size="sm" muted>{tScreen(locale, "archive.preview.label")}</Label>
+          <Label weight="bold">{tScreen(locale, "archive.preview.title")}</Label>
           <View style={styles.archiveMetaGrid}>
             <View style={styles.archiveMetaItem}>
-              <Label size="sm" muted>보안 범위</Label>
-              <Label weight="bold">급여 담당 / Branch 관리자</Label>
+              <Label size="sm" muted>{tScreen(locale, "archive.preview.securityScope.label")}</Label>
+              <Label weight="bold">{tScreen(locale, "archive.preview.securityScope.value")}</Label>
             </View>
             <View style={styles.archiveMetaItem}>
-              <Label size="sm" muted>상태</Label>
-              <Label weight="bold">보관됨</Label>
+              <Label size="sm" muted>{tScreen(locale, "archive.preview.status.label")}</Label>
+              <Label weight="bold">{tScreen(locale, "archive.preview.status.value")}</Label>
             </View>
           </View>
           <View style={styles.actionRow}>
-            <ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 화면 열기</ActionButton>
-            <ActionButton onPress={() => onSelect("admin")} variant="ghost">권한 확인</ActionButton>
+            <ActionButton onPress={() => onSelect("payroll")} variant="secondary">{tScreen(locale, "archive.preview.actions.payroll")}</ActionButton>
+            <ActionButton onPress={() => onSelect("admin")} variant="ghost">{tScreen(locale, "archive.preview.actions.permissions")}</ActionButton>
           </View>
         </View>
       </View>
@@ -686,46 +743,46 @@ function ArchiveLibraryPanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
   );
 }
 
-function AiWorkspacePanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
+function AiWorkspacePanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "onSelect">) {
   return (
     <Card>
       <SectionHeader
-        title="AI 업무 작업대"
-        description="급여, 결재, 자료함 문맥에서 추천 작업을 고르고 사람이 확인해야 할 초안과 질문을 분리합니다."
-        action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">AI 사용 범위 확인</ActionButton>}
+        title={tScreen(locale, "ai.title")}
+        description={tScreen(locale, "ai.description")}
+        action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">{tScreen(locale, "ai.action")}</ActionButton>}
       />
       <View style={styles.aiWorkspaceGrid}>
         <View style={styles.aiRecommendationList}>
-          {aiRecommendations.map((item) => (
+          {aiRecommendationDefinitions.map((item) => (
             <Pressable
               accessibilityRole="button"
               key={item.id}
               onPress={() => onSelect(item.target)}
               style={({ pressed }) => [styles.aiRecommendationItem, { borderLeftColor: toneColor(item.tone) }, pressed && styles.buttonPressed]}
             >
-              <Badge tone={item.tone}>{item.status}</Badge>
+              <Badge tone={item.tone}>{tScreen(locale, `ai.recommendations.${item.id}.status`)}</Badge>
               <View style={styles.plannerCopy}>
-                <Label weight="bold">{item.title}</Label>
-                <Label size="sm" muted>{item.source}</Label>
+                <Label weight="bold">{tScreen(locale, `ai.recommendations.${item.id}.title`)}</Label>
+                <Label size="sm" muted>{tScreen(locale, `ai.recommendations.${item.id}.source`)}</Label>
               </View>
             </Pressable>
           ))}
         </View>
         <View style={styles.aiPreviewPane}>
-          <Label size="sm" muted>사람 검토 필요</Label>
-          <Label weight="bold">AI가 만든 문장은 바로 확정하지 않고 담당자가 확인합니다.</Label>
+          <Label size="sm" muted>{tScreen(locale, "ai.preview.label")}</Label>
+          <Label weight="bold">{tScreen(locale, "ai.preview.title")}</Label>
           <View style={styles.aiDraftGrid}>
-            {aiDraftCards.map((card) => (
+            {aiDraftDefinitions.map((card) => (
               <View key={card.id} style={[styles.aiDraftCard, { borderTopColor: toneColor(card.tone) }]}>
-                <Badge tone={card.tone}>{card.label}</Badge>
-                <Label weight="bold">{card.title}</Label>
-                <Label size="sm" muted>{card.detail}</Label>
+                <Badge tone={card.tone}>{tScreen(locale, `ai.drafts.${card.id}.label`)}</Badge>
+                <Label weight="bold">{tScreen(locale, `ai.drafts.${card.id}.title`)}</Label>
+                <Label size="sm" muted>{tScreen(locale, `ai.drafts.${card.id}.detail`)}</Label>
               </View>
             ))}
           </View>
           <View style={styles.actionRow}>
-            <ActionButton onPress={() => onSelect("payroll")} variant="secondary">급여 문맥 열기</ActionButton>
-            <ActionButton onPress={() => onSelect("archive")} variant="ghost">자료함 문서 보기</ActionButton>
+            <ActionButton onPress={() => onSelect("payroll")} variant="secondary">{tScreen(locale, "ai.preview.actions.payroll")}</ActionButton>
+            <ActionButton onPress={() => onSelect("archive")} variant="ghost">{tScreen(locale, "ai.preview.actions.archive")}</ActionButton>
           </View>
         </View>
       </View>
@@ -733,39 +790,39 @@ function AiWorkspacePanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
   );
 }
 
-function AdminAccountPanel() {
+function AdminAccountPanel({ locale }: Pick<ScreenProps, "locale">) {
   return (
     <Card>
-      <SectionHeader title="법인 Branch / 하위계정 권한" description="회사 하나를 하나의 Branch로 보고, 하위계정과 민감 문서 접근 범위를 화면에서 분리합니다." />
+      <SectionHeader title={tScreen(locale, "admin.title")} description={tScreen(locale, "admin.description")} />
       <View style={styles.adminBranchGrid}>
         <View style={styles.adminBranchCard}>
-          <Label size="sm" muted>Branch 계정</Label>
-          <Label weight="bold">Bitween Demo · 법인코드 0000</Label>
-          <Label size="sm" muted>법인 기본사항 입력, 사업장 정보, 하위계정 생성 권한을 이 화면에서 검토합니다.</Label>
+          <Label size="sm" muted>{tScreen(locale, "admin.branchAccount.label")}</Label>
+          <Label weight="bold">{tScreen(locale, "admin.branchAccount.value")}</Label>
+          <Label size="sm" muted>{tScreen(locale, "admin.branchAccount.detail")}</Label>
         </View>
         <View style={styles.adminBranchCard}>
-          <Label size="sm" muted>하위계정 구조</Label>
-          <Label weight="bold">관리자 2명 · 경영진 3명 · 일반 사원 9명</Label>
-          <Label size="sm" muted>신규 계정은 Branch 소속, 부서, 역할을 지정한 뒤 초대합니다.</Label>
+          <Label size="sm" muted>{tScreen(locale, "admin.subaccount.label")}</Label>
+          <Label weight="bold">{tScreen(locale, "admin.subaccount.value")}</Label>
+          <Label size="sm" muted>{tScreen(locale, "admin.subaccount.detail")}</Label>
         </View>
       </View>
       <View style={styles.permissionMatrix}>
-        {adminPermissionRows.map((row) => (
+        {adminPermissionDefinitions.map((row) => (
           <View key={row.id} style={styles.permissionRow}>
             <View style={styles.permissionRole}>
-              <Badge tone={row.tone}>{row.role}</Badge>
+              <Badge tone={row.tone}>{tScreen(locale, `admin.permissions.${row.id}.role`)}</Badge>
             </View>
             <View style={styles.permissionCell}>
-              <Label size="sm" muted>급여</Label>
-              <Label weight="bold">{row.payroll}</Label>
+              <Label size="sm" muted>{tScreen(locale, "admin.permissions.columns.payroll")}</Label>
+              <Label weight="bold">{tScreen(locale, `admin.permissions.${row.id}.payroll`)}</Label>
             </View>
             <View style={styles.permissionCell}>
-              <Label size="sm" muted>경영진 급여</Label>
-              <Label weight="bold">{row.executive}</Label>
+              <Label size="sm" muted>{tScreen(locale, "admin.permissions.columns.executive")}</Label>
+              <Label weight="bold">{tScreen(locale, `admin.permissions.${row.id}.executive`)}</Label>
             </View>
             <View style={styles.permissionCell}>
-              <Label size="sm" muted>자료함</Label>
-              <Label weight="bold">{row.archive}</Label>
+              <Label size="sm" muted>{tScreen(locale, "admin.permissions.columns.archive")}</Label>
+              <Label weight="bold">{tScreen(locale, `admin.permissions.${row.id}.archive`)}</Label>
             </View>
           </View>
         ))}
@@ -774,76 +831,76 @@ function AdminAccountPanel() {
   );
 }
 
-function TravelWorklogPanel() {
+function TravelWorklogPanel({ locale }: Pick<ScreenProps, "locale">) {
   return (
     <Card>
-      <SectionHeader title="출장/업무일지 흐름" description="출장계획부터 출장실행, 업무일지, 실적반영, 상급자 검토까지 한 화면에서 확인합니다." />
+      <SectionHeader title={tScreen(locale, "travel.title")} description={tScreen(locale, "travel.description")} />
       <View style={styles.travelStageGrid}>
-        {travelWorkflowStages.map((stage, index) => (
+        {travelWorkflowStageDefinitions.map((stage, index) => (
           <View key={stage.id} style={[styles.travelStageCard, { borderTopColor: toneColor(stage.tone) }]}>
             <Text style={styles.travelStageStep}>{String(index + 1).padStart(2, "0")}</Text>
-            <Badge tone={stage.tone}>{stage.status}</Badge>
-            <Label weight="bold">{stage.label}</Label>
-            <Label size="sm" muted>{stage.detail}</Label>
+            <Badge tone={stage.tone}>{tScreen(locale, `travel.stages.${stage.id}.status`)}</Badge>
+            <Label weight="bold">{tScreen(locale, `travel.stages.${stage.id}.label`)}</Label>
+            <Label size="sm" muted>{tScreen(locale, `travel.stages.${stage.id}.detail`)}</Label>
           </View>
         ))}
       </View>
       <View style={styles.travelReviewGrid}>
         <View style={styles.travelReviewCard}>
-          <Label size="sm" muted>상급자 on-going view</Label>
-          <Label weight="bold">진행 중 출장 2건</Label>
-          <Label size="sm" muted>출장실행, 업무일지 작성, 실적 반영 대기 상태를 분리해서 봅니다.</Label>
+          <Label size="sm" muted>{tScreen(locale, "travel.review.ongoing.label")}</Label>
+          <Label weight="bold">{tScreen(locale, "travel.review.ongoing.value")}</Label>
+          <Label size="sm" muted>{tScreen(locale, "travel.review.ongoing.detail")}</Label>
         </View>
         <View style={styles.travelReviewCard}>
-          <Label size="sm" muted>상급자 Completed view</Label>
-          <Label weight="bold">완료 반영 7건</Label>
-          <Label size="sm" muted>검토 완료된 출장신청서, 업무일지, 성과 연결 내역을 보관 화면으로 넘깁니다.</Label>
+          <Label size="sm" muted>{tScreen(locale, "travel.review.completed.label")}</Label>
+          <Label weight="bold">{tScreen(locale, "travel.review.completed.value")}</Label>
+          <Label size="sm" muted>{tScreen(locale, "travel.review.completed.detail")}</Label>
         </View>
       </View>
     </Card>
   );
 }
 
-function AttendancePhonePanel() {
+function AttendancePhonePanel({ locale }: Pick<ScreenProps, "locale">) {
   return (
     <Card>
-      <SectionHeader title="휴대폰 출퇴근" description="직원이 모바일에서 확인하는 오늘의 출근/퇴근 상태입니다." />
+      <SectionHeader title={tScreen(locale, "attendance.title")} description={tScreen(locale, "attendance.description")} />
       <View style={styles.attendanceGrid}>
         <View style={styles.phoneFrame}>
           <View style={styles.phoneHeader}>
-            <Label size="sm" muted>오늘 상태</Label>
-            <Badge tone="ready">출근 확인</Badge>
+            <Label size="sm" muted>{tScreen(locale, "attendance.phone.todayStatus")}</Label>
+            <Badge tone="ready">{tScreen(locale, "attendance.phone.checkedIn")}</Badge>
           </View>
           <View style={styles.phoneClock}>
             <Text style={styles.phoneTime}>09:02</Text>
-            <Label size="sm" muted>본사 120m 이내 · 위치 확인됨</Label>
+            <Label size="sm" muted>{tScreen(locale, "attendance.phone.location")}</Label>
           </View>
           <View style={styles.punchActions}>
             <Pressable accessibilityRole="button" style={({ pressed }) => [styles.punchButton, pressed && styles.buttonPressed]}>
-              <Text style={styles.punchButtonText}>출근</Text>
+              <Text style={styles.punchButtonText}>{tScreen(locale, "attendance.phone.checkIn")}</Text>
             </Pressable>
             <Pressable accessibilityRole="button" style={({ pressed }) => [styles.punchButtonSecondary, pressed && styles.buttonPressed]}>
-              <Text style={styles.punchButtonSecondaryText}>퇴근</Text>
+              <Text style={styles.punchButtonSecondaryText}>{tScreen(locale, "attendance.phone.checkOut")}</Text>
             </Pressable>
           </View>
           <View style={styles.locationNotice}>
-            <Label size="sm" weight="bold">위치 확인</Label>
-            <Label size="sm" muted>GPS 또는 현장 QR 확인 후 기록되는 모바일 UI 자리입니다.</Label>
+            <Label size="sm" weight="bold">{tScreen(locale, "attendance.locationNotice.title")}</Label>
+            <Label size="sm" muted>{tScreen(locale, "attendance.locationNotice.description")}</Label>
           </View>
         </View>
         <View style={styles.attendanceSide}>
           <View style={styles.attendanceSummaryCard}>
-            <Label size="sm" muted>관리자 확인</Label>
-            <Label weight="bold">외근 위치 확인 1건</Label>
-            <Label size="sm" muted>사유와 위치 메모를 확인한 뒤 승인 흐름으로 연결합니다.</Label>
+            <Label size="sm" muted>{tScreen(locale, "attendance.manager.label")}</Label>
+            <Label weight="bold">{tScreen(locale, "attendance.manager.value")}</Label>
+            <Label size="sm" muted>{tScreen(locale, "attendance.manager.detail")}</Label>
           </View>
           <View style={styles.attendanceLogList}>
-            {attendanceLogs.map((log) => (
+            {attendanceLogDefinitions.map((log) => (
               <View key={log.id} style={styles.attendanceLogItem}>
-                <Badge tone={log.tone}>{log.label}</Badge>
+                <Badge tone={log.tone}>{tScreen(locale, `attendance.logs.${log.id}.label`)}</Badge>
                 <View style={styles.plannerCopy}>
                   <Label weight="bold">{log.time}</Label>
-                  <Label size="sm" muted>{log.place}</Label>
+                  <Label size="sm" muted>{tScreen(locale, `attendance.logs.${log.id}.place`)}</Label>
                 </View>
               </View>
             ))}
@@ -854,134 +911,64 @@ function AttendancePhonePanel() {
   );
 }
 
-function WorkDetailPanel({ row, onSelect }: { readonly row: ModuleRow; readonly onSelect: (id: PlatformId) => void }) {
-  const target = workRowTarget(row);
-
+function WorkDetailPanel({ locale, row, onSelect }: { readonly locale: SupportedLocale; readonly row: ModuleRow; readonly onSelect: (id: PlatformId) => void }) {
   return (
     <View style={styles.detailPanel}>
       <View style={styles.detailHeader}>
         <View style={styles.detailTitle}>
-          <Label size="sm" muted>선택한 업무</Label>
+          <Label size="sm" muted>{tScreen(locale, "workDetail.selectedLabel")}</Label>
           <Label weight="bold">{row.category}</Label>
         </View>
         <Badge tone={row.tone}>{row.status}</Badge>
       </View>
       <View style={styles.detailGrid}>
         <View style={styles.detailItem}>
-          <Label size="sm" muted>담당</Label>
+          <Label size="sm" muted>{tScreen(locale, "workDetail.owner")}</Label>
           <Label weight="bold">{row.owner}</Label>
         </View>
         <View style={styles.detailItem}>
-          <Label size="sm" muted>다음 작업</Label>
+          <Label size="sm" muted>{tScreen(locale, "workDetail.nextStep")}</Label>
           <Label>{row.nextStep}</Label>
         </View>
       </View>
       <View style={styles.actionRow}>
-        <ActionButton onPress={() => onSelect(target)} variant="secondary">관련 화면 열기</ActionButton>
-        <ActionButton onPress={() => undefined} variant="ghost">담당자 확인</ActionButton>
+        <ActionButton onPress={() => onSelect(row.target)} variant="secondary">{tScreen(locale, "workDetail.actions.openRelated")}</ActionButton>
+        <ActionButton onPress={() => undefined} variant="ghost">{tScreen(locale, "workDetail.actions.confirmOwner")}</ActionButton>
       </View>
     </View>
   );
 }
 
-function WorkQueueDetailPanel({ item, onSelect }: { readonly item: WorkQueueItem; readonly onSelect: (id: PlatformId) => void }) {
-  const target = workQueueTarget(item);
-
+function WorkQueueDetailPanel({ item, locale, onSelect }: { readonly item: WorkQueueItem; readonly locale: SupportedLocale; readonly onSelect: (id: PlatformId) => void }) {
   return (
     <View style={styles.detailPanel}>
       <View style={styles.detailHeader}>
         <View style={styles.detailTitle}>
-          <Label size="sm" muted>선택한 오늘의 업무</Label>
+          <Label size="sm" muted>{tScreen(locale, "workQueueDetail.selectedLabel")}</Label>
           <Label weight="bold">{item.title}</Label>
         </View>
         <Badge tone={item.tone}>{item.status}</Badge>
       </View>
       <View style={styles.detailGrid}>
         <View style={styles.detailItem}>
-          <Label size="sm" muted>담당</Label>
+          <Label size="sm" muted>{tScreen(locale, "workQueueDetail.owner")}</Label>
           <Label weight="bold">{item.owner}</Label>
         </View>
         <View style={styles.detailItem}>
-          <Label size="sm" muted>기한</Label>
+          <Label size="sm" muted>{tScreen(locale, "workQueueDetail.due")}</Label>
           <Label weight="bold">{item.due}</Label>
         </View>
         <View style={styles.detailItem}>
-          <Label size="sm" muted>업무 영역</Label>
+          <Label size="sm" muted>{tScreen(locale, "workQueueDetail.area")}</Label>
           <Label>{item.meta}</Label>
         </View>
       </View>
       <View style={styles.actionRow}>
-        <ActionButton onPress={() => onSelect(target)} variant="secondary">관련 화면 열기</ActionButton>
-        <ActionButton onPress={() => undefined} variant="ghost">담당 흐름 확인</ActionButton>
+        <ActionButton onPress={() => onSelect(item.target)} variant="secondary">{tScreen(locale, "workQueueDetail.actions.openRelated")}</ActionButton>
+        <ActionButton onPress={() => undefined} variant="ghost">{tScreen(locale, "workQueueDetail.actions.confirmFlow")}</ActionButton>
       </View>
     </View>
   );
-}
-
-function workQueueTarget(item: WorkQueueItem): PlatformId {
-  if (item.meta.includes("급여")) {
-    return "payroll";
-  }
-
-  if (item.meta.includes("워크") || item.meta.includes("결재")) {
-    return "workflow";
-  }
-
-  if (item.meta.includes("출장") || item.meta.includes("업무일지")) {
-    return "travel";
-  }
-
-  if (item.meta.includes("아카이브") || item.meta.includes("자료")) {
-    return "archive";
-  }
-
-  return "home";
-}
-
-function workRowTarget(row: ModuleRow): PlatformId {
-  const haystack = [row.category, row.status, row.owner, row.nextStep].join(" ");
-
-  if (haystack.includes("급여") || haystack.includes("산출") || haystack.includes("월 기본근로시간")) {
-    return "payroll";
-  }
-
-  if (haystack.includes("결재") || haystack.includes("회람") || haystack.includes("기안")) {
-    return "workflow";
-  }
-
-  if (haystack.includes("출장") || haystack.includes("업무일지") || haystack.includes("실적")) {
-    return "travel";
-  }
-
-  if (haystack.includes("자료") || haystack.includes("보고서") || haystack.includes("파일") || haystack.includes("폴더")) {
-    return "archive";
-  }
-
-  if (haystack.includes("권한") || haystack.includes("사용자") || haystack.includes("역할") || haystack.includes("법인")) {
-    return "admin";
-  }
-
-  if (haystack.includes("채용") || haystack.includes("지원자") || haystack.includes("자격") || haystack.includes("배치")) {
-    return "recruit";
-  }
-
-  if (haystack.includes("설정") || haystack.includes("알림") || haystack.includes("환경")) {
-    return "settings";
-  }
-
-  if (haystack.includes("AI") || haystack.includes("요약") || haystack.includes("초안")) {
-    return "ai";
-  }
-
-  if (haystack.includes("근태") || haystack.includes("증명서") || haystack.includes("직원")) {
-    return "hr";
-  }
-
-  if (haystack.includes("출근") || haystack.includes("퇴근") || haystack.includes("외근")) {
-    return "attendance";
-  }
-
-  return "home";
 }
 
 const styles = StyleSheet.create({

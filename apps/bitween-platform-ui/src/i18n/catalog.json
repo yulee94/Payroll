@@ -1,0 +1,6276 @@
+{
+  "supportedLocales": [
+    "ko-KR",
+    "en-US",
+    "zh-Hans-CN",
+    "ja-JP"
+  ],
+  "messages": [
+    {
+      "key": "settings.i18n.title",
+      "values": {
+        "ko-KR": "언어 설정",
+        "en-US": "Language settings",
+        "zh-Hans-CN": "语言设置",
+        "ja-JP": "言語設定"
+      }
+    },
+    {
+      "key": "settings.i18n.description",
+      "values": {
+        "ko-KR": "한 세션은 하나의 언어만 사용합니다. 모든 화면 문구는 번역 카탈로그 배열에서 가져옵니다.",
+        "en-US": "Each session uses one language only. All screen copy is loaded from the translation catalog array.",
+        "zh-Hans-CN": "每个会话只使用一种语言。所有界面文案都从翻译目录数组加载。",
+        "ja-JP": "1つのセッションでは1つの言語だけを使用します。すべての画面文言は翻訳カタログ配列から読み込みます。"
+      }
+    },
+    {
+      "key": "settings.i18n.status.selected",
+      "values": {
+        "ko-KR": "선택됨",
+        "en-US": "Selected",
+        "zh-Hans-CN": "已选择",
+        "ja-JP": "選択中"
+      }
+    },
+    {
+      "key": "settings.i18n.status.available",
+      "values": {
+        "ko-KR": "사용 가능",
+        "en-US": "Available",
+        "zh-Hans-CN": "可用",
+        "ja-JP": "利用可能"
+      }
+    },
+    {
+      "key": "settings.i18n.catalogRule.title",
+      "values": {
+        "ko-KR": "하드코딩 금지",
+        "en-US": "No hardcoded copy",
+        "zh-Hans-CN": "禁止硬编码文案",
+        "ja-JP": "文言のハードコード禁止"
+      }
+    },
+    {
+      "key": "settings.i18n.catalogRule.description",
+      "values": {
+        "ko-KR": "새 UI 문구는 컴포넌트에 직접 쓰지 않고 key/value 배열에 추가한 뒤 사용합니다.",
+        "en-US": "New UI copy is added to key/value arrays first, then referenced by components.",
+        "zh-Hans-CN": "新的界面文案先添加到 key/value 数组，再由组件引用。",
+        "ja-JP": "新しいUI文言は先にkey/value配列へ追加し、その後コンポーネントから参照します。"
+      }
+    },
+    {
+      "key": "shell.logout",
+      "values": {
+        "ko-KR": "로그아웃",
+        "en-US": "Log out",
+        "zh-Hans-CN": "退出登录",
+        "ja-JP": "ログアウト"
+      }
+    },
+    {
+      "key": "shell.employeeNumber",
+      "values": {
+        "ko-KR": "사번 {number}",
+        "en-US": "Employee no. {number}",
+        "zh-Hans-CN": "员工编号 {number}",
+        "ja-JP": "社員番号 {number}"
+      }
+    },
+    {
+      "key": "shell.companyLogo",
+      "values": {
+        "ko-KR": "Bitween 회사 로고",
+        "en-US": "Bitween company logo",
+        "zh-Hans-CN": "Bitween 公司标识",
+        "ja-JP": "Bitween 会社ロゴ"
+      }
+    },
+    {
+      "key": "shell.brandSubtitle",
+      "values": {
+        "ko-KR": "업무 플랫폼",
+        "en-US": "Work platform",
+        "zh-Hans-CN": "业务平台",
+        "ja-JP": "業務プラットフォーム"
+      }
+    },
+    {
+      "key": "shell.themePanel.title",
+      "values": {
+        "ko-KR": "메뉴 색상 옵션",
+        "en-US": "Menu color options",
+        "zh-Hans-CN": "菜单颜色选项",
+        "ja-JP": "メニュー色オプション"
+      }
+    },
+    {
+      "key": "session.roleLabel",
+      "values": {
+        "ko-KR": "Demo 관리자",
+        "en-US": "Demo administrator",
+        "zh-Hans-CN": "演示管理员",
+        "ja-JP": "デモ管理者"
+      }
+    },
+    {
+      "key": "table.empty.title",
+      "values": {
+        "ko-KR": "표시할 항목이 없습니다.",
+        "en-US": "No items to display.",
+        "zh-Hans-CN": "没有可显示的项目。",
+        "ja-JP": "表示する項目がありません。"
+      }
+    },
+    {
+      "key": "table.empty.description",
+      "values": {
+        "ko-KR": "처리할 업무가 생기면 목록이 자동으로 채워집니다.",
+        "en-US": "When work appears, this list fills automatically.",
+        "zh-Hans-CN": "出现待处理工作后，列表会自动填充。",
+        "ja-JP": "処理する業務が発生すると、この一覧が自動で埋まります。"
+      }
+    },
+    {
+      "key": "table.mobile.owner",
+      "values": {
+        "ko-KR": "담당: {owner}",
+        "en-US": "Owner: {owner}",
+        "zh-Hans-CN": "负责人：{owner}",
+        "ja-JP": "担当: {owner}"
+      }
+    },
+    {
+      "key": "table.columns.category",
+      "values": {
+        "ko-KR": "구분",
+        "en-US": "Category",
+        "zh-Hans-CN": "分类",
+        "ja-JP": "区分"
+      }
+    },
+    {
+      "key": "table.columns.status",
+      "values": {
+        "ko-KR": "상태",
+        "en-US": "Status",
+        "zh-Hans-CN": "状态",
+        "ja-JP": "状態"
+      }
+    },
+    {
+      "key": "table.columns.owner",
+      "values": {
+        "ko-KR": "담당",
+        "en-US": "Owner",
+        "zh-Hans-CN": "负责人",
+        "ja-JP": "担当"
+      }
+    },
+    {
+      "key": "table.columns.nextStep",
+      "values": {
+        "ko-KR": "다음 작업",
+        "en-US": "Next step",
+        "zh-Hans-CN": "下一步",
+        "ja-JP": "次の作業"
+      }
+    },
+    {
+      "key": "sidebarThemes.steel.label",
+      "values": {
+        "ko-KR": "스틸 블루",
+        "en-US": "Steel blue",
+        "zh-Hans-CN": "钢蓝",
+        "ja-JP": "スチールブルー"
+      }
+    },
+    {
+      "key": "sidebarThemes.steel.description",
+      "values": {
+        "ko-KR": "현재 톤보다 선명한 업무형 파랑",
+        "en-US": "A sharper operational blue than the current tone",
+        "zh-Hans-CN": "比当前色调更清晰的业务型蓝色",
+        "ja-JP": "現在のトーンより明瞭な業務向けブルー"
+      }
+    },
+    {
+      "key": "sidebarThemes.graphite.label",
+      "values": {
+        "ko-KR": "그래파이트",
+        "en-US": "Graphite",
+        "zh-Hans-CN": "石墨灰",
+        "ja-JP": "グラファイト"
+      }
+    },
+    {
+      "key": "sidebarThemes.graphite.description",
+      "values": {
+        "ko-KR": "차분하고 밀도 있는 관리자형",
+        "en-US": "A calm, dense administrator style",
+        "zh-Hans-CN": "沉稳且信息密度高的管理员风格",
+        "ja-JP": "落ち着きと密度のある管理者向けスタイル"
+      }
+    },
+    {
+      "key": "sidebarThemes.teal.label",
+      "values": {
+        "ko-KR": "틸 그린",
+        "en-US": "Teal green",
+        "zh-Hans-CN": "青绿色",
+        "ja-JP": "ティールグリーン"
+      }
+    },
+    {
+      "key": "sidebarThemes.teal.description",
+      "values": {
+        "ko-KR": "신뢰감 있는 HR/운영형",
+        "en-US": "Trust-focused HR and operations style",
+        "zh-Hans-CN": "强调信任感的 HR/运营风格",
+        "ja-JP": "信頼感のあるHR/運用向けスタイル"
+      }
+    },
+    {
+      "key": "sidebarThemes.navy.label",
+      "values": {
+        "ko-KR": "딥 네이비",
+        "en-US": "Deep navy",
+        "zh-Hans-CN": "深海军蓝",
+        "ja-JP": "ディープネイビー"
+      }
+    },
+    {
+      "key": "sidebarThemes.navy.description",
+      "values": {
+        "ko-KR": "가장 강한 기업용 대비",
+        "en-US": "The strongest enterprise contrast",
+        "zh-Hans-CN": "最强的企业级对比度",
+        "ja-JP": "最も強い企業向けコントラスト"
+      }
+    },
+    {
+      "key": "navigation.home.label",
+      "values": {
+        "ko-KR": "플랫폼 홈",
+        "en-US": "Platform Home",
+        "zh-Hans-CN": "平台首页",
+        "ja-JP": "プラットフォームホーム"
+      }
+    },
+    {
+      "key": "navigation.home.eyebrow",
+      "values": {
+        "ko-KR": "Launcher",
+        "en-US": "Launcher",
+        "zh-Hans-CN": "启动台",
+        "ja-JP": "ランチャー"
+      }
+    },
+    {
+      "key": "navigation.home.description",
+      "values": {
+        "ko-KR": "오늘의 업무, 빠른 실행, 플랫폼 상태를 한 화면에서 확인합니다.",
+        "en-US": "View today’s work, quick actions, and platform status in one screen.",
+        "zh-Hans-CN": "在一个界面查看今日工作、快捷操作和平台状态。",
+        "ja-JP": "今日の業務、クイック操作、プラットフォーム状態を1画面で確認します。"
+      }
+    },
+    {
+      "key": "navigation.payroll.label",
+      "values": {
+        "ko-KR": "급여",
+        "en-US": "Payroll",
+        "zh-Hans-CN": "薪资",
+        "ja-JP": "給与"
+      }
+    },
+    {
+      "key": "navigation.payroll.eyebrow",
+      "values": {
+        "ko-KR": "Payroll",
+        "en-US": "Payroll",
+        "zh-Hans-CN": "薪资",
+        "ja-JP": "給与"
+      }
+    },
+    {
+      "key": "navigation.payroll.description",
+      "values": {
+        "ko-KR": "급여 자동화 준비 상태, 산출 진입, 월별 보고와 설정을 관리합니다.",
+        "en-US": "Manage payroll automation readiness, calculation entry, monthly reports, and settings.",
+        "zh-Hans-CN": "管理薪资自动化准备状态、计算入口、月度报告和设置。",
+        "ja-JP": "給与自動化の準備状況、計算開始、月次レポート、設定を管理します。"
+      }
+    },
+    {
+      "key": "navigation.hr.label",
+      "values": {
+        "ko-KR": "HR",
+        "en-US": "HR",
+        "zh-Hans-CN": "HR",
+        "ja-JP": "HR"
+      }
+    },
+    {
+      "key": "navigation.hr.eyebrow",
+      "values": {
+        "ko-KR": "People",
+        "en-US": "People",
+        "zh-Hans-CN": "人员",
+        "ja-JP": "人材"
+      }
+    },
+    {
+      "key": "navigation.hr.description",
+      "values": {
+        "ko-KR": "직원 명부, 이력서, 사직서, 증명서 흐름을 정리합니다.",
+        "en-US": "Organize rosters, resumes, resignation forms, and certificates.",
+        "zh-Hans-CN": "整理员工名册、简历、离职单和证明书流程。",
+        "ja-JP": "社員名簿、履歴書、退職届、証明書の流れを整理します。"
+      }
+    },
+    {
+      "key": "navigation.attendance.label",
+      "values": {
+        "ko-KR": "출퇴근",
+        "en-US": "Attendance",
+        "zh-Hans-CN": "考勤",
+        "ja-JP": "勤怠"
+      }
+    },
+    {
+      "key": "navigation.attendance.eyebrow",
+      "values": {
+        "ko-KR": "Attendance",
+        "en-US": "Attendance",
+        "zh-Hans-CN": "考勤",
+        "ja-JP": "勤怠"
+      }
+    },
+    {
+      "key": "navigation.attendance.description",
+      "values": {
+        "ko-KR": "모바일 출근, 퇴근, 위치 확인, 근태 기록을 관리합니다.",
+        "en-US": "Manage mobile check-in, check-out, location checks, and attendance records.",
+        "zh-Hans-CN": "管理移动签到、签退、位置确认和考勤记录。",
+        "ja-JP": "モバイル出勤、退勤、位置確認、勤怠記録を管理します。"
+      }
+    },
+    {
+      "key": "navigation.recruit.label",
+      "values": {
+        "ko-KR": "채용",
+        "en-US": "Recruiting",
+        "zh-Hans-CN": "招聘",
+        "ja-JP": "採用"
+      }
+    },
+    {
+      "key": "navigation.recruit.eyebrow",
+      "values": {
+        "ko-KR": "Recruit",
+        "en-US": "Recruit",
+        "zh-Hans-CN": "招聘",
+        "ja-JP": "採用"
+      }
+    },
+    {
+      "key": "navigation.recruit.description",
+      "values": {
+        "ko-KR": "지원자 경력, 자격, 부서 배치 후보를 관리합니다.",
+        "en-US": "Manage applicant careers, credentials, and department placement candidates.",
+        "zh-Hans-CN": "管理应聘者经历、资格和部门配置候选。",
+        "ja-JP": "応募者の経歴、資格、部門配置候補を管理します。"
+      }
+    },
+    {
+      "key": "navigation.travel.label",
+      "values": {
+        "ko-KR": "출장/일지",
+        "en-US": "Trips / Worklogs",
+        "zh-Hans-CN": "出差/日志",
+        "ja-JP": "出張/日報"
+      }
+    },
+    {
+      "key": "navigation.travel.eyebrow",
+      "values": {
+        "ko-KR": "Travel",
+        "en-US": "Travel",
+        "zh-Hans-CN": "出差",
+        "ja-JP": "出張"
+      }
+    },
+    {
+      "key": "navigation.travel.description",
+      "values": {
+        "ko-KR": "출장계획, 실행, 업무일지, 실적반영, 상급자 검토 흐름을 확인합니다.",
+        "en-US": "Track trip planning, execution, worklogs, performance reflection, and manager review.",
+        "zh-Hans-CN": "跟踪出差计划、执行、工作日志、绩效反映和上级审核。",
+        "ja-JP": "出張計画、実行、業務日誌、実績反映、上長レビューの流れを確認します。"
+      }
+    },
+    {
+      "key": "navigation.workflow.label",
+      "values": {
+        "ko-KR": "전자결재",
+        "en-US": "Approvals",
+        "zh-Hans-CN": "电子审批",
+        "ja-JP": "電子決裁"
+      }
+    },
+    {
+      "key": "navigation.workflow.eyebrow",
+      "values": {
+        "ko-KR": "Workflow",
+        "en-US": "Workflow",
+        "zh-Hans-CN": "流程",
+        "ja-JP": "ワークフロー"
+      }
+    },
+    {
+      "key": "navigation.workflow.description",
+      "values": {
+        "ko-KR": "기안, 결재 대기, 진행 문서, 회람 상태를 추적합니다.",
+        "en-US": "Track drafts, pending approvals, active documents, and circulation status.",
+        "zh-Hans-CN": "跟踪起草、待审批、进行中文档和传阅状态。",
+        "ja-JP": "起案、承認待ち、進行中文書、回覧状態を追跡します。"
+      }
+    },
+    {
+      "key": "navigation.archive.label",
+      "values": {
+        "ko-KR": "자료함",
+        "en-US": "Archive",
+        "zh-Hans-CN": "资料库",
+        "ja-JP": "資料庫"
+      }
+    },
+    {
+      "key": "navigation.archive.eyebrow",
+      "values": {
+        "ko-KR": "Archive",
+        "en-US": "Archive",
+        "zh-Hans-CN": "档案",
+        "ja-JP": "アーカイブ"
+      }
+    },
+    {
+      "key": "navigation.archive.description",
+      "values": {
+        "ko-KR": "법인, 사업장, 월별 산출 자료와 보고서를 찾고 미리 봅니다.",
+        "en-US": "Find and preview company, workplace, monthly output, and report files.",
+        "zh-Hans-CN": "查找并预览法人、事业场所、月度产出和报告资料。",
+        "ja-JP": "法人、事業所、月別成果物、レポート資料を検索・プレビューします。"
+      }
+    },
+    {
+      "key": "navigation.ai.label",
+      "values": {
+        "ko-KR": "AI",
+        "en-US": "AI",
+        "zh-Hans-CN": "AI",
+        "ja-JP": "AI"
+      }
+    },
+    {
+      "key": "navigation.ai.eyebrow",
+      "values": {
+        "ko-KR": "Assistant",
+        "en-US": "Assistant",
+        "zh-Hans-CN": "助手",
+        "ja-JP": "アシスタント"
+      }
+    },
+    {
+      "key": "navigation.ai.description",
+      "values": {
+        "ko-KR": "업무 문맥을 기반으로 요약, 초안, 확인 질문을 도와줍니다.",
+        "en-US": "Use work context to support summaries, drafts, and confirmation questions.",
+        "zh-Hans-CN": "基于业务上下文辅助摘要、草稿和确认问题。",
+        "ja-JP": "業務文脈に基づき、要約、下書き、確認質問を支援します。"
+      }
+    },
+    {
+      "key": "navigation.admin.label",
+      "values": {
+        "ko-KR": "관리자",
+        "en-US": "Admin",
+        "zh-Hans-CN": "管理",
+        "ja-JP": "管理者"
+      }
+    },
+    {
+      "key": "navigation.admin.eyebrow",
+      "values": {
+        "ko-KR": "Admin",
+        "en-US": "Admin",
+        "zh-Hans-CN": "管理",
+        "ja-JP": "管理"
+      }
+    },
+    {
+      "key": "navigation.admin.description",
+      "values": {
+        "ko-KR": "법인, 사용자 권한, 조직과 운영 설정을 관리합니다.",
+        "en-US": "Manage company, user permissions, organization, and operating settings.",
+        "zh-Hans-CN": "管理法人、用户权限、组织和运营设置。",
+        "ja-JP": "法人、ユーザー権限、組織、運用設定を管理します。"
+      }
+    },
+    {
+      "key": "navigation.settings.label",
+      "values": {
+        "ko-KR": "설정",
+        "en-US": "Settings",
+        "zh-Hans-CN": "设置",
+        "ja-JP": "設定"
+      }
+    },
+    {
+      "key": "navigation.settings.eyebrow",
+      "values": {
+        "ko-KR": "Settings",
+        "en-US": "Settings",
+        "zh-Hans-CN": "设置",
+        "ja-JP": "設定"
+      }
+    },
+    {
+      "key": "navigation.settings.description",
+      "values": {
+        "ko-KR": "개인 화면, 급여 운영 기준, 플랫폼 환경을 조정합니다.",
+        "en-US": "Adjust personal views, payroll operating rules, and platform environment.",
+        "zh-Hans-CN": "调整个人界面、薪资运营规则和平台环境。",
+        "ja-JP": "個人画面、給与運用基準、プラットフォーム環境を調整します。"
+      }
+    },
+    {
+      "key": "platform.metrics.today.label",
+      "values": {
+        "ko-KR": "오늘 처리할 업무",
+        "en-US": "Work due today",
+        "zh-Hans-CN": "今日待处理工作",
+        "ja-JP": "本日対応する業務"
+      }
+    },
+    {
+      "key": "platform.metrics.today.value",
+      "values": {
+        "ko-KR": "10건",
+        "en-US": "10 tasks",
+        "zh-Hans-CN": "10项",
+        "ja-JP": "10件"
+      }
+    },
+    {
+      "key": "platform.metrics.today.helper",
+      "values": {
+        "ko-KR": "급여, 출장, 결재, 자료 확인 포함",
+        "en-US": "Includes payroll, trips, approvals, and document checks",
+        "zh-Hans-CN": "包括薪资、出差、审批和资料确认",
+        "ja-JP": "給与、出張、決裁、資料確認を含む"
+      }
+    },
+    {
+      "key": "platform.metrics.ready.label",
+      "values": {
+        "ko-KR": "연동 준비 완료",
+        "en-US": "Integrations ready",
+        "zh-Hans-CN": "联动准备完成",
+        "ja-JP": "連携準備完了"
+      }
+    },
+    {
+      "key": "platform.metrics.ready.value",
+      "values": {
+        "ko-KR": "5개",
+        "en-US": "5 items",
+        "zh-Hans-CN": "5项",
+        "ja-JP": "5件"
+      }
+    },
+    {
+      "key": "platform.metrics.ready.helper",
+      "values": {
+        "ko-KR": "연동 준비 항목 포함",
+        "en-US": "Includes integration readiness items",
+        "zh-Hans-CN": "包含联动准备项目",
+        "ja-JP": "連携準備項目を含む"
+      }
+    },
+    {
+      "key": "platform.metrics.blocked.label",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs confirmation",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "platform.metrics.blocked.value",
+      "values": {
+        "ko-KR": "2건",
+        "en-US": "2 items",
+        "zh-Hans-CN": "2项",
+        "ja-JP": "2件"
+      }
+    },
+    {
+      "key": "platform.metrics.blocked.helper",
+      "values": {
+        "ko-KR": "권한 또는 정책 확인 대기",
+        "en-US": "Waiting on permission or policy review",
+        "zh-Hans-CN": "等待权限或政策确认",
+        "ja-JP": "権限またはポリシー確認待ち"
+      }
+    },
+    {
+      "key": "platform.metrics.docs.label",
+      "values": {
+        "ko-KR": "최근 자료",
+        "en-US": "Recent documents",
+        "zh-Hans-CN": "近期资料",
+        "ja-JP": "最近の資料"
+      }
+    },
+    {
+      "key": "platform.metrics.docs.value",
+      "values": {
+        "ko-KR": "12개",
+        "en-US": "12 files",
+        "zh-Hans-CN": "12个",
+        "ja-JP": "12件"
+      }
+    },
+    {
+      "key": "platform.metrics.docs.helper",
+      "values": {
+        "ko-KR": "월별 보고서와 업로드 문서",
+        "en-US": "Monthly reports and uploaded documents",
+        "zh-Hans-CN": "月度报告和上传文档",
+        "ja-JP": "月次レポートとアップロード文書"
+      }
+    },
+    {
+      "key": "payroll.readiness.roster.title",
+      "values": {
+        "ko-KR": "근로자 명부",
+        "en-US": "Worker roster",
+        "zh-Hans-CN": "劳动者名册",
+        "ja-JP": "労働者名簿"
+      }
+    },
+    {
+      "key": "payroll.readiness.roster.value",
+      "values": {
+        "ko-KR": "연동 대기",
+        "en-US": "Waiting for sync",
+        "zh-Hans-CN": "等待联动",
+        "ja-JP": "連携待ち"
+      }
+    },
+    {
+      "key": "payroll.readiness.roster.detail",
+      "values": {
+        "ko-KR": "최근 명부 기준과 급여 대상자 상태를 확인하세요.",
+        "en-US": "Check the latest roster criteria and payroll target status.",
+        "zh-Hans-CN": "请确认最新名册标准和薪资对象状态。",
+        "ja-JP": "最新名簿基準と給与対象者の状態を確認してください。"
+      }
+    },
+    {
+      "key": "payroll.readiness.policy.title",
+      "values": {
+        "ko-KR": "운영 기준",
+        "en-US": "Operating rules",
+        "zh-Hans-CN": "运营规则",
+        "ja-JP": "運用基準"
+      }
+    },
+    {
+      "key": "payroll.readiness.policy.value",
+      "values": {
+        "ko-KR": "기준 검토",
+        "en-US": "Rules review",
+        "zh-Hans-CN": "规则审核",
+        "ja-JP": "基準確認"
+      }
+    },
+    {
+      "key": "payroll.readiness.policy.detail",
+      "values": {
+        "ko-KR": "지급일, 입력 방식, 근태 반올림 기준을 확인합니다.",
+        "en-US": "Review pay date, input method, and attendance rounding rules.",
+        "zh-Hans-CN": "确认发薪日、输入方式和考勤取整规则。",
+        "ja-JP": "支給日、入力方式、勤怠丸め基準を確認します。"
+      }
+    },
+    {
+      "key": "payroll.readiness.outputs.title",
+      "values": {
+        "ko-KR": "월별 산출",
+        "en-US": "Monthly output",
+        "zh-Hans-CN": "月度产出",
+        "ja-JP": "月別算出"
+      }
+    },
+    {
+      "key": "payroll.readiness.outputs.value",
+      "values": {
+        "ko-KR": "자료함 준비",
+        "en-US": "Archive ready",
+        "zh-Hans-CN": "资料库准备",
+        "ja-JP": "資料庫準備"
+      }
+    },
+    {
+      "key": "payroll.readiness.outputs.detail",
+      "values": {
+        "ko-KR": "최근 처리 월, 보고서, 급여차이 파일 상태를 연결합니다.",
+        "en-US": "Connect recent processing month, reports, and payroll delta files.",
+        "zh-Hans-CN": "连接最近处理月份、报告和薪资差异文件状态。",
+        "ja-JP": "直近処理月、レポート、給与差分ファイル状態を接続します。"
+      }
+    },
+    {
+      "key": "payroll.readiness.api.title",
+      "values": {
+        "ko-KR": "자료 연동",
+        "en-US": "Data integration",
+        "zh-Hans-CN": "资料联动",
+        "ja-JP": "資料連携"
+      }
+    },
+    {
+      "key": "payroll.readiness.api.value",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs check",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "payroll.readiness.api.detail",
+      "values": {
+        "ko-KR": "외부 자료 연동 전 입력 누락 여부를 확인합니다.",
+        "en-US": "Check missing inputs before external data integration.",
+        "zh-Hans-CN": "在外部资料联动前确认是否缺少输入。",
+        "ja-JP": "外部資料連携前に入力漏れを確認します。"
+      }
+    },
+    {
+      "key": "payroll.steps.settings.title",
+      "values": {
+        "ko-KR": "운영 기준 확인",
+        "en-US": "Check operating rules",
+        "zh-Hans-CN": "确认运营规则",
+        "ja-JP": "運用基準確認"
+      }
+    },
+    {
+      "key": "payroll.steps.settings.detail",
+      "values": {
+        "ko-KR": "지급일, 보험/세액 기준, 급여 항목 매핑을 검토합니다.",
+        "en-US": "Review pay date, insurance/tax rules, and payroll item mapping.",
+        "zh-Hans-CN": "审核发薪日、保险/税额规则和薪资项目映射。",
+        "ja-JP": "支給日、保険/税額基準、給与項目マッピングを確認します。"
+      }
+    },
+    {
+      "key": "payroll.steps.settings.status",
+      "values": {
+        "ko-KR": "먼저 확인",
+        "en-US": "Check first",
+        "zh-Hans-CN": "先确认",
+        "ja-JP": "先に確認"
+      }
+    },
+    {
+      "key": "payroll.steps.upload.title",
+      "values": {
+        "ko-KR": "입력 자료 준비",
+        "en-US": "Prepare input data",
+        "zh-Hans-CN": "准备输入资料",
+        "ja-JP": "入力資料準備"
+      }
+    },
+    {
+      "key": "payroll.steps.upload.detail",
+      "values": {
+        "ko-KR": "명부, 근태, 수당/공제 입력 파일을 업로드할 자리입니다.",
+        "en-US": "Upload roster, attendance, allowance, and deduction input files here.",
+        "zh-Hans-CN": "在此上传名册、考勤、津贴/扣除输入文件。",
+        "ja-JP": "名簿、勤怠、手当/控除入力ファイルをアップロードする場所です。"
+      }
+    },
+    {
+      "key": "payroll.steps.upload.status",
+      "values": {
+        "ko-KR": "대기",
+        "en-US": "Waiting",
+        "zh-Hans-CN": "等待",
+        "ja-JP": "待機"
+      }
+    },
+    {
+      "key": "payroll.steps.preview.title",
+      "values": {
+        "ko-KR": "결과 미리보기",
+        "en-US": "Preview results",
+        "zh-Hans-CN": "预览结果",
+        "ja-JP": "結果プレビュー"
+      }
+    },
+    {
+      "key": "payroll.steps.preview.detail",
+      "values": {
+        "ko-KR": "산출 결과, 오류, 변경 이력을 한 화면에서 비교합니다.",
+        "en-US": "Compare calculation results, errors, and change history in one screen.",
+        "zh-Hans-CN": "在一个界面比较计算结果、错误和变更历史。",
+        "ja-JP": "算出結果、エラー、変更履歴を1画面で比較します。"
+      }
+    },
+    {
+      "key": "payroll.steps.preview.status",
+      "values": {
+        "ko-KR": "준비됨",
+        "en-US": "Ready",
+        "zh-Hans-CN": "已准备",
+        "ja-JP": "準備完了"
+      }
+    },
+    {
+      "key": "payroll.steps.archive.title",
+      "values": {
+        "ko-KR": "자료함 저장",
+        "en-US": "Save to archive",
+        "zh-Hans-CN": "保存到资料库",
+        "ja-JP": "資料庫へ保存"
+      }
+    },
+    {
+      "key": "payroll.steps.archive.detail",
+      "values": {
+        "ko-KR": "월별 산출물과 보고서를 저장하고 추후 조회합니다.",
+        "en-US": "Save monthly outputs and reports for later lookup.",
+        "zh-Hans-CN": "保存月度产出和报告以便之后查询。",
+        "ja-JP": "月別成果物とレポートを保存し、後で照会します。"
+      }
+    },
+    {
+      "key": "payroll.steps.archive.status",
+      "values": {
+        "ko-KR": "연결 예정",
+        "en-US": "Planned connection",
+        "zh-Hans-CN": "计划连接",
+        "ja-JP": "連携予定"
+      }
+    },
+    {
+      "key": "rows.payrollSettings.payroll-setting-1.category",
+      "values": {
+        "ko-KR": "설정 대상",
+        "en-US": "Setting target",
+        "zh-Hans-CN": "设置对象",
+        "ja-JP": "設定対象"
+      }
+    },
+    {
+      "key": "rows.payrollSettings.payroll-setting-1.status",
+      "values": {
+        "ko-KR": "법인 기본",
+        "en-US": "Company default",
+        "zh-Hans-CN": "法人默认",
+        "ja-JP": "法人基本"
+      }
+    },
+    {
+      "key": "rows.payrollSettings.payroll-setting-1.owner",
+      "values": {
+        "ko-KR": "급여 담당",
+        "en-US": "Payroll owner",
+        "zh-Hans-CN": "薪资负责人",
+        "ja-JP": "給与担当"
+      }
+    },
+    {
+      "key": "rows.payrollSettings.payroll-setting-1.nextStep",
+      "values": {
+        "ko-KR": "사업장별 예외 여부 확인",
+        "en-US": "Check workplace exceptions",
+        "zh-Hans-CN": "确认各事业场所例外",
+        "ja-JP": "事業所別例外の有無を確認"
+      }
+    },
+    {
+      "key": "rows.payrollSettings.payroll-setting-2.category",
+      "values": {
+        "ko-KR": "휴업수당 지급률",
+        "en-US": "Shutdown allowance rate",
+        "zh-Hans-CN": "停工津贴支付率",
+        "ja-JP": "休業手当支給率"
+      }
+    },
+    {
+      "key": "rows.payrollSettings.payroll-setting-2.status",
+      "values": {
+        "ko-KR": "법정 기준 확인",
+        "en-US": "Legal rule check",
+        "zh-Hans-CN": "确认法定标准",
+        "ja-JP": "法定基準確認"
+      }
+    },
+    {
+      "key": "rows.payrollSettings.payroll-setting-2.owner",
+      "values": {
+        "ko-KR": "급여 담당",
+        "en-US": "Payroll owner",
+        "zh-Hans-CN": "薪资负责人",
+        "ja-JP": "給与担当"
+      }
+    },
+    {
+      "key": "rows.payrollSettings.payroll-setting-2.nextStep",
+      "values": {
+        "ko-KR": "최저 기준 이상 입력값 검토",
+        "en-US": "Review values above minimum rules",
+        "zh-Hans-CN": "审核高于最低标准的输入值",
+        "ja-JP": "最低基準以上の入力値を確認"
+      }
+    },
+    {
+      "key": "rows.payrollSettings.payroll-setting-3.category",
+      "values": {
+        "ko-KR": "월 기본근로시간",
+        "en-US": "Monthly base working hours",
+        "zh-Hans-CN": "月基本工作时间",
+        "ja-JP": "月基本労働時間"
+      }
+    },
+    {
+      "key": "rows.payrollSettings.payroll-setting-3.status",
+      "values": {
+        "ko-KR": "209시간",
+        "en-US": "209 hours",
+        "zh-Hans-CN": "209小时",
+        "ja-JP": "209時間"
+      }
+    },
+    {
+      "key": "rows.payrollSettings.payroll-setting-3.owner",
+      "values": {
+        "ko-KR": "운영 관리자",
+        "en-US": "Operations admin",
+        "zh-Hans-CN": "运营管理员",
+        "ja-JP": "運用管理者"
+      }
+    },
+    {
+      "key": "rows.payrollSettings.payroll-setting-3.nextStep",
+      "values": {
+        "ko-KR": "사업장별 고정/대체 방식 표시",
+        "en-US": "Show fixed or alternative method by workplace",
+        "zh-Hans-CN": "按事业场所显示固定/替代方式",
+        "ja-JP": "事業所別の固定/代替方式を表示"
+      }
+    },
+    {
+      "key": "rows.payrollIntegration.payroll-integration-1.category",
+      "values": {
+        "ko-KR": "Bitween Demo / 본사",
+        "en-US": "Bitween Demo / HQ",
+        "zh-Hans-CN": "Bitween Demo / 总部",
+        "ja-JP": "Bitween Demo / 本社"
+      }
+    },
+    {
+      "key": "rows.payrollIntegration.payroll-integration-1.status",
+      "values": {
+        "ko-KR": "근태문서 2종",
+        "en-US": "2 attendance documents",
+        "zh-Hans-CN": "2种考勤文档",
+        "ja-JP": "勤怠文書2種"
+      }
+    },
+    {
+      "key": "rows.payrollIntegration.payroll-integration-1.owner",
+      "values": {
+        "ko-KR": "건강보험EDI 확인 전",
+        "en-US": "Before health insurance EDI check",
+        "zh-Hans-CN": "健康保险EDI确认前",
+        "ja-JP": "健康保険EDI確認前"
+      }
+    },
+    {
+      "key": "rows.payrollIntegration.payroll-integration-1.nextStep",
+      "values": {
+        "ko-KR": "급여 작업 전 보험료 공제금액 확인 필요",
+        "en-US": "Confirm insurance deduction amounts before payroll work",
+        "zh-Hans-CN": "薪资作业前需确认保险费扣除金额",
+        "ja-JP": "給与作業前に保険料控除額の確認が必要"
+      }
+    },
+    {
+      "key": "rows.payrollIntegration.payroll-integration-2.category",
+      "values": {
+        "ko-KR": "Bitween Demo / 부산지점",
+        "en-US": "Bitween Demo / Busan Branch",
+        "zh-Hans-CN": "Bitween Demo / 釜山分店",
+        "ja-JP": "Bitween Demo / 釜山支店"
+      }
+    },
+    {
+      "key": "rows.payrollIntegration.payroll-integration-2.status",
+      "values": {
+        "ko-KR": "청구서 매핑 대기",
+        "en-US": "Invoice mapping pending",
+        "zh-Hans-CN": "等待账单映射",
+        "ja-JP": "請求書マッピング待ち"
+      }
+    },
+    {
+      "key": "rows.payrollIntegration.payroll-integration-2.owner",
+      "values": {
+        "ko-KR": "사업장 담당",
+        "en-US": "Workplace owner",
+        "zh-Hans-CN": "事业场所负责人",
+        "ja-JP": "事業所担当"
+      }
+    },
+    {
+      "key": "rows.payrollIntegration.payroll-integration-2.nextStep",
+      "values": {
+        "ko-KR": "사업장별 청구서 양식과 근태문서 연결",
+        "en-US": "Connect workplace invoice forms and attendance documents",
+        "zh-Hans-CN": "连接各事业场所账单表单和考勤文档",
+        "ja-JP": "事業所別請求書様式と勤怠文書を連携"
+      }
+    },
+    {
+      "key": "rows.payrollIntegration.payroll-integration-3.category",
+      "values": {
+        "ko-KR": "협력 사업장",
+        "en-US": "Partner workplace",
+        "zh-Hans-CN": "合作事业场所",
+        "ja-JP": "協力事業所"
+      }
+    },
+    {
+      "key": "rows.payrollIntegration.payroll-integration-3.status",
+      "values": {
+        "ko-KR": "입력자료 준비",
+        "en-US": "Input data ready",
+        "zh-Hans-CN": "输入资料准备",
+        "ja-JP": "入力資料準備"
+      }
+    },
+    {
+      "key": "rows.payrollIntegration.payroll-integration-3.owner",
+      "values": {
+        "ko-KR": "급여 담당",
+        "en-US": "Payroll owner",
+        "zh-Hans-CN": "薪资负责人",
+        "ja-JP": "給与担当"
+      }
+    },
+    {
+      "key": "rows.payrollIntegration.payroll-integration-3.nextStep",
+      "values": {
+        "ko-KR": "법인/사업장별 입력 정책 확인 후 산출 진입",
+        "en-US": "Enter calculation after checking company/workplace input policy",
+        "zh-Hans-CN": "确认法人/事业场所输入政策后进入计算",
+        "ja-JP": "法人/事業所別入力ポリシー確認後に算出へ進む"
+      }
+    },
+    {
+      "key": "rows.preview.preview-1.category",
+      "values": {
+        "ko-KR": "Excel 미리보기",
+        "en-US": "Excel preview",
+        "zh-Hans-CN": "Excel预览",
+        "ja-JP": "Excelプレビュー"
+      }
+    },
+    {
+      "key": "rows.preview.preview-1.status",
+      "values": {
+        "ko-KR": "시트 선택",
+        "en-US": "Sheet selection",
+        "zh-Hans-CN": "选择工作表",
+        "ja-JP": "シート選択"
+      }
+    },
+    {
+      "key": "rows.preview.preview-1.owner",
+      "values": {
+        "ko-KR": "자료함",
+        "en-US": "Archive",
+        "zh-Hans-CN": "资料库",
+        "ja-JP": "資料庫"
+      }
+    },
+    {
+      "key": "rows.preview.preview-1.nextStep",
+      "values": {
+        "ko-KR": "표/텍스트 보기 전환",
+        "en-US": "Switch table/text view",
+        "zh-Hans-CN": "切换表格/文本视图",
+        "ja-JP": "表/テキスト表示を切替"
+      }
+    },
+    {
+      "key": "rows.preview.preview-2.category",
+      "values": {
+        "ko-KR": "필터 초기화",
+        "en-US": "Reset filters",
+        "zh-Hans-CN": "重置筛选",
+        "ja-JP": "フィルター初期化"
+      }
+    },
+    {
+      "key": "rows.preview.preview-2.status",
+      "values": {
+        "ko-KR": "지원",
+        "en-US": "Supported",
+        "zh-Hans-CN": "支持",
+        "ja-JP": "対応"
+      }
+    },
+    {
+      "key": "rows.preview.preview-2.owner",
+      "values": {
+        "ko-KR": "사용자",
+        "en-US": "User",
+        "zh-Hans-CN": "用户",
+        "ja-JP": "ユーザー"
+      }
+    },
+    {
+      "key": "rows.preview.preview-2.nextStep",
+      "values": {
+        "ko-KR": "필터 적용 상태 안내",
+        "en-US": "Show applied filter state",
+        "zh-Hans-CN": "提示筛选应用状态",
+        "ja-JP": "フィルター適用状態を案内"
+      }
+    },
+    {
+      "key": "rows.preview.preview-3.category",
+      "values": {
+        "ko-KR": "수정본 업로드",
+        "en-US": "Upload revision",
+        "zh-Hans-CN": "上传修订版",
+        "ja-JP": "修正版アップロード"
+      }
+    },
+    {
+      "key": "rows.preview.preview-3.status",
+      "values": {
+        "ko-KR": "권한 필요",
+        "en-US": "Permission required",
+        "zh-Hans-CN": "需要权限",
+        "ja-JP": "権限が必要"
+      }
+    },
+    {
+      "key": "rows.preview.preview-3.owner",
+      "values": {
+        "ko-KR": "급여 담당",
+        "en-US": "Payroll owner",
+        "zh-Hans-CN": "薪资负责人",
+        "ja-JP": "給与担当"
+      }
+    },
+    {
+      "key": "rows.preview.preview-3.nextStep",
+      "values": {
+        "ko-KR": "현재 scope 파일일 때만 노출",
+        "en-US": "Show only for files in the current scope",
+        "zh-Hans-CN": "仅当前范围文件时显示",
+        "ja-JP": "現在スコープのファイルのみ表示"
+      }
+    },
+    {
+      "key": "workQueue.payroll-june.title",
+      "values": {
+        "ko-KR": "6월 급여 산출 준비",
+        "en-US": "Prepare June payroll calculation",
+        "zh-Hans-CN": "准备6月薪资计算",
+        "ja-JP": "6月給与算出準備"
+      }
+    },
+    {
+      "key": "workQueue.payroll-june.meta",
+      "values": {
+        "ko-KR": "급여 자동화",
+        "en-US": "Payroll automation",
+        "zh-Hans-CN": "薪资自动化",
+        "ja-JP": "給与自動化"
+      }
+    },
+    {
+      "key": "workQueue.payroll-june.owner",
+      "values": {
+        "ko-KR": "급여 담당",
+        "en-US": "Payroll owner",
+        "zh-Hans-CN": "薪资负责人",
+        "ja-JP": "給与担当"
+      }
+    },
+    {
+      "key": "workQueue.payroll-june.due",
+      "values": {
+        "ko-KR": "오늘",
+        "en-US": "Today",
+        "zh-Hans-CN": "今天",
+        "ja-JP": "今日"
+      }
+    },
+    {
+      "key": "workQueue.payroll-june.status",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs check",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "workQueue.approval-pending.title",
+      "values": {
+        "ko-KR": "전자결재 대기 문서",
+        "en-US": "Pending approval documents",
+        "zh-Hans-CN": "待审批文档",
+        "ja-JP": "電子決裁待ち文書"
+      }
+    },
+    {
+      "key": "workQueue.approval-pending.meta",
+      "values": {
+        "ko-KR": "워크플로우",
+        "en-US": "Workflow",
+        "zh-Hans-CN": "流程",
+        "ja-JP": "ワークフロー"
+      }
+    },
+    {
+      "key": "workQueue.approval-pending.owner",
+      "values": {
+        "ko-KR": "승인권자",
+        "en-US": "Approver",
+        "zh-Hans-CN": "审批人",
+        "ja-JP": "承認者"
+      }
+    },
+    {
+      "key": "workQueue.approval-pending.due",
+      "values": {
+        "ko-KR": "D-1",
+        "en-US": "D-1",
+        "zh-Hans-CN": "D-1",
+        "ja-JP": "D-1"
+      }
+    },
+    {
+      "key": "workQueue.approval-pending.status",
+      "values": {
+        "ko-KR": "3건",
+        "en-US": "3 items",
+        "zh-Hans-CN": "3项",
+        "ja-JP": "3件"
+      }
+    },
+    {
+      "key": "workQueue.travel-diary.title",
+      "values": {
+        "ko-KR": "출장 계획/업무일지 검토",
+        "en-US": "Review trip plan/worklog",
+        "zh-Hans-CN": "审核出差计划/工作日志",
+        "ja-JP": "出張計画/業務日誌レビュー"
+      }
+    },
+    {
+      "key": "workQueue.travel-diary.meta",
+      "values": {
+        "ko-KR": "출장/업무일지",
+        "en-US": "Trips / worklogs",
+        "zh-Hans-CN": "出差/工作日志",
+        "ja-JP": "出張/業務日誌"
+      }
+    },
+    {
+      "key": "workQueue.travel-diary.owner",
+      "values": {
+        "ko-KR": "팀 리더",
+        "en-US": "Team lead",
+        "zh-Hans-CN": "团队负责人",
+        "ja-JP": "チームリーダー"
+      }
+    },
+    {
+      "key": "workQueue.travel-diary.due",
+      "values": {
+        "ko-KR": "오늘",
+        "en-US": "Today",
+        "zh-Hans-CN": "今天",
+        "ja-JP": "今日"
+      }
+    },
+    {
+      "key": "workQueue.travel-diary.status",
+      "values": {
+        "ko-KR": "진행 중",
+        "en-US": "In progress",
+        "zh-Hans-CN": "进行中",
+        "ja-JP": "進行中"
+      }
+    },
+    {
+      "key": "workQueue.archive-preview.title",
+      "values": {
+        "ko-KR": "자료함 최근 보고서",
+        "en-US": "Recent archive report",
+        "zh-Hans-CN": "资料库近期报告",
+        "ja-JP": "資料庫の最近レポート"
+      }
+    },
+    {
+      "key": "workQueue.archive-preview.meta",
+      "values": {
+        "ko-KR": "아카이브",
+        "en-US": "Archive",
+        "zh-Hans-CN": "档案",
+        "ja-JP": "アーカイブ"
+      }
+    },
+    {
+      "key": "workQueue.archive-preview.owner",
+      "values": {
+        "ko-KR": "운영팀",
+        "en-US": "Operations team",
+        "zh-Hans-CN": "运营团队",
+        "ja-JP": "運用チーム"
+      }
+    },
+    {
+      "key": "workQueue.archive-preview.due",
+      "values": {
+        "ko-KR": "상시",
+        "en-US": "Always",
+        "zh-Hans-CN": "常时",
+        "ja-JP": "常時"
+      }
+    },
+    {
+      "key": "workQueue.archive-preview.status",
+      "values": {
+        "ko-KR": "미리보기 가능",
+        "en-US": "Preview available",
+        "zh-Hans-CN": "可预览",
+        "ja-JP": "プレビュー可能"
+      }
+    },
+    {
+      "key": "calendarEvents.calendar-payroll.title",
+      "values": {
+        "ko-KR": "급여 산출 기준 확인",
+        "en-US": "Check payroll calculation rules",
+        "zh-Hans-CN": "确认薪资计算标准",
+        "ja-JP": "給与算出基準確認"
+      }
+    },
+    {
+      "key": "calendarEvents.calendar-approval.title",
+      "values": {
+        "ko-KR": "전자결재 대기 문서 검토",
+        "en-US": "Review pending approval documents",
+        "zh-Hans-CN": "审核待审批文档",
+        "ja-JP": "電子決裁待ち文書レビュー"
+      }
+    },
+    {
+      "key": "calendarEvents.calendar-recruit.title",
+      "values": {
+        "ko-KR": "채용 후보자 부서 배치 회의",
+        "en-US": "Candidate department placement meeting",
+        "zh-Hans-CN": "候选人部门配置会议",
+        "ja-JP": "採用候補者の部門配置会議"
+      }
+    },
+    {
+      "key": "calendarEvents.calendar-travel.title",
+      "values": {
+        "ko-KR": "부산 출장 업무일지 실적 반영",
+        "en-US": "Reflect Busan trip worklog into performance",
+        "zh-Hans-CN": "将釜山出差工作日志反映到绩效",
+        "ja-JP": "釜山出張業務日誌を実績へ反映"
+      }
+    },
+    {
+      "key": "todayTodos.todo-payroll.owner",
+      "values": {
+        "ko-KR": "급여 담당",
+        "en-US": "Payroll owner",
+        "zh-Hans-CN": "薪资负责人",
+        "ja-JP": "給与担当"
+      }
+    },
+    {
+      "key": "todayTodos.todo-payroll.title",
+      "values": {
+        "ko-KR": "6월 급여 산출 준비",
+        "en-US": "Prepare June payroll calculation",
+        "zh-Hans-CN": "准备6月薪资计算",
+        "ja-JP": "6月給与算出準備"
+      }
+    },
+    {
+      "key": "todayTodos.todo-payroll.timeLabel",
+      "values": {
+        "ko-KR": "오늘",
+        "en-US": "Today",
+        "zh-Hans-CN": "今天",
+        "ja-JP": "今日"
+      }
+    },
+    {
+      "key": "todayTodos.todo-approval.owner",
+      "values": {
+        "ko-KR": "승인권자",
+        "en-US": "Approver",
+        "zh-Hans-CN": "审批人",
+        "ja-JP": "承認者"
+      }
+    },
+    {
+      "key": "todayTodos.todo-approval.title",
+      "values": {
+        "ko-KR": "전자결재 대기 문서",
+        "en-US": "Pending approval documents",
+        "zh-Hans-CN": "待审批文档",
+        "ja-JP": "電子決裁待ち文書"
+      }
+    },
+    {
+      "key": "todayTodos.todo-approval.timeLabel",
+      "values": {
+        "ko-KR": "오늘",
+        "en-US": "Today",
+        "zh-Hans-CN": "今天",
+        "ja-JP": "今日"
+      }
+    },
+    {
+      "key": "todayTodos.todo-travel.owner",
+      "values": {
+        "ko-KR": "영업팀",
+        "en-US": "Sales team",
+        "zh-Hans-CN": "销售团队",
+        "ja-JP": "営業チーム"
+      }
+    },
+    {
+      "key": "todayTodos.todo-travel.title",
+      "values": {
+        "ko-KR": "출장 업무일지 작성 및 실적 반영",
+        "en-US": "Write trip worklog and reflect performance",
+        "zh-Hans-CN": "填写出差工作日志并反映绩效",
+        "ja-JP": "出張業務日誌作成と実績反映"
+      }
+    },
+    {
+      "key": "todayTodos.todo-travel.timeLabel",
+      "values": {
+        "ko-KR": "오늘",
+        "en-US": "Today",
+        "zh-Hans-CN": "今天",
+        "ja-JP": "今日"
+      }
+    },
+    {
+      "key": "todayTodos.todo-archive.owner",
+      "values": {
+        "ko-KR": "운영팀",
+        "en-US": "Operations team",
+        "zh-Hans-CN": "运营团队",
+        "ja-JP": "運用チーム"
+      }
+    },
+    {
+      "key": "todayTodos.todo-archive.title",
+      "values": {
+        "ko-KR": "자료함 최근 보고서 확인",
+        "en-US": "Check recent archive report",
+        "zh-Hans-CN": "确认资料库近期报告",
+        "ja-JP": "資料庫の最近レポート確認"
+      }
+    },
+    {
+      "key": "todayTodos.todo-archive.timeLabel",
+      "values": {
+        "ko-KR": "완료",
+        "en-US": "Done",
+        "zh-Hans-CN": "完成",
+        "ja-JP": "完了"
+      }
+    },
+    {
+      "key": "modules.hr.title",
+      "values": {
+        "ko-KR": "HR 운영 현황",
+        "en-US": "HR operations status",
+        "zh-Hans-CN": "HR运营现状",
+        "ja-JP": "HR運用状況"
+      }
+    },
+    {
+      "key": "modules.hr.subtitle",
+      "values": {
+        "ko-KR": "직원 명부, 이력서, 사직서, 재직/경력증명서 요청을 한 화면에서 추적합니다.",
+        "en-US": "Track roster, resume, resignation, employment and career certificate requests in one screen.",
+        "zh-Hans-CN": "在一个界面跟踪员工名册、简历、离职单、在职/经历证明请求。",
+        "ja-JP": "社員名簿、履歴書、退職届、在職/経歴証明書リクエストを1画面で追跡します。"
+      }
+    },
+    {
+      "key": "modules.hr.filters.all",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "modules.hr.filters.roster",
+      "values": {
+        "ko-KR": "직원명부",
+        "en-US": "Roster",
+        "zh-Hans-CN": "员工名册",
+        "ja-JP": "社員名簿"
+      }
+    },
+    {
+      "key": "modules.hr.filters.resume",
+      "values": {
+        "ko-KR": "이력서",
+        "en-US": "Resume",
+        "zh-Hans-CN": "简历",
+        "ja-JP": "履歴書"
+      }
+    },
+    {
+      "key": "modules.hr.filters.resignation",
+      "values": {
+        "ko-KR": "사직서",
+        "en-US": "Resignation",
+        "zh-Hans-CN": "离职单",
+        "ja-JP": "退職届"
+      }
+    },
+    {
+      "key": "modules.hr.filters.certificate",
+      "values": {
+        "ko-KR": "증명서",
+        "en-US": "Certificates",
+        "zh-Hans-CN": "证明书",
+        "ja-JP": "証明書"
+      }
+    },
+    {
+      "key": "modules.hr.primaryAction.label",
+      "values": {
+        "ko-KR": "직원 명부 보기",
+        "en-US": "View roster",
+        "zh-Hans-CN": "查看员工名册",
+        "ja-JP": "社員名簿を見る"
+      }
+    },
+    {
+      "key": "modules.hr.primaryAction.description",
+      "values": {
+        "ko-KR": "명부와 급여 연동 상태를 확인합니다.",
+        "en-US": "Check roster and payroll sync status.",
+        "zh-Hans-CN": "确认名册和薪资联动状态。",
+        "ja-JP": "名簿と給与連携状態を確認します。"
+      }
+    },
+    {
+      "key": "modules.hr.secondaryAction.label",
+      "values": {
+        "ko-KR": "급여 준비로 이동",
+        "en-US": "Go to payroll readiness",
+        "zh-Hans-CN": "转到薪资准备",
+        "ja-JP": "給与準備へ移動"
+      }
+    },
+    {
+      "key": "modules.hr.secondaryAction.description",
+      "values": {
+        "ko-KR": "급여 자동화 readiness를 확인합니다.",
+        "en-US": "Check payroll automation readiness.",
+        "zh-Hans-CN": "确认薪资自动化准备度。",
+        "ja-JP": "給与自動化の準備状況を確認します。"
+      }
+    },
+    {
+      "key": "modules.hr.emptyTitle",
+      "values": {
+        "ko-KR": "표시할 HR 업무가 없습니다.",
+        "en-US": "No HR work to display.",
+        "zh-Hans-CN": "没有可显示的HR工作。",
+        "ja-JP": "表示するHR業務がありません。"
+      }
+    },
+    {
+      "key": "modules.hr.emptyDescription",
+      "values": {
+        "ko-KR": "명부, 이력서, 사직서, 증명서 업무가 생기면 처리 대기 항목이 표시됩니다.",
+        "en-US": "Roster, resume, resignation, and certificate work appears here when pending.",
+        "zh-Hans-CN": "名册、简历、离职单、证明书工作待处理时会显示在此。",
+        "ja-JP": "名簿、履歴書、退職届、証明書業務が発生すると待機項目が表示されます。"
+      }
+    },
+    {
+      "key": "modules.hr.metrics.employees.label",
+      "values": {
+        "ko-KR": "재직 직원",
+        "en-US": "Active employees",
+        "zh-Hans-CN": "在职员工",
+        "ja-JP": "在籍社員"
+      }
+    },
+    {
+      "key": "modules.hr.metrics.employees.value",
+      "values": {
+        "ko-KR": "48명",
+        "en-US": "48 people",
+        "zh-Hans-CN": "48人",
+        "ja-JP": "48名"
+      }
+    },
+    {
+      "key": "modules.hr.metrics.employees.helper",
+      "values": {
+        "ko-KR": "법인 전체",
+        "en-US": "Whole company",
+        "zh-Hans-CN": "法人整体",
+        "ja-JP": "法人全体"
+      }
+    },
+    {
+      "key": "modules.hr.metrics.attendance.label",
+      "values": {
+        "ko-KR": "근태 확인",
+        "en-US": "Attendance checks",
+        "zh-Hans-CN": "考勤确认",
+        "ja-JP": "勤怠確認"
+      }
+    },
+    {
+      "key": "modules.hr.metrics.attendance.value",
+      "values": {
+        "ko-KR": "6건",
+        "en-US": "6 items",
+        "zh-Hans-CN": "6项",
+        "ja-JP": "6件"
+      }
+    },
+    {
+      "key": "modules.hr.metrics.attendance.helper",
+      "values": {
+        "ko-KR": "월말 마감 전 확인",
+        "en-US": "Before month-end close",
+        "zh-Hans-CN": "月末结算前确认",
+        "ja-JP": "月末締め前確認"
+      }
+    },
+    {
+      "key": "modules.hr.metrics.certs.label",
+      "values": {
+        "ko-KR": "증명서 요청",
+        "en-US": "Certificate requests",
+        "zh-Hans-CN": "证明书请求",
+        "ja-JP": "証明書リクエスト"
+      }
+    },
+    {
+      "key": "modules.hr.metrics.certs.value",
+      "values": {
+        "ko-KR": "2건",
+        "en-US": "2 items",
+        "zh-Hans-CN": "2项",
+        "ja-JP": "2件"
+      }
+    },
+    {
+      "key": "modules.hr.metrics.certs.helper",
+      "values": {
+        "ko-KR": "담당자 처리 대기",
+        "en-US": "Waiting for owner processing",
+        "zh-Hans-CN": "等待负责人处理",
+        "ja-JP": "担当者処理待ち"
+      }
+    },
+    {
+      "key": "modules.hr.rows.hr-1.category",
+      "values": {
+        "ko-KR": "직원명부 업데이트",
+        "en-US": "Roster update",
+        "zh-Hans-CN": "员工名册更新",
+        "ja-JP": "社員名簿更新"
+      }
+    },
+    {
+      "key": "modules.hr.rows.hr-1.status",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs check",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "modules.hr.rows.hr-1.owner",
+      "values": {
+        "ko-KR": "인사 담당",
+        "en-US": "HR owner",
+        "zh-Hans-CN": "HR负责人",
+        "ja-JP": "人事担当"
+      }
+    },
+    {
+      "key": "modules.hr.rows.hr-1.nextStep",
+      "values": {
+        "ko-KR": "부서/직무 최신 정보 확인",
+        "en-US": "Check latest department/job data",
+        "zh-Hans-CN": "确认最新部门/岗位信息",
+        "ja-JP": "部門/職務の最新情報を確認"
+      }
+    },
+    {
+      "key": "modules.hr.rows.hr-2.category",
+      "values": {
+        "ko-KR": "재직증명서/경력증명서",
+        "en-US": "Employment/career certificates",
+        "zh-Hans-CN": "在职/经历证明",
+        "ja-JP": "在職証明書/経歴証明書"
+      }
+    },
+    {
+      "key": "modules.hr.rows.hr-2.status",
+      "values": {
+        "ko-KR": "접수",
+        "en-US": "Received",
+        "zh-Hans-CN": "已受理",
+        "ja-JP": "受付"
+      }
+    },
+    {
+      "key": "modules.hr.rows.hr-2.owner",
+      "values": {
+        "ko-KR": "운영팀",
+        "en-US": "Operations team",
+        "zh-Hans-CN": "运营团队",
+        "ja-JP": "運用チーム"
+      }
+    },
+    {
+      "key": "modules.hr.rows.hr-2.nextStep",
+      "values": {
+        "ko-KR": "발급 양식 검토",
+        "en-US": "Review issue form",
+        "zh-Hans-CN": "审核签发表单",
+        "ja-JP": "発行様式を確認"
+      }
+    },
+    {
+      "key": "modules.hr.rows.hr-3.category",
+      "values": {
+        "ko-KR": "이력서/사직서 관리",
+        "en-US": "Resume/resignation management",
+        "zh-Hans-CN": "简历/离职单管理",
+        "ja-JP": "履歴書/退職届管理"
+      }
+    },
+    {
+      "key": "modules.hr.rows.hr-3.status",
+      "values": {
+        "ko-KR": "정리 중",
+        "en-US": "Organizing",
+        "zh-Hans-CN": "整理中",
+        "ja-JP": "整理中"
+      }
+    },
+    {
+      "key": "modules.hr.rows.hr-3.owner",
+      "values": {
+        "ko-KR": "인사 담당",
+        "en-US": "HR owner",
+        "zh-Hans-CN": "HR负责人",
+        "ja-JP": "人事担当"
+      }
+    },
+    {
+      "key": "modules.hr.rows.hr-3.nextStep",
+      "values": {
+        "ko-KR": "입사/퇴사 문서 분류",
+        "en-US": "Classify hire/exit documents",
+        "zh-Hans-CN": "分类入职/离职文档",
+        "ja-JP": "入社/退社文書を分類"
+      }
+    },
+    {
+      "key": "modules.attendance.title",
+      "values": {
+        "ko-KR": "모바일 출퇴근",
+        "en-US": "Mobile attendance",
+        "zh-Hans-CN": "移动考勤",
+        "ja-JP": "モバイル出退勤"
+      }
+    },
+    {
+      "key": "modules.attendance.subtitle",
+      "values": {
+        "ko-KR": "휴대폰에서 출근/퇴근 상태, 위치 확인, 최근 근태 기록을 확인합니다.",
+        "en-US": "Check check-in/out status, location verification, and recent attendance records on mobile.",
+        "zh-Hans-CN": "在手机上确认签到/签退状态、位置确认和近期考勤记录。",
+        "ja-JP": "携帯で出勤/退勤状態、位置確認、最近の勤怠記録を確認します。"
+      }
+    },
+    {
+      "key": "modules.attendance.filters.all",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "modules.attendance.filters.checkIn",
+      "values": {
+        "ko-KR": "출근",
+        "en-US": "Check-in",
+        "zh-Hans-CN": "签到",
+        "ja-JP": "出勤"
+      }
+    },
+    {
+      "key": "modules.attendance.filters.checkOut",
+      "values": {
+        "ko-KR": "퇴근",
+        "en-US": "Check-out",
+        "zh-Hans-CN": "签退",
+        "ja-JP": "退勤"
+      }
+    },
+    {
+      "key": "modules.attendance.filters.attention",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs check",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "modules.attendance.primaryAction.label",
+      "values": {
+        "ko-KR": "출퇴근 앱 보기",
+        "en-US": "Open attendance app",
+        "zh-Hans-CN": "查看考勤应用",
+        "ja-JP": "出退勤アプリを見る"
+      }
+    },
+    {
+      "key": "modules.attendance.primaryAction.description",
+      "values": {
+        "ko-KR": "휴대폰 출퇴근 화면을 확인합니다.",
+        "en-US": "Check the mobile attendance screen.",
+        "zh-Hans-CN": "确认手机考勤界面。",
+        "ja-JP": "携帯の出退勤画面を確認します。"
+      }
+    },
+    {
+      "key": "modules.attendance.secondaryAction.label",
+      "values": {
+        "ko-KR": "HR로 이동",
+        "en-US": "Go to HR",
+        "zh-Hans-CN": "转到HR",
+        "ja-JP": "HRへ移動"
+      }
+    },
+    {
+      "key": "modules.attendance.secondaryAction.description",
+      "values": {
+        "ko-KR": "근태와 직원 정보를 함께 확인합니다.",
+        "en-US": "Review attendance and employee information together.",
+        "zh-Hans-CN": "同时确认考勤和员工信息。",
+        "ja-JP": "勤怠と社員情報を一緒に確認します。"
+      }
+    },
+    {
+      "key": "modules.attendance.emptyTitle",
+      "values": {
+        "ko-KR": "표시할 출퇴근 기록이 없습니다.",
+        "en-US": "No attendance records to display.",
+        "zh-Hans-CN": "没有可显示的考勤记录。",
+        "ja-JP": "表示する出退勤記録がありません。"
+      }
+    },
+    {
+      "key": "modules.attendance.emptyDescription",
+      "values": {
+        "ko-KR": "출근 또는 퇴근 기록이 생기면 이곳에 표시됩니다.",
+        "en-US": "Check-in or check-out records appear here.",
+        "zh-Hans-CN": "签到或签退记录会显示在此。",
+        "ja-JP": "出勤または退勤記録が発生するとここに表示されます。"
+      }
+    },
+    {
+      "key": "modules.attendance.metrics.checked-in.label",
+      "values": {
+        "ko-KR": "오늘 출근",
+        "en-US": "Today check-in",
+        "zh-Hans-CN": "今日签到",
+        "ja-JP": "本日出勤"
+      }
+    },
+    {
+      "key": "modules.attendance.metrics.checked-in.value",
+      "values": {
+        "ko-KR": "09:02",
+        "en-US": "09:02",
+        "zh-Hans-CN": "09:02",
+        "ja-JP": "09:02"
+      }
+    },
+    {
+      "key": "modules.attendance.metrics.checked-in.helper",
+      "values": {
+        "ko-KR": "본사 120m 이내",
+        "en-US": "Within 120m of HQ",
+        "zh-Hans-CN": "总部120m以内",
+        "ja-JP": "本社120m以内"
+      }
+    },
+    {
+      "key": "modules.attendance.metrics.pending.label",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs check",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "modules.attendance.metrics.pending.value",
+      "values": {
+        "ko-KR": "1건",
+        "en-US": "1 item",
+        "zh-Hans-CN": "1项",
+        "ja-JP": "1件"
+      }
+    },
+    {
+      "key": "modules.attendance.metrics.pending.helper",
+      "values": {
+        "ko-KR": "외근 위치 확인",
+        "en-US": "Offsite location check",
+        "zh-Hans-CN": "外勤位置确认",
+        "ja-JP": "外勤位置確認"
+      }
+    },
+    {
+      "key": "modules.attendance.metrics.weekly.label",
+      "values": {
+        "ko-KR": "이번 주 기록",
+        "en-US": "This week records",
+        "zh-Hans-CN": "本周记录",
+        "ja-JP": "今週の記録"
+      }
+    },
+    {
+      "key": "modules.attendance.metrics.weekly.value",
+      "values": {
+        "ko-KR": "4일",
+        "en-US": "4 days",
+        "zh-Hans-CN": "4天",
+        "ja-JP": "4日"
+      }
+    },
+    {
+      "key": "modules.attendance.metrics.weekly.helper",
+      "values": {
+        "ko-KR": "정상 출근",
+        "en-US": "Normal check-in",
+        "zh-Hans-CN": "正常签到",
+        "ja-JP": "正常出勤"
+      }
+    },
+    {
+      "key": "modules.attendance.rows.attendance-1.category",
+      "values": {
+        "ko-KR": "오늘 출근 기록",
+        "en-US": "Today check-in record",
+        "zh-Hans-CN": "今日签到记录",
+        "ja-JP": "本日の出勤記録"
+      }
+    },
+    {
+      "key": "modules.attendance.rows.attendance-1.status",
+      "values": {
+        "ko-KR": "확인됨",
+        "en-US": "Confirmed",
+        "zh-Hans-CN": "已确认",
+        "ja-JP": "確認済み"
+      }
+    },
+    {
+      "key": "modules.attendance.rows.attendance-1.owner",
+      "values": {
+        "ko-KR": "BW-0001",
+        "en-US": "BW-0001",
+        "zh-Hans-CN": "BW-0001",
+        "ja-JP": "BW-0001"
+      }
+    },
+    {
+      "key": "modules.attendance.rows.attendance-1.nextStep",
+      "values": {
+        "ko-KR": "퇴근 체크 대기",
+        "en-US": "Waiting for check-out",
+        "zh-Hans-CN": "等待签退",
+        "ja-JP": "退勤チェック待ち"
+      }
+    },
+    {
+      "key": "modules.attendance.rows.attendance-2.category",
+      "values": {
+        "ko-KR": "외근 위치 확인",
+        "en-US": "Offsite location check",
+        "zh-Hans-CN": "外勤位置确认",
+        "ja-JP": "外勤位置確認"
+      }
+    },
+    {
+      "key": "modules.attendance.rows.attendance-2.status",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs check",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "modules.attendance.rows.attendance-2.owner",
+      "values": {
+        "ko-KR": "관리자",
+        "en-US": "Admin",
+        "zh-Hans-CN": "管理员",
+        "ja-JP": "管理者"
+      }
+    },
+    {
+      "key": "modules.attendance.rows.attendance-2.nextStep",
+      "values": {
+        "ko-KR": "외근 사유 확인",
+        "en-US": "Confirm offsite reason",
+        "zh-Hans-CN": "确认外勤原因",
+        "ja-JP": "外勤理由を確認"
+      }
+    },
+    {
+      "key": "modules.recruit.title",
+      "values": {
+        "ko-KR": "채용 인재 관리",
+        "en-US": "Recruiting talent management",
+        "zh-Hans-CN": "招聘人才管理",
+        "ja-JP": "採用人材管理"
+      }
+    },
+    {
+      "key": "modules.recruit.subtitle",
+      "values": {
+        "ko-KR": "지원자 경력과 자격 정보를 공유하고 부서별 필요 인재를 배치합니다.",
+        "en-US": "Share applicant career and credential data and place talent by department needs.",
+        "zh-Hans-CN": "共享应聘者经历和资格信息，并按部门需求配置人才。",
+        "ja-JP": "応募者の経歴と資格情報を共有し、部門別に必要人材を配置します。"
+      }
+    },
+    {
+      "key": "modules.recruit.filters.all",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "modules.recruit.filters.applicant",
+      "values": {
+        "ko-KR": "지원자",
+        "en-US": "Applicants",
+        "zh-Hans-CN": "应聘者",
+        "ja-JP": "応募者"
+      }
+    },
+    {
+      "key": "modules.recruit.filters.career",
+      "values": {
+        "ko-KR": "경력",
+        "en-US": "Career",
+        "zh-Hans-CN": "经历",
+        "ja-JP": "経歴"
+      }
+    },
+    {
+      "key": "modules.recruit.filters.credential",
+      "values": {
+        "ko-KR": "자격",
+        "en-US": "Credentials",
+        "zh-Hans-CN": "资格",
+        "ja-JP": "資格"
+      }
+    },
+    {
+      "key": "modules.recruit.filters.placement",
+      "values": {
+        "ko-KR": "배치",
+        "en-US": "Placement",
+        "zh-Hans-CN": "配置",
+        "ja-JP": "配置"
+      }
+    },
+    {
+      "key": "modules.recruit.primaryAction.label",
+      "values": {
+        "ko-KR": "지원자 보기",
+        "en-US": "View applicants",
+        "zh-Hans-CN": "查看应聘者",
+        "ja-JP": "応募者を見る"
+      }
+    },
+    {
+      "key": "modules.recruit.primaryAction.description",
+      "values": {
+        "ko-KR": "지원자 경력과 자격 정보를 검토합니다.",
+        "en-US": "Review applicant careers and credentials.",
+        "zh-Hans-CN": "审核应聘者经历和资格信息。",
+        "ja-JP": "応募者の経歴と資格情報を確認します。"
+      }
+    },
+    {
+      "key": "modules.recruit.secondaryAction.label",
+      "values": {
+        "ko-KR": "HR로 이동",
+        "en-US": "Go to HR",
+        "zh-Hans-CN": "转到HR",
+        "ja-JP": "HRへ移動"
+      }
+    },
+    {
+      "key": "modules.recruit.secondaryAction.description",
+      "values": {
+        "ko-KR": "직원 전환 후 문서 흐름을 확인합니다.",
+        "en-US": "Check document flow after employee conversion.",
+        "zh-Hans-CN": "确认转为员工后的文档流程。",
+        "ja-JP": "社員転換後の文書フローを確認します。"
+      }
+    },
+    {
+      "key": "modules.recruit.emptyTitle",
+      "values": {
+        "ko-KR": "표시할 채용 업무가 없습니다.",
+        "en-US": "No recruiting work to display.",
+        "zh-Hans-CN": "没有可显示的招聘工作。",
+        "ja-JP": "表示する採用業務がありません。"
+      }
+    },
+    {
+      "key": "modules.recruit.emptyDescription",
+      "values": {
+        "ko-KR": "지원자 경력 또는 자격 검토 항목이 생기면 표시됩니다.",
+        "en-US": "Applicant career or credential reviews appear here.",
+        "zh-Hans-CN": "应聘者经历或资格审核项目会显示在此。",
+        "ja-JP": "応募者経歴または資格確認項目が発生すると表示されます。"
+      }
+    },
+    {
+      "key": "modules.recruit.metrics.applicants.label",
+      "values": {
+        "ko-KR": "지원자",
+        "en-US": "Applicants",
+        "zh-Hans-CN": "应聘者",
+        "ja-JP": "応募者"
+      }
+    },
+    {
+      "key": "modules.recruit.metrics.applicants.value",
+      "values": {
+        "ko-KR": "8명",
+        "en-US": "8 people",
+        "zh-Hans-CN": "8人",
+        "ja-JP": "8名"
+      }
+    },
+    {
+      "key": "modules.recruit.metrics.applicants.helper",
+      "values": {
+        "ko-KR": "공유 가능 후보",
+        "en-US": "Shareable candidates",
+        "zh-Hans-CN": "可共享候选人",
+        "ja-JP": "共有可能候補"
+      }
+    },
+    {
+      "key": "modules.recruit.metrics.qualified.label",
+      "values": {
+        "ko-KR": "자격 검토",
+        "en-US": "Credential reviews",
+        "zh-Hans-CN": "资格审核",
+        "ja-JP": "資格確認"
+      }
+    },
+    {
+      "key": "modules.recruit.metrics.qualified.value",
+      "values": {
+        "ko-KR": "3건",
+        "en-US": "3 items",
+        "zh-Hans-CN": "3项",
+        "ja-JP": "3件"
+      }
+    },
+    {
+      "key": "modules.recruit.metrics.qualified.helper",
+      "values": {
+        "ko-KR": "부서 확인 대기",
+        "en-US": "Waiting for department check",
+        "zh-Hans-CN": "等待部门确认",
+        "ja-JP": "部門確認待ち"
+      }
+    },
+    {
+      "key": "modules.recruit.metrics.placement.label",
+      "values": {
+        "ko-KR": "배치 후보",
+        "en-US": "Placement candidates",
+        "zh-Hans-CN": "配置候选",
+        "ja-JP": "配置候補"
+      }
+    },
+    {
+      "key": "modules.recruit.metrics.placement.value",
+      "values": {
+        "ko-KR": "4명",
+        "en-US": "4 people",
+        "zh-Hans-CN": "4人",
+        "ja-JP": "4名"
+      }
+    },
+    {
+      "key": "modules.recruit.metrics.placement.helper",
+      "values": {
+        "ko-KR": "직무 적합 후보",
+        "en-US": "Role-fit candidates",
+        "zh-Hans-CN": "岗位匹配候选",
+        "ja-JP": "職務適合候補"
+      }
+    },
+    {
+      "key": "modules.recruit.rows.recruit-1.category",
+      "values": {
+        "ko-KR": "지원자 경력 공유",
+        "en-US": "Share applicant career",
+        "zh-Hans-CN": "共享应聘者经历",
+        "ja-JP": "応募者経歴共有"
+      }
+    },
+    {
+      "key": "modules.recruit.rows.recruit-1.status",
+      "values": {
+        "ko-KR": "검토 중",
+        "en-US": "Under review",
+        "zh-Hans-CN": "审核中",
+        "ja-JP": "確認中"
+      }
+    },
+    {
+      "key": "modules.recruit.rows.recruit-1.owner",
+      "values": {
+        "ko-KR": "채용 담당",
+        "en-US": "Recruiting owner",
+        "zh-Hans-CN": "招聘负责人",
+        "ja-JP": "採用担当"
+      }
+    },
+    {
+      "key": "modules.recruit.rows.recruit-1.nextStep",
+      "values": {
+        "ko-KR": "부서장 열람 권한 확인",
+        "en-US": "Check department-head view permission",
+        "zh-Hans-CN": "确认部门负责人查看权限",
+        "ja-JP": "部門長閲覧権限を確認"
+      }
+    },
+    {
+      "key": "modules.recruit.rows.recruit-2.category",
+      "values": {
+        "ko-KR": "자격사항 매칭",
+        "en-US": "Credential matching",
+        "zh-Hans-CN": "资格事项匹配",
+        "ja-JP": "資格事項マッチング"
+      }
+    },
+    {
+      "key": "modules.recruit.rows.recruit-2.status",
+      "values": {
+        "ko-KR": "추천",
+        "en-US": "Recommended",
+        "zh-Hans-CN": "推荐",
+        "ja-JP": "推薦"
+      }
+    },
+    {
+      "key": "modules.recruit.rows.recruit-2.owner",
+      "values": {
+        "ko-KR": "운영팀",
+        "en-US": "Operations team",
+        "zh-Hans-CN": "运营团队",
+        "ja-JP": "運用チーム"
+      }
+    },
+    {
+      "key": "modules.recruit.rows.recruit-2.nextStep",
+      "values": {
+        "ko-KR": "필요 부서 후보 배치",
+        "en-US": "Place candidates for needed departments",
+        "zh-Hans-CN": "为需求部门配置候选",
+        "ja-JP": "必要部門へ候補を配置"
+      }
+    },
+    {
+      "key": "modules.travel.title",
+      "values": {
+        "ko-KR": "출장/업무일지",
+        "en-US": "Trips / worklogs",
+        "zh-Hans-CN": "出差/工作日志",
+        "ja-JP": "出張/業務日誌"
+      }
+    },
+    {
+      "key": "modules.travel.subtitle",
+      "values": {
+        "ko-KR": "출장계획, 실행, 업무일지, 실적반영, 상급자 진행/완료 view를 연결해 확인합니다.",
+        "en-US": "Connect trip plans, execution, worklogs, performance reflection, and manager ongoing/completed views.",
+        "zh-Hans-CN": "连接出差计划、执行、工作日志、绩效反映和上级进行中/完成视图。",
+        "ja-JP": "出張計画、実行、業務日誌、実績反映、上長の進行中/完了ビューを接続して確認します。"
+      }
+    },
+    {
+      "key": "modules.travel.filters.all",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "modules.travel.filters.plan",
+      "values": {
+        "ko-KR": "출장계획",
+        "en-US": "Trip plan",
+        "zh-Hans-CN": "出差计划",
+        "ja-JP": "出張計画"
+      }
+    },
+    {
+      "key": "modules.travel.filters.run",
+      "values": {
+        "ko-KR": "출장실행",
+        "en-US": "Trip execution",
+        "zh-Hans-CN": "出差执行",
+        "ja-JP": "出張実行"
+      }
+    },
+    {
+      "key": "modules.travel.filters.diary",
+      "values": {
+        "ko-KR": "업무일지",
+        "en-US": "Worklog",
+        "zh-Hans-CN": "工作日志",
+        "ja-JP": "業務日誌"
+      }
+    },
+    {
+      "key": "modules.travel.filters.result",
+      "values": {
+        "ko-KR": "실적",
+        "en-US": "Performance",
+        "zh-Hans-CN": "绩效",
+        "ja-JP": "実績"
+      }
+    },
+    {
+      "key": "modules.travel.filters.review",
+      "values": {
+        "ko-KR": "검토",
+        "en-US": "Review",
+        "zh-Hans-CN": "审核",
+        "ja-JP": "レビュー"
+      }
+    },
+    {
+      "key": "modules.travel.primaryAction.label",
+      "values": {
+        "ko-KR": "출장 흐름 보기",
+        "en-US": "View trip flow",
+        "zh-Hans-CN": "查看出差流程",
+        "ja-JP": "出張フローを見る"
+      }
+    },
+    {
+      "key": "modules.travel.primaryAction.description",
+      "values": {
+        "ko-KR": "계획부터 실적 반영까지 상태를 확인합니다.",
+        "en-US": "Check status from planning through performance reflection.",
+        "zh-Hans-CN": "确认从计划到绩效反映的状态。",
+        "ja-JP": "計画から実績反映までの状態を確認します。"
+      }
+    },
+    {
+      "key": "modules.travel.secondaryAction.label",
+      "values": {
+        "ko-KR": "전자결재로 이동",
+        "en-US": "Go to approvals",
+        "zh-Hans-CN": "转到电子审批",
+        "ja-JP": "電子決裁へ移動"
+      }
+    },
+    {
+      "key": "modules.travel.secondaryAction.description",
+      "values": {
+        "ko-KR": "출장신청서와 결재 문서를 함께 확인합니다.",
+        "en-US": "Review trip request forms and approval documents together.",
+        "zh-Hans-CN": "同时确认出差申请书和审批文档。",
+        "ja-JP": "出張申請書と決裁文書を一緒に確認します。"
+      }
+    },
+    {
+      "key": "modules.travel.emptyTitle",
+      "values": {
+        "ko-KR": "표시할 출장/업무일지 업무가 없습니다.",
+        "en-US": "No trip/worklog work to display.",
+        "zh-Hans-CN": "没有可显示的出差/工作日志工作。",
+        "ja-JP": "表示する出張/業務日誌業務がありません。"
+      }
+    },
+    {
+      "key": "modules.travel.emptyDescription",
+      "values": {
+        "ko-KR": "출장계획, 업무일지, 실적 반영 항목이 생기면 진행 상태가 표시됩니다.",
+        "en-US": "Trip plans, worklogs, and performance reflection items show progress here.",
+        "zh-Hans-CN": "出差计划、工作日志、绩效反映项目会在此显示进度。",
+        "ja-JP": "出張計画、業務日誌、実績反映項目が発生すると進行状態が表示されます。"
+      }
+    },
+    {
+      "key": "modules.travel.metrics.plans.label",
+      "values": {
+        "ko-KR": "출장계획",
+        "en-US": "Trip plans",
+        "zh-Hans-CN": "出差计划",
+        "ja-JP": "出張計画"
+      }
+    },
+    {
+      "key": "modules.travel.metrics.plans.value",
+      "values": {
+        "ko-KR": "4건",
+        "en-US": "4 items",
+        "zh-Hans-CN": "4项",
+        "ja-JP": "4件"
+      }
+    },
+    {
+      "key": "modules.travel.metrics.plans.helper",
+      "values": {
+        "ko-KR": "승인 전/진행 중 포함",
+        "en-US": "Includes before-approval/in-progress",
+        "zh-Hans-CN": "包含审批前/进行中",
+        "ja-JP": "承認前/進行中を含む"
+      }
+    },
+    {
+      "key": "modules.travel.metrics.diary.label",
+      "values": {
+        "ko-KR": "업무일지",
+        "en-US": "Worklogs",
+        "zh-Hans-CN": "工作日志",
+        "ja-JP": "業務日誌"
+      }
+    },
+    {
+      "key": "modules.travel.metrics.diary.value",
+      "values": {
+        "ko-KR": "2건",
+        "en-US": "2 items",
+        "zh-Hans-CN": "2项",
+        "ja-JP": "2件"
+      }
+    },
+    {
+      "key": "modules.travel.metrics.diary.helper",
+      "values": {
+        "ko-KR": "오늘 작성 권장",
+        "en-US": "Recommended today",
+        "zh-Hans-CN": "建议今天填写",
+        "ja-JP": "本日作成推奨"
+      }
+    },
+    {
+      "key": "modules.travel.metrics.completed.label",
+      "values": {
+        "ko-KR": "완료 반영",
+        "en-US": "Completed reflection",
+        "zh-Hans-CN": "完成反映",
+        "ja-JP": "完了反映"
+      }
+    },
+    {
+      "key": "modules.travel.metrics.completed.value",
+      "values": {
+        "ko-KR": "7건",
+        "en-US": "7 items",
+        "zh-Hans-CN": "7项",
+        "ja-JP": "7件"
+      }
+    },
+    {
+      "key": "modules.travel.metrics.completed.helper",
+      "values": {
+        "ko-KR": "상급자 확인 완료",
+        "en-US": "Manager confirmed",
+        "zh-Hans-CN": "上级已确认",
+        "ja-JP": "上長確認完了"
+      }
+    },
+    {
+      "key": "modules.travel.rows.travel-1.category",
+      "values": {
+        "ko-KR": "부산 고객사 출장계획",
+        "en-US": "Busan customer trip plan",
+        "zh-Hans-CN": "釜山客户出差计划",
+        "ja-JP": "釜山顧客先出張計画"
+      }
+    },
+    {
+      "key": "modules.travel.rows.travel-1.status",
+      "values": {
+        "ko-KR": "출장실행",
+        "en-US": "Trip execution",
+        "zh-Hans-CN": "出差执行",
+        "ja-JP": "出張実行"
+      }
+    },
+    {
+      "key": "modules.travel.rows.travel-1.owner",
+      "values": {
+        "ko-KR": "영업팀",
+        "en-US": "Sales team",
+        "zh-Hans-CN": "销售团队",
+        "ja-JP": "営業チーム"
+      }
+    },
+    {
+      "key": "modules.travel.rows.travel-1.nextStep",
+      "values": {
+        "ko-KR": "현장 미팅 후 업무일지 작성",
+        "en-US": "Write worklog after onsite meeting",
+        "zh-Hans-CN": "现场会议后填写工作日志",
+        "ja-JP": "現地ミーティング後に業務日誌を作成"
+      }
+    },
+    {
+      "key": "modules.travel.rows.travel-2.category",
+      "values": {
+        "ko-KR": "대전 설치 지원 업무일지",
+        "en-US": "Daejeon installation support worklog",
+        "zh-Hans-CN": "大田安装支持工作日志",
+        "ja-JP": "大田設置支援業務日誌"
+      }
+    },
+    {
+      "key": "modules.travel.rows.travel-2.status",
+      "values": {
+        "ko-KR": "상급자 검토",
+        "en-US": "Manager review",
+        "zh-Hans-CN": "上级审核",
+        "ja-JP": "上長レビュー"
+      }
+    },
+    {
+      "key": "modules.travel.rows.travel-2.owner",
+      "values": {
+        "ko-KR": "기술지원",
+        "en-US": "Tech support",
+        "zh-Hans-CN": "技术支持",
+        "ja-JP": "技術支援"
+      }
+    },
+    {
+      "key": "modules.travel.rows.travel-2.nextStep",
+      "values": {
+        "ko-KR": "실적 반영 승인 대기",
+        "en-US": "Waiting for performance reflection approval",
+        "zh-Hans-CN": "等待绩效反映审批",
+        "ja-JP": "実績反映承認待ち"
+      }
+    },
+    {
+      "key": "modules.travel.rows.travel-3.category",
+      "values": {
+        "ko-KR": "서울 협력사 방문",
+        "en-US": "Seoul partner visit",
+        "zh-Hans-CN": "首尔合作方访问",
+        "ja-JP": "ソウル協力会社訪問"
+      }
+    },
+    {
+      "key": "modules.travel.rows.travel-3.status",
+      "values": {
+        "ko-KR": "Completed",
+        "en-US": "Completed",
+        "zh-Hans-CN": "Completed",
+        "ja-JP": "Completed"
+      }
+    },
+    {
+      "key": "modules.travel.rows.travel-3.owner",
+      "values": {
+        "ko-KR": "운영팀",
+        "en-US": "Operations team",
+        "zh-Hans-CN": "运营团队",
+        "ja-JP": "運用チーム"
+      }
+    },
+    {
+      "key": "modules.travel.rows.travel-3.nextStep",
+      "values": {
+        "ko-KR": "완료 업무 성과 리포트 보관",
+        "en-US": "Archive completed-work performance report",
+        "zh-Hans-CN": "归档完成工作的绩效报告",
+        "ja-JP": "完了業務の成果レポートを保管"
+      }
+    },
+    {
+      "key": "modules.workflow.title",
+      "values": {
+        "ko-KR": "전자결재 업무함",
+        "en-US": "Approval inbox",
+        "zh-Hans-CN": "电子审批工作箱",
+        "ja-JP": "電子決裁業務箱"
+      }
+    },
+    {
+      "key": "modules.workflow.subtitle",
+      "values": {
+        "ko-KR": "기안, 승인, 반려, 회람 문서를 상태별로 정리합니다.",
+        "en-US": "Organize drafts, approvals, returns, and circulation documents by status.",
+        "zh-Hans-CN": "按状态整理起草、审批、驳回和传阅文档。",
+        "ja-JP": "起案、承認、差戻し、回覧文書を状態別に整理します。"
+      }
+    },
+    {
+      "key": "modules.workflow.filters.all",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "modules.workflow.filters.pending",
+      "values": {
+        "ko-KR": "결재 대기",
+        "en-US": "Pending approval",
+        "zh-Hans-CN": "待审批",
+        "ja-JP": "決裁待ち"
+      }
+    },
+    {
+      "key": "modules.workflow.filters.ongoing",
+      "values": {
+        "ko-KR": "진행 중",
+        "en-US": "In progress",
+        "zh-Hans-CN": "进行中",
+        "ja-JP": "進行中"
+      }
+    },
+    {
+      "key": "modules.workflow.filters.returned",
+      "values": {
+        "ko-KR": "반려",
+        "en-US": "Returned",
+        "zh-Hans-CN": "驳回",
+        "ja-JP": "差戻し"
+      }
+    },
+    {
+      "key": "modules.workflow.primaryAction.label",
+      "values": {
+        "ko-KR": "결재함 열기",
+        "en-US": "Open approvals",
+        "zh-Hans-CN": "打开审批箱",
+        "ja-JP": "決裁箱を開く"
+      }
+    },
+    {
+      "key": "modules.workflow.primaryAction.description",
+      "values": {
+        "ko-KR": "대기 중인 결재 문서를 검토합니다.",
+        "en-US": "Review pending approval documents.",
+        "zh-Hans-CN": "审核待审批文档。",
+        "ja-JP": "待機中の決裁文書を確認します。"
+      }
+    },
+    {
+      "key": "modules.workflow.secondaryAction.label",
+      "values": {
+        "ko-KR": "자료함 확인",
+        "en-US": "Check archive",
+        "zh-Hans-CN": "确认资料库",
+        "ja-JP": "資料庫確認"
+      }
+    },
+    {
+      "key": "modules.workflow.secondaryAction.description",
+      "values": {
+        "ko-KR": "첨부와 산출물을 확인합니다.",
+        "en-US": "Check attachments and outputs.",
+        "zh-Hans-CN": "确认附件和产出物。",
+        "ja-JP": "添付と成果物を確認します。"
+      }
+    },
+    {
+      "key": "modules.workflow.emptyTitle",
+      "values": {
+        "ko-KR": "대기 중인 결재 문서가 없습니다.",
+        "en-US": "No pending approval documents.",
+        "zh-Hans-CN": "没有待审批文档。",
+        "ja-JP": "待機中の決裁文書はありません。"
+      }
+    },
+    {
+      "key": "modules.workflow.emptyDescription",
+      "values": {
+        "ko-KR": "개인 권한에 맞는 결재 문서가 생기면 표시됩니다.",
+        "en-US": "Approval documents matching personal permissions appear here.",
+        "zh-Hans-CN": "符合个人权限的审批文档会显示在此。",
+        "ja-JP": "個人権限に合う決裁文書が発生すると表示されます。"
+      }
+    },
+    {
+      "key": "modules.workflow.metrics.pending.label",
+      "values": {
+        "ko-KR": "결재 대기",
+        "en-US": "Pending approvals",
+        "zh-Hans-CN": "待审批",
+        "ja-JP": "決裁待ち"
+      }
+    },
+    {
+      "key": "modules.workflow.metrics.pending.value",
+      "values": {
+        "ko-KR": "3건",
+        "en-US": "3 items",
+        "zh-Hans-CN": "3项",
+        "ja-JP": "3件"
+      }
+    },
+    {
+      "key": "modules.workflow.metrics.pending.helper",
+      "values": {
+        "ko-KR": "오늘 처리 권장",
+        "en-US": "Recommended today",
+        "zh-Hans-CN": "建议今天处理",
+        "ja-JP": "本日処理推奨"
+      }
+    },
+    {
+      "key": "modules.workflow.metrics.drafts.label",
+      "values": {
+        "ko-KR": "임시저장",
+        "en-US": "Drafts",
+        "zh-Hans-CN": "临时保存",
+        "ja-JP": "一時保存"
+      }
+    },
+    {
+      "key": "modules.workflow.metrics.drafts.value",
+      "values": {
+        "ko-KR": "1건",
+        "en-US": "1 item",
+        "zh-Hans-CN": "1项",
+        "ja-JP": "1件"
+      }
+    },
+    {
+      "key": "modules.workflow.metrics.drafts.helper",
+      "values": {
+        "ko-KR": "기안자 작성 중",
+        "en-US": "Drafter editing",
+        "zh-Hans-CN": "起草人填写中",
+        "ja-JP": "起案者作成中"
+      }
+    },
+    {
+      "key": "modules.workflow.metrics.done.label",
+      "values": {
+        "ko-KR": "완료 문서",
+        "en-US": "Completed docs",
+        "zh-Hans-CN": "完成文档",
+        "ja-JP": "完了文書"
+      }
+    },
+    {
+      "key": "modules.workflow.metrics.done.value",
+      "values": {
+        "ko-KR": "18건",
+        "en-US": "18 items",
+        "zh-Hans-CN": "18项",
+        "ja-JP": "18件"
+      }
+    },
+    {
+      "key": "modules.workflow.metrics.done.helper",
+      "values": {
+        "ko-KR": "이번 달 기준",
+        "en-US": "This month",
+        "zh-Hans-CN": "本月标准",
+        "ja-JP": "今月基準"
+      }
+    },
+    {
+      "key": "modules.workflow.rows.wf-1.category",
+      "values": {
+        "ko-KR": "급여 지급 품의",
+        "en-US": "Payroll payment request",
+        "zh-Hans-CN": "薪资支付请示",
+        "ja-JP": "給与支給稟議"
+      }
+    },
+    {
+      "key": "modules.workflow.rows.wf-1.status",
+      "values": {
+        "ko-KR": "결재 대기",
+        "en-US": "Pending approval",
+        "zh-Hans-CN": "待审批",
+        "ja-JP": "決裁待ち"
+      }
+    },
+    {
+      "key": "modules.workflow.rows.wf-1.owner",
+      "values": {
+        "ko-KR": "대표 승인",
+        "en-US": "CEO approval",
+        "zh-Hans-CN": "代表审批",
+        "ja-JP": "代表承認"
+      }
+    },
+    {
+      "key": "modules.workflow.rows.wf-1.nextStep",
+      "values": {
+        "ko-KR": "금액 요약 확인",
+        "en-US": "Check amount summary",
+        "zh-Hans-CN": "确认金额摘要",
+        "ja-JP": "金額サマリーを確認"
+      }
+    },
+    {
+      "key": "modules.workflow.rows.wf-2.category",
+      "values": {
+        "ko-KR": "계약서 검토",
+        "en-US": "Contract review",
+        "zh-Hans-CN": "合同审核",
+        "ja-JP": "契約書レビュー"
+      }
+    },
+    {
+      "key": "modules.workflow.rows.wf-2.status",
+      "values": {
+        "ko-KR": "진행 중",
+        "en-US": "In progress",
+        "zh-Hans-CN": "进行中",
+        "ja-JP": "進行中"
+      }
+    },
+    {
+      "key": "modules.workflow.rows.wf-2.owner",
+      "values": {
+        "ko-KR": "법무 담당",
+        "en-US": "Legal owner",
+        "zh-Hans-CN": "法务负责人",
+        "ja-JP": "法務担当"
+      }
+    },
+    {
+      "key": "modules.workflow.rows.wf-2.nextStep",
+      "values": {
+        "ko-KR": "첨부 파일 회람",
+        "en-US": "Circulate attachments",
+        "zh-Hans-CN": "传阅附件",
+        "ja-JP": "添付ファイル回覧"
+      }
+    },
+    {
+      "key": "modules.archive.title",
+      "values": {
+        "ko-KR": "자료함",
+        "en-US": "Archive",
+        "zh-Hans-CN": "资料库",
+        "ja-JP": "資料庫"
+      }
+    },
+    {
+      "key": "modules.archive.subtitle",
+      "values": {
+        "ko-KR": "월별 급여 산출물, 보고서, 업로드 문서를 안전하게 찾습니다.",
+        "en-US": "Safely find monthly payroll outputs, reports, and uploaded documents.",
+        "zh-Hans-CN": "安全查找月度薪资产出、报告和上传文档。",
+        "ja-JP": "月別給与成果物、レポート、アップロード文書を安全に探します。"
+      }
+    },
+    {
+      "key": "modules.archive.filters.all",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "modules.archive.filters.payroll",
+      "values": {
+        "ko-KR": "급여",
+        "en-US": "Payroll",
+        "zh-Hans-CN": "薪资",
+        "ja-JP": "給与"
+      }
+    },
+    {
+      "key": "modules.archive.filters.contract",
+      "values": {
+        "ko-KR": "계약",
+        "en-US": "Contracts",
+        "zh-Hans-CN": "合同",
+        "ja-JP": "契約"
+      }
+    },
+    {
+      "key": "modules.archive.filters.report",
+      "values": {
+        "ko-KR": "보고서",
+        "en-US": "Reports",
+        "zh-Hans-CN": "报告",
+        "ja-JP": "レポート"
+      }
+    },
+    {
+      "key": "modules.archive.primaryAction.label",
+      "values": {
+        "ko-KR": "최근 자료 보기",
+        "en-US": "View recent files",
+        "zh-Hans-CN": "查看近期资料",
+        "ja-JP": "最近の資料を見る"
+      }
+    },
+    {
+      "key": "modules.archive.primaryAction.description",
+      "values": {
+        "ko-KR": "최근 생성 문서를 먼저 확인합니다.",
+        "en-US": "Check recently created documents first.",
+        "zh-Hans-CN": "优先确认近期生成的文档。",
+        "ja-JP": "最近作成された文書を先に確認します。"
+      }
+    },
+    {
+      "key": "modules.archive.secondaryAction.label",
+      "values": {
+        "ko-KR": "급여 화면으로 이동",
+        "en-US": "Go to payroll",
+        "zh-Hans-CN": "转到薪资界面",
+        "ja-JP": "給与画面へ移動"
+      }
+    },
+    {
+      "key": "modules.archive.secondaryAction.description",
+      "values": {
+        "ko-KR": "산출 결과와 연결 상태를 확인합니다.",
+        "en-US": "Check calculation results and connection status.",
+        "zh-Hans-CN": "确认计算结果和连接状态。",
+        "ja-JP": "算出結果と連携状態を確認します。"
+      }
+    },
+    {
+      "key": "modules.archive.emptyTitle",
+      "values": {
+        "ko-KR": "자료함에 표시할 문서가 없습니다.",
+        "en-US": "No documents to display in the archive.",
+        "zh-Hans-CN": "资料库中没有可显示的文档。",
+        "ja-JP": "資料庫に表示する文書がありません。"
+      }
+    },
+    {
+      "key": "modules.archive.emptyDescription",
+      "values": {
+        "ko-KR": "월별 산출물 또는 업로드 파일이 생기면 이곳에 표시됩니다.",
+        "en-US": "Monthly outputs or uploaded files appear here.",
+        "zh-Hans-CN": "月度产出物或上传文件会显示在此。",
+        "ja-JP": "月別成果物またはアップロードファイルが発生するとここに表示されます。"
+      }
+    },
+    {
+      "key": "modules.archive.metrics.reports.label",
+      "values": {
+        "ko-KR": "최근 보고서",
+        "en-US": "Recent reports",
+        "zh-Hans-CN": "近期报告",
+        "ja-JP": "最近のレポート"
+      }
+    },
+    {
+      "key": "modules.archive.metrics.reports.value",
+      "values": {
+        "ko-KR": "12개",
+        "en-US": "12 files",
+        "zh-Hans-CN": "12个",
+        "ja-JP": "12件"
+      }
+    },
+    {
+      "key": "modules.archive.metrics.reports.helper",
+      "values": {
+        "ko-KR": "3개월 내 생성",
+        "en-US": "Created within 3 months",
+        "zh-Hans-CN": "3个月内生成",
+        "ja-JP": "3か月以内に作成"
+      }
+    },
+    {
+      "key": "modules.archive.metrics.missing.label",
+      "values": {
+        "ko-KR": "정리 필요",
+        "en-US": "Needs organization",
+        "zh-Hans-CN": "需要整理",
+        "ja-JP": "整理が必要"
+      }
+    },
+    {
+      "key": "modules.archive.metrics.missing.value",
+      "values": {
+        "ko-KR": "4개",
+        "en-US": "4 files",
+        "zh-Hans-CN": "4个",
+        "ja-JP": "4件"
+      }
+    },
+    {
+      "key": "modules.archive.metrics.missing.helper",
+      "values": {
+        "ko-KR": "분류 대기",
+        "en-US": "Waiting for classification",
+        "zh-Hans-CN": "等待分类",
+        "ja-JP": "分類待ち"
+      }
+    },
+    {
+      "key": "modules.archive.metrics.shared.label",
+      "values": {
+        "ko-KR": "공유 링크",
+        "en-US": "Share links",
+        "zh-Hans-CN": "共享链接",
+        "ja-JP": "共有リンク"
+      }
+    },
+    {
+      "key": "modules.archive.metrics.shared.value",
+      "values": {
+        "ko-KR": "0개",
+        "en-US": "0 links",
+        "zh-Hans-CN": "0个",
+        "ja-JP": "0件"
+      }
+    },
+    {
+      "key": "modules.archive.metrics.shared.helper",
+      "values": {
+        "ko-KR": "외부 공유 없음",
+        "en-US": "No external sharing",
+        "zh-Hans-CN": "无外部共享",
+        "ja-JP": "外部共有なし"
+      }
+    },
+    {
+      "key": "modules.archive.rows.ar-1.category",
+      "values": {
+        "ko-KR": "2026년 5월 급여 보고서",
+        "en-US": "May 2026 payroll report",
+        "zh-Hans-CN": "2026年5月薪资报告",
+        "ja-JP": "2026年5月給与レポート"
+      }
+    },
+    {
+      "key": "modules.archive.rows.ar-1.status",
+      "values": {
+        "ko-KR": "보관됨",
+        "en-US": "Archived",
+        "zh-Hans-CN": "已归档",
+        "ja-JP": "保管済み"
+      }
+    },
+    {
+      "key": "modules.archive.rows.ar-1.owner",
+      "values": {
+        "ko-KR": "급여 담당",
+        "en-US": "Payroll owner",
+        "zh-Hans-CN": "薪资负责人",
+        "ja-JP": "給与担当"
+      }
+    },
+    {
+      "key": "modules.archive.rows.ar-1.nextStep",
+      "values": {
+        "ko-KR": "미리보기",
+        "en-US": "Preview",
+        "zh-Hans-CN": "预览",
+        "ja-JP": "プレビュー"
+      }
+    },
+    {
+      "key": "modules.archive.rows.ar-2.category",
+      "values": {
+        "ko-KR": "근태 원본 파일",
+        "en-US": "Attendance source file",
+        "zh-Hans-CN": "考勤原始文件",
+        "ja-JP": "勤怠原本ファイル"
+      }
+    },
+    {
+      "key": "modules.archive.rows.ar-2.status",
+      "values": {
+        "ko-KR": "분류 대기",
+        "en-US": "Waiting classification",
+        "zh-Hans-CN": "等待分类",
+        "ja-JP": "分類待ち"
+      }
+    },
+    {
+      "key": "modules.archive.rows.ar-2.owner",
+      "values": {
+        "ko-KR": "운영팀",
+        "en-US": "Operations team",
+        "zh-Hans-CN": "运营团队",
+        "ja-JP": "運用チーム"
+      }
+    },
+    {
+      "key": "modules.archive.rows.ar-2.nextStep",
+      "values": {
+        "ko-KR": "폴더 지정",
+        "en-US": "Assign folder",
+        "zh-Hans-CN": "指定文件夹",
+        "ja-JP": "フォルダー指定"
+      }
+    },
+    {
+      "key": "modules.ai.title",
+      "values": {
+        "ko-KR": "AI 업무 지원",
+        "en-US": "AI work support",
+        "zh-Hans-CN": "AI业务支持",
+        "ja-JP": "AI業務支援"
+      }
+    },
+    {
+      "key": "modules.ai.subtitle",
+      "values": {
+        "ko-KR": "급여/HR/결재 문맥을 읽고 요약과 검토 질문을 준비합니다.",
+        "en-US": "Read payroll, HR, and approval context to prepare summaries and review questions.",
+        "zh-Hans-CN": "读取薪资、HR和审批上下文，准备摘要和审核问题。",
+        "ja-JP": "給与/HR/決裁の文脈を読み、要約と確認質問を準備します。"
+      }
+    },
+    {
+      "key": "modules.ai.filters.all",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "modules.ai.filters.summary",
+      "values": {
+        "ko-KR": "요약",
+        "en-US": "Summary",
+        "zh-Hans-CN": "摘要",
+        "ja-JP": "要約"
+      }
+    },
+    {
+      "key": "modules.ai.filters.draft",
+      "values": {
+        "ko-KR": "초안",
+        "en-US": "Draft",
+        "zh-Hans-CN": "草稿",
+        "ja-JP": "下書き"
+      }
+    },
+    {
+      "key": "modules.ai.filters.review",
+      "values": {
+        "ko-KR": "검토",
+        "en-US": "Review",
+        "zh-Hans-CN": "审核",
+        "ja-JP": "レビュー"
+      }
+    },
+    {
+      "key": "modules.ai.primaryAction.label",
+      "values": {
+        "ko-KR": "추천 작업 보기",
+        "en-US": "View recommended tasks",
+        "zh-Hans-CN": "查看推荐任务",
+        "ja-JP": "推奨作業を見る"
+      }
+    },
+    {
+      "key": "modules.ai.primaryAction.description",
+      "values": {
+        "ko-KR": "현재 화면에 맞는 AI 작업을 확인합니다.",
+        "en-US": "Check AI tasks suited to the current screen.",
+        "zh-Hans-CN": "确认适合当前界面的AI任务。",
+        "ja-JP": "現在画面に合うAI作業を確認します。"
+      }
+    },
+    {
+      "key": "modules.ai.secondaryAction.label",
+      "values": {
+        "ko-KR": "설정 확인",
+        "en-US": "Check settings",
+        "zh-Hans-CN": "确认设置",
+        "ja-JP": "設定確認"
+      }
+    },
+    {
+      "key": "modules.ai.secondaryAction.description",
+      "values": {
+        "ko-KR": "AI 사용 범위와 표시 설정을 확인합니다.",
+        "en-US": "Check AI usage scope and display settings.",
+        "zh-Hans-CN": "确认AI使用范围和显示设置。",
+        "ja-JP": "AI使用範囲と表示設定を確認します。"
+      }
+    },
+    {
+      "key": "modules.ai.emptyTitle",
+      "values": {
+        "ko-KR": "추천할 AI 작업이 없습니다.",
+        "en-US": "No AI tasks to recommend.",
+        "zh-Hans-CN": "没有可推荐的AI任务。",
+        "ja-JP": "推奨するAI作業がありません。"
+      }
+    },
+    {
+      "key": "modules.ai.emptyDescription",
+      "values": {
+        "ko-KR": "업무 문맥이 준비되면 화면별 추천 작업이 표시됩니다.",
+        "en-US": "Screen-specific recommendations appear when work context is ready.",
+        "zh-Hans-CN": "业务上下文准备后会显示各界面的推荐任务。",
+        "ja-JP": "業務文脈が準備されると画面別の推奨作業が表示されます。"
+      }
+    },
+    {
+      "key": "modules.ai.metrics.prompts.label",
+      "values": {
+        "ko-KR": "추천 작업",
+        "en-US": "Recommended tasks",
+        "zh-Hans-CN": "推荐任务",
+        "ja-JP": "推奨作業"
+      }
+    },
+    {
+      "key": "modules.ai.metrics.prompts.value",
+      "values": {
+        "ko-KR": "5개",
+        "en-US": "5 items",
+        "zh-Hans-CN": "5项",
+        "ja-JP": "5件"
+      }
+    },
+    {
+      "key": "modules.ai.metrics.prompts.helper",
+      "values": {
+        "ko-KR": "현재 화면 기준",
+        "en-US": "Current screen",
+        "zh-Hans-CN": "当前界面标准",
+        "ja-JP": "現在画面基準"
+      }
+    },
+    {
+      "key": "modules.ai.metrics.reviews.label",
+      "values": {
+        "ko-KR": "검토 대기",
+        "en-US": "Waiting review",
+        "zh-Hans-CN": "等待审核",
+        "ja-JP": "レビュー待ち"
+      }
+    },
+    {
+      "key": "modules.ai.metrics.reviews.value",
+      "values": {
+        "ko-KR": "2건",
+        "en-US": "2 items",
+        "zh-Hans-CN": "2项",
+        "ja-JP": "2件"
+      }
+    },
+    {
+      "key": "modules.ai.metrics.reviews.helper",
+      "values": {
+        "ko-KR": "사람 확인 필요",
+        "en-US": "Human check required",
+        "zh-Hans-CN": "需要人工确认",
+        "ja-JP": "人の確認が必要"
+      }
+    },
+    {
+      "key": "modules.ai.metrics.policy.label",
+      "values": {
+        "ko-KR": "정책 문맥",
+        "en-US": "Policy context",
+        "zh-Hans-CN": "政策上下文",
+        "ja-JP": "ポリシー文脈"
+      }
+    },
+    {
+      "key": "modules.ai.metrics.policy.value",
+      "values": {
+        "ko-KR": "확인 전",
+        "en-US": "Before check",
+        "zh-Hans-CN": "确认前",
+        "ja-JP": "確認前"
+      }
+    },
+    {
+      "key": "modules.ai.metrics.policy.helper",
+      "values": {
+        "ko-KR": "업무 기준 확인 후 사용",
+        "en-US": "Use after checking work rules",
+        "zh-Hans-CN": "确认业务规则后使用",
+        "ja-JP": "業務基準確認後に使用"
+      }
+    },
+    {
+      "key": "modules.ai.rows.ai-1.category",
+      "values": {
+        "ko-KR": "급여 오류 요약",
+        "en-US": "Payroll error summary",
+        "zh-Hans-CN": "薪资错误摘要",
+        "ja-JP": "給与エラー要約"
+      }
+    },
+    {
+      "key": "modules.ai.rows.ai-1.status",
+      "values": {
+        "ko-KR": "추천",
+        "en-US": "Recommended",
+        "zh-Hans-CN": "推荐",
+        "ja-JP": "推薦"
+      }
+    },
+    {
+      "key": "modules.ai.rows.ai-1.owner",
+      "values": {
+        "ko-KR": "AI",
+        "en-US": "AI",
+        "zh-Hans-CN": "AI",
+        "ja-JP": "AI"
+      }
+    },
+    {
+      "key": "modules.ai.rows.ai-1.nextStep",
+      "values": {
+        "ko-KR": "오류 행 설명 생성",
+        "en-US": "Generate explanations for error rows",
+        "zh-Hans-CN": "生成错误行说明",
+        "ja-JP": "エラー行の説明を生成"
+      }
+    },
+    {
+      "key": "modules.ai.rows.ai-2.category",
+      "values": {
+        "ko-KR": "결재 의견 초안",
+        "en-US": "Approval comment draft",
+        "zh-Hans-CN": "审批意见草稿",
+        "ja-JP": "決裁意見下書き"
+      }
+    },
+    {
+      "key": "modules.ai.rows.ai-2.status",
+      "values": {
+        "ko-KR": "검토 필요",
+        "en-US": "Needs review",
+        "zh-Hans-CN": "需要审核",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "modules.ai.rows.ai-2.owner",
+      "values": {
+        "ko-KR": "사용자",
+        "en-US": "User",
+        "zh-Hans-CN": "用户",
+        "ja-JP": "ユーザー"
+      }
+    },
+    {
+      "key": "modules.ai.rows.ai-2.nextStep",
+      "values": {
+        "ko-KR": "문서 맥락 확인",
+        "en-US": "Check document context",
+        "zh-Hans-CN": "确认文档上下文",
+        "ja-JP": "文書文脈を確認"
+      }
+    },
+    {
+      "key": "modules.admin.title",
+      "values": {
+        "ko-KR": "관리자 콘솔",
+        "en-US": "Admin console",
+        "zh-Hans-CN": "管理控制台",
+        "ja-JP": "管理者コンソール"
+      }
+    },
+    {
+      "key": "modules.admin.subtitle",
+      "values": {
+        "ko-KR": "법인 Branch, 하위계정, 민감 문서 권한, 감사 상태를 분리해서 관리합니다.",
+        "en-US": "Manage company Branch, subaccounts, sensitive document permissions, and audit status separately.",
+        "zh-Hans-CN": "分别管理法人Branch、下级账号、敏感文档权限和审计状态。",
+        "ja-JP": "法人Branch、下位アカウント、機微文書権限、監査状態を分けて管理します。"
+      }
+    },
+    {
+      "key": "modules.admin.filters.all",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "modules.admin.filters.permission",
+      "values": {
+        "ko-KR": "권한",
+        "en-US": "Permissions",
+        "zh-Hans-CN": "权限",
+        "ja-JP": "権限"
+      }
+    },
+    {
+      "key": "modules.admin.filters.branch",
+      "values": {
+        "ko-KR": "법인",
+        "en-US": "Company",
+        "zh-Hans-CN": "法人",
+        "ja-JP": "法人"
+      }
+    },
+    {
+      "key": "modules.admin.filters.subaccount",
+      "values": {
+        "ko-KR": "하위계정",
+        "en-US": "Subaccounts",
+        "zh-Hans-CN": "下级账号",
+        "ja-JP": "下位アカウント"
+      }
+    },
+    {
+      "key": "modules.admin.filters.audit",
+      "values": {
+        "ko-KR": "감사",
+        "en-US": "Audit",
+        "zh-Hans-CN": "审计",
+        "ja-JP": "監査"
+      }
+    },
+    {
+      "key": "modules.admin.primaryAction.label",
+      "values": {
+        "ko-KR": "권한 검토",
+        "en-US": "Review permissions",
+        "zh-Hans-CN": "审核权限",
+        "ja-JP": "権限確認"
+      }
+    },
+    {
+      "key": "modules.admin.primaryAction.description",
+      "values": {
+        "ko-KR": "사용자 역할과 접근 범위를 확인합니다.",
+        "en-US": "Review user roles and access scope.",
+        "zh-Hans-CN": "确认用户角色和访问范围。",
+        "ja-JP": "ユーザー役割とアクセス範囲を確認します。"
+      }
+    },
+    {
+      "key": "modules.admin.secondaryAction.label",
+      "values": {
+        "ko-KR": "설정으로 이동",
+        "en-US": "Go to settings",
+        "zh-Hans-CN": "转到设置",
+        "ja-JP": "設定へ移動"
+      }
+    },
+    {
+      "key": "modules.admin.secondaryAction.description",
+      "values": {
+        "ko-KR": "운영 기준 화면을 확인합니다.",
+        "en-US": "Check the operating rules screen.",
+        "zh-Hans-CN": "确认运营规则界面。",
+        "ja-JP": "運用基準画面を確認します。"
+      }
+    },
+    {
+      "key": "modules.admin.emptyTitle",
+      "values": {
+        "ko-KR": "관리자 알림이 없습니다.",
+        "en-US": "No admin alerts.",
+        "zh-Hans-CN": "没有管理员提醒。",
+        "ja-JP": "管理者通知はありません。"
+      }
+    },
+    {
+      "key": "modules.admin.emptyDescription",
+      "values": {
+        "ko-KR": "권한 변경이나 운영 알림이 생기면 표시됩니다.",
+        "en-US": "Permission changes or operations alerts appear here.",
+        "zh-Hans-CN": "权限变更或运营提醒会显示在此。",
+        "ja-JP": "権限変更や運用通知が発生すると表示されます。"
+      }
+    },
+    {
+      "key": "modules.admin.metrics.branch.label",
+      "values": {
+        "ko-KR": "Branch",
+        "en-US": "Branch",
+        "zh-Hans-CN": "Branch",
+        "ja-JP": "Branch"
+      }
+    },
+    {
+      "key": "modules.admin.metrics.branch.value",
+      "values": {
+        "ko-KR": "1개",
+        "en-US": "1 item",
+        "zh-Hans-CN": "1个",
+        "ja-JP": "1件"
+      }
+    },
+    {
+      "key": "modules.admin.metrics.branch.helper",
+      "values": {
+        "ko-KR": "Bitween Demo 법인",
+        "en-US": "Bitween Demo company",
+        "zh-Hans-CN": "Bitween Demo法人",
+        "ja-JP": "Bitween Demo法人"
+      }
+    },
+    {
+      "key": "modules.admin.metrics.users.label",
+      "values": {
+        "ko-KR": "하위계정",
+        "en-US": "Subaccounts",
+        "zh-Hans-CN": "下级账号",
+        "ja-JP": "下位アカウント"
+      }
+    },
+    {
+      "key": "modules.admin.metrics.users.value",
+      "values": {
+        "ko-KR": "14명",
+        "en-US": "14 users",
+        "zh-Hans-CN": "14人",
+        "ja-JP": "14名"
+      }
+    },
+    {
+      "key": "modules.admin.metrics.users.helper",
+      "values": {
+        "ko-KR": "초대 완료 계정",
+        "en-US": "Invited accounts",
+        "zh-Hans-CN": "已邀请账号",
+        "ja-JP": "招待完了アカウント"
+      }
+    },
+    {
+      "key": "modules.admin.metrics.roles.label",
+      "values": {
+        "ko-KR": "권한 검토",
+        "en-US": "Permission reviews",
+        "zh-Hans-CN": "权限审核",
+        "ja-JP": "権限確認"
+      }
+    },
+    {
+      "key": "modules.admin.metrics.roles.value",
+      "values": {
+        "ko-KR": "2건",
+        "en-US": "2 items",
+        "zh-Hans-CN": "2项",
+        "ja-JP": "2件"
+      }
+    },
+    {
+      "key": "modules.admin.metrics.roles.helper",
+      "values": {
+        "ko-KR": "민감 문서 접근 확인",
+        "en-US": "Sensitive document access check",
+        "zh-Hans-CN": "敏感文档访问确认",
+        "ja-JP": "機微文書アクセス確認"
+      }
+    },
+    {
+      "key": "modules.admin.metrics.audit.label",
+      "values": {
+        "ko-KR": "감사 로그",
+        "en-US": "Audit logs",
+        "zh-Hans-CN": "审计日志",
+        "ja-JP": "監査ログ"
+      }
+    },
+    {
+      "key": "modules.admin.metrics.audit.value",
+      "values": {
+        "ko-KR": "정상",
+        "en-US": "Normal",
+        "zh-Hans-CN": "正常",
+        "ja-JP": "正常"
+      }
+    },
+    {
+      "key": "modules.admin.metrics.audit.helper",
+      "values": {
+        "ko-KR": "최근 오류 없음",
+        "en-US": "No recent errors",
+        "zh-Hans-CN": "近期无错误",
+        "ja-JP": "最近のエラーなし"
+      }
+    },
+    {
+      "key": "modules.admin.rows.ad-1.category",
+      "values": {
+        "ko-KR": "신규 하위계정 초대",
+        "en-US": "Invite new subaccount",
+        "zh-Hans-CN": "邀请新下级账号",
+        "ja-JP": "新規下位アカウント招待"
+      }
+    },
+    {
+      "key": "modules.admin.rows.ad-1.status",
+      "values": {
+        "ko-KR": "검토 중",
+        "en-US": "Under review",
+        "zh-Hans-CN": "审核中",
+        "ja-JP": "確認中"
+      }
+    },
+    {
+      "key": "modules.admin.rows.ad-1.owner",
+      "values": {
+        "ko-KR": "관리자",
+        "en-US": "Admin",
+        "zh-Hans-CN": "管理员",
+        "ja-JP": "管理者"
+      }
+    },
+    {
+      "key": "modules.admin.rows.ad-1.nextStep",
+      "values": {
+        "ko-KR": "Branch 소속과 역할 지정",
+        "en-US": "Assign Branch and role",
+        "zh-Hans-CN": "指定Branch所属和角色",
+        "ja-JP": "Branch所属と役割を指定"
+      }
+    },
+    {
+      "key": "modules.admin.rows.ad-2.category",
+      "values": {
+        "ko-KR": "법인 Branch 정보",
+        "en-US": "Company Branch information",
+        "zh-Hans-CN": "法人Branch信息",
+        "ja-JP": "法人Branch情報"
+      }
+    },
+    {
+      "key": "modules.admin.rows.ad-2.status",
+      "values": {
+        "ko-KR": "정상",
+        "en-US": "Normal",
+        "zh-Hans-CN": "正常",
+        "ja-JP": "正常"
+      }
+    },
+    {
+      "key": "modules.admin.rows.ad-2.owner",
+      "values": {
+        "ko-KR": "운영 관리자",
+        "en-US": "Operations admin",
+        "zh-Hans-CN": "运营管理员",
+        "ja-JP": "運用管理者"
+      }
+    },
+    {
+      "key": "modules.admin.rows.ad-2.nextStep",
+      "values": {
+        "ko-KR": "정기 검토",
+        "en-US": "Periodic review",
+        "zh-Hans-CN": "定期审核",
+        "ja-JP": "定期確認"
+      }
+    },
+    {
+      "key": "modules.admin.rows.ad-3.category",
+      "values": {
+        "ko-KR": "급여 민감 문서 권한",
+        "en-US": "Payroll sensitive document permissions",
+        "zh-Hans-CN": "薪资敏感文档权限",
+        "ja-JP": "給与機微文書権限"
+      }
+    },
+    {
+      "key": "modules.admin.rows.ad-3.status",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs check",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "modules.admin.rows.ad-3.owner",
+      "values": {
+        "ko-KR": "대표 승인",
+        "en-US": "CEO approval",
+        "zh-Hans-CN": "代表审批",
+        "ja-JP": "代表承認"
+      }
+    },
+    {
+      "key": "modules.admin.rows.ad-3.nextStep",
+      "values": {
+        "ko-KR": "경영진 급여/일반 급여 열람 범위 분리",
+        "en-US": "Separate executive/general payroll view scope",
+        "zh-Hans-CN": "分离高管薪资/一般薪资查看范围",
+        "ja-JP": "役員給与/一般給与の閲覧範囲を分離"
+      }
+    },
+    {
+      "key": "modules.settings.title",
+      "values": {
+        "ko-KR": "설정",
+        "en-US": "Settings",
+        "zh-Hans-CN": "设置",
+        "ja-JP": "設定"
+      }
+    },
+    {
+      "key": "modules.settings.subtitle",
+      "values": {
+        "ko-KR": "개인 화면, 급여 운영 기준, 알림, 접근 환경을 정리합니다.",
+        "en-US": "Organize personal view, payroll operating rules, notifications, and access environment.",
+        "zh-Hans-CN": "整理个人界面、薪资运营规则、通知和访问环境。",
+        "ja-JP": "個人画面、給与運用基準、通知、アクセス環境を整理します。"
+      }
+    },
+    {
+      "key": "modules.settings.filters.all",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "modules.settings.filters.personal",
+      "values": {
+        "ko-KR": "개인",
+        "en-US": "Personal",
+        "zh-Hans-CN": "个人",
+        "ja-JP": "個人"
+      }
+    },
+    {
+      "key": "modules.settings.filters.payroll",
+      "values": {
+        "ko-KR": "급여",
+        "en-US": "Payroll",
+        "zh-Hans-CN": "薪资",
+        "ja-JP": "給与"
+      }
+    },
+    {
+      "key": "modules.settings.filters.notification",
+      "values": {
+        "ko-KR": "알림",
+        "en-US": "Notifications",
+        "zh-Hans-CN": "通知",
+        "ja-JP": "通知"
+      }
+    },
+    {
+      "key": "modules.settings.primaryAction.label",
+      "values": {
+        "ko-KR": "급여 설정 보기",
+        "en-US": "View payroll settings",
+        "zh-Hans-CN": "查看薪资设置",
+        "ja-JP": "給与設定を見る"
+      }
+    },
+    {
+      "key": "modules.settings.primaryAction.description",
+      "values": {
+        "ko-KR": "운영 기준 연결 영역을 확인합니다.",
+        "en-US": "Check operating-rule connection areas.",
+        "zh-Hans-CN": "确认运营规则连接区域。",
+        "ja-JP": "運用基準連携領域を確認します。"
+      }
+    },
+    {
+      "key": "modules.settings.secondaryAction.label",
+      "values": {
+        "ko-KR": "급여 화면으로 이동",
+        "en-US": "Go to payroll",
+        "zh-Hans-CN": "转到薪资界面",
+        "ja-JP": "給与画面へ移動"
+      }
+    },
+    {
+      "key": "modules.settings.secondaryAction.description",
+      "values": {
+        "ko-KR": "준비 현황과 함께 검토합니다.",
+        "en-US": "Review together with readiness status.",
+        "zh-Hans-CN": "与准备状态一起审核。",
+        "ja-JP": "準備状況と一緒に確認します。"
+      }
+    },
+    {
+      "key": "modules.settings.emptyTitle",
+      "values": {
+        "ko-KR": "설정 알림이 없습니다.",
+        "en-US": "No settings alerts.",
+        "zh-Hans-CN": "没有设置提醒。",
+        "ja-JP": "設定通知はありません。"
+      }
+    },
+    {
+      "key": "modules.settings.emptyDescription",
+      "values": {
+        "ko-KR": "사용자 또는 운영 기준 변경이 필요한 경우 표시됩니다.",
+        "en-US": "User or operating-rule changes appear here when required.",
+        "zh-Hans-CN": "需要用户或运营规则变更时会显示在此。",
+        "ja-JP": "ユーザーまたは運用基準変更が必要な場合に表示されます。"
+      }
+    },
+    {
+      "key": "modules.settings.metrics.profile.label",
+      "values": {
+        "ko-KR": "프로필",
+        "en-US": "Profile",
+        "zh-Hans-CN": "个人资料",
+        "ja-JP": "プロフィール"
+      }
+    },
+    {
+      "key": "modules.settings.metrics.profile.value",
+      "values": {
+        "ko-KR": "완료",
+        "en-US": "Complete",
+        "zh-Hans-CN": "完成",
+        "ja-JP": "完了"
+      }
+    },
+    {
+      "key": "modules.settings.metrics.profile.helper",
+      "values": {
+        "ko-KR": "기본 정보 설정됨",
+        "en-US": "Basic info set",
+        "zh-Hans-CN": "基本信息已设置",
+        "ja-JP": "基本情報設定済み"
+      }
+    },
+    {
+      "key": "modules.settings.metrics.payroll.label",
+      "values": {
+        "ko-KR": "급여 기준",
+        "en-US": "Payroll rules",
+        "zh-Hans-CN": "薪资规则",
+        "ja-JP": "給与基準"
+      }
+    },
+    {
+      "key": "modules.settings.metrics.payroll.value",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs check",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "modules.settings.metrics.payroll.helper",
+      "values": {
+        "ko-KR": "지급일/반올림 기준",
+        "en-US": "Pay date/rounding rules",
+        "zh-Hans-CN": "发薪日/取整规则",
+        "ja-JP": "支給日/丸め基準"
+      }
+    },
+    {
+      "key": "modules.settings.metrics.notice.label",
+      "values": {
+        "ko-KR": "알림",
+        "en-US": "Notifications",
+        "zh-Hans-CN": "通知",
+        "ja-JP": "通知"
+      }
+    },
+    {
+      "key": "modules.settings.metrics.notice.value",
+      "values": {
+        "ko-KR": "4개",
+        "en-US": "4 items",
+        "zh-Hans-CN": "4项",
+        "ja-JP": "4件"
+      }
+    },
+    {
+      "key": "modules.settings.metrics.notice.helper",
+      "values": {
+        "ko-KR": "업무별 수신 설정",
+        "en-US": "Per-work subscription settings",
+        "zh-Hans-CN": "按业务接收设置",
+        "ja-JP": "業務別受信設定"
+      }
+    },
+    {
+      "key": "modules.settings.rows.st-1.category",
+      "values": {
+        "ko-KR": "급여 운영 기준",
+        "en-US": "Payroll operating rules",
+        "zh-Hans-CN": "薪资运营规则",
+        "ja-JP": "給与運用基準"
+      }
+    },
+    {
+      "key": "modules.settings.rows.st-1.status",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs check",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "modules.settings.rows.st-1.owner",
+      "values": {
+        "ko-KR": "급여 담당",
+        "en-US": "Payroll owner",
+        "zh-Hans-CN": "薪资负责人",
+        "ja-JP": "給与担当"
+      }
+    },
+    {
+      "key": "modules.settings.rows.st-1.nextStep",
+      "values": {
+        "ko-KR": "지급일과 반올림 기준 확인",
+        "en-US": "Check pay date and rounding rules",
+        "zh-Hans-CN": "确认发薪日和取整规则",
+        "ja-JP": "支給日と丸め基準を確認"
+      }
+    },
+    {
+      "key": "modules.settings.rows.st-2.category",
+      "values": {
+        "ko-KR": "화면 밀도",
+        "en-US": "Screen density",
+        "zh-Hans-CN": "界面密度",
+        "ja-JP": "画面密度"
+      }
+    },
+    {
+      "key": "modules.settings.rows.st-2.status",
+      "values": {
+        "ko-KR": "권장",
+        "en-US": "Recommended",
+        "zh-Hans-CN": "推荐",
+        "ja-JP": "推奨"
+      }
+    },
+    {
+      "key": "modules.settings.rows.st-2.owner",
+      "values": {
+        "ko-KR": "개인",
+        "en-US": "Personal",
+        "zh-Hans-CN": "个人",
+        "ja-JP": "個人"
+      }
+    },
+    {
+      "key": "modules.settings.rows.st-2.nextStep",
+      "values": {
+        "ko-KR": "업무형 레이아웃 유지",
+        "en-US": "Keep work-focused layout",
+        "zh-Hans-CN": "保持业务型布局",
+        "ja-JP": "業務型レイアウトを維持"
+      }
+    },
+    {
+      "key": "screens.login.hero.badge",
+      "values": {
+        "ko-KR": "B2B operations",
+        "en-US": "B2B operations",
+        "zh-Hans-CN": "B2B运营",
+        "ja-JP": "B2Bオペレーション"
+      }
+    },
+    {
+      "key": "screens.login.hero.title",
+      "values": {
+        "ko-KR": "로그인 후 권한에 맞는 업무 화면으로 이동합니다.",
+        "en-US": "After sign-in, move to the workspace allowed by your permissions.",
+        "zh-Hans-CN": "登录后进入符合权限的工作界面。",
+        "ja-JP": "ログイン後、権限に合う業務画面へ移動します。"
+      }
+    },
+    {
+      "key": "screens.login.hero.copy",
+      "values": {
+        "ko-KR": "급여, HR, 전자결재, 자료함, AI, 관리자 화면을 하나의 업무 플랫폼 경험으로 정리합니다.",
+        "en-US": "Payroll, HR, approvals, archive, AI, and admin screens are organized as one work-platform experience.",
+        "zh-Hans-CN": "将薪资、HR、电子审批、资料库、AI和管理界面整理为一个业务平台体验。",
+        "ja-JP": "給与、HR、電子決裁、資料庫、AI、管理画面を1つの業務プラットフォーム体験として整理します。"
+      }
+    },
+    {
+      "key": "screens.login.hero.status.roleMenu",
+      "values": {
+        "ko-KR": "권한 기반 메뉴",
+        "en-US": "Permission-based menus",
+        "zh-Hans-CN": "基于权限的菜单",
+        "ja-JP": "権限ベースのメニュー"
+      }
+    },
+    {
+      "key": "screens.login.hero.status.workflowStatus",
+      "values": {
+        "ko-KR": "업무별 상태",
+        "en-US": "Work status by area",
+        "zh-Hans-CN": "按业务显示状态",
+        "ja-JP": "業務別状態"
+      }
+    },
+    {
+      "key": "screens.login.hero.status.dataProtection",
+      "values": {
+        "ko-KR": "자료 보호",
+        "en-US": "Data protection",
+        "zh-Hans-CN": "资料保护",
+        "ja-JP": "資料保護"
+      }
+    },
+    {
+      "key": "screens.login.form.eyebrow",
+      "values": {
+        "ko-KR": "Secure sign in",
+        "en-US": "Secure sign in",
+        "zh-Hans-CN": "安全登录",
+        "ja-JP": "セキュアサインイン"
+      }
+    },
+    {
+      "key": "screens.login.form.title",
+      "values": {
+        "ko-KR": "로그인",
+        "en-US": "Sign in",
+        "zh-Hans-CN": "登录",
+        "ja-JP": "ログイン"
+      }
+    },
+    {
+      "key": "screens.login.form.description",
+      "values": {
+        "ko-KR": "법인 계정으로 접속하면 권한에 맞는 업무 화면으로 이동합니다.",
+        "en-US": "Use a company account to reach the workspace allowed by your permissions.",
+        "zh-Hans-CN": "使用法人账号进入符合权限的工作界面。",
+        "ja-JP": "法人アカウントで接続すると権限に合う業務画面へ移動します。"
+      }
+    },
+    {
+      "key": "screens.login.form.companyCode",
+      "values": {
+        "ko-KR": "법인 코드",
+        "en-US": "Company code",
+        "zh-Hans-CN": "法人代码",
+        "ja-JP": "法人コード"
+      }
+    },
+    {
+      "key": "screens.login.form.userId",
+      "values": {
+        "ko-KR": "아이디",
+        "en-US": "User ID",
+        "zh-Hans-CN": "用户ID",
+        "ja-JP": "ユーザーID"
+      }
+    },
+    {
+      "key": "screens.login.form.password",
+      "values": {
+        "ko-KR": "비밀번호",
+        "en-US": "Password",
+        "zh-Hans-CN": "密码",
+        "ja-JP": "パスワード"
+      }
+    },
+    {
+      "key": "screens.login.feedback.badge",
+      "values": {
+        "ko-KR": "확인 필요",
+        "en-US": "Needs check",
+        "zh-Hans-CN": "需要确认",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "screens.login.feedback.missingDemo",
+      "values": {
+        "ko-KR": "demo 계정은 법인코드 {companyCode}, 아이디 {userId}, 비밀번호 {password}입니다.",
+        "en-US": "The demo account is company code {companyCode}, user ID {userId}, password {password}.",
+        "zh-Hans-CN": "演示账号为法人代码 {companyCode}、用户ID {userId}、密码 {password}。",
+        "ja-JP": "demoアカウントは法人コード {companyCode}、ID {userId}、パスワード {password} です。"
+      }
+    },
+    {
+      "key": "screens.login.feedback.invalidDemo",
+      "values": {
+        "ko-KR": "demo 계정 정보가 일치하지 않습니다. 법인코드 {companyCode}, 아이디 {userId}, 비밀번호 {password}로 입력하세요.",
+        "en-US": "The demo account does not match. Enter company code {companyCode}, user ID {userId}, and password {password}.",
+        "zh-Hans-CN": "演示账号信息不匹配。请输入法人代码 {companyCode}、用户ID {userId}、密码 {password}。",
+        "ja-JP": "demoアカウント情報が一致しません。法人コード {companyCode}、ID {userId}、パスワード {password} を入力してください。"
+      }
+    },
+    {
+      "key": "screens.login.actions.enterHome",
+      "values": {
+        "ko-KR": "플랫폼 홈으로 이동",
+        "en-US": "Go to platform home",
+        "zh-Hans-CN": "进入平台首页",
+        "ja-JP": "プラットフォームホームへ移動"
+      }
+    },
+    {
+      "key": "screens.login.actions.login",
+      "values": {
+        "ko-KR": "로그인",
+        "en-US": "Sign in",
+        "zh-Hans-CN": "登录",
+        "ja-JP": "ログイン"
+      }
+    },
+    {
+      "key": "screens.login.actions.demo",
+      "values": {
+        "ko-KR": "Demo 계정으로 접속",
+        "en-US": "Use demo account",
+        "zh-Hans-CN": "使用演示账号",
+        "ja-JP": "Demoアカウントで接続"
+      }
+    },
+    {
+      "key": "screens.login.demo.badge",
+      "values": {
+        "ko-KR": "Demo 계정",
+        "en-US": "Demo account",
+        "zh-Hans-CN": "演示账号",
+        "ja-JP": "Demoアカウント"
+      }
+    },
+    {
+      "key": "screens.login.demo.summary",
+      "values": {
+        "ko-KR": "법인코드 {companyCode} · 아이디 {userId} · 비밀번호 {password}",
+        "en-US": "Company code {companyCode} · User ID {userId} · Password {password}",
+        "zh-Hans-CN": "法人代码 {companyCode} · 用户ID {userId} · 密码 {password}",
+        "ja-JP": "法人コード {companyCode} · ID {userId} · パスワード {password}"
+      }
+    },
+    {
+      "key": "screens.launcher.platformStatus.title",
+      "values": {
+        "ko-KR": "오늘의 플랫폼 상태",
+        "en-US": "Today’s platform status",
+        "zh-Hans-CN": "今日平台状态",
+        "ja-JP": "本日のプラットフォーム状態"
+      }
+    },
+    {
+      "key": "screens.launcher.platformStatus.description",
+      "values": {
+        "ko-KR": "중요한 업무 상태를 먼저 보고 필요한 메뉴로 바로 이동합니다.",
+        "en-US": "See important work status first and jump to the needed menu.",
+        "zh-Hans-CN": "先查看重要工作状态，并直接进入所需菜单。",
+        "ja-JP": "重要な業務状態を先に確認し、必要なメニューへ直接移動します。"
+      }
+    },
+    {
+      "key": "screens.launcher.platformStatus.action",
+      "values": {
+        "ko-KR": "급여 준비 확인",
+        "en-US": "Check payroll readiness",
+        "zh-Hans-CN": "确认薪资准备",
+        "ja-JP": "給与準備確認"
+      }
+    },
+    {
+      "key": "screens.launcher.workQueue.title",
+      "values": {
+        "ko-KR": "오늘의 업무",
+        "en-US": "Today’s work",
+        "zh-Hans-CN": "今日工作",
+        "ja-JP": "本日の業務"
+      }
+    },
+    {
+      "key": "screens.launcher.workQueue.description",
+      "values": {
+        "ko-KR": "처리 우선순위가 높은 업무를 카드로 정리합니다.",
+        "en-US": "High-priority work is organized as cards.",
+        "zh-Hans-CN": "将处理优先级高的工作整理为卡片。",
+        "ja-JP": "処理優先度の高い業務をカードで整理します。"
+      }
+    },
+    {
+      "key": "screens.launcher.workQueue.metaOwner",
+      "values": {
+        "ko-KR": "{meta} · {owner}",
+        "en-US": "{meta} · {owner}",
+        "zh-Hans-CN": "{meta} · {owner}",
+        "ja-JP": "{meta} · {owner}"
+      }
+    },
+    {
+      "key": "screens.launcher.shortcuts.title",
+      "values": {
+        "ko-KR": "플랫폼 바로가기",
+        "en-US": "Platform shortcuts",
+        "zh-Hans-CN": "平台快捷入口",
+        "ja-JP": "プラットフォームショートカット"
+      }
+    },
+    {
+      "key": "screens.launcher.shortcuts.description",
+      "values": {
+        "ko-KR": "업무별 화면이 같은 구조로 이어지도록 정리했습니다.",
+        "en-US": "Each work screen follows a consistent structure.",
+        "zh-Hans-CN": "各业务界面按一致结构连接。",
+        "ja-JP": "業務別画面が同じ構造でつながるよう整理しました。"
+      }
+    },
+    {
+      "key": "screens.launcher.settingsSummary.eyebrow",
+      "values": {
+        "ko-KR": "Settings summary",
+        "en-US": "Settings summary",
+        "zh-Hans-CN": "设置摘要",
+        "ja-JP": "設定サマリー"
+      }
+    },
+    {
+      "key": "screens.launcher.settingsSummary.title",
+      "values": {
+        "ko-KR": "급여 산출 설정 요약",
+        "en-US": "Payroll calculation settings summary",
+        "zh-Hans-CN": "薪资计算设置摘要",
+        "ja-JP": "給与算出設定サマリー"
+      }
+    },
+    {
+      "key": "screens.launcher.settingsSummary.description",
+      "values": {
+        "ko-KR": "산출 전 확인해야 할 핵심 급여 기준을 한눈에 검토합니다.",
+        "en-US": "Review key payroll rules to check before calculation.",
+        "zh-Hans-CN": "一眼审核计算前需确认的核心薪资规则。",
+        "ja-JP": "算出前に確認すべき主要給与基準を一目で確認します。"
+      }
+    },
+    {
+      "key": "screens.launcher.settingsSummary.action",
+      "values": {
+        "ko-KR": "상세 설정",
+        "en-US": "Detailed settings",
+        "zh-Hans-CN": "详细设置",
+        "ja-JP": "詳細設定"
+      }
+    },
+    {
+      "key": "screens.launcher.previewArchive.eyebrow",
+      "values": {
+        "ko-KR": "Preview and archive",
+        "en-US": "Preview and archive",
+        "zh-Hans-CN": "预览和资料库",
+        "ja-JP": "プレビューと資料庫"
+      }
+    },
+    {
+      "key": "screens.launcher.previewArchive.title",
+      "values": {
+        "ko-KR": "파일 미리보기 작업",
+        "en-US": "File preview work",
+        "zh-Hans-CN": "文件预览工作",
+        "ja-JP": "ファイルプレビュー作業"
+      }
+    },
+    {
+      "key": "screens.launcher.previewArchive.description",
+      "values": {
+        "ko-KR": "Excel 미리보기, 시트 선택, 필터 초기화, 수정본 업로드 같은 사용자 흐름을 분리했습니다.",
+        "en-US": "User flows such as Excel preview, sheet selection, filter reset, and revision upload are separated.",
+        "zh-Hans-CN": "已分离Excel预览、选择工作表、重置筛选、上传修订版等用户流程。",
+        "ja-JP": "Excelプレビュー、シート選択、フィルター初期化、修正版アップロードなどのユーザーフローを分離しました。"
+      }
+    },
+    {
+      "key": "screens.launcher.previewArchive.action",
+      "values": {
+        "ko-KR": "자료함 열기",
+        "en-US": "Open archive",
+        "zh-Hans-CN": "打开资料库",
+        "ja-JP": "資料庫を開く"
+      }
+    },
+    {
+      "key": "screens.actions.open",
+      "values": {
+        "ko-KR": "열기",
+        "en-US": "Open",
+        "zh-Hans-CN": "打开",
+        "ja-JP": "開く"
+      }
+    },
+    {
+      "key": "screens.actions.move",
+      "values": {
+        "ko-KR": "이동",
+        "en-US": "Move",
+        "zh-Hans-CN": "移动",
+        "ja-JP": "移動"
+      }
+    },
+    {
+      "key": "screens.calendar.title",
+      "values": {
+        "ko-KR": "오늘 일정",
+        "en-US": "Today’s schedule",
+        "zh-Hans-CN": "今日日程",
+        "ja-JP": "本日の予定"
+      }
+    },
+    {
+      "key": "screens.calendar.description",
+      "values": {
+        "ko-KR": "2026년 6월 4일 기준 주요 일정을 확인합니다.",
+        "en-US": "Review key schedule items for June 4, 2026.",
+        "zh-Hans-CN": "查看2026年6月4日的主要日程。",
+        "ja-JP": "2026年6月4日時点の主要予定を確認します。"
+      }
+    },
+    {
+      "key": "screens.calendar.weekday",
+      "values": {
+        "ko-KR": "목요일",
+        "en-US": "Thursday",
+        "zh-Hans-CN": "星期四",
+        "ja-JP": "木曜日"
+      }
+    },
+    {
+      "key": "screens.todo.title",
+      "values": {
+        "ko-KR": "To-do list",
+        "en-US": "To-do list",
+        "zh-Hans-CN": "待办清单",
+        "ja-JP": "To-doリスト"
+      }
+    },
+    {
+      "key": "screens.todo.description",
+      "values": {
+        "ko-KR": "오늘 업무는 계속 표시하고, 실행한 항목은 흐리게 표시합니다.",
+        "en-US": "Today’s work remains visible; completed items are dimmed.",
+        "zh-Hans-CN": "今日工作持续显示，已执行项目变淡显示。",
+        "ja-JP": "本日の業務は表示を続け、実行済み項目は薄く表示します。"
+      }
+    },
+    {
+      "key": "screens.module.unavailable.title",
+      "values": {
+        "ko-KR": "화면을 준비하고 있습니다.",
+        "en-US": "Preparing this screen.",
+        "zh-Hans-CN": "界面准备中。",
+        "ja-JP": "画面を準備しています。"
+      }
+    },
+    {
+      "key": "screens.module.unavailable.description",
+      "values": {
+        "ko-KR": "선택한 메뉴는 전용 화면으로 이동됩니다.",
+        "en-US": "The selected menu opens its dedicated screen.",
+        "zh-Hans-CN": "所选菜单将进入专用界面。",
+        "ja-JP": "選択したメニューは専用画面へ移動します。"
+      }
+    },
+    {
+      "key": "screens.filters.all",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "screens.module.list.title",
+      "values": {
+        "ko-KR": "업무 목록",
+        "en-US": "Work list",
+        "zh-Hans-CN": "工作列表",
+        "ja-JP": "業務一覧"
+      }
+    },
+    {
+      "key": "screens.module.list.description",
+      "values": {
+        "ko-KR": "필터로 상태를 좁히고 필요한 다음 작업을 확인합니다.",
+        "en-US": "Narrow status with filters and check the needed next step.",
+        "zh-Hans-CN": "通过筛选缩小状态并确认所需下一步。",
+        "ja-JP": "フィルターで状態を絞り、必要な次の作業を確認します。"
+      }
+    },
+    {
+      "key": "screens.module.search.label",
+      "values": {
+        "ko-KR": "검색",
+        "en-US": "Search",
+        "zh-Hans-CN": "搜索",
+        "ja-JP": "検索"
+      }
+    },
+    {
+      "key": "screens.module.search.placeholder",
+      "values": {
+        "ko-KR": "업무, 상태, 담당자 검색",
+        "en-US": "Search work, status, or owner",
+        "zh-Hans-CN": "搜索工作、状态或负责人",
+        "ja-JP": "業務、状態、担当者を検索"
+      }
+    },
+    {
+      "key": "screens.module.list.count",
+      "values": {
+        "ko-KR": "{count}건",
+        "en-US": "{count} items",
+        "zh-Hans-CN": "{count}项",
+        "ja-JP": "{count}件"
+      }
+    },
+    {
+      "key": "screens.module.list.filtered",
+      "values": {
+        "ko-KR": "{filter} 필터",
+        "en-US": "{filter} filter",
+        "zh-Hans-CN": "{filter}筛选",
+        "ja-JP": "{filter}フィルター"
+      }
+    },
+    {
+      "key": "screens.module.list.filteredWithSearch",
+      "values": {
+        "ko-KR": "{filter} 필터 · \"{search}\" 검색",
+        "en-US": "{filter} filter · searched \"{search}\"",
+        "zh-Hans-CN": "{filter}筛选 · 搜索“{search}”",
+        "ja-JP": "{filter}フィルター ·「{search}」検索"
+      }
+    },
+    {
+      "key": "screens.payroll.flow.eyebrow",
+      "values": {
+        "ko-KR": "Payroll flow",
+        "en-US": "Payroll flow",
+        "zh-Hans-CN": "薪资流程",
+        "ja-JP": "給与フロー"
+      }
+    },
+    {
+      "key": "screens.payroll.flow.title",
+      "values": {
+        "ko-KR": "급여 산출 작업 흐름",
+        "en-US": "Payroll calculation work flow",
+        "zh-Hans-CN": "薪资计算工作流程",
+        "ja-JP": "給与算出作業フロー"
+      }
+    },
+    {
+      "key": "screens.payroll.flow.description",
+      "values": {
+        "ko-KR": "운영 기준 확인부터 입력 자료 준비, 결과 검토, 자료함 저장까지 순서대로 진행합니다.",
+        "en-US": "Proceed from operating-rule checks through input preparation, result review, and archive storage.",
+        "zh-Hans-CN": "按顺序完成运营规则确认、输入资料准备、结果审核和资料库保存。",
+        "ja-JP": "運用基準確認から入力資料準備、結果確認、資料庫保存まで順番に進めます。"
+      }
+    },
+    {
+      "key": "screens.payroll.flow.action",
+      "values": {
+        "ko-KR": "급여 설정 확인",
+        "en-US": "Check payroll settings",
+        "zh-Hans-CN": "确认薪资设置",
+        "ja-JP": "給与設定確認"
+      }
+    },
+    {
+      "key": "screens.payroll.actions.keepPayroll",
+      "values": {
+        "ko-KR": "산출 화면 유지",
+        "en-US": "Stay on calculation screen",
+        "zh-Hans-CN": "停留在计算界面",
+        "ja-JP": "算出画面を維持"
+      }
+    },
+    {
+      "key": "screens.payroll.actions.monthlyArchive",
+      "values": {
+        "ko-KR": "월별 자료함",
+        "en-US": "Monthly archive",
+        "zh-Hans-CN": "月度资料库",
+        "ja-JP": "月別資料庫"
+      }
+    },
+    {
+      "key": "screens.payroll.actions.prepareAiReview",
+      "values": {
+        "ko-KR": "AI 검토 준비",
+        "en-US": "Prepare AI review",
+        "zh-Hans-CN": "准备AI审核",
+        "ja-JP": "AIレビュー準備"
+      }
+    },
+    {
+      "key": "screens.payroll.integration.title",
+      "values": {
+        "ko-KR": "급여 연동 준비 점검",
+        "en-US": "Payroll integration readiness check",
+        "zh-Hans-CN": "薪资联动准备检查",
+        "ja-JP": "給与連携準備点検"
+      }
+    },
+    {
+      "key": "screens.payroll.integration.description",
+      "values": {
+        "ko-KR": "법인/사업장별 근태문서, 청구서, 건강보험EDI 확인 상태를 산출 전 화면에서 먼저 정리합니다.",
+        "en-US": "Organize attendance documents, invoices, and health-insurance EDI status by company/workplace before calculation.",
+        "zh-Hans-CN": "在计算前界面先按法人/事业场所整理考勤文档、账单和健康保险EDI确认状态。",
+        "ja-JP": "法人/事業所別の勤怠文書、請求書、健康保険EDI確認状態を算出前画面で先に整理します。"
+      }
+    },
+    {
+      "key": "screens.payroll.integration.action",
+      "values": {
+        "ko-KR": "Branch 권한 확인",
+        "en-US": "Check Branch permissions",
+        "zh-Hans-CN": "确认Branch权限",
+        "ja-JP": "Branch権限確認"
+      }
+    },
+    {
+      "key": "screens.payroll.integration.notice.badge",
+      "values": {
+        "ko-KR": "Frontend 준비",
+        "en-US": "Frontend ready",
+        "zh-Hans-CN": "前端准备",
+        "ja-JP": "フロントエンド準備"
+      }
+    },
+    {
+      "key": "screens.payroll.integration.notice.description",
+      "values": {
+        "ko-KR": "실제 건강보험EDI 조회, 보험료 공제금액 반영, 사업장별 입력 양식 검증은 backend/API 계약 후 연결합니다.",
+        "en-US": "Actual health-insurance EDI lookup, deduction reflection, and workplace form validation connect after the backend/API contract.",
+        "zh-Hans-CN": "实际健康保险EDI查询、保险费扣除金额反映和各事业场所输入表单验证将在后端/API契约后连接。",
+        "ja-JP": "実際の健康保険EDI照会、保険料控除額反映、事業所別入力様式検証はbackend/API契約後に接続します。"
+      }
+    },
+    {
+      "key": "screens.payroll.readiness.eyebrow",
+      "values": {
+        "ko-KR": "Readiness",
+        "en-US": "Readiness",
+        "zh-Hans-CN": "准备度",
+        "ja-JP": "準備状況"
+      }
+    },
+    {
+      "key": "screens.payroll.readiness.title",
+      "values": {
+        "ko-KR": "급여 자동화 준비 현황",
+        "en-US": "Payroll automation readiness",
+        "zh-Hans-CN": "薪资自动化准备现状",
+        "ja-JP": "給与自動化準備状況"
+      }
+    },
+    {
+      "key": "screens.payroll.readiness.description",
+      "values": {
+        "ko-KR": "산출 전 필요한 기준과 자료 상태를 먼저 확인합니다.",
+        "en-US": "Check required rules and data status before calculation.",
+        "zh-Hans-CN": "计算前先确认必要规则和资料状态。",
+        "ja-JP": "算出前に必要な基準と資料状態を先に確認します。"
+      }
+    },
+    {
+      "key": "screens.payroll.readiness.action",
+      "values": {
+        "ko-KR": "설정 확인",
+        "en-US": "Check settings",
+        "zh-Hans-CN": "确认设置",
+        "ja-JP": "設定確認"
+      }
+    },
+    {
+      "key": "screens.payroll.readinessDetail.label",
+      "values": {
+        "ko-KR": "선택한 준비 항목",
+        "en-US": "Selected readiness item",
+        "zh-Hans-CN": "所选准备项目",
+        "ja-JP": "選択した準備項目"
+      }
+    },
+    {
+      "key": "screens.payroll.readinessDetail.actions.status",
+      "values": {
+        "ko-KR": "준비 상태 확인",
+        "en-US": "Check readiness status",
+        "zh-Hans-CN": "确认准备状态",
+        "ja-JP": "準備状態確認"
+      }
+    },
+    {
+      "key": "screens.payroll.readinessDetail.actions.materials",
+      "values": {
+        "ko-KR": "관련 자료 보기",
+        "en-US": "View related materials",
+        "zh-Hans-CN": "查看相关资料",
+        "ja-JP": "関連資料を見る"
+      }
+    },
+    {
+      "key": "screens.payroll.stepDetail.label",
+      "values": {
+        "ko-KR": "선택한 산출 단계",
+        "en-US": "Selected calculation step",
+        "zh-Hans-CN": "所选计算阶段",
+        "ja-JP": "選択した算出段階"
+      }
+    },
+    {
+      "key": "screens.payroll.stepDetail.actions.work",
+      "values": {
+        "ko-KR": "단계 작업 보기",
+        "en-US": "View step work",
+        "zh-Hans-CN": "查看阶段工作",
+        "ja-JP": "段階作業を見る"
+      }
+    },
+    {
+      "key": "screens.payroll.stepDetail.actions.help",
+      "values": {
+        "ko-KR": "도움말 확인",
+        "en-US": "Check help",
+        "zh-Hans-CN": "查看帮助",
+        "ja-JP": "ヘルプ確認"
+      }
+    },
+    {
+      "key": "screens.payroll.integrationChecks.branch-docs.label",
+      "values": {
+        "ko-KR": "법인/사업장 입력자료",
+        "en-US": "Company/workplace input data",
+        "zh-Hans-CN": "法人/事业场所输入资料",
+        "ja-JP": "法人/事業所入力資料"
+      }
+    },
+    {
+      "key": "screens.payroll.integrationChecks.branch-docs.value",
+      "values": {
+        "ko-KR": "3곳",
+        "en-US": "3 locations",
+        "zh-Hans-CN": "3处",
+        "ja-JP": "3か所"
+      }
+    },
+    {
+      "key": "screens.payroll.integrationChecks.branch-docs.detail",
+      "values": {
+        "ko-KR": "근태문서와 청구서 유형을 사업장별로 구분합니다.",
+        "en-US": "Separate attendance documents and invoice types by workplace.",
+        "zh-Hans-CN": "按事业场所区分考勤文档和账单类型。",
+        "ja-JP": "勤怠文書と請求書タイプを事業所別に区分します。"
+      }
+    },
+    {
+      "key": "screens.payroll.integrationChecks.edi.label",
+      "values": {
+        "ko-KR": "건강보험EDI",
+        "en-US": "Health insurance EDI",
+        "zh-Hans-CN": "健康保险EDI",
+        "ja-JP": "健康保険EDI"
+      }
+    },
+    {
+      "key": "screens.payroll.integrationChecks.edi.value",
+      "values": {
+        "ko-KR": "확인 전",
+        "en-US": "Before check",
+        "zh-Hans-CN": "确认前",
+        "ja-JP": "確認前"
+      }
+    },
+    {
+      "key": "screens.payroll.integrationChecks.edi.detail",
+      "values": {
+        "ko-KR": "급여 작업 전 보험료 변동 확인이 필요한 상태입니다.",
+        "en-US": "Insurance premium changes must be checked before payroll work.",
+        "zh-Hans-CN": "薪资作业前需确认保险费变动。",
+        "ja-JP": "給与作業前に保険料変動確認が必要な状態です。"
+      }
+    },
+    {
+      "key": "screens.payroll.integrationChecks.mapping.label",
+      "values": {
+        "ko-KR": "양식 매핑",
+        "en-US": "Form mapping",
+        "zh-Hans-CN": "表单映射",
+        "ja-JP": "様式マッピング"
+      }
+    },
+    {
+      "key": "screens.payroll.integrationChecks.mapping.value",
+      "values": {
+        "ko-KR": "2종",
+        "en-US": "2 types",
+        "zh-Hans-CN": "2种",
+        "ja-JP": "2種"
+      }
+    },
+    {
+      "key": "screens.payroll.integrationChecks.mapping.detail",
+      "values": {
+        "ko-KR": "근태문서/청구서 입력 양식 연결 예정입니다.",
+        "en-US": "Attendance document and invoice input forms are planned for connection.",
+        "zh-Hans-CN": "计划连接考勤文档/账单输入表单。",
+        "ja-JP": "勤怠文書/請求書入力様式を連携予定です。"
+      }
+    },
+    {
+      "key": "screens.payroll.integrationChecks.policy.label",
+      "values": {
+        "ko-KR": "산출 진입",
+        "en-US": "Calculation entry",
+        "zh-Hans-CN": "进入计算",
+        "ja-JP": "算出開始"
+      }
+    },
+    {
+      "key": "screens.payroll.integrationChecks.policy.value",
+      "values": {
+        "ko-KR": "대기",
+        "en-US": "Waiting",
+        "zh-Hans-CN": "等待",
+        "ja-JP": "待機"
+      }
+    },
+    {
+      "key": "screens.payroll.integrationChecks.policy.detail",
+      "values": {
+        "ko-KR": "backend API 계약 후 실제 검증 흐름으로 전환합니다.",
+        "en-US": "After the backend API contract, switch to the real validation flow.",
+        "zh-Hans-CN": "后端API契约后切换到实际验证流程。",
+        "ja-JP": "backend API契約後、実際の検証フローへ切り替えます。"
+      }
+    },
+    {
+      "key": "screens.archive.title",
+      "values": {
+        "ko-KR": "자료함 작업대",
+        "en-US": "Archive workspace",
+        "zh-Hans-CN": "资料库工作台",
+        "ja-JP": "資料庫ワークスペース"
+      }
+    },
+    {
+      "key": "screens.archive.description",
+      "values": {
+        "ko-KR": "급여 산출물, 근태 원본, 결재 첨부, 출장/업무일지 자료를 폴더별로 확인하고 최근 문서를 바로 미리봅니다.",
+        "en-US": "Review payroll outputs, attendance sources, approval attachments, and trip/worklog files by folder and preview recent documents.",
+        "zh-Hans-CN": "按文件夹确认薪资产出、考勤原件、审批附件、出差/工作日志资料，并直接预览近期文档。",
+        "ja-JP": "給与成果物、勤怠原本、決裁添付、出張/業務日誌資料をフォルダー別に確認し、最近の文書をすぐにプレビューします。"
+      }
+    },
+    {
+      "key": "screens.archive.action",
+      "values": {
+        "ko-KR": "급여 자료 확인",
+        "en-US": "Check payroll files",
+        "zh-Hans-CN": "确认薪资资料",
+        "ja-JP": "給与資料確認"
+      }
+    },
+    {
+      "key": "screens.archive.documents.meta",
+      "values": {
+        "ko-KR": "{type} · {owner}",
+        "en-US": "{type} · {owner}",
+        "zh-Hans-CN": "{type} · {owner}",
+        "ja-JP": "{type} · {owner}"
+      }
+    },
+    {
+      "key": "screens.archive.preview.label",
+      "values": {
+        "ko-KR": "선택 문서 미리보기",
+        "en-US": "Selected document preview",
+        "zh-Hans-CN": "所选文档预览",
+        "ja-JP": "選択文書プレビュー"
+      }
+    },
+    {
+      "key": "screens.archive.preview.title",
+      "values": {
+        "ko-KR": "2026년 5월 급여 보고서",
+        "en-US": "May 2026 payroll report",
+        "zh-Hans-CN": "2026年5月薪资报告",
+        "ja-JP": "2026年5月給与レポート"
+      }
+    },
+    {
+      "key": "screens.archive.preview.securityScope.label",
+      "values": {
+        "ko-KR": "보안 범위",
+        "en-US": "Security scope",
+        "zh-Hans-CN": "安全范围",
+        "ja-JP": "セキュリティ範囲"
+      }
+    },
+    {
+      "key": "screens.archive.preview.securityScope.value",
+      "values": {
+        "ko-KR": "급여 담당 / Branch 관리자",
+        "en-US": "Payroll owner / Branch admin",
+        "zh-Hans-CN": "薪资负责人 / Branch管理员",
+        "ja-JP": "給与担当 / Branch管理者"
+      }
+    },
+    {
+      "key": "screens.archive.preview.status.label",
+      "values": {
+        "ko-KR": "상태",
+        "en-US": "Status",
+        "zh-Hans-CN": "状态",
+        "ja-JP": "状態"
+      }
+    },
+    {
+      "key": "screens.archive.preview.status.value",
+      "values": {
+        "ko-KR": "보관됨",
+        "en-US": "Archived",
+        "zh-Hans-CN": "已归档",
+        "ja-JP": "保管済み"
+      }
+    },
+    {
+      "key": "screens.archive.preview.actions.payroll",
+      "values": {
+        "ko-KR": "급여 화면 열기",
+        "en-US": "Open payroll screen",
+        "zh-Hans-CN": "打开薪资界面",
+        "ja-JP": "給与画面を開く"
+      }
+    },
+    {
+      "key": "screens.archive.preview.actions.permissions",
+      "values": {
+        "ko-KR": "권한 확인",
+        "en-US": "Check permissions",
+        "zh-Hans-CN": "确认权限",
+        "ja-JP": "権限確認"
+      }
+    },
+    {
+      "key": "screens.ai.title",
+      "values": {
+        "ko-KR": "AI 업무 작업대",
+        "en-US": "AI work workspace",
+        "zh-Hans-CN": "AI业务工作台",
+        "ja-JP": "AI業務ワークスペース"
+      }
+    },
+    {
+      "key": "screens.ai.description",
+      "values": {
+        "ko-KR": "급여, 결재, 자료함 문맥에서 추천 작업을 고르고 사람이 확인해야 할 초안과 질문을 분리합니다.",
+        "en-US": "Choose recommended tasks from payroll, approval, and archive context, and separate drafts/questions that need human review.",
+        "zh-Hans-CN": "从薪资、审批、资料库上下文中选择推荐任务，并分离需人工确认的草稿和问题。",
+        "ja-JP": "給与、決裁、資料庫の文脈から推奨作業を選び、人が確認すべき下書きと質問を分離します。"
+      }
+    },
+    {
+      "key": "screens.ai.action",
+      "values": {
+        "ko-KR": "AI 사용 범위 확인",
+        "en-US": "Check AI usage scope",
+        "zh-Hans-CN": "确认AI使用范围",
+        "ja-JP": "AI使用範囲確認"
+      }
+    },
+    {
+      "key": "screens.ai.preview.label",
+      "values": {
+        "ko-KR": "사람 검토 필요",
+        "en-US": "Human review required",
+        "zh-Hans-CN": "需要人工审核",
+        "ja-JP": "人の確認が必要"
+      }
+    },
+    {
+      "key": "screens.ai.preview.title",
+      "values": {
+        "ko-KR": "AI가 만든 문장은 바로 확정하지 않고 담당자가 확인합니다.",
+        "en-US": "AI-generated text is not finalized until the owner reviews it.",
+        "zh-Hans-CN": "AI生成的文本不会立即确定，需要负责人确认。",
+        "ja-JP": "AIが作成した文はすぐ確定せず、担当者が確認します。"
+      }
+    },
+    {
+      "key": "screens.ai.preview.actions.payroll",
+      "values": {
+        "ko-KR": "급여 문맥 열기",
+        "en-US": "Open payroll context",
+        "zh-Hans-CN": "打开薪资上下文",
+        "ja-JP": "給与文脈を開く"
+      }
+    },
+    {
+      "key": "screens.ai.preview.actions.archive",
+      "values": {
+        "ko-KR": "자료함 문서 보기",
+        "en-US": "View archive documents",
+        "zh-Hans-CN": "查看资料库文档",
+        "ja-JP": "資料庫文書を見る"
+      }
+    },
+    {
+      "key": "screens.admin.title",
+      "values": {
+        "ko-KR": "법인 Branch / 하위계정 권한",
+        "en-US": "Company Branch / subaccount permissions",
+        "zh-Hans-CN": "法人Branch / 下级账号权限",
+        "ja-JP": "法人Branch / 下位アカウント権限"
+      }
+    },
+    {
+      "key": "screens.admin.description",
+      "values": {
+        "ko-KR": "회사 하나를 하나의 Branch로 보고, 하위계정과 민감 문서 접근 범위를 화면에서 분리합니다.",
+        "en-US": "Treat one company as one Branch and separate subaccounts from sensitive document access scope on screen.",
+        "zh-Hans-CN": "将一个公司视为一个Branch，并在界面中分离下级账号和敏感文档访问范围。",
+        "ja-JP": "会社1つを1つのBranchとみなし、下位アカウントと機微文書アクセス範囲を画面で分離します。"
+      }
+    },
+    {
+      "key": "screens.admin.branchAccount.label",
+      "values": {
+        "ko-KR": "Branch 계정",
+        "en-US": "Branch account",
+        "zh-Hans-CN": "Branch账号",
+        "ja-JP": "Branchアカウント"
+      }
+    },
+    {
+      "key": "screens.admin.branchAccount.value",
+      "values": {
+        "ko-KR": "Bitween Demo · 법인코드 0000",
+        "en-US": "Bitween Demo · Company code 0000",
+        "zh-Hans-CN": "Bitween Demo · 法人代码0000",
+        "ja-JP": "Bitween Demo · 法人コード0000"
+      }
+    },
+    {
+      "key": "screens.admin.branchAccount.detail",
+      "values": {
+        "ko-KR": "법인 기본사항 입력, 사업장 정보, 하위계정 생성 권한을 이 화면에서 검토합니다.",
+        "en-US": "Review company basics, workplace information, and subaccount creation rights on this screen.",
+        "zh-Hans-CN": "在此界面审核法人基本事项、事业场所信息和下级账号创建权限。",
+        "ja-JP": "法人基本事項入力、事業所情報、下位アカウント作成権限をこの画面で確認します。"
+      }
+    },
+    {
+      "key": "screens.admin.subaccount.label",
+      "values": {
+        "ko-KR": "하위계정 구조",
+        "en-US": "Subaccount structure",
+        "zh-Hans-CN": "下级账号结构",
+        "ja-JP": "下位アカウント構造"
+      }
+    },
+    {
+      "key": "screens.admin.subaccount.value",
+      "values": {
+        "ko-KR": "관리자 2명 · 경영진 3명 · 일반 사원 9명",
+        "en-US": "2 admins · 3 executives · 9 employees",
+        "zh-Hans-CN": "管理员2人 · 经营层3人 · 一般员工9人",
+        "ja-JP": "管理者2名 · 経営陣3名 · 一般社員9名"
+      }
+    },
+    {
+      "key": "screens.admin.subaccount.detail",
+      "values": {
+        "ko-KR": "신규 계정은 Branch 소속, 부서, 역할을 지정한 뒤 초대합니다.",
+        "en-US": "New accounts are invited after assigning Branch, department, and role.",
+        "zh-Hans-CN": "新账号指定Branch所属、部门和角色后邀请。",
+        "ja-JP": "新規アカウントはBranch所属、部門、役割を指定した後に招待します。"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.columns.payroll",
+      "values": {
+        "ko-KR": "급여",
+        "en-US": "Payroll",
+        "zh-Hans-CN": "薪资",
+        "ja-JP": "給与"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.columns.executive",
+      "values": {
+        "ko-KR": "경영진 급여",
+        "en-US": "Executive payroll",
+        "zh-Hans-CN": "高管薪资",
+        "ja-JP": "役員給与"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.columns.archive",
+      "values": {
+        "ko-KR": "자료함",
+        "en-US": "Archive",
+        "zh-Hans-CN": "资料库",
+        "ja-JP": "資料庫"
+      }
+    },
+    {
+      "key": "screens.travel.title",
+      "values": {
+        "ko-KR": "출장/업무일지 흐름",
+        "en-US": "Trip/worklog flow",
+        "zh-Hans-CN": "出差/工作日志流程",
+        "ja-JP": "出張/業務日誌フロー"
+      }
+    },
+    {
+      "key": "screens.travel.description",
+      "values": {
+        "ko-KR": "출장계획부터 출장실행, 업무일지, 실적반영, 상급자 검토까지 한 화면에서 확인합니다.",
+        "en-US": "Check trip planning, execution, worklogs, performance reflection, and manager review in one screen.",
+        "zh-Hans-CN": "在一个界面确认出差计划、执行、工作日志、绩效反映和上级审核。",
+        "ja-JP": "出張計画から実行、業務日誌、実績反映、上長レビューまで1画面で確認します。"
+      }
+    },
+    {
+      "key": "screens.travel.review.ongoing.label",
+      "values": {
+        "ko-KR": "상급자 on-going view",
+        "en-US": "Manager on-going view",
+        "zh-Hans-CN": "上级on-going视图",
+        "ja-JP": "上長on-goingビュー"
+      }
+    },
+    {
+      "key": "screens.travel.review.ongoing.value",
+      "values": {
+        "ko-KR": "진행 중 출장 2건",
+        "en-US": "2 trips in progress",
+        "zh-Hans-CN": "进行中出差2项",
+        "ja-JP": "進行中出張2件"
+      }
+    },
+    {
+      "key": "screens.travel.review.ongoing.detail",
+      "values": {
+        "ko-KR": "출장실행, 업무일지 작성, 실적 반영 대기 상태를 분리해서 봅니다.",
+        "en-US": "Separate trip execution, worklog writing, and waiting performance reflection statuses.",
+        "zh-Hans-CN": "分别查看出差执行、工作日志填写、绩效反映等待状态。",
+        "ja-JP": "出張実行、業務日誌作成、実績反映待ち状態を分けて見ます。"
+      }
+    },
+    {
+      "key": "screens.travel.review.completed.label",
+      "values": {
+        "ko-KR": "상급자 Completed view",
+        "en-US": "Manager Completed view",
+        "zh-Hans-CN": "上级Completed视图",
+        "ja-JP": "上長Completedビュー"
+      }
+    },
+    {
+      "key": "screens.travel.review.completed.value",
+      "values": {
+        "ko-KR": "완료 반영 7건",
+        "en-US": "7 completed reflections",
+        "zh-Hans-CN": "完成反映7项",
+        "ja-JP": "完了反映7件"
+      }
+    },
+    {
+      "key": "screens.travel.review.completed.detail",
+      "values": {
+        "ko-KR": "검토 완료된 출장신청서, 업무일지, 성과 연결 내역을 보관 화면으로 넘깁니다.",
+        "en-US": "Move reviewed trip requests, worklogs, and performance links to the archive screen.",
+        "zh-Hans-CN": "将审核完成的出差申请书、工作日志和绩效连接明细转到资料库界面。",
+        "ja-JP": "レビュー完了した出張申請書、業務日誌、成果連携履歴を保管画面へ渡します。"
+      }
+    },
+    {
+      "key": "screens.attendance.title",
+      "values": {
+        "ko-KR": "휴대폰 출퇴근",
+        "en-US": "Mobile attendance",
+        "zh-Hans-CN": "手机考勤",
+        "ja-JP": "携帯出退勤"
+      }
+    },
+    {
+      "key": "screens.attendance.description",
+      "values": {
+        "ko-KR": "직원이 모바일에서 확인하는 오늘의 출근/퇴근 상태입니다.",
+        "en-US": "Today’s check-in/out status as employees see it on mobile.",
+        "zh-Hans-CN": "员工在手机上确认的今日签到/签退状态。",
+        "ja-JP": "社員がモバイルで確認する本日の出勤/退勤状態です。"
+      }
+    },
+    {
+      "key": "screens.attendance.phone.todayStatus",
+      "values": {
+        "ko-KR": "오늘 상태",
+        "en-US": "Today status",
+        "zh-Hans-CN": "今日状态",
+        "ja-JP": "本日状態"
+      }
+    },
+    {
+      "key": "screens.attendance.phone.checkedIn",
+      "values": {
+        "ko-KR": "출근 확인",
+        "en-US": "Checked in",
+        "zh-Hans-CN": "签到确认",
+        "ja-JP": "出勤確認"
+      }
+    },
+    {
+      "key": "screens.attendance.phone.location",
+      "values": {
+        "ko-KR": "본사 120m 이내 · 위치 확인됨",
+        "en-US": "Within 120m of HQ · Location confirmed",
+        "zh-Hans-CN": "总部120m以内 · 位置已确认",
+        "ja-JP": "本社120m以内 · 位置確認済み"
+      }
+    },
+    {
+      "key": "screens.attendance.phone.checkIn",
+      "values": {
+        "ko-KR": "출근",
+        "en-US": "Check in",
+        "zh-Hans-CN": "签到",
+        "ja-JP": "出勤"
+      }
+    },
+    {
+      "key": "screens.attendance.phone.checkOut",
+      "values": {
+        "ko-KR": "퇴근",
+        "en-US": "Check out",
+        "zh-Hans-CN": "签退",
+        "ja-JP": "退勤"
+      }
+    },
+    {
+      "key": "screens.attendance.locationNotice.title",
+      "values": {
+        "ko-KR": "위치 확인",
+        "en-US": "Location check",
+        "zh-Hans-CN": "位置确认",
+        "ja-JP": "位置確認"
+      }
+    },
+    {
+      "key": "screens.attendance.locationNotice.description",
+      "values": {
+        "ko-KR": "GPS 또는 현장 QR 확인 후 기록되는 모바일 UI 자리입니다.",
+        "en-US": "This mobile UI records after GPS or onsite QR confirmation.",
+        "zh-Hans-CN": "该移动UI在GPS或现场QR确认后记录。",
+        "ja-JP": "GPSまたは現場QR確認後に記録されるモバイルUIの場所です。"
+      }
+    },
+    {
+      "key": "screens.attendance.manager.label",
+      "values": {
+        "ko-KR": "관리자 확인",
+        "en-US": "Manager check",
+        "zh-Hans-CN": "管理员确认",
+        "ja-JP": "管理者確認"
+      }
+    },
+    {
+      "key": "screens.attendance.manager.value",
+      "values": {
+        "ko-KR": "외근 위치 확인 1건",
+        "en-US": "1 offsite location check",
+        "zh-Hans-CN": "外勤位置确认1项",
+        "ja-JP": "外勤位置確認1件"
+      }
+    },
+    {
+      "key": "screens.attendance.manager.detail",
+      "values": {
+        "ko-KR": "사유와 위치 메모를 확인한 뒤 승인 흐름으로 연결합니다.",
+        "en-US": "After reviewing reason and location memo, connect to approval flow.",
+        "zh-Hans-CN": "确认原因和位置备注后连接到审批流程。",
+        "ja-JP": "理由と位置メモを確認した後、承認フローへ接続します。"
+      }
+    },
+    {
+      "key": "screens.workDetail.selectedLabel",
+      "values": {
+        "ko-KR": "선택한 업무",
+        "en-US": "Selected work",
+        "zh-Hans-CN": "所选工作",
+        "ja-JP": "選択した業務"
+      }
+    },
+    {
+      "key": "screens.workDetail.owner",
+      "values": {
+        "ko-KR": "담당",
+        "en-US": "Owner",
+        "zh-Hans-CN": "负责人",
+        "ja-JP": "担当"
+      }
+    },
+    {
+      "key": "screens.workDetail.nextStep",
+      "values": {
+        "ko-KR": "다음 작업",
+        "en-US": "Next step",
+        "zh-Hans-CN": "下一步",
+        "ja-JP": "次の作業"
+      }
+    },
+    {
+      "key": "screens.workDetail.actions.openRelated",
+      "values": {
+        "ko-KR": "관련 화면 열기",
+        "en-US": "Open related screen",
+        "zh-Hans-CN": "打开相关界面",
+        "ja-JP": "関連画面を開く"
+      }
+    },
+    {
+      "key": "screens.workDetail.actions.confirmOwner",
+      "values": {
+        "ko-KR": "담당자 확인",
+        "en-US": "Confirm owner",
+        "zh-Hans-CN": "确认负责人",
+        "ja-JP": "担当者確認"
+      }
+    },
+    {
+      "key": "screens.workQueueDetail.selectedLabel",
+      "values": {
+        "ko-KR": "선택한 오늘의 업무",
+        "en-US": "Selected work for today",
+        "zh-Hans-CN": "所选今日工作",
+        "ja-JP": "選択した本日の業務"
+      }
+    },
+    {
+      "key": "screens.workQueueDetail.owner",
+      "values": {
+        "ko-KR": "담당",
+        "en-US": "Owner",
+        "zh-Hans-CN": "负责人",
+        "ja-JP": "担当"
+      }
+    },
+    {
+      "key": "screens.workQueueDetail.due",
+      "values": {
+        "ko-KR": "기한",
+        "en-US": "Due",
+        "zh-Hans-CN": "期限",
+        "ja-JP": "期限"
+      }
+    },
+    {
+      "key": "screens.workQueueDetail.area",
+      "values": {
+        "ko-KR": "업무 영역",
+        "en-US": "Work area",
+        "zh-Hans-CN": "业务领域",
+        "ja-JP": "業務領域"
+      }
+    },
+    {
+      "key": "screens.workQueueDetail.actions.openRelated",
+      "values": {
+        "ko-KR": "관련 화면 열기",
+        "en-US": "Open related screen",
+        "zh-Hans-CN": "打开相关界面",
+        "ja-JP": "関連画面を開く"
+      }
+    },
+    {
+      "key": "screens.workQueueDetail.actions.confirmFlow",
+      "values": {
+        "ko-KR": "담당 흐름 확인",
+        "en-US": "Confirm owner flow",
+        "zh-Hans-CN": "确认负责流程",
+        "ja-JP": "担当フロー確認"
+      }
+    },
+    {
+      "key": "screens.archive.folders.folder-payroll.label",
+      "values": {
+        "ko-KR": "급여 산출물",
+        "en-US": "Payroll outputs",
+        "zh-Hans-CN": "薪资产出",
+        "ja-JP": "給与成果物"
+      }
+    },
+    {
+      "key": "screens.archive.folders.folder-payroll.count",
+      "values": {
+        "ko-KR": "12개",
+        "en-US": "12 files",
+        "zh-Hans-CN": "12个",
+        "ja-JP": "12件"
+      }
+    },
+    {
+      "key": "screens.archive.folders.folder-payroll.owner",
+      "values": {
+        "ko-KR": "급여 담당",
+        "en-US": "Payroll owner",
+        "zh-Hans-CN": "薪资负责人",
+        "ja-JP": "給与担当"
+      }
+    },
+    {
+      "key": "screens.archive.folders.folder-attendance.label",
+      "values": {
+        "ko-KR": "근태 원본",
+        "en-US": "Attendance sources",
+        "zh-Hans-CN": "考勤原件",
+        "ja-JP": "勤怠原本"
+      }
+    },
+    {
+      "key": "screens.archive.folders.folder-attendance.count",
+      "values": {
+        "ko-KR": "4개",
+        "en-US": "4 files",
+        "zh-Hans-CN": "4个",
+        "ja-JP": "4件"
+      }
+    },
+    {
+      "key": "screens.archive.folders.folder-attendance.owner",
+      "values": {
+        "ko-KR": "운영팀",
+        "en-US": "Operations team",
+        "zh-Hans-CN": "运营团队",
+        "ja-JP": "運用チーム"
+      }
+    },
+    {
+      "key": "screens.archive.folders.folder-approval.label",
+      "values": {
+        "ko-KR": "결재 첨부",
+        "en-US": "Approval attachments",
+        "zh-Hans-CN": "审批附件",
+        "ja-JP": "決裁添付"
+      }
+    },
+    {
+      "key": "screens.archive.folders.folder-approval.count",
+      "values": {
+        "ko-KR": "8개",
+        "en-US": "8 files",
+        "zh-Hans-CN": "8个",
+        "ja-JP": "8件"
+      }
+    },
+    {
+      "key": "screens.archive.folders.folder-approval.owner",
+      "values": {
+        "ko-KR": "승인권자",
+        "en-US": "Approver",
+        "zh-Hans-CN": "审批人",
+        "ja-JP": "承認者"
+      }
+    },
+    {
+      "key": "screens.archive.folders.folder-travel.label",
+      "values": {
+        "ko-KR": "출장/업무일지",
+        "en-US": "Trips / worklogs",
+        "zh-Hans-CN": "出差/工作日志",
+        "ja-JP": "出張/業務日誌"
+      }
+    },
+    {
+      "key": "screens.archive.folders.folder-travel.count",
+      "values": {
+        "ko-KR": "7개",
+        "en-US": "7 files",
+        "zh-Hans-CN": "7个",
+        "ja-JP": "7件"
+      }
+    },
+    {
+      "key": "screens.archive.folders.folder-travel.owner",
+      "values": {
+        "ko-KR": "영업팀",
+        "en-US": "Sales team",
+        "zh-Hans-CN": "销售团队",
+        "ja-JP": "営業チーム"
+      }
+    },
+    {
+      "key": "screens.archive.documents.doc-payroll.title",
+      "values": {
+        "ko-KR": "2026년 5월 급여 보고서",
+        "en-US": "May 2026 payroll report",
+        "zh-Hans-CN": "2026年5月薪资报告",
+        "ja-JP": "2026年5月給与レポート"
+      }
+    },
+    {
+      "key": "screens.archive.documents.doc-payroll.type",
+      "values": {
+        "ko-KR": "Excel",
+        "en-US": "Excel",
+        "zh-Hans-CN": "Excel",
+        "ja-JP": "Excel"
+      }
+    },
+    {
+      "key": "screens.archive.documents.doc-payroll.owner",
+      "values": {
+        "ko-KR": "급여 담당",
+        "en-US": "Payroll owner",
+        "zh-Hans-CN": "薪资负责人",
+        "ja-JP": "給与担当"
+      }
+    },
+    {
+      "key": "screens.archive.documents.doc-payroll.status",
+      "values": {
+        "ko-KR": "보관됨",
+        "en-US": "Archived",
+        "zh-Hans-CN": "已归档",
+        "ja-JP": "保管済み"
+      }
+    },
+    {
+      "key": "screens.archive.documents.doc-attendance.title",
+      "values": {
+        "ko-KR": "6월 1주차 근태 원본",
+        "en-US": "Week 1 June attendance source",
+        "zh-Hans-CN": "6月第1周考勤原件",
+        "ja-JP": "6月第1週勤怠原本"
+      }
+    },
+    {
+      "key": "screens.archive.documents.doc-attendance.type",
+      "values": {
+        "ko-KR": "CSV",
+        "en-US": "CSV",
+        "zh-Hans-CN": "CSV",
+        "ja-JP": "CSV"
+      }
+    },
+    {
+      "key": "screens.archive.documents.doc-attendance.owner",
+      "values": {
+        "ko-KR": "운영팀",
+        "en-US": "Operations team",
+        "zh-Hans-CN": "运营团队",
+        "ja-JP": "運用チーム"
+      }
+    },
+    {
+      "key": "screens.archive.documents.doc-attendance.status",
+      "values": {
+        "ko-KR": "분류 대기",
+        "en-US": "Waiting classification",
+        "zh-Hans-CN": "等待分类",
+        "ja-JP": "分類待ち"
+      }
+    },
+    {
+      "key": "screens.archive.documents.doc-travel.title",
+      "values": {
+        "ko-KR": "부산 출장 업무일지",
+        "en-US": "Busan trip worklog",
+        "zh-Hans-CN": "釜山出差工作日志",
+        "ja-JP": "釜山出張業務日誌"
+      }
+    },
+    {
+      "key": "screens.archive.documents.doc-travel.type",
+      "values": {
+        "ko-KR": "PDF",
+        "en-US": "PDF",
+        "zh-Hans-CN": "PDF",
+        "ja-JP": "PDF"
+      }
+    },
+    {
+      "key": "screens.archive.documents.doc-travel.owner",
+      "values": {
+        "ko-KR": "영업팀",
+        "en-US": "Sales team",
+        "zh-Hans-CN": "销售团队",
+        "ja-JP": "営業チーム"
+      }
+    },
+    {
+      "key": "screens.archive.documents.doc-travel.status",
+      "values": {
+        "ko-KR": "성과 연결",
+        "en-US": "Performance linked",
+        "zh-Hans-CN": "连接绩效",
+        "ja-JP": "成果連携"
+      }
+    },
+    {
+      "key": "screens.ai.recommendations.ai-payroll-errors.title",
+      "values": {
+        "ko-KR": "급여 산출 오류 요약",
+        "en-US": "Payroll calculation error summary",
+        "zh-Hans-CN": "薪资计算错误摘要",
+        "ja-JP": "給与算出エラー要約"
+      }
+    },
+    {
+      "key": "screens.ai.recommendations.ai-payroll-errors.source",
+      "values": {
+        "ko-KR": "급여 준비 현황",
+        "en-US": "Payroll readiness status",
+        "zh-Hans-CN": "薪资准备现状",
+        "ja-JP": "給与準備状況"
+      }
+    },
+    {
+      "key": "screens.ai.recommendations.ai-payroll-errors.status",
+      "values": {
+        "ko-KR": "추천",
+        "en-US": "Recommended",
+        "zh-Hans-CN": "推荐",
+        "ja-JP": "推薦"
+      }
+    },
+    {
+      "key": "screens.ai.recommendations.ai-approval-comment.title",
+      "values": {
+        "ko-KR": "결재 의견 초안",
+        "en-US": "Approval comment draft",
+        "zh-Hans-CN": "审批意见草稿",
+        "ja-JP": "決裁意見下書き"
+      }
+    },
+    {
+      "key": "screens.ai.recommendations.ai-approval-comment.source",
+      "values": {
+        "ko-KR": "전자결재 대기 문서",
+        "en-US": "Pending approval documents",
+        "zh-Hans-CN": "待审批文档",
+        "ja-JP": "電子決裁待ち文書"
+      }
+    },
+    {
+      "key": "screens.ai.recommendations.ai-approval-comment.status",
+      "values": {
+        "ko-KR": "검토 필요",
+        "en-US": "Needs review",
+        "zh-Hans-CN": "需要审核",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "screens.ai.recommendations.ai-archive-summary.title",
+      "values": {
+        "ko-KR": "자료함 문서 요약",
+        "en-US": "Archive document summary",
+        "zh-Hans-CN": "资料库文档摘要",
+        "ja-JP": "資料庫文書要約"
+      }
+    },
+    {
+      "key": "screens.ai.recommendations.ai-archive-summary.source",
+      "values": {
+        "ko-KR": "2026년 5월 급여 보고서",
+        "en-US": "May 2026 payroll report",
+        "zh-Hans-CN": "2026年5月薪资报告",
+        "ja-JP": "2026年5月給与レポート"
+      }
+    },
+    {
+      "key": "screens.ai.recommendations.ai-archive-summary.status",
+      "values": {
+        "ko-KR": "미리보기",
+        "en-US": "Preview",
+        "zh-Hans-CN": "预览",
+        "ja-JP": "プレビュー"
+      }
+    },
+    {
+      "key": "screens.ai.drafts.draft-summary.label",
+      "values": {
+        "ko-KR": "요약",
+        "en-US": "Summary",
+        "zh-Hans-CN": "摘要",
+        "ja-JP": "要約"
+      }
+    },
+    {
+      "key": "screens.ai.drafts.draft-summary.title",
+      "values": {
+        "ko-KR": "급여 기준 확인 요약",
+        "en-US": "Payroll rule check summary",
+        "zh-Hans-CN": "薪资规则确认摘要",
+        "ja-JP": "給与基準確認要約"
+      }
+    },
+    {
+      "key": "screens.ai.drafts.draft-summary.detail",
+      "values": {
+        "ko-KR": "누락된 입력자료, EDI 확인 전 상태, 산출 전 검토 항목을 짧게 정리합니다.",
+        "en-US": "Briefly organize missing inputs, pre-EDI status, and pre-calculation review items.",
+        "zh-Hans-CN": "简要整理缺失输入资料、EDI确认前状态和计算前审核项目。",
+        "ja-JP": "不足入力資料、EDI確認前状態、算出前確認項目を短く整理します。"
+      }
+    },
+    {
+      "key": "screens.ai.drafts.draft-question.label",
+      "values": {
+        "ko-KR": "확인 질문",
+        "en-US": "Confirmation question",
+        "zh-Hans-CN": "确认问题",
+        "ja-JP": "確認質問"
+      }
+    },
+    {
+      "key": "screens.ai.drafts.draft-question.title",
+      "values": {
+        "ko-KR": "관리자에게 물어볼 항목",
+        "en-US": "Questions for the manager",
+        "zh-Hans-CN": "询问管理员的项目",
+        "ja-JP": "管理者へ質問する項目"
+      }
+    },
+    {
+      "key": "screens.ai.drafts.draft-question.detail",
+      "values": {
+        "ko-KR": "경영진 급여 열람 권한과 Branch 하위계정 범위를 확인하도록 제안합니다.",
+        "en-US": "Suggest checking executive payroll view permissions and Branch subaccount scope.",
+        "zh-Hans-CN": "建议确认高管薪资查看权限和Branch下级账号范围。",
+        "ja-JP": "役員給与閲覧権限とBranch下位アカウント範囲を確認するよう提案します。"
+      }
+    },
+    {
+      "key": "screens.ai.drafts.draft-comment.label",
+      "values": {
+        "ko-KR": "초안",
+        "en-US": "Draft",
+        "zh-Hans-CN": "草稿",
+        "ja-JP": "下書き"
+      }
+    },
+    {
+      "key": "screens.ai.drafts.draft-comment.title",
+      "values": {
+        "ko-KR": "결재 의견 문장",
+        "en-US": "Approval comment sentence",
+        "zh-Hans-CN": "审批意见句子",
+        "ja-JP": "決裁意見文"
+      }
+    },
+    {
+      "key": "screens.ai.drafts.draft-comment.detail",
+      "values": {
+        "ko-KR": "급여 지급 품의에 붙일 검토 의견 초안을 사람이 확인하기 전 상태로 표시합니다.",
+        "en-US": "Show a draft review comment for the payroll payment request before human confirmation.",
+        "zh-Hans-CN": "显示薪资支付请示的审核意见草稿，等待人工确认。",
+        "ja-JP": "給与支給稟議に添付する確認意見の下書きを、人が確認する前の状態として表示します。"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.role-owner.role",
+      "values": {
+        "ko-KR": "Branch 관리자",
+        "en-US": "Branch admin",
+        "zh-Hans-CN": "Branch管理员",
+        "ja-JP": "Branch管理者"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.role-owner.payroll",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.role-owner.executive",
+      "values": {
+        "ko-KR": "요청 승인",
+        "en-US": "Request approval",
+        "zh-Hans-CN": "请求审批",
+        "ja-JP": "申請承認"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.role-owner.archive",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.role-manager.role",
+      "values": {
+        "ko-KR": "경영진",
+        "en-US": "Executive",
+        "zh-Hans-CN": "经营层",
+        "ja-JP": "経営陣"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.role-manager.payroll",
+      "values": {
+        "ko-KR": "열람",
+        "en-US": "View",
+        "zh-Hans-CN": "查看",
+        "ja-JP": "閲覧"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.role-manager.executive",
+      "values": {
+        "ko-KR": "열람",
+        "en-US": "View",
+        "zh-Hans-CN": "查看",
+        "ja-JP": "閲覧"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.role-manager.archive",
+      "values": {
+        "ko-KR": "경영 자료",
+        "en-US": "Executive materials",
+        "zh-Hans-CN": "经营资料",
+        "ja-JP": "経営資料"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.role-employee.role",
+      "values": {
+        "ko-KR": "일반 사원",
+        "en-US": "Employee",
+        "zh-Hans-CN": "一般员工",
+        "ja-JP": "一般社員"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.role-employee.payroll",
+      "values": {
+        "ko-KR": "본인 자료",
+        "en-US": "Own data",
+        "zh-Hans-CN": "本人资料",
+        "ja-JP": "本人資料"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.role-employee.executive",
+      "values": {
+        "ko-KR": "차단",
+        "en-US": "Blocked",
+        "zh-Hans-CN": "阻止",
+        "ja-JP": "遮断"
+      }
+    },
+    {
+      "key": "screens.admin.permissions.role-employee.archive",
+      "values": {
+        "ko-KR": "공유 자료",
+        "en-US": "Shared materials",
+        "zh-Hans-CN": "共享资料",
+        "ja-JP": "共有資料"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-plan.label",
+      "values": {
+        "ko-KR": "출장계획",
+        "en-US": "Trip plan",
+        "zh-Hans-CN": "出差计划",
+        "ja-JP": "出張計画"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-plan.detail",
+      "values": {
+        "ko-KR": "출장신청서와 일정 목적을 먼저 정리합니다.",
+        "en-US": "Organize the trip request and schedule purpose first.",
+        "zh-Hans-CN": "先整理出差申请书和日程目的。",
+        "ja-JP": "出張申請書と日程目的を先に整理します。"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-plan.status",
+      "values": {
+        "ko-KR": "작성/승인",
+        "en-US": "Draft/approval",
+        "zh-Hans-CN": "填写/审批",
+        "ja-JP": "作成/承認"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-run.label",
+      "values": {
+        "ko-KR": "출장실행",
+        "en-US": "Trip execution",
+        "zh-Hans-CN": "出差执行",
+        "ja-JP": "出張実行"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-run.detail",
+      "values": {
+        "ko-KR": "현장 방문, 이동, 고객 미팅 상태를 표시합니다.",
+        "en-US": "Show site visit, travel, and customer meeting status.",
+        "zh-Hans-CN": "显示现场访问、移动和客户会议状态。",
+        "ja-JP": "現場訪問、移動、顧客ミーティング状態を表示します。"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-run.status",
+      "values": {
+        "ko-KR": "진행 중",
+        "en-US": "In progress",
+        "zh-Hans-CN": "进行中",
+        "ja-JP": "進行中"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-diary.label",
+      "values": {
+        "ko-KR": "업무일지",
+        "en-US": "Worklog",
+        "zh-Hans-CN": "工作日志",
+        "ja-JP": "業務日誌"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-diary.detail",
+      "values": {
+        "ko-KR": "출장 중 처리한 업무와 후속 조치를 기록합니다.",
+        "en-US": "Record work handled during the trip and follow-up actions.",
+        "zh-Hans-CN": "记录出差中处理的工作和后续措施。",
+        "ja-JP": "出張中に処理した業務とフォローアップを記録します。"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-diary.status",
+      "values": {
+        "ko-KR": "오늘 작성",
+        "en-US": "Write today",
+        "zh-Hans-CN": "今天填写",
+        "ja-JP": "本日作成"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-result.label",
+      "values": {
+        "ko-KR": "실적반영",
+        "en-US": "Performance reflection",
+        "zh-Hans-CN": "绩效反映",
+        "ja-JP": "実績反映"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-result.detail",
+      "values": {
+        "ko-KR": "계약, 매출, 고객 대응 결과를 성과에 연결합니다.",
+        "en-US": "Connect contract, sales, and customer response results to performance.",
+        "zh-Hans-CN": "将合同、销售和客户响应结果连接到绩效。",
+        "ja-JP": "契約、売上、顧客対応結果を成果に接続します。"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-result.status",
+      "values": {
+        "ko-KR": "검토 대기",
+        "en-US": "Waiting review",
+        "zh-Hans-CN": "等待审核",
+        "ja-JP": "レビュー待ち"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-review.label",
+      "values": {
+        "ko-KR": "상급자 view",
+        "en-US": "Manager view",
+        "zh-Hans-CN": "上级视图",
+        "ja-JP": "上長ビュー"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-review.detail",
+      "values": {
+        "ko-KR": "on-going과 Completed 상태를 관리자가 나눠 확인합니다.",
+        "en-US": "Managers review on-going and Completed status separately.",
+        "zh-Hans-CN": "管理员分别确认on-going和Completed状态。",
+        "ja-JP": "管理者がon-goingとCompleted状態を分けて確認します。"
+      }
+    },
+    {
+      "key": "screens.travel.stages.travel-review.status",
+      "values": {
+        "ko-KR": "view 준비",
+        "en-US": "View ready",
+        "zh-Hans-CN": "视图准备",
+        "ja-JP": "ビュー準備"
+      }
+    },
+    {
+      "key": "screens.attendance.logs.att-log-1.label",
+      "values": {
+        "ko-KR": "출근",
+        "en-US": "Check-in",
+        "zh-Hans-CN": "签到",
+        "ja-JP": "出勤"
+      }
+    },
+    {
+      "key": "screens.attendance.logs.att-log-1.place",
+      "values": {
+        "ko-KR": "본사",
+        "en-US": "HQ",
+        "zh-Hans-CN": "总部",
+        "ja-JP": "本社"
+      }
+    },
+    {
+      "key": "screens.attendance.logs.att-log-2.label",
+      "values": {
+        "ko-KR": "외근",
+        "en-US": "Offsite",
+        "zh-Hans-CN": "外勤",
+        "ja-JP": "外勤"
+      }
+    },
+    {
+      "key": "screens.attendance.logs.att-log-2.place",
+      "values": {
+        "ko-KR": "고객사",
+        "en-US": "Customer site",
+        "zh-Hans-CN": "客户现场",
+        "ja-JP": "顧客先"
+      }
+    },
+    {
+      "key": "screens.attendance.logs.att-log-3.label",
+      "values": {
+        "ko-KR": "퇴근",
+        "en-US": "Check-out",
+        "zh-Hans-CN": "签退",
+        "ja-JP": "退勤"
+      }
+    },
+    {
+      "key": "screens.attendance.logs.att-log-3.place",
+      "values": {
+        "ko-KR": "대기",
+        "en-US": "Waiting",
+        "zh-Hans-CN": "等待",
+        "ja-JP": "待機"
+      }
+    },
+    {
+      "key": "shell.themePanel.aria",
+      "values": {
+        "ko-KR": "메뉴 색상 옵션",
+        "en-US": "Sidebar color options",
+        "zh-Hans-CN": "菜单颜色选项",
+        "ja-JP": "メニュー色オプション"
+      }
+    },
+    {
+      "key": "shell.navigation.aria",
+      "values": {
+        "ko-KR": "플랫폼 메뉴",
+        "en-US": "Platform menu",
+        "zh-Hans-CN": "平台菜单",
+        "ja-JP": "プラットフォームメニュー"
+      }
+    },
+    {
+      "key": "preview.documentTitle",
+      "values": {
+        "ko-KR": "Bitween 플랫폼 UI 미리보기",
+        "en-US": "Bitween platform UI preview",
+        "zh-Hans-CN": "Bitween 平台 UI 预览",
+        "ja-JP": "Bitween プラットフォーム UI プレビュー"
+      }
+    },
+    {
+      "key": "preview.toast.default",
+      "values": {
+        "ko-KR": "화면이 업데이트되었습니다.",
+        "en-US": "The screen has been updated.",
+        "zh-Hans-CN": "页面已更新。",
+        "ja-JP": "画面を更新しました。"
+      }
+    },
+    {
+      "key": "preview.toast.screenChanged",
+      "values": {
+        "ko-KR": "{screen} 화면으로 이동했습니다.",
+        "en-US": "Opened the {screen} screen.",
+        "zh-Hans-CN": "已打开 {screen} 页面。",
+        "ja-JP": "{screen} 画面を開きました。"
+      }
+    },
+    {
+      "key": "preview.toast.filterSelected",
+      "values": {
+        "ko-KR": "{filter} 필터가 선택되었습니다.",
+        "en-US": "Selected the {filter} filter.",
+        "zh-Hans-CN": "已选择 {filter} 筛选。",
+        "ja-JP": "{filter} フィルターを選択しました。"
+      }
+    },
+    {
+      "key": "preview.toast.workDetailOpened",
+      "values": {
+        "ko-KR": "업무 상세를 열었습니다.",
+        "en-US": "Opened the work detail.",
+        "zh-Hans-CN": "已打开工作详情。",
+        "ja-JP": "業務詳細を開きました。"
+      }
+    },
+    {
+      "key": "preview.toast.sidebarThemeApplied",
+      "values": {
+        "ko-KR": "사이드 메뉴 색상 옵션을 적용했습니다.",
+        "en-US": "Applied the sidebar color option.",
+        "zh-Hans-CN": "已应用侧边菜单颜色选项。",
+        "ja-JP": "サイドメニューの色オプションを適用しました。"
+      }
+    },
+    {
+      "key": "preview.toast.languageSelected",
+      "values": {
+        "ko-KR": "국제화 설정을 선택했습니다.",
+        "en-US": "Selected the language setting.",
+        "zh-Hans-CN": "已选择国际化设置。",
+        "ja-JP": "国際化設定を選択しました。"
+      }
+    },
+    {
+      "key": "preview.toast.payrollReadinessSelected",
+      "values": {
+        "ko-KR": "급여 준비 항목을 선택했습니다.",
+        "en-US": "Selected the payroll readiness item.",
+        "zh-Hans-CN": "已选择薪资准备项目。",
+        "ja-JP": "給与準備項目を選択しました。"
+      }
+    },
+    {
+      "key": "preview.toast.payrollStepSelected",
+      "values": {
+        "ko-KR": "급여 산출 단계를 선택했습니다.",
+        "en-US": "Selected the payroll calculation step.",
+        "zh-Hans-CN": "已选择薪资计算步骤。",
+        "ja-JP": "給与計算ステップを選択しました。"
+      }
+    },
+    {
+      "key": "preview.toast.queueDetailOpened",
+      "values": {
+        "ko-KR": "오늘의 업무 상세를 열었습니다.",
+        "en-US": "Opened today's work detail.",
+        "zh-Hans-CN": "已打开今日工作详情。",
+        "ja-JP": "今日の業務詳細を開きました。"
+      }
+    },
+    {
+      "key": "preview.toast.demoLogin",
+      "values": {
+        "ko-KR": "Demo 계정으로 접속했습니다.",
+        "en-US": "Signed in with the demo account.",
+        "zh-Hans-CN": "已使用演示账号登录。",
+        "ja-JP": "デモアカウントでログインしました。"
+      }
+    },
+    {
+      "key": "preview.toast.checkLogin",
+      "values": {
+        "ko-KR": "로그인 정보를 확인하세요.",
+        "en-US": "Check the sign-in information.",
+        "zh-Hans-CN": "请检查登录信息。",
+        "ja-JP": "ログイン情報を確認してください。"
+      }
+    },
+    {
+      "key": "preview.toast.home",
+      "values": {
+        "ko-KR": "플랫폼 홈으로 이동했습니다.",
+        "en-US": "Opened the platform home.",
+        "zh-Hans-CN": "已打开平台首页。",
+        "ja-JP": "プラットフォームホームを開きました。"
+      }
+    },
+    {
+      "key": "preview.toast.logout",
+      "values": {
+        "ko-KR": "로그아웃했습니다.",
+        "en-US": "Signed out.",
+        "zh-Hans-CN": "已退出登录。",
+        "ja-JP": "ログアウトしました。"
+      }
+    },
+    {
+      "key": "screens.module.filteredEmpty.title",
+      "values": {
+        "ko-KR": "검색 결과가 없습니다.",
+        "en-US": "No search results.",
+        "zh-Hans-CN": "没有搜索结果。",
+        "ja-JP": "検索結果がありません。"
+      }
+    },
+    {
+      "key": "screens.module.filteredEmpty.description",
+      "values": {
+        "ko-KR": "필터나 검색어를 조정하면 업무 목록을 다시 확인할 수 있습니다.",
+        "en-US": "Adjust the filter or search term to check the work list again.",
+        "zh-Hans-CN": "调整筛选或搜索词后，可以重新查看工作列表。",
+        "ja-JP": "フィルターや検索語を調整すると、業務一覧を再確認できます。"
+      }
+    },
+    {
+      "key": "screens.module.filteredEmpty.reset",
+      "values": {
+        "ko-KR": "필터 초기화",
+        "en-US": "Reset filters",
+        "zh-Hans-CN": "重置筛选",
+        "ja-JP": "フィルター初期化"
+      }
+    },
+    {
+      "key": "preview.toast.filtersReset",
+      "values": {
+        "ko-KR": "필터와 검색어를 초기화했습니다.",
+        "en-US": "Reset the filter and search term.",
+        "zh-Hans-CN": "已重置筛选和搜索词。",
+        "ja-JP": "フィルターと検索語を初期化しました。"
+      }
+    }
+  ],
+  "languageDisplayNames": [
+    {
+      "locale": "ko-KR",
+      "values": {
+        "ko-KR": "한국어",
+        "en-US": "Korean",
+        "zh-Hans-CN": "韩语",
+        "ja-JP": "韓国語"
+      }
+    },
+    {
+      "locale": "en-US",
+      "values": {
+        "ko-KR": "영어",
+        "en-US": "English",
+        "zh-Hans-CN": "英语",
+        "ja-JP": "英語"
+      }
+    },
+    {
+      "locale": "zh-Hans-CN",
+      "values": {
+        "ko-KR": "중국어",
+        "en-US": "Chinese",
+        "zh-Hans-CN": "中文",
+        "ja-JP": "中国語"
+      }
+    },
+    {
+      "locale": "ja-JP",
+      "values": {
+        "ko-KR": "일본어",
+        "en-US": "Japanese",
+        "zh-Hans-CN": "日语",
+        "ja-JP": "日本語"
+      }
+    }
+  ]
+}
