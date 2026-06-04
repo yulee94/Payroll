@@ -65,6 +65,7 @@ export type TodoItem = {
   readonly id: string;
   readonly completed: boolean;
   readonly owner: string;
+  readonly target: PlatformId;
   readonly title: string;
   readonly timeLabel: string;
   readonly tone: ReadinessTone;

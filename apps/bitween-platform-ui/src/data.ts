@@ -94,11 +94,11 @@ const calendarEventDefinitions = [
 ] as const satisfies readonly { readonly dateLabel: string; readonly id: string; readonly timeLabel: string; readonly tone: ReadinessTone }[];
 
 const todoDefinitions = [
-  { completed: false, id: "todo-payroll", tone: "attention" },
-  { completed: false, id: "todo-approval", tone: "neutral" },
-  { completed: false, id: "todo-travel", tone: "attention" },
-  { completed: true, id: "todo-archive", tone: "ready" }
-] as const satisfies readonly { readonly completed: boolean; readonly id: string; readonly tone: ReadinessTone }[];
+  { completed: false, id: "todo-payroll", target: "payroll", tone: "attention" },
+  { completed: false, id: "todo-approval", target: "workflow", tone: "neutral" },
+  { completed: false, id: "todo-travel", target: "travel", tone: "attention" },
+  { completed: true, id: "todo-archive", target: "archive", tone: "ready" }
+] as const satisfies readonly { readonly completed: boolean; readonly id: string; readonly target: PlatformId; readonly tone: ReadinessTone }[];
 
 const moduleDefinitions = {
   hr: {
@@ -316,6 +316,7 @@ export const getTodayTodos = (locale: SupportedLocale): readonly TodoItem[] =>
     completed: todo.completed,
     id: todo.id,
     owner: t(locale, `todayTodos.${todo.id}.owner`),
+    target: todo.target,
     title: t(locale, `todayTodos.${todo.id}.title`),
     timeLabel: t(locale, `todayTodos.${todo.id}.timeLabel`),
     tone: todo.tone

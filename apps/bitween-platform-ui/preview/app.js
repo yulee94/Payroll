@@ -97,11 +97,11 @@ const calendarEventDefs = [
 ].map(([id, date, time, tone]) => ({ id, date, time, tone }));
 
 const todayTodoDefs = [
-  ["todo-payroll", "attention", false],
-  ["todo-approval", "neutral", false],
-  ["todo-travel", "attention", false],
-  ["todo-archive", "ready", true]
-].map(([id, tone, done]) => ({ id, tone, done }));
+  ["todo-payroll", "attention", false, "payroll"],
+  ["todo-approval", "neutral", false, "workflow"],
+  ["todo-travel", "attention", false, "travel"],
+  ["todo-archive", "ready", true, "archive"]
+].map(([id, tone, done, target]) => ({ id, tone, done, target }));
 
 const attendanceLogDefs = [
   ["att-log-1", "09:02", "ready"],
@@ -524,7 +524,7 @@ function renderHome() {
       <div class="card planner-card">
         ${sectionHead("", t("screens.todo.title"), t("screens.todo.description"))}
         <div class="planner-list">${todayTodos().map((item) => `
-          <div class="planner-item todo-item ${item.done ? "done" : ""}">${badge(item.timeLabel, item.tone)}<div><strong>${item.title}</strong><span class="helper">${item.owner}</span></div></div>
+          <button class="planner-item todo-item ${item.done ? "done" : ""}" data-target="${item.target}">${badge(item.timeLabel, item.tone)}<div><strong>${item.title}</strong><span class="helper">${item.owner}</span></div></button>
         `).join("")}</div>
       </div>
     </section>
