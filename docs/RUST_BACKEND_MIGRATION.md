@@ -588,6 +588,34 @@ Verification evidence for this checkpoint:
 Slice spec: `docs/PAYROLL_RUST_EXECUTION_PLAN_SLICE.md`.
 
 
+## Current implementation checkpoint: Rust workflow document permission core
+
+Implemented on 2026-06-04 as a workflow document authorization slice:
+
+- `crates/workflow-core::business_trip_permissions` now owns pure supplied
+  workflow-document view, edit, submit, and approve predicates.
+- Rust preserves Python compatibility for the business-trip document legal-scope
+  gate, admin/executive/finance document visibility, requester visibility,
+  approval-step visibility, site-manager/HR site-scoped visibility, requester
+  edit/submit limits for `draft` and `requested_changes`, terminal
+  `approved`/`closed` edit denial, current-pending-step approval, and supplied
+  org workflow-approval override only for admin/executive/finance workflow
+  authority.
+- Python still owns `UserSession` conversion, `get_user_profile`, workflow JSON
+  persistence, document/content extraction, org-position workflow-approval
+  capability lookup, approval mutation, document/task/report/KPI side effects,
+  notifications, calendar/To-Do links, and UI bridge behavior.
+- Workflow contract metadata now names the Rust document permission DTOs,
+  entrypoints, and invariants.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-workflow-core business_trip_permissions --lib`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_document_permissions_contracts -v`
+
+Slice spec: `docs/WORKFLOW_RUST_DOCUMENT_PERMISSIONS_SLICE.md`.
+
+
 ## Current implementation checkpoint: Rust workflow operational permissions core
 
 Implemented on 2026-06-04 as a workflow operational authorization slice:

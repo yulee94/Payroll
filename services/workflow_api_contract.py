@@ -103,13 +103,19 @@ def workflow_business_trip_permissions_example() -> dict[str, Any]:
             "can_manage_execution_task",
             "can_close_month",
             "can_view_site_report",
+            "can_view_document",
+            "can_edit_document",
+            "can_submit_document",
+            "can_approve_document",
         ],
         "python_compatibility_source": "core.workflow.permissions",
         "python_boundary": (
             "Python compatibility code may still own UserSession conversion, get_user_profile lookup, "
             "workflow JSON persistence, document/task/report/KPI side effects, overdue evaluation, "
-            "notifications, calendar/To-Do links, and UI bridges. Rust permission predicates expect "
-            "supplied principal, trip, user profile, and optional requester/traveler profile DTOs."
+            "org-position workflow approval capability lookup, notifications, calendar/To-Do links, "
+            "and UI bridges. Rust permission predicates expect supplied principal, document/trip, "
+            "user profile, approval steps, supplied org workflow-approval capability, and optional "
+            "requester/traveler profile DTOs."
         ),
         "role_values": [
             c.WF_ROLE_ADMIN,
@@ -134,6 +140,9 @@ def workflow_business_trip_permissions_example() -> dict[str, Any]:
             "BusinessTripPermissionTrip",
             "BusinessTripPermissionInput",
             "BusinessTripPermissionDocument",
+            "WorkflowApprovalStep",
+            "WorkflowPermissionDocument",
+            "WorkflowDocumentPermissionInput",
         ],
         "legal_scope_invariants": [
             "row tenant_id must match requested workflow storage tenant when present",
@@ -180,6 +189,18 @@ def workflow_business_trip_permissions_example() -> dict[str, Any]:
             "related documents use the requested workflow storage tenant as row tenant",
             "missing principal tenant preserves legacy document-scope compatibility",
             "sibling legal-tenant principals fail related-document scope",
+        ],
+        "document_permission_invariants": [
+            "Document permissions run after the business-trip document legal-scope gate",
+            "Admin/executive/finance can view legal-scoped documents",
+            "Requesters can view their documents",
+            "Any approval-step assignee can view the document",
+            "Site managers and HR can view documents for supplied profile site_ids",
+            "Requesters can edit and submit only draft or requested_changes documents",
+            "Approved and closed documents are terminal for edit and submit",
+            "Approve requires submitted or in_review document status and a pending approval step",
+            "Only the current pending approval-step assignee can approve without supplied org workflow-approval capability",
+            "Supplied org workflow-approval capability only grants approve override to admin/executive/finance workflow authority",
         ],
         "operational_invariants": [
             "Admin/executive/finance can view any site report",
