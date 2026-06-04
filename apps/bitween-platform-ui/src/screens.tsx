@@ -101,6 +101,13 @@ const aiDraftCards = [
   { id: "draft-comment", label: "초안", title: "결재 의견 문장", detail: "급여 지급 품의에 붙일 검토 의견 초안을 사람이 확인하기 전 상태로 표시합니다.", tone: "neutral" }
 ] as const;
 
+const settingsPreferenceGroups = [
+  { id: "density", label: "화면 밀도", value: "업무형", detail: "카드와 테이블을 한 화면에서 더 많이 스캔하도록 유지합니다.", tone: "ready", target: "home" },
+  { id: "notice", label: "알림", value: "4개 켜짐", detail: "급여, 결재, 자료함, 출장 업무 알림을 업무별로 관리합니다.", tone: "neutral", target: "workflow" },
+  { id: "security", label: "보안 세션", value: "관리 필요", detail: "민감 문서 접근과 세션 만료 안내를 관리자 권한과 함께 확인합니다.", tone: "attention", target: "admin" },
+  { id: "payroll", label: "급여 기준", value: "확인 필요", detail: "지급일, 반올림, 사업장별 입력 기준을 산출 전 다시 봅니다.", tone: "attention", target: "payroll" }
+] as const;
+
 function isModuleId(id: PlatformId): id is ModuleId {
   return id !== "home" && id !== "payroll";
 }
@@ -497,6 +504,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
           </View>
         </Card>
       ) : null}
+      {active.id === "settings" ? <SettingsControlPanel onSelect={onSelect} /> : null}
 
       <Card>
         <SectionHeader
@@ -718,6 +726,38 @@ function AiWorkspacePanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
             <ActionButton onPress={() => onSelect("archive")} variant="ghost">자료함 문서 보기</ActionButton>
           </View>
         </View>
+      </View>
+    </Card>
+  );
+}
+
+function SettingsControlPanel({ onSelect }: Pick<ScreenProps, "onSelect">) {
+  return (
+    <Card>
+      <SectionHeader
+        title="업무 환경 설정"
+        description="화면 밀도, 업무 알림, 보안 세션, 급여 기준 확인을 사용자 화면 안에서 빠르게 점검합니다."
+        action={<ActionButton onPress={() => onSelect("admin")} variant="secondary">권한 설정 확인</ActionButton>}
+      />
+      <View style={styles.settingsGrid}>
+        {settingsPreferenceGroups.map((item) => (
+          <Pressable
+            accessibilityRole="button"
+            key={item.id}
+            onPress={() => onSelect(item.target)}
+            style={({ pressed }) => [styles.settingsPreferenceCard, { borderTopColor: toneColor(item.tone) }, pressed && styles.buttonPressed]}
+          >
+            <View style={styles.settingsPreferenceHead}>
+              <Label size="sm" muted>{item.label}</Label>
+              <Badge tone={item.tone}>{item.value}</Badge>
+            </View>
+            <Label size="sm">{item.detail}</Label>
+          </Pressable>
+        ))}
+      </View>
+      <View style={styles.settingsNotice}>
+        <Badge tone="neutral">Frontend 설정</Badge>
+        <Label size="sm" muted>이 화면은 실제 저장 없이 표시 상태만 구성합니다. 운영 설정 저장은 backend/API 계약 후 연결합니다.</Label>
       </View>
     </Card>
   );
@@ -1500,6 +1540,40 @@ const styles = StyleSheet.create({
     flexBasis: 240,
     flexGrow: 1,
     gap: spacing.xs
+  },
+  settingsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  settingsNotice: {
+    alignItems: "center",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  settingsPreferenceCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 220,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  settingsPreferenceHead: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
   },
   queueGrid: {
     flexDirection: "row",
