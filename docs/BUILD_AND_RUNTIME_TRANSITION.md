@@ -261,6 +261,7 @@ cargo test --workspace
 - [x] Business-trip document relatedness and legal-scope predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the document/content resolver and side-effect bridge.
 - [x] Workflow document view/edit/submit/approve permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile/org-capability resolver and approval mutation bridge.
 - [x] Workflow inbox classification is defined in framework-neutral Rust DTOs and API contracts while Python remains the session/permission/document hydration/count/filter/UI bridge.
+- [x] Workflow form validation and document-field shaping are defined in framework-neutral Rust DTOs and API contracts while Python remains the tenant/template/config/persistence/UI bridge.
 - [x] Workflow site-report, month-close, and execution-task management permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile/task/site resolver and side-effect bridge.
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
@@ -756,6 +757,35 @@ cargo test -p bitween-workflow-core workflow_inbox --lib
 Task 5 acceptance status:
 
 - [x] Workflow inbox classification is Rust-owned behind parity contract tests.
+
+## Implementation checkpoint: Rust workflow form value core
+
+Completed on 2026-06-04 as a workflow form validation and field-shaping slice:
+
+- `crates/workflow-core::workflow_forms` owns pure supplied-schema form
+  validation, built-in form schema fallback, document-field shaping, and
+  attendance label-to-key mapping.
+- Rust preserves required-field Korean errors, number parsing with comma
+  stripping, closing-month length validation, lexicographic period ordering,
+  summary and amount fallback order, payload trimming plus `document_type`
+  injection, and unknown-attendance fallback.
+- Python remains the tenant/template/config lookup owner, form-template
+  persistence owner, workflow document mutation bridge, service orchestrator,
+  and UI renderer.
+- Slice spec: `docs/WORKFLOW_RUST_FORM_VALUES_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo test -p bitween-workflow-core workflow_forms --lib
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_form_contracts -v
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_forms -v
+```
+
+Task 5 acceptance status:
+
+- [x] Workflow form validation and field shaping are Rust-owned behind parity
+      contract tests.
 
 ## Implementation checkpoint: Rust workflow document permissions core
 
