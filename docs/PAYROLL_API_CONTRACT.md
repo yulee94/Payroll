@@ -17,13 +17,14 @@ Rust transition entry point:
 - Validation function: `bitween_payroll_api::validate_payroll_api_payload(payload, policy_snapshot)`
 - Policy-resolved validation function: `PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)`
 - Attendance aggregation function: `PayrollApiService::aggregate_attendance_records(records, workplace, attendance_policy)`
+- Workplace monthly-hours application function: `PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)`
 - Fixed-hours application function: `PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)`
 - Execution plan function: `PayrollApiService::plan_run_request(request, policy_snapshot)`
 - Run-result response function: `PayrollApiService::run_response(result, request_id)`
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -112,6 +113,51 @@ Example invoice-compatible output row:
   "subtotal": 0,
   "_attendance_days": 2,
   "_attendance_input": true
+}
+```
+
+## Workplace Monthly-Hours Application
+
+Python compatibility code may still load tenant/site/global settings and canonical workplace aliases. Once a workplace-hours policy has been supplied for an invoice-compatible payroll row, Rust owns the deterministic monthly-hours selection rule through `resolve_monthly_work_hours(invoice, workplace, workplace_hours_policy)`, `apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)`, and `PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)`.
+
+Application invariants:
+
+1. Invalid or missing modes fall back to `fixed`; missing, invalid, or non-positive policy hours fall back to 209.
+2. Optional `daily_hours` is retained only when positive, and `break_minutes` only when non-negative.
+3. Invoice `work_days` and `base_days` are clamped at zero before mode selection.
+4. All five Python-compatible modes remain stable: `fixed`, `invoice_work_days`, `invoice_base_days`, `work_or_fixed`, and `base_or_fixed`.
+5. `_monthly_work_hours` and `_monthly_hours_source` preserve the Korean source-label wording used by payroll reviewers.
+
+Example supplied policy:
+
+```json
+{
+  "mode": "invoice_work_days",
+  "hours": 209,
+  "daily_hours": 8,
+  "break_minutes": 60
+}
+```
+
+Example application output:
+
+```json
+{
+  "hours": 192,
+  "source": "청구장: 청구서 근무시간",
+  "invoice": {
+    "workplace": "청구장",
+    "work_days": 192,
+    "base_days": 209,
+    "_monthly_work_hours": 192,
+    "_monthly_hours_source": "청구장: 청구서 근무시간"
+  },
+  "policy": {
+    "mode": "invoice_work_days",
+    "hours": 209,
+    "daily_hours": 8,
+    "break_minutes": 60
+  }
 }
 ```
 
@@ -666,6 +712,7 @@ Frontend code must use `error_code`, not parse `error` text.
 - Explicit `invoice`, `attendance`, and `mixed` requests preserve caller selection.
 - Responses include `operation_policy` and `operation_policy_source` (`site`, `tenant`, or `global`) so operators can audit which policy was applied.
 - Rust owns site -> tenant -> global policy-resolution precedence for supplied settings snapshots through `PayrollApiService::validate_run_payload_with_policy_settings`; Python settings persistence remains compatibility-only until the repository/storage migration lands.
+- Rust owns supplied-policy workplace monthly-hours application through `PayrollApiService::apply_monthly_hours_to_invoice`; Python settings persistence and canonical workplace alias resolution remain compatibility-only until repository/storage migration lands.
 - Rust owns resolved fixed-hours profile application through `PayrollApiService::apply_fixed_hours_to_invoice`; Python contract/template/settings resolution remains compatibility-only until persistence and HR contract repositories move to Rust.
 - Rust now owns run-result success and execution-failure envelope shaping through `PayrollApiService::run_response`; Python execution remains a compatibility source until the Rust executor and persistence slices land.
 - Rust normalizes `operation_policy` known fields before serializing responses: invalid input basis falls back to `hybrid`; attendance minute fields are clamped to Python-compatible ranges; missing-clock policy falls back to `warn`.

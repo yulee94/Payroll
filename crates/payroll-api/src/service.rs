@@ -16,6 +16,10 @@ use crate::response::{
     PayrollApiResponse,
 };
 use crate::run::{run_response_from_result, PayrollRunResponse, PayrollRunResult};
+use crate::workplace_hours::{
+    apply_monthly_hours_to_invoice, resolve_monthly_work_hours, WorkplaceHoursInvoice,
+    WorkplaceHoursPolicy, WorkplaceMonthlyHoursApplication, WorkplaceMonthlyHoursResolution,
+};
 use serde::Serialize;
 use serde_json::Value;
 use std::time::Instant;
@@ -161,6 +165,30 @@ impl PayrollApiService {
         S: Into<String>,
     {
         apply_fixed_hours_to_invoice(invoice, profile, workplace)
+    }
+
+    pub fn resolve_monthly_work_hours<S>(
+        &self,
+        invoice: &WorkplaceHoursInvoice,
+        workplace: S,
+        policy: &WorkplaceHoursPolicy,
+    ) -> WorkplaceMonthlyHoursResolution
+    where
+        S: AsRef<str>,
+    {
+        resolve_monthly_work_hours(invoice, workplace, policy)
+    }
+
+    pub fn apply_monthly_hours_to_invoice<S>(
+        &self,
+        invoice: WorkplaceHoursInvoice,
+        workplace: S,
+        policy: &WorkplaceHoursPolicy,
+    ) -> WorkplaceMonthlyHoursApplication
+    where
+        S: AsRef<str>,
+    {
+        apply_monthly_hours_to_invoice(invoice, workplace, policy)
     }
 
     pub fn run_response(

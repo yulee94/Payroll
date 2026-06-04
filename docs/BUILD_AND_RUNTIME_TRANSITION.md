@@ -256,6 +256,7 @@ cargo test --workspace
 - [x] Tenant/site/global operation-policy resolution behavior is defined in framework-neutral Rust DTOs and API contracts for supplied settings snapshots.
 - [x] Payroll execution routing/planning behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the compatibility executor.
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
+- [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
 - [x] Fixed-hours payroll row application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the HR contract/settings resolver.
 - [ ] Service-account permissions and initial latency/error budgets are defined for Kubernetes.
 
@@ -374,6 +375,34 @@ cargo fmt --check
 cargo test --workspace
 buck2 test //crates/payroll-api:payroll_api_test
 /tmp/payroll-policy-venv/bin/python -m unittest tests.test_attendance_import tests.test_payroll_api_contract -v
+npm run typecheck --prefix frontend
+git diff --check
+cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
+```
+
+## Implementation checkpoint: Rust payroll workplace-hours application
+
+Completed on 2026-06-04 as a payroll monthly-hours behavior slice:
+
+- `crates/payroll-api` owns supplied-policy workplace monthly-hours application
+  through `resolve_monthly_work_hours`, `apply_monthly_hours_to_invoice`, and
+  `PayrollApiService::apply_monthly_hours_to_invoice`.
+- Rust normalizes workplace-hours policies, applies the five Python-compatible
+  mode values, clamps missing/negative invoice hours before selection, and emits
+  `_monthly_work_hours` plus `_monthly_hours_source` metadata.
+- Python remains the resolver bridge for tenant/site/global settings and
+  canonical workplace aliases until those repositories move to Rust.
+- Contract docs and TypeScript/Python metadata name the workplace-hours policy,
+  invoice, resolution, and application DTOs.
+- Slice spec: `docs/PAYROLL_RUST_WORKPLACE_HOURS_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo fmt --check
+cargo test --workspace
+buck2 test //crates/payroll-api:payroll_api_test
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workplace_hours tests.test_payroll_api_contract -v
 npm run typecheck --prefix frontend
 git diff --check
 cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant

@@ -94,6 +94,21 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertTrue(aggregation["example_invoice_rows"][0]["_attendance_input"])
         self.assertIn("aggregate_attendance_records", response["attendance_aggregation_entrypoint"])
 
+    def test_contract_declares_rust_workplace_hours_application(self) -> None:
+        contract = payroll_api_contract()
+        workplace = contract["workplace_hours_application"]
+        response = contract["response"]
+
+        self.assertIn("apply_monthly_hours_to_invoice", workplace["rust_entrypoint"])
+        self.assertIn("services.workplace_hours.apply_monthly_hours_to_invoice", workplace["python_compatibility_source"])
+        self.assertIn("work_or_fixed", workplace["mode_values"])
+        self.assertIn("_monthly_work_hours", workplace["invoice_fields"])
+        self.assertEqual(workplace["example_policy"]["mode"], "invoice_work_days")
+        self.assertEqual(workplace["example_resolution"]["hours"], 192)
+        self.assertEqual(workplace["example_resolution"]["source"], "청구장: 청구서 근무시간")
+        self.assertEqual(workplace["example_application"]["invoice"]["_monthly_work_hours"], 192)
+        self.assertIn("apply_monthly_hours_to_invoice", response["workplace_hours_application_entrypoint"])
+
     def test_contract_declares_rust_fixed_hours_application(self) -> None:
         contract = payroll_api_contract()
         fixed = contract["fixed_hours_application"]

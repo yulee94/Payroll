@@ -84,6 +84,69 @@ class WorkplaceHoursTests(unittest.TestCase):
         self.assertEqual(h, 209.0)
         self.assertEqual(inv["_monthly_work_hours"], 209.0)
 
+    def test_normalize_invalid_policy_for_rust_parity(self) -> None:
+        pol = normalize_policy(
+            {
+                "mode": "not-a-mode",
+                "hours": -1,
+                "daily_hours": -8,
+                "break_minutes": -15,
+            }
+        )
+
+        self.assertEqual(pol, {"mode": MODE_FIXED, "hours": 209.0})
+
+    def test_resolve_supplied_policy_modes_for_rust_parity(self) -> None:
+        cases = [
+            (
+                {"mode": "work_or_fixed", "hours": 209},
+                {"work_days": 195, "base_days": 209},
+                "청구장",
+                195.0,
+                "청구장: 청구서 근무시간 195",
+            ),
+            (
+                {"mode": "work_or_fixed", "hours": 209},
+                {"work_days": 0, "base_days": 209},
+                "청구장",
+                209.0,
+                "청구장: 고정 209시간",
+            ),
+            (
+                {"mode": "invoice_base_days", "hours": 200},
+                {"work_days": 180, "base_days": -5},
+                "기준장",
+                200.0,
+                "기준장: 고정 200시간(기준시간 없음)",
+            ),
+            (
+                {"mode": "base_or_fixed", "hours": 209},
+                {"work_days": 190, "base_days": 207.5},
+                "",
+                207.5,
+                "(기본): 청구서 기준시간 207.5",
+            ),
+        ]
+        for policy, invoice, workplace, expected_hours, expected_source in cases:
+            with self.subTest(policy=policy, invoice=invoice, workplace=workplace):
+                hours, source = resolve_monthly_work_hours(
+                    invoice, workplace, policy=policy
+                )
+
+                self.assertEqual(hours, expected_hours)
+                self.assertEqual(source, expected_source)
+
+    def test_apply_supplied_policy_records_monthly_metadata_for_rust_parity(self) -> None:
+        inv = {"work_days": 192, "base_days": 209}
+
+        hours = apply_monthly_hours_to_invoice(
+            inv, "청구장", policy={"mode": "invoice_work_days", "hours": 209}
+        )
+
+        self.assertEqual(hours, 192.0)
+        self.assertEqual(inv["_monthly_work_hours"], 192.0)
+        self.assertEqual(inv["_monthly_hours_source"], "청구장: 청구서 근무시간")
+
     def test_fallback_tenant_default(self) -> None:
         save_default_workplace_hours_policy(mode=MODE_FIXED, hours=210)
         pol = policy_for_workplace("미등록사업장")
