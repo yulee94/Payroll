@@ -45,6 +45,32 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
+.skip-link {
+  background: var(--accent);
+  border-radius: 6px;
+  color: var(--card);
+  font-size: 14px;
+  font-weight: 800;
+  left: 16px;
+  padding: 10px 14px;
+  position: fixed;
+  text-decoration: none;
+  top: 12px;
+  transform: translateY(-160%);
+  transition: transform 120ms ease;
+  z-index: 20;
+}
+
+.skip-link:focus {
+  outline: 3px solid rgba(31, 56, 100, 0.32);
+  outline-offset: 2px;
+  transform: translateY(0);
+}
+
+#main-content:focus {
+  outline: none;
+}
+
 .login-page {
   align-items: center;
   display: flex;
@@ -388,6 +414,43 @@ input:focus-visible {
   font-size: 12px;
 }
 
+.sidebar-theme-current {
+  align-items: stretch;
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 4px minmax(0, 1fr);
+  padding: 8px;
+}
+
+.sidebar-theme-current-rail {
+  background: var(--nav-active-text);
+  border-radius: 999px;
+}
+
+.sidebar-theme-current strong,
+.sidebar-theme-current small {
+  display: block;
+  min-width: 0;
+}
+
+.sidebar-theme-current strong {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.sidebar-theme-current small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
 .sidebar-swatch {
   border: 1px solid rgba(17, 24, 39, 0.12);
   border-radius: 999px;
@@ -493,7 +556,24 @@ input:focus-visible {
 .topbar-copy {
   display: grid;
   gap: 4px;
+  flex: 1;
   min-width: 0;
+}
+
+.topbar-copy p {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.45;
+  margin: 0;
+  max-width: 760px;
+}
+
+.topbar-eyebrow {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
 .topbar h1,
@@ -773,6 +853,37 @@ input:focus-visible {
 .todo-item.done {
   background: var(--input);
   opacity: 0.5;
+}
+
+.todo-progress {
+  background: var(--success-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.todo-progress-head {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.todo-progress-track {
+  background: var(--card);
+  border-radius: 999px;
+  min-height: 8px;
+  overflow: hidden;
+}
+
+.todo-progress-track span {
+  background: var(--success);
+  border-radius: inherit;
+  display: block;
+  min-height: 8px;
 }
 
 .language-grid {
@@ -1085,12 +1196,15 @@ input:focus-visible {
 }
 
 .filter-chip {
+  align-items: center;
   background: var(--input);
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--muted);
+  display: inline-flex;
   font-size: 13px;
   font-weight: 800;
+  gap: 4px;
   padding: 8px 12px;
 }
 
@@ -1098,6 +1212,14 @@ input:focus-visible {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--card);
+}
+
+.filter-chip-mark {
+  background: var(--card);
+  border-radius: 999px;
+  display: inline-block;
+  height: 6px;
+  width: 6px;
 }
 
 .filter-chip:focus-visible {
@@ -1111,12 +1233,22 @@ input:focus-visible {
   align-items: end;
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px) auto;
 }
 
 .search-box {
   display: grid;
   gap: 6px;
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.search-clear {
+  align-self: end;
+  grid-column: 3;
+  grid-row: 1;
+  min-height: 40px;
+  white-space: nowrap;
 }
 
 .search-box span {
@@ -1337,6 +1469,12 @@ input:focus-visible {
 
   .list-toolbar {
     grid-template-columns: 1fr;
+  }
+
+  .search-box,
+  .search-clear {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .table {

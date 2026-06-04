@@ -219,6 +219,8 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">{tScreen(locale, "login.form.companyCode")}</Label>
           <TextInput
+            accessibilityHint={tScreen(locale, "login.form.companyCodeHint", demoParams)}
+            accessibilityLabel={tScreen(locale, "login.form.companyCode")}
             autoCapitalize="characters"
             autoComplete="organization"
             onChangeText={setCompanyCode}
@@ -232,6 +234,8 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">{tScreen(locale, "login.form.userId")}</Label>
           <TextInput
+            accessibilityHint={tScreen(locale, "login.form.userIdHint", demoParams)}
+            accessibilityLabel={tScreen(locale, "login.form.userId")}
             autoCapitalize="none"
             autoComplete="username"
             onChangeText={setUserId}
@@ -245,6 +249,8 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">{tScreen(locale, "login.form.password")}</Label>
           <TextInput
+            accessibilityHint={tScreen(locale, "login.form.passwordHint", demoParams)}
+            accessibilityLabel={tScreen(locale, "login.form.password")}
             autoComplete="password"
             onChangeText={setPassword}
             placeholder={demoAccount.password}
@@ -262,8 +268,19 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
           </View>
         ) : null}
         <View style={styles.loginActions}>
-          <ActionButton onPress={handleLogin}>{tScreen(locale, canSubmit ? "login.actions.enterHome" : "login.actions.login")}</ActionButton>
-          <ActionButton onPress={handleDemoLogin} variant="secondary">{tScreen(locale, "login.actions.demo")}</ActionButton>
+          <ActionButton
+            accessibilityLabel={tScreen(locale, canSubmit ? "login.actions.enterHomeAccessibility" : "login.actions.loginAccessibility", demoParams)}
+            onPress={handleLogin}
+          >
+            {tScreen(locale, canSubmit ? "login.actions.enterHome" : "login.actions.login")}
+          </ActionButton>
+          <ActionButton
+            accessibilityLabel={tScreen(locale, "login.actions.demoAccessibility", demoParams)}
+            onPress={handleDemoLogin}
+            variant="secondary"
+          >
+            {tScreen(locale, "login.actions.demo")}
+          </ActionButton>
         </View>
       </Card>
     </View>
@@ -455,6 +472,11 @@ function CalendarTodoPanel({
   readonly onSelect: (id: PlatformId) => void;
   readonly todos: readonly TodoItem[];
 }) {
+  const completedTodos = todos.filter((todo) => todo.completed).length;
+  const totalTodos = todos.length;
+  const pendingTodos = totalTodos - completedTodos;
+  const completionRatio = totalTodos > 0 ? completedTodos / totalTodos : 0;
+  const progressStyle = { width: `${Math.round(completionRatio * 100)}%` } as const;
   return (
     <View style={styles.homePlannerGrid}>
       <Card style={styles.homePlannerCard}>
@@ -483,6 +505,15 @@ function CalendarTodoPanel({
       </Card>
       <Card style={styles.homePlannerCard}>
         <SectionHeader title={tScreen(locale, "todo.title")} description={tScreen(locale, "todo.description")} />
+        <View style={styles.todoProgressPanel}>
+          <View style={styles.todoProgressHeader}>
+            <Label weight="bold">{tScreen(locale, "todo.progress.title", { done: completedTodos, total: totalTodos })}</Label>
+            <Label size="sm" muted>{tScreen(locale, "todo.progress.pending", { count: pendingTodos })}</Label>
+          </View>
+          <View style={styles.todoProgressTrack}>
+            <View style={[styles.todoProgressFill, progressStyle]} />
+          </View>
+        </View>
         <View style={styles.plannerList}>
           {todos.map((todo) => (
             <Pressable
@@ -614,6 +645,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
             <Label size="sm" weight="bold">{tScreen(locale, "module.search.label")}</Label>
             <TextInput
               autoCapitalize="none"
+              accessibilityLabel={tScreen(locale, "module.search.accessibilityLabel")}
               onChangeText={setSearch}
               placeholder={tScreen(locale, "module.search.placeholder")}
               placeholderTextColor={colors.muted}
@@ -621,6 +653,11 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
               style={styles.input}
               value={search}
             />
+            {search ? (
+              <ActionButton accessibilityLabel={tScreen(locale, "module.search.clearAccessibilityLabel")} onPress={() => setSearch("")} variant="ghost">
+                {tScreen(locale, "module.search.clear")}
+              </ActionButton>
+            ) : null}
           </View>
         </View>
         <View style={styles.listSummary}>
@@ -1750,6 +1787,32 @@ const styles = StyleSheet.create({
   todoItemDone: {
     backgroundColor: colors.input,
     opacity: 0.5
+  },
+  todoProgressFill: {
+    backgroundColor: colors.success,
+    borderRadius: 999,
+    minHeight: 8
+  },
+  todoProgressHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
+  },
+  todoProgressPanel: {
+    backgroundColor: colors.successSoft,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  todoProgressTrack: {
+    backgroundColor: colors.card,
+    borderRadius: 999,
+    minHeight: 8,
+    overflow: "hidden"
   },
   travelReviewCard: {
     backgroundColor: colors.card,
