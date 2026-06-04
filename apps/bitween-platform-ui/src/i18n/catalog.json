@@ -7061,6 +7061,159 @@
         "zh-Hans-CN": "此面板不存储人事数据，仅引导用户前往相关工作区。",
         "ja-JP": "このパネルは人事データを保存せず、関連画面への移動を案内するだけです。"
       }
+    },
+    {
+      "key": "screens.recruitPlacement.title",
+      "values": {
+        "ko-KR": "채용 후보 / 부서 배치 요약",
+        "en-US": "Recruiting candidate / department placement summary",
+        "zh-Hans-CN": "招聘候选人 / 部门配置摘要",
+        "ja-JP": "採用候補 / 部門配置サマリー"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.description",
+      "values": {
+        "ko-KR": "지원자 경력, 자격사항, 부서 필요도를 업무 화면과 연결해 인재를 적재적소에 배치하는 흐름을 정리합니다.",
+        "en-US": "Connect applicant careers, credentials, and department needs to related workspaces for better placement decisions.",
+        "zh-Hans-CN": "将申请人经历、资格和部门需求连接到相关工作区，以支持更好的配置决策。",
+        "ja-JP": "応募者の経歴、資格、部門ニーズを関連画面と連携し、適材適所の配置を整理します。"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.action",
+      "values": {
+        "ko-KR": "HR 문서 확인",
+        "en-US": "Check HR documents",
+        "zh-Hans-CN": "检查 HR 文档",
+        "ja-JP": "HR 文書を確認"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.applicantFit.label",
+      "values": {
+        "ko-KR": "지원자 경력",
+        "en-US": "Applicant career",
+        "zh-Hans-CN": "申请人经历",
+        "ja-JP": "応募者経歴"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.applicantFit.status",
+      "values": {
+        "ko-KR": "검토 필요",
+        "en-US": "Needs review",
+        "zh-Hans-CN": "需要复核",
+        "ja-JP": "確認が必要"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.applicantFit.title",
+      "values": {
+        "ko-KR": "이력서와 인사 문서 연결",
+        "en-US": "Connect resumes with HR documents",
+        "zh-Hans-CN": "将简历与人事文档连接",
+        "ja-JP": "履歴書と人事文書を連携"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.applicantFit.detail",
+      "values": {
+        "ko-KR": "HR 화면에서 이력서, 사직서, 직원명부 흐름과 함께 후보 적합도를 확인합니다.",
+        "en-US": "Open HR to compare candidate fit with resumes, resignations, and roster context.",
+        "zh-Hans-CN": "打开 HR 画面，结合简历、离职书和名册上下文检查候选人匹配度。",
+        "ja-JP": "HR 画面で履歴書、退職届、名簿の文脈とあわせて候補者の適合度を確認します。"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.credentialCheck.label",
+      "values": {
+        "ko-KR": "자격사항",
+        "en-US": "Credentials",
+        "zh-Hans-CN": "资格信息",
+        "ja-JP": "資格情報"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.credentialCheck.status",
+      "values": {
+        "ko-KR": "자료 확인",
+        "en-US": "File check",
+        "zh-Hans-CN": "文件检查",
+        "ja-JP": "資料確認"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.credentialCheck.title",
+      "values": {
+        "ko-KR": "자격 첨부와 보관 상태",
+        "en-US": "Credential attachments and storage",
+        "zh-Hans-CN": "资格附件和存档状态",
+        "ja-JP": "資格添付と保管状態"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.credentialCheck.detail",
+      "values": {
+        "ko-KR": "자료함에서 자격증, 경력증명, 채용 첨부문서 보관 상태를 확인합니다.",
+        "en-US": "Open Archive to review certificates, career proof, and recruiting attachment storage.",
+        "zh-Hans-CN": "打开资料库，检查资格证书、经历证明和招聘附件存档状态。",
+        "ja-JP": "資料箱で資格証、経歴証明、採用添付文書の保管状態を確認します。"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.departmentMatch.label",
+      "values": {
+        "ko-KR": "부서 배치",
+        "en-US": "Department match",
+        "zh-Hans-CN": "部门匹配",
+        "ja-JP": "部門マッチ"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.departmentMatch.status",
+      "values": {
+        "ko-KR": "공유 준비",
+        "en-US": "Ready to share",
+        "zh-Hans-CN": "可共享",
+        "ja-JP": "共有準備"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.departmentMatch.title",
+      "values": {
+        "ko-KR": "필요 부서와 권한 연결",
+        "en-US": "Connect target department and permissions",
+        "zh-Hans-CN": "连接目标部门和权限",
+        "ja-JP": "対象部門と権限を連携"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.cards.departmentMatch.detail",
+      "values": {
+        "ko-KR": "관리자 화면에서 Branch, 부서, 하위계정 권한을 이어서 점검합니다.",
+        "en-US": "Open Admin to review Branch, department, and subaccount permission alignment.",
+        "zh-Hans-CN": "打开管理员画面，继续检查 Branch、部门和子账户权限对齐。",
+        "ja-JP": "管理者画面で Branch、部門、サブアカウント権限の整合を確認します。"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.notice.badge",
+      "values": {
+        "ko-KR": "채용 UI 흐름",
+        "en-US": "Recruiting UI flow",
+        "zh-Hans-CN": "招聘 UI 流程",
+        "ja-JP": "採用 UI フロー"
+      }
+    },
+    {
+      "key": "screens.recruitPlacement.notice.description",
+      "values": {
+        "ko-KR": "이 패널은 실제 지원자 데이터를 저장하지 않고, 관련 업무 화면으로 이동하는 UI 안내만 제공합니다.",
+        "en-US": "This panel does not store applicant data; it only guides users to related workspaces.",
+        "zh-Hans-CN": "此面板不存储申请人数据，仅引导用户前往相关工作区。",
+        "ja-JP": "このパネルは応募者データを保存せず、関連画面への移動を案内するだけです。"
+      }
     }
   ],
   "languageDisplayNames": [

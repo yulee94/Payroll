@@ -123,6 +123,12 @@ const travelStageDefs = [
   ["travel-review", "05", "ready"]
 ].map(([id, index, tone]) => ({ id, index, tone }));
 
+const recruitPlacementDefs = [
+  ["applicantFit", "attention", "hr"],
+  ["credentialCheck", "neutral", "archive"],
+  ["departmentMatch", "ready", "admin"]
+].map(([id, tone, target]) => ({ id, target, tone }));
+
 const hrPeopleReviewDefs = [
   ["roster", "ready", "attendance"],
   ["certificates", "attention", "archive"],
@@ -733,6 +739,7 @@ function renderModule(id) {
       ${metrics(data.metrics)}
     </section>
     ${id === "attendance" ? attendancePhonePanel() : ""}
+    ${id === "recruit" ? recruitPlacementPanel() : ""}
     ${id === "hr" ? hrPeoplePanel() : ""}
     ${id === "travel" ? travelWorklogPanel() : ""}
     ${id === "admin" ? adminAccountPanel() : ""}
@@ -822,6 +829,20 @@ function aiWorkspacePanel() {
         <div class="action-row">${button(t("screens.ai.preview.actions.payroll"), "payroll", "secondary")}${button(t("screens.ai.preview.actions.archive"), "archive", "ghost")}</div>
       </div>
     </div>
+  </section>`;
+}
+
+function recruitPlacementPanel() {
+  return `<section class="card">
+    ${sectionHead("", t("screens.recruitPlacement.title"), t("screens.recruitPlacement.description"), button(t("screens.recruitPlacement.action"), "hr", "secondary"))}
+    <div class="recruit-placement-grid">${recruitPlacementDefs.map((item) => `
+      <button class="recruit-placement-card" data-target="${item.target}" style="border-top-color:${toneColor(item.tone)}">
+        <div class="recruit-placement-head"><span class="helper">${t(`screens.recruitPlacement.cards.${item.id}.label`)}</span>${badge(t(`screens.recruitPlacement.cards.${item.id}.status`), item.tone)}</div>
+        <strong>${t(`screens.recruitPlacement.cards.${item.id}.title`)}</strong>
+        <span class="helper">${t(`screens.recruitPlacement.cards.${item.id}.detail`)}</span>
+      </button>
+    `).join("")}</div>
+    <div class="notice">${badge(t("screens.recruitPlacement.notice.badge"), "neutral")}<span class="helper">${t("screens.recruitPlacement.notice.description")}</span></div>
   </section>`;
 }
 

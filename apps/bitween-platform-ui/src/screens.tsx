@@ -75,6 +75,12 @@ const travelWorkflowStageDefinitions = [
   { id: "travel-review", tone: "ready" }
 ] as const satisfies readonly ToneDefinition[];
 
+const recruitPlacementDefinitions = [
+  { id: "applicantFit", target: "hr", tone: "attention" },
+  { id: "credentialCheck", target: "archive", tone: "neutral" },
+  { id: "departmentMatch", target: "admin", tone: "ready" }
+] as const satisfies readonly TargetToneDefinition[];
+
 const hrPeopleReviewDefinitions = [
   { id: "roster", target: "attendance", tone: "ready" },
   { id: "certificates", target: "archive", tone: "attention" },
@@ -619,6 +625,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
       </Card>
 
       {active.id === "attendance" ? <AttendancePhonePanel locale={locale} /> : null}
+      {active.id === "recruit" ? <RecruitPlacementPanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "hr" ? <HrPeoplePanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "travel" ? <TravelWorklogPanel locale={locale} /> : null}
       {active.id === "admin" ? <AdminAccountPanel locale={locale} onSelect={onSelect} /> : null}
@@ -800,6 +807,39 @@ function PayrollStepDetail({ locale, step }: { readonly locale: SupportedLocale;
         <ActionButton onPress={() => undefined} variant="ghost">{tScreen(locale, "payroll.stepDetail.actions.help")}</ActionButton>
       </View>
     </View>
+  );
+}
+
+function RecruitPlacementPanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "onSelect">) {
+  return (
+    <Card>
+      <SectionHeader
+        title={tScreen(locale, "recruitPlacement.title")}
+        description={tScreen(locale, "recruitPlacement.description")}
+        action={<ActionButton onPress={() => onSelect("hr")} variant="secondary">{tScreen(locale, "recruitPlacement.action")}</ActionButton>}
+      />
+      <View style={styles.recruitPlacementGrid}>
+        {recruitPlacementDefinitions.map((item) => (
+          <Pressable
+            accessibilityRole="button"
+            key={item.id}
+            onPress={() => onSelect(item.target)}
+            style={({ pressed }) => [styles.recruitPlacementCard, { borderTopColor: toneColor(item.tone) }, pressed && styles.buttonPressed]}
+          >
+            <View style={styles.recruitPlacementHead}>
+              <Label size="sm" muted>{tScreen(locale, `recruitPlacement.cards.${item.id}.label`)}</Label>
+              <Badge tone={item.tone}>{tScreen(locale, `recruitPlacement.cards.${item.id}.status`)}</Badge>
+            </View>
+            <Label weight="bold">{tScreen(locale, `recruitPlacement.cards.${item.id}.title`)}</Label>
+            <Label size="sm" muted>{tScreen(locale, `recruitPlacement.cards.${item.id}.detail`)}</Label>
+          </Pressable>
+        ))}
+      </View>
+      <View style={styles.inlineNotice}>
+        <Badge tone="neutral">{tScreen(locale, "recruitPlacement.notice.badge")}</Badge>
+        <Label size="sm" muted>{tScreen(locale, "recruitPlacement.notice.description")}</Label>
+      </View>
+    </Card>
   );
 }
 
@@ -1926,6 +1966,29 @@ const styles = StyleSheet.create({
   queueItemSelected: {
     backgroundColor: colors.accentSoft,
     borderColor: colors.accent
+  },
+  recruitPlacementCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 220,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  recruitPlacementGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  recruitPlacementHead: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
   },
   readinessCard: {
     backgroundColor: colors.bg,

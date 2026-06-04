@@ -947,12 +947,14 @@ input:focus-visible {
   padding: 14px;
 }
 
+.recruit-placement-grid,
 .hr-people-grid {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.recruit-placement-card,
 .hr-people-card {
   background: var(--bg);
   border: 1px solid var(--border);
@@ -965,6 +967,7 @@ input:focus-visible {
   text-align: left;
 }
 
+.recruit-placement-head,
 .hr-people-head {
   align-items: start;
   display: flex;
