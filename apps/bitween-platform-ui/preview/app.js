@@ -11,6 +11,12 @@ const demoAccount = {
   userId: "admin"
 };
 
+const demoCredentialCards = [
+  ["company", demoAccount.companyCode],
+  ["user", demoAccount.userId],
+  ["password", demoAccount.password]
+];
+
 const employeeNumber = "BW-0001";
 const session = {
   roleLabel: "admin",
@@ -425,6 +431,13 @@ function renderLogin() {
         </div>
         <form class="card login-card" id="login-form">
           ${sectionHead(t("screens.login.form.eyebrow"), t("screens.login.form.title"), t("screens.login.form.description"))}
+          <div class="login-credential-panel">
+            <div class="login-credential-head">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.panel.helper")}</span></div>
+            <div class="login-credential-grid">${demoCredentialCards.map(([id, value]) => `
+              <div class="login-credential-item"><span class="helper">${t(`screens.login.demo.credentials.${id}.label`)}</span><strong>${escapeText(value)}</strong><span class="helper">${t(`screens.login.demo.credentials.${id}.helper`)}</span></div>
+            `).join("")}</div>
+            <span class="helper">${t("screens.login.demo.panel.disclaimer")}</span>
+          </div>
           ${languageSelector()}
           ${field(t("screens.login.form.companyCode"), "company-code", demoAccount.companyCode, "text", state.companyCode)}
           ${field(t("screens.login.form.userId"), "user-id", demoAccount.userId, "text", state.userId)}
@@ -434,7 +447,6 @@ function renderLogin() {
             <button class="btn primary" type="submit">${t("screens.login.actions.enterHome")}</button>
             <button class="btn secondary" type="button" data-demo-login="true">${t("screens.login.actions.demo")}</button>
           </div>
-          <div class="notice">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.summary")}</span></div>
         </form>
       </div>
     </section>
@@ -498,6 +510,21 @@ function renderShell() {
           </div>
         </header>
         <div class="content">${renderScreen(active.id)}</div>
+        <footer class="shell-status" aria-label="${t("shell.status.aria")}">
+          <div class="shell-status-group">
+            <span class="status-dot" aria-hidden="true"></span>
+            <strong>${t("shell.status.previewTitle")}</strong>
+            <span class="helper">${t("shell.status.demoCompany")}</span>
+          </div>
+          <div class="shell-status-group">
+            ${badge(t("shell.status.uiOnly"), "ready")}
+            <span class="helper">${t("shell.status.logicUnchanged")}</span>
+          </div>
+          <div class="shell-status-group">
+            ${badge(t("shell.status.strictTs"), "neutral")}
+            <span class="helper">${t("shell.status.reactNativeWebReady")}</span>
+          </div>
+        </footer>
       </div>
     </section>
     <div class="toast" id="toast">${t("preview.toast.default")}</div>
@@ -670,7 +697,7 @@ function renderModule(id) {
         <label class="search-box" for="work-search"><span>${t("screens.module.search.label")}</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="${t("screens.module.search.placeholder")}" /></label>
       </div>
       <div class="list-summary"><strong>${t("screens.module.list.count", { count: rows.length })}</strong><span class="helper">${state.search ? t("screens.module.list.filteredWithSearch", { filter: filterLabel, search: state.search }) : t("screens.module.list.filtered", { filter: filterLabel })}</span></div>
-      ${table(rows, true)}
+      ${data.rows.length === 0 ? empty(t("table.empty.title"), t("table.empty.description")) : rows.length ? table(rows, true) : filteredEmpty()}
       ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
     <div class="action-panels">
@@ -835,11 +862,11 @@ function table(rows, selectable = false) {
     ${rows.map((row) => {
       const content = `<span><strong>${row.category}</strong></span><span>${badge(row.status, row.tone)}</span><span>${row.owner}</span><span>${row.next}</span>`;
       return selectable ? `
-      <button aria-pressed="${state.selectedRowKey === row.id}" class="table-row row-button ${state.selectedRowKey === row.id ? "selected" : ""}" data-row-key="${row.id}">
+      <button aria-pressed="${state.selectedRowKey === row.id}" class="table-row row-button ${state.selectedRowKey === row.id ? "selected" : ""}" data-row-key="${row.id}" style="border-left-color:${toneColor(row.tone)}">
         ${content}
       </button>
     ` : `
-      <div class="table-row">
+      <div class="table-row" style="border-left-color:${toneColor(row.tone)}">
         ${content}
       </div>
     `;
@@ -870,6 +897,13 @@ function filterRows(rows) {
 
 function empty(title, desc) {
   return `<div class="empty"><strong>${title}</strong><span class="helper">${desc}</span></div>`;
+}
+
+function filteredEmpty() {
+  return `<div class="filtered-empty">
+    ${empty(t("screens.module.filteredEmpty.title"), t("screens.module.filteredEmpty.description"))}
+    <button class="btn secondary" data-reset-list>${t("screens.module.filteredEmpty.reset")}</button>
+  </div>`;
 }
 
 function toneColor(tone) {
@@ -932,6 +966,16 @@ function bindEvents() {
       state.filter = "all";
       render();
       toast(t("preview.toast.languageSelected"));
+    });
+  });
+
+  document.querySelectorAll("[data-reset-list]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.filter = "all";
+      state.search = "";
+      state.selectedRowKey = "";
+      render();
+      toast(t("preview.toast.filtersReset"));
     });
   });
 
