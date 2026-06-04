@@ -331,6 +331,43 @@ button {
   font-size: 12px;
 }
 
+.sidebar-theme-current {
+  align-items: stretch;
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 4px minmax(0, 1fr);
+  padding: 8px;
+}
+
+.sidebar-theme-current-rail {
+  background: var(--nav-active-text);
+  border-radius: 999px;
+}
+
+.sidebar-theme-current strong,
+.sidebar-theme-current small {
+  display: block;
+  min-width: 0;
+}
+
+.sidebar-theme-current strong {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.sidebar-theme-current small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
 .sidebar-swatch {
   border: 1px solid rgba(17, 24, 39, 0.12);
   border-radius: 999px;

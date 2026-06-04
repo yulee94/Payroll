@@ -322,6 +322,7 @@ function field(label, id, placeholder, type = "text", value = "") {
 
 function renderShell() {
   const active = navItems.find((item) => item.id === state.activeId) || navItems[0];
+  const activeSidebarTheme = sidebarThemes.find((theme) => theme.id === state.sidebarTheme) || sidebarThemes[0];
   return html`
     <section class="shell sidebar-theme-${state.sidebarTheme}">
       <aside class="sidebar">
@@ -333,11 +334,24 @@ function renderShell() {
           <span class="sidebar-options-title">메뉴 색상 옵션</span>
           <div class="sidebar-theme-grid">
             ${sidebarThemes.map((theme) => `
-              <button class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}" data-sidebar-theme="${theme.id}" title="${theme.description}">
+              <button
+                aria-label="${theme.label} 메뉴 색상 옵션. ${theme.description}"
+                aria-pressed="${state.sidebarTheme === theme.id ? "true" : "false"}"
+                class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}"
+                data-sidebar-theme="${theme.id}"
+                title="${theme.description}"
+              >
                 <span class="sidebar-swatch sidebar-swatch-${theme.id}"></span>
                 <strong>${theme.label}</strong>
               </button>
             `).join("")}
+          </div>
+          <div class="sidebar-theme-current" aria-live="polite">
+            <span class="sidebar-theme-current-rail"></span>
+            <span>
+              <strong>현재 적용: ${activeSidebarTheme.label}</strong>
+              <small>${activeSidebarTheme.description}</small>
+            </span>
           </div>
         </div>
         <nav class="nav" aria-label="platform menu">
