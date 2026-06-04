@@ -209,8 +209,8 @@ Implemented on 2026-06-04 as the next payroll decision behavior slice:
   `skip`/`deduct` unknown defaults, management-number fallback, and the Korean
   unknown-warning wording.
 - Python remains responsible for KCOMWEL CSV import/persistence, live provider
-  calls, employee matching, site management-number lookup, EDI premium
-  application, payroll row mutation, and workbook I/O until those slices move to
+  calls, employee matching, site management-number lookup, EDI premium input
+  resolution, payroll row mutation, and workbook I/O until those slices move to
   Rust behind parity tests.
 - TypeScript and Python contract metadata now include EI 65+ supplied-input and
   result DTO shapes.
@@ -226,6 +226,42 @@ Verification evidence for this checkpoint:
 - `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
 
 Slice spec: `docs/PAYROLL_RUST_EI65_SLICE.md`.
+
+
+## Current implementation checkpoint: Rust payroll EDI insurance premium application
+
+Implemented on 2026-06-04 as the next payroll row-application behavior slice:
+
+- `crates/payroll-api` now exposes `EdiPremiumSource`,
+  `EdiInsuranceConfig`, `EdiInsurancePremiumRecord`,
+  `EdiInsuranceInvoice`, `EdiInsuranceApplication`, and
+  `apply_edi_premiums_to_invoice`.
+- `PayrollApiService::apply_edi_premiums_to_invoice` applies a supplied latest
+  EDI premium record to one invoice-compatible row without reading settings,
+  EDI storage, live providers, rosters, site management-number stores, or
+  workbooks.
+- Rust preserves Python-compatible enabled/disabled and missing-record messages,
+  EDI metadata fields, source values, long-term-care fallback rounding,
+  age-exempt pension/health/LTC preservation, employment clearing/application,
+  industrial-accident fields, and insurance-total recalculation.
+- Python remains responsible for EDI CSV/Excel import, local EDI storage, future
+  live provider calls, tenant/site config resolution, employee matching,
+  site management-number resolution, and workbook I/O until those boundaries move
+  behind parity tests.
+- TypeScript and Python contract metadata now include EDI config, premium record,
+  invoice, and application DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo fmt --check`
+- `cargo test --workspace`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_edi_insurance tests.test_payroll_api_contract -v`
+- `npm run typecheck --prefix frontend`
+- `git diff --check`
+- `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
+
+Slice spec: `docs/PAYROLL_RUST_EDI_INSURANCE_SLICE.md`.
 
 ## Current implementation checkpoint: Rust payroll site-benefits application
 

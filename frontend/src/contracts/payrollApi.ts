@@ -282,6 +282,59 @@ export interface PayrollEi65PayrollResult {
   default_action: PayrollEi65UnknownDefault;
 }
 
+
+export type PayrollEdiPremiumSource = "manual" | "import" | "api" | "calculated";
+
+export interface PayrollEdiInsuranceConfig {
+  use_edi_premiums: boolean;
+  respect_age_exempt: boolean;
+}
+
+export interface PayrollEdiInsurancePremiumRecord {
+  employee_id: string;
+  employee_name: string;
+  period: string;
+  national_pension: number;
+  health_insurance: number;
+  long_term_care: number;
+  employment_insurance: number;
+  industrial_accident: number;
+  industrial_accident_employer?: number;
+  industrial_accident_employee?: number;
+  management_no: string;
+  source: PayrollEdiPremiumSource;
+  fetched_at: string;
+  workplace: string;
+  note: string;
+}
+
+export interface PayrollEdiInsuranceInvoice {
+  name: string;
+  employee_id: string;
+  workplace: string;
+  national_pension: number;
+  health_insurance: number;
+  long_term_care: number;
+  employment_insurance: number;
+  industrial_accident: number;
+  industrial_accident_employer?: number;
+  industrial_accident_employee?: number;
+  insurance_total: number;
+  insurance_exempt: boolean;
+  edi_premium_source: boolean;
+  edi_premium_badge: string;
+  edi_premium_period: string;
+  edi_premium_fetched_at: string;
+  edi_premium_source_type: PayrollEdiPremiumSource | string;
+}
+
+export interface PayrollEdiInsuranceApplication {
+  applied: boolean;
+  record?: PayrollEdiInsurancePremiumRecord;
+  message: string;
+  invoice: PayrollEdiInsuranceInvoice;
+}
+
 export type PayrollBenefitSource = "site" | "tenant" | "global";
 
 export interface PayrollWorkersDayConfig {
