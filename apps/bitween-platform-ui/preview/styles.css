@@ -155,8 +155,11 @@ button {
   font-size: 14px;
   font-weight: 800;
   justify-content: center;
+  line-height: 1.25;
   min-height: 42px;
   padding: 10px 16px;
+  text-align: center;
+  white-space: normal;
 }
 
 .btn:active {
@@ -244,6 +247,11 @@ button {
   display: grid;
   gap: 8px;
   overflow: auto;
+  scrollbar-width: none;
+}
+
+.nav::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-button {

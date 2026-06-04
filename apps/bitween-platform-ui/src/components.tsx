@@ -352,8 +352,10 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: colors.accent,
+    flexShrink: 1,
     fontSize: 14,
-    fontWeight: "700"
+    fontWeight: "700",
+    textAlign: "center"
   },
   buttonTextGhost: {
     color: colors.muted
