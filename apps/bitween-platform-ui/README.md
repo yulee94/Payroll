@@ -6,12 +6,21 @@ This app is intentionally added in parallel to the existing Python/Tkinter deskt
 
 ## Screens Covered
 
-- Login
-- Platform launcher/home
-- Sidebar/menu navigation
-- Payroll readiness and payroll entry flow
-- HR, workflow, archive, AI, admin, and settings shell screens
-- Shared card, badge, table, empty-state, and action button patterns
+- Login screen separated from the authenticated platform shell
+- Platform launcher/home with metrics, work queue, and module cards
+- Sidebar/menu navigation with compact horizontal behavior on narrow screens
+- Payroll readiness and payroll workflow steps
+- HR, workflow, archive, AI, admin, and settings dashboard screens
+- Shared card, badge, table, filter, empty-state, metric, and action button patterns
+
+## Source Map
+
+- `App.tsx`: auth preview state, screen routing, shell entry
+- `src/components.tsx`: shared RN UI primitives
+- `src/screens.tsx`: login, launcher, payroll, and module screens
+- `src/data.ts`: typed safe mock data for frontend preview
+- `src/types.ts`: strict frontend domain types
+- `src/theme.ts`: color, spacing, radius, and status-tone tokens
 
 ## Commands
 
@@ -20,6 +29,15 @@ npm install
 npm run typecheck
 npm run web
 ```
+
+## Review Checklist
+
+- Confirm login renders without the authenticated sidebar.
+- Confirm login button moves to the platform launcher.
+- Confirm sidebar navigation switches between payroll, HR, workflow, archive, AI, admin, and settings.
+- Confirm payroll readiness cards and payroll workflow cards wrap without text clipping.
+- Confirm module tables show as table rows on wide screens and card rows on narrow screens.
+- Confirm no backend service, calculation, runtime data, template, or credential file is touched.
 
 ## Backend Integration Policy
 
