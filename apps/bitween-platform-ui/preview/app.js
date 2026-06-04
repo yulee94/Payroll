@@ -510,6 +510,21 @@ function renderShell() {
           </div>
         </header>
         <div class="content">${renderScreen(active.id)}</div>
+        <footer class="shell-status" aria-label="platform status">
+          <div class="shell-status-group">
+            <span class="status-dot" aria-hidden="true"></span>
+            <strong>Frontend preview</strong>
+            <span class="helper">Demo 법인 0000</span>
+          </div>
+          <div class="shell-status-group">
+            ${badge("UI only", "ready")}
+            <span class="helper">급여 계산/저장 로직 미변경</span>
+          </div>
+          <div class="shell-status-group">
+            ${badge("Strict TS", "neutral")}
+            <span class="helper">React Native/Web 준비</span>
+          </div>
+        </footer>
       </div>
     </section>
     <div class="toast" id="toast">${t("preview.toast.default")}</div>

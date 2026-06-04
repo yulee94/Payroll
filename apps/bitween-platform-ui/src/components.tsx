@@ -364,7 +364,24 @@ export function AppShell({
             {onLogout ? <ActionButton onPress={onLogout} variant="ghost">{logoutLabel}</ActionButton> : null}
           </View>
         </View>
-        <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]}>{children}</ScrollView>
+        <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]} style={styles.contentScroll}>
+          {children}
+        </ScrollView>
+        <View style={[styles.statusFooter, compact && styles.statusFooterCompact]}>
+          <View style={styles.statusFooterGroup}>
+            <View style={styles.statusDot} />
+            <Label size="sm" weight="bold">Frontend preview</Label>
+            <Label size="sm" muted>Demo 법인 0000</Label>
+          </View>
+          <View style={styles.statusFooterGroup}>
+            <Badge tone="ready">UI only</Badge>
+            <Label size="sm" muted>급여 계산/저장 로직 미변경</Label>
+          </View>
+          <View style={styles.statusFooterGroup}>
+            <Badge tone="neutral">Strict TS</Badge>
+            <Label size="sm" muted>React Native/Web 준비</Label>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -452,6 +469,9 @@ const styles = StyleSheet.create({
   },
   contentCompact: {
     padding: spacing.md
+  },
+  contentScroll: {
+    flex: 1
   },
   emptyMark: {
     color: colors.muted,
@@ -633,6 +653,35 @@ const styles = StyleSheet.create({
     borderRightWidth: 0,
     padding: spacing.md,
     width: "100%"
+  },
+  statusDot: {
+    backgroundColor: colors.success,
+    borderRadius: 999,
+    height: 8,
+    width: 8
+  },
+  statusFooter: {
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md,
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md
+  },
+  statusFooterCompact: {
+    alignItems: "flex-start",
+    paddingHorizontal: spacing.md
+  },
+  statusFooterGroup: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    minHeight: 30
   },
   themeChip: {
     alignItems: "center",
