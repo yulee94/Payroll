@@ -4,6 +4,7 @@ export type PlatformId =
   | "hr"
   | "attendance"
   | "recruit"
+  | "travel"
   | "workflow"
   | "archive"
   | "ai"

@@ -49,6 +49,13 @@ export const navigationItems = [
     accent: "#9333EA"
   },
   {
+    id: "travel",
+    label: "출장/일지",
+    eyebrow: "Travel",
+    description: "출장계획, 실행, 업무일지, 실적반영, 상급자 검토 흐름을 확인합니다.",
+    accent: "#0F766E"
+  },
+  {
     id: "workflow",
     label: "전자결재",
     eyebrow: "Workflow",
@@ -89,8 +96,8 @@ export const platformMetrics: readonly MetricItem[] = [
   {
     id: "today",
     label: "오늘 처리할 업무",
-    value: "9건",
-    helper: "급여, 결재, 자료 확인 포함",
+    value: "10건",
+    helper: "급여, 출장, 결재, 자료 확인 포함",
     tone: "attention"
   },
   {
@@ -252,6 +259,15 @@ export const workQueue: readonly WorkQueueItem[] = [
     tone: "neutral"
   },
   {
+    id: "travel-diary",
+    title: "출장 계획/업무일지 검토",
+    meta: "출장/업무일지",
+    owner: "팀 리더",
+    due: "오늘",
+    status: "진행 중",
+    tone: "attention"
+  },
+  {
     id: "archive-preview",
     title: "자료함 최근 보고서",
     meta: "아카이브",
@@ -283,6 +299,13 @@ export const calendarEvents: readonly CalendarEvent[] = [
     timeLabel: "09:30",
     title: "채용 후보자 부서 배치 회의",
     tone: "ready"
+  },
+  {
+    dateLabel: "2026.06.05",
+    id: "calendar-travel",
+    timeLabel: "16:00",
+    title: "부산 출장 업무일지 실적 반영",
+    tone: "attention"
   }
 ];
 
@@ -302,6 +325,14 @@ export const todayTodos: readonly TodoItem[] = [
     timeLabel: "오늘",
     title: "전자결재 대기 문서",
     tone: "neutral"
+  },
+  {
+    completed: false,
+    id: "todo-travel",
+    owner: "영업팀",
+    timeLabel: "오늘",
+    title: "출장 업무일지 작성 및 실적 반영",
+    tone: "attention"
   },
   {
     completed: true,
@@ -444,6 +475,55 @@ export const moduleDashboards = {
     },
     emptyTitle: "표시할 채용 업무가 없습니다.",
     emptyDescription: "지원자 경력 또는 자격 검토 항목이 생기면 표시됩니다."
+  },
+  travel: {
+    id: "travel",
+    title: "출장/업무일지",
+    subtitle: "출장계획, 실행, 업무일지, 실적반영, 상급자 진행/완료 view를 연결해 확인합니다.",
+    filters: ["전체", "출장계획", "출장실행", "업무일지", "실적", "검토"],
+    metrics: [
+      { id: "plans", label: "출장계획", value: "4건", helper: "승인 전/진행 중 포함", tone: "neutral" },
+      { id: "diary", label: "업무일지", value: "2건", helper: "오늘 작성 권장", tone: "attention" },
+      { id: "completed", label: "완료 반영", value: "7건", helper: "상급자 확인 완료", tone: "ready" }
+    ],
+    rows: [
+      {
+        id: "travel-1",
+        category: "부산 고객사 출장계획",
+        status: "출장실행",
+        owner: "영업팀",
+        nextStep: "현장 미팅 후 업무일지 작성",
+        tone: "attention"
+      },
+      {
+        id: "travel-2",
+        category: "대전 설치 지원 업무일지",
+        status: "상급자 검토",
+        owner: "기술지원",
+        nextStep: "실적 반영 승인 대기",
+        tone: "neutral"
+      },
+      {
+        id: "travel-3",
+        category: "서울 협력사 방문",
+        status: "Completed",
+        owner: "운영팀",
+        nextStep: "완료 업무 성과 리포트 보관",
+        tone: "ready"
+      }
+    ],
+    primaryAction: {
+      label: "출장 흐름 보기",
+      description: "계획부터 실적 반영까지 상태를 확인합니다.",
+      target: "travel"
+    },
+    secondaryAction: {
+      label: "전자결재로 이동",
+      description: "출장신청서와 결재 문서를 함께 확인합니다.",
+      target: "workflow"
+    },
+    emptyTitle: "표시할 출장/업무일지 업무가 없습니다.",
+    emptyDescription: "출장계획, 업무일지, 실적 반영 항목이 생기면 진행 상태가 표시됩니다."
   },
   workflow: {
     id: "workflow",

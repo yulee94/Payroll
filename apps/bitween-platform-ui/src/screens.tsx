@@ -54,6 +54,14 @@ const attendanceLogs = [
   { id: "att-log-3", label: "퇴근", place: "대기", time: "--:--", tone: "neutral" }
 ] as const;
 
+const travelWorkflowStages = [
+  { id: "travel-plan", label: "출장계획", detail: "출장신청서와 일정 목적을 먼저 정리합니다.", status: "작성/승인", tone: "neutral" },
+  { id: "travel-run", label: "출장실행", detail: "현장 방문, 이동, 고객 미팅 상태를 표시합니다.", status: "진행 중", tone: "attention" },
+  { id: "travel-diary", label: "업무일지", detail: "출장 중 처리한 업무와 후속 조치를 기록합니다.", status: "오늘 작성", tone: "attention" },
+  { id: "travel-result", label: "실적반영", detail: "계약, 매출, 고객 대응 결과를 성과에 연결합니다.", status: "검토 대기", tone: "neutral" },
+  { id: "travel-review", label: "상급자 view", detail: "on-going과 Completed 상태를 관리자가 나눠 확인합니다.", status: "view 준비", tone: "ready" }
+] as const;
+
 function isModuleId(id: PlatformId): id is ModuleId {
   return id !== "home" && id !== "payroll";
 }
@@ -397,6 +405,7 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
       </Card>
 
       {active.id === "attendance" ? <AttendancePhonePanel /> : null}
+      {active.id === "travel" ? <TravelWorklogPanel /> : null}
 
       {active.id === "settings" ? (
         <Card>
@@ -541,6 +550,36 @@ function PayrollStepDetail({ step }: { readonly step: PayrollStep }) {
   );
 }
 
+function TravelWorklogPanel() {
+  return (
+    <Card>
+      <SectionHeader title="출장/업무일지 흐름" description="출장계획부터 출장실행, 업무일지, 실적반영, 상급자 검토까지 한 화면에서 확인합니다." />
+      <View style={styles.travelStageGrid}>
+        {travelWorkflowStages.map((stage, index) => (
+          <View key={stage.id} style={[styles.travelStageCard, { borderTopColor: toneColor(stage.tone) }]}>
+            <Text style={styles.travelStageStep}>{String(index + 1).padStart(2, "0")}</Text>
+            <Badge tone={stage.tone}>{stage.status}</Badge>
+            <Label weight="bold">{stage.label}</Label>
+            <Label size="sm" muted>{stage.detail}</Label>
+          </View>
+        ))}
+      </View>
+      <View style={styles.travelReviewGrid}>
+        <View style={styles.travelReviewCard}>
+          <Label size="sm" muted>상급자 on-going view</Label>
+          <Label weight="bold">진행 중 출장 2건</Label>
+          <Label size="sm" muted>출장실행, 업무일지 작성, 실적 반영 대기 상태를 분리해서 봅니다.</Label>
+        </View>
+        <View style={styles.travelReviewCard}>
+          <Label size="sm" muted>상급자 Completed view</Label>
+          <Label weight="bold">완료 반영 7건</Label>
+          <Label size="sm" muted>검토 완료된 출장신청서, 업무일지, 성과 연결 내역을 보관 화면으로 넘깁니다.</Label>
+        </View>
+      </View>
+    </Card>
+  );
+}
+
 function AttendancePhonePanel() {
   return (
     <Card>
@@ -664,6 +703,10 @@ function workQueueTarget(item: WorkQueueItem): PlatformId {
     return "workflow";
   }
 
+  if (item.meta.includes("출장") || item.meta.includes("업무일지")) {
+    return "travel";
+  }
+
   if (item.meta.includes("아카이브") || item.meta.includes("자료")) {
     return "archive";
   }
@@ -680,6 +723,10 @@ function workRowTarget(row: ModuleRow): PlatformId {
 
   if (haystack.includes("결재") || haystack.includes("회람") || haystack.includes("기안")) {
     return "workflow";
+  }
+
+  if (haystack.includes("출장") || haystack.includes("업무일지") || haystack.includes("실적")) {
+    return "travel";
   }
 
   if (haystack.includes("자료") || haystack.includes("보고서") || haystack.includes("파일") || haystack.includes("폴더")) {
@@ -1157,5 +1204,41 @@ const styles = StyleSheet.create({
   todoItemDone: {
     backgroundColor: colors.input,
     opacity: 0.5
+  },
+  travelReviewCard: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 260,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  travelReviewGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  travelStageCard: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 190,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  travelStageGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
+  travelStageStep: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800"
   }
 });

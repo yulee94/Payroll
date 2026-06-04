@@ -22,6 +22,7 @@ const navItems = [
   ["hr", "HR", "People", "직원 명부, 이력서, 사직서, 증명서 흐름을 정리합니다.", "#0D9488"],
   ["attendance", "출퇴근", "Attendance", "모바일 출근, 퇴근, 위치 확인, 근태 기록을 관리합니다.", "#0284C7"],
   ["recruit", "채용", "Recruit", "지원자 경력, 자격, 부서 배치 후보를 관리합니다.", "#9333EA"],
+  ["travel", "출장/일지", "Travel", "출장계획, 실행, 업무일지, 실적반영, 상급자 검토 흐름을 확인합니다.", "#0F766E"],
   ["workflow", "전자결재", "Workflow", "기안, 결재 대기, 진행 문서, 회람 상태를 추적합니다.", "#2563EB"],
   ["archive", "자료함", "Archive", "법인, 사업장, 월별 산출 자료와 보고서를 찾고 미리 봅니다.", "#475569"],
   ["ai", "AI", "Assistant", "업무 문맥을 기반으로 요약, 초안, 확인 질문을 도와줍니다.", "#7C3AED"],
@@ -60,7 +61,7 @@ const state = {
 };
 
 const platformMetrics = [
-  ["오늘 처리할 업무", "9건", "급여, 결재, 자료 확인 포함", "attention"],
+  ["오늘 처리할 업무", "10건", "급여, 출장, 결재, 자료 확인 포함", "attention"],
   ["연동 준비 완료", "5개", "연동 준비 항목 포함", "ready"],
   ["확인 필요", "2건", "권한 또는 정책 확인 대기", "blocked"],
   ["최근 자료", "12개", "월별 보고서와 업로드 문서", "neutral"]
@@ -83,18 +84,21 @@ const payrollSteps = [
 const workQueue = [
   ["6월 급여 산출 준비", "급여 자동화", "급여 담당", "오늘", "확인 필요", "attention"],
   ["전자결재 대기 문서", "워크플로우", "승인권자", "D-1", "3건", "neutral"],
+  ["출장 계획/업무일지 검토", "출장/업무일지", "팀 리더", "오늘", "진행 중", "attention"],
   ["자료함 최근 보고서", "아카이브", "운영팀", "상시", "미리보기 가능", "ready"]
 ];
 
 const calendarEvents = [
   ["2026.06.04", "10:00", "급여 산출 기준 확인", "attention"],
   ["2026.06.04", "14:00", "전자결재 대기 문서 검토", "neutral"],
-  ["2026.06.05", "09:30", "채용 후보자 부서 배치 회의", "ready"]
+  ["2026.06.05", "09:30", "채용 후보자 부서 배치 회의", "ready"],
+  ["2026.06.05", "16:00", "부산 출장 업무일지 실적 반영", "attention"]
 ];
 
 const todayTodos = [
   ["6월 급여 산출 준비", "급여 담당", "오늘", "attention", false],
   ["전자결재 대기 문서", "승인권자", "오늘", "neutral", false],
+  ["출장 업무일지 작성 및 실적 반영", "영업팀", "오늘", "attention", false],
   ["자료함 최근 보고서 확인", "운영팀", "완료", "ready", true]
 ];
 
@@ -102,6 +106,14 @@ const attendanceLogs = [
   ["출근", "09:02", "본사", "ready"],
   ["외근", "13:40", "고객사", "attention"],
   ["퇴근", "--:--", "대기", "neutral"]
+];
+
+const travelWorkflowStages = [
+  ["01", "출장계획", "작성/승인", "출장신청서와 일정 목적을 먼저 정리합니다.", "neutral"],
+  ["02", "출장실행", "진행 중", "현장 방문, 이동, 고객 미팅 상태를 표시합니다.", "attention"],
+  ["03", "업무일지", "오늘 작성", "출장 중 처리한 업무와 후속 조치를 기록합니다.", "attention"],
+  ["04", "실적반영", "검토 대기", "계약, 매출, 고객 대응 결과를 성과에 연결합니다.", "neutral"],
+  ["05", "상급자 view", "view 준비", "on-going과 Completed 상태를 관리자가 나눠 확인합니다.", "ready"]
 ];
 
 const payrollSettingsRows = [
@@ -141,6 +153,15 @@ const dashboards = {
   ], [
     ["지원자 경력 공유", "검토 중", "채용 담당", "부서장 열람 권한 확인", "attention"],
     ["자격사항 매칭", "추천", "운영팀", "필요 부서 후보 배치", "ready"]
+  ]),
+  travel: dashboard("출장/업무일지", "출장계획, 실행, 업무일지, 실적반영, 상급자 진행/완료 view를 연결해 확인합니다.", ["전체", "출장계획", "출장실행", "업무일지", "실적", "검토"], [
+    ["출장계획", "4건", "승인 전/진행 중 포함", "neutral"],
+    ["업무일지", "2건", "오늘 작성 권장", "attention"],
+    ["완료 반영", "7건", "상급자 확인 완료", "ready"]
+  ], [
+    ["부산 고객사 출장계획", "출장실행", "영업팀", "현장 미팅 후 업무일지 작성", "attention"],
+    ["대전 설치 지원 업무일지", "상급자 검토", "기술지원", "실적 반영 승인 대기", "neutral"],
+    ["서울 협력사 방문", "Completed", "운영팀", "완료 업무 성과 리포트 보관", "ready"]
   ]),
   workflow: dashboard("전자결재 업무함", "기안, 승인, 반려, 회람 문서를 상태별로 정리합니다.", ["전체", "결재 대기", "진행 중", "반려"], [
     ["결재 대기", "3건", "오늘 처리 권장", "attention"],
@@ -376,6 +397,7 @@ function queueDetail([title, meta, owner, due, status, tone]) {
 function queueTarget(meta) {
   if (meta.includes("급여")) return "payroll";
   if (meta.includes("워크") || meta.includes("결재")) return "workflow";
+  if (meta.includes("출장") || meta.includes("업무일지")) return "travel";
   if (meta.includes("아카이브") || meta.includes("자료")) return "archive";
   return "home";
 }
@@ -462,6 +484,7 @@ function renderModule(id) {
       ${metrics(data.metrics)}
     </section>
     ${id === "attendance" ? attendancePhonePanel() : ""}
+    ${id === "travel" ? travelWorklogPanel() : ""}
     ${id === "settings" ? i18nSettingsPanel() : ""}
     <section class="card">
       ${sectionHead("", "업무 목록", "필터로 상태를 좁히고 필요한 다음 작업을 확인합니다.", button(secondaryLabel(id), secondaryTarget(id), "secondary"))}
@@ -492,6 +515,24 @@ function i18nSettingsPanel() {
         <strong>${label}</strong><span class="helper">${state.selectedLanguage === code ? "선택됨" : status}</span>
       </button>
     `).join("")}</div>
+  </section>`;
+}
+
+function travelWorklogPanel() {
+  return `<section class="card">
+    ${sectionHead("", "출장/업무일지 흐름", "출장계획부터 출장실행, 업무일지, 실적반영, 상급자 검토까지 한 화면에서 확인합니다.")}
+    <div class="travel-stage-grid">${travelWorkflowStages.map(([index, label, status, detail, tone]) => `
+      <article class="travel-stage-card" style="border-top-color:${toneColor(tone)}">
+        <span class="eyebrow">${index}</span>
+        ${badge(status, tone)}
+        <strong>${label}</strong>
+        <span class="helper">${detail}</span>
+      </article>
+    `).join("")}</div>
+    <div class="travel-review-grid">
+      <article class="detail-item"><span class="helper">상급자 on-going view</span><strong>진행 중 출장 2건</strong><span>출장실행, 업무일지 작성, 실적 반영 대기 상태를 분리해서 봅니다.</span></article>
+      <article class="detail-item"><span class="helper">상급자 Completed view</span><strong>완료 반영 7건</strong><span>검토 완료된 출장신청서, 업무일지, 성과 연결 내역을 보관 화면으로 넘깁니다.</span></article>
+    </div>
   </section>`;
 }
 
@@ -569,6 +610,7 @@ function workRowTarget(row) {
   const haystack = row.slice(0, 4).join(" ");
   if (haystack.includes("급여") || haystack.includes("산출") || haystack.includes("월 기본근로시간")) return "payroll";
   if (haystack.includes("결재") || haystack.includes("회람") || haystack.includes("기안")) return "workflow";
+  if (haystack.includes("출장") || haystack.includes("업무일지") || haystack.includes("실적")) return "travel";
   if (haystack.includes("자료") || haystack.includes("보고서") || haystack.includes("파일") || haystack.includes("폴더")) return "archive";
   if (haystack.includes("권한") || haystack.includes("사용자") || haystack.includes("역할") || haystack.includes("법인")) return "admin";
   if (haystack.includes("채용") || haystack.includes("지원자") || haystack.includes("자격") || haystack.includes("배치")) return "recruit";
@@ -607,6 +649,7 @@ function primaryLabel(id) {
     hr: "직원 명부 보기",
     attendance: "출퇴근 앱 보기",
     recruit: "지원자 보기",
+    travel: "출장 흐름 보기",
     workflow: "결재함 열기",
     archive: "최근 자료 보기",
     ai: "추천 작업 보기",
@@ -620,6 +663,7 @@ function secondaryLabel(id) {
     hr: "급여 준비로 이동",
     attendance: "HR로 이동",
     recruit: "HR로 이동",
+    travel: "전자결재로 이동",
     workflow: "자료함 확인",
     archive: "급여 화면으로 이동",
     ai: "설정 확인",
@@ -633,6 +677,7 @@ function secondaryTarget(id) {
     hr: "payroll",
     attendance: "hr",
     recruit: "hr",
+    travel: "workflow",
     workflow: "archive",
     archive: "payroll",
     ai: "settings",
