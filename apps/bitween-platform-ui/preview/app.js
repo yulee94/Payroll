@@ -284,7 +284,7 @@ function render() {
 
 function renderLogin() {
   return html`
-    <section class="login-page">
+    <section class="login-page" id="main-content" tabindex="-1">
       <div class="login-grid">
         <div class="login-hero">
           ${badge("B2B operations", "ready")}
@@ -359,7 +359,7 @@ function renderShell() {
             <button class="btn ghost compact-btn" data-logout="true">로그아웃</button>
           </div>
         </header>
-        <div class="content">${renderScreen(active.id)}</div>
+        <div class="content" id="main-content" tabindex="-1">${renderScreen(active.id)}</div>
       </div>
     </section>
     <div class="toast" id="toast">화면이 업데이트되었습니다.</div>
