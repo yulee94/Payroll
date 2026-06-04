@@ -477,7 +477,7 @@ function renderLogin() {
           ${field(t("screens.login.form.companyCode"), "company-code", demoAccount.companyCode, "text", state.companyCode)}
           ${field(t("screens.login.form.userId"), "user-id", demoAccount.userId, "text", state.userId)}
           ${field(t("screens.login.form.password"), "password", demoAccount.password, "password", state.password)}
-          ${state.loginFeedbackKey ? `<div aria-live="assertive" class="inline-warning" role="alert">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey)}</span></div>` : ""}
+          ${state.loginFeedbackKey ? `<div aria-live="assertive" class="inline-warning" role="alert">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey, demoAccount)}</span></div>` : ""}
           <div class="login-actions">
             <button class="btn primary" type="submit">${t("screens.login.actions.enterHome")}</button>
             <button class="btn secondary" type="button" data-demo-login="true">${t("screens.login.actions.demo")}</button>
@@ -755,7 +755,7 @@ function renderModule(id) {
     ${id === "settings" ? i18nSettingsPanel() : ""}
     ${id === "settings" ? settingsControlPanel() : ""}
     <section class="card">
-      ${sectionHead("", t("screens.module.list.title"), t("screens.module.list.description"), button(data.secondaryAction.label, data.secondaryAction.target, "secondary"))}
+      ${sectionHead("", t("screens.module.list.title"), "", button(data.secondaryAction.label, data.secondaryAction.target, "secondary"))}
       <div class="list-toolbar">
         <div class="filters">${data.filters.map((filter) => {
           const selected = state.filter === filter.id;
@@ -772,8 +772,8 @@ function renderModule(id) {
       ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
     <div class="action-panels">
-      <section class="card"><strong>${data.primaryAction.label}</strong><span class="helper">${data.primaryAction.description}</span>${button(t("screens.actions.move"), data.primaryAction.target, "ghost")}</section>
-      <section class="card"><strong>${data.secondaryAction.label}</strong><span class="helper">${data.secondaryAction.description}</span>${button(t("screens.actions.move"), data.secondaryAction.target, "ghost")}</section>
+      <section class="card"><strong>${data.primaryAction.label}</strong>${button(t("screens.actions.move"), data.primaryAction.target, "ghost")}</section>
+      <section class="card"><strong>${data.secondaryAction.label}</strong>${button(t("screens.actions.move"), data.secondaryAction.target, "ghost")}</section>
     </div>
   `;
 }
