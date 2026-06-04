@@ -260,6 +260,7 @@ cargo test --workspace
 - [x] Business-trip lifecycle administration and overdue-evaluator permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile resolver and side-effect bridge.
 - [x] Business-trip document relatedness and legal-scope predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the document/content resolver and side-effect bridge.
 - [x] Workflow document view/edit/submit/approve permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile/org-capability resolver and approval mutation bridge.
+- [x] Workflow inbox classification is defined in framework-neutral Rust DTOs and API contracts while Python remains the session/permission/document hydration/count/filter/UI bridge.
 - [x] Workflow site-report, month-close, and execution-task management permission predicates are defined in framework-neutral Rust DTOs and API contracts while Python remains the profile/task/site resolver and side-effect bridge.
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
@@ -728,6 +729,33 @@ git diff --check
 cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
 ```
 
+
+## Implementation checkpoint: Rust workflow inbox classification core
+
+Completed on 2026-06-04 as a workflow inbox classification slice:
+
+- `crates/workflow-core::workflow_inbox` owns pure supplied-document inbox
+  classification for `to_approve`, `my_draft`, `circulate`, `in_progress`,
+  `completed`, `rejected`, `reference`, `all`, and legacy aliases.
+- Rust preserves supplied `can_approve_document`, requester/approval-line/cc
+  matching, active approval status handling, completed/rejected visibility,
+  GW imported pending/draft/circulate list-kind overrides, circulate/reference
+  exclusions, and blank/`all` inclusion.
+- Python remains the `UserSession` adapter, document hydrator, permission
+  resolver, label/count/filter wrapper, workflow store, and UI bridge.
+- Slice spec: `docs/WORKFLOW_RUST_INBOX_CLASSIFICATION_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo test -p bitween-workflow-core workflow_inbox --lib
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_inbox_contracts -v
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_inbox_gw -v
+```
+
+Task 5 acceptance status:
+
+- [x] Workflow inbox classification is Rust-owned behind parity contract tests.
 
 ## Implementation checkpoint: Rust workflow document permissions core
 

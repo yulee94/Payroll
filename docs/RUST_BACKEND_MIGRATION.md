@@ -588,6 +588,32 @@ Verification evidence for this checkpoint:
 Slice spec: `docs/PAYROLL_RUST_EXECUTION_PLAN_SLICE.md`.
 
 
+## Current implementation checkpoint: Rust workflow inbox classification core
+
+Implemented on 2026-06-04 as a workflow inbox classification slice:
+
+- `crates/workflow-core::workflow_inbox` now owns pure supplied-document inbox
+  matching for `to_approve`, `my_draft`, `circulate`, `in_progress`,
+  `completed`, `rejected`, `reference`, `all`, and legacy aliases.
+- Rust preserves Python compatibility for supplied `can_approve_document`,
+  requester/approval-line/cc matching, active approval statuses, completed and
+  rejected visibility, GW imported pending/draft/circulate list-kind overrides,
+  circulate/reference exclusions, and blank/`all` inclusion.
+- Python still owns `UserSession` adaptation, document hydration from workflow
+  JSON, permission resolution, labels, count/filter wrappers, persistence, and
+  UI bridge behavior.
+- Workflow contract metadata now names the Rust inbox DTOs, entrypoints, inbox
+  IDs, quick tabs, and invariants.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-workflow-core workflow_inbox --lib`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_inbox_contracts -v`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_inbox_gw -v`
+
+Slice spec: `docs/WORKFLOW_RUST_INBOX_CLASSIFICATION_SLICE.md`.
+
+
 ## Current implementation checkpoint: Rust workflow document permission core
 
 Implemented on 2026-06-04 as a workflow document authorization slice:
