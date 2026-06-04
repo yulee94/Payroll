@@ -25,22 +25,34 @@ from core.workflow.constants import (
     DOC_TYPE_EXPENSE,
     DOC_TYPE_GENERAL,
     DOC_TYPE_PURCHASE,
+    KPI_REFLECTION_BLOCKED,
+    KPI_REFLECTION_NOT_APPLICABLE,
+    KPI_REFLECTION_READY,
+    KPI_REFLECTION_REFLECTED,
     STEP_APPROVED,
     STEP_PENDING,
     STEP_REJECTED,
     STEP_REQUESTED_CHANGES,
     TASK_COMPLETED,
+    TASK_CANCELLED,
+    TASK_DELAYED,
     TASK_PENDING,
     TRIP_SOURCE_KIND_WORKFLOW,
     TRIP_STATUS_APPROVED,
     TRIP_STATUS_CANCELLED,
     TRIP_STATUS_COMPLETED,
+    TRIP_STATUS_DIARY_DUE,
     TRIP_STATUS_DRAFT,
     TRIP_STATUS_IN_PROGRESS,
+    TRIP_STATUS_OVERDUE,
     TRIP_STATUS_PLANNED,
+    TRIP_STATUS_LABELS,
     WF_ROLE_ADMIN,
+    WF_ROLE_DEPT_MANAGER,
     WF_ROLE_EXECUTIVE,
     WF_ROLE_FINANCE,
+    WF_ROLE_HR,
+    WF_ROLE_SITE_MANAGER,
 )
 from core.workflow.inbox import count_by_inbox, filter_inbox
 from core.workflow.store import (
@@ -246,6 +258,111 @@ def _complete_business_trip_lifecycle_for_task(
             after=row,
         )
         return
+
+
+def _business_trip_by_id(db: dict[str, Any], trip_id: str) -> dict[str, Any] | None:
+    trip_id = str(trip_id or "").strip()
+    if not trip_id:
+        return None
+    return next(
+        (
+            row
+            for row in db.get("business_trips") or []
+            if row.get("trip_id") == trip_id or row.get("id") == trip_id
+        ),
+        None,
+    )
+
+
+def _today_str(value: str | date | None = None) -> str:
+    if isinstance(value, date):
+        return value.isoformat()
+    text = str(value or "").strip()[:10]
+    return text or date.today().isoformat()
+
+
+def _add_notification_once(
+    db: dict[str, Any],
+    *,
+    user_id: str,
+    ntype: str,
+    title: str,
+    message: str,
+    related_document_id: str = "",
+    related_task_id: str = "",
+) -> bool:
+    user_id = str(user_id or "").strip()
+    if not user_id:
+        return False
+    for note in db.get("notifications") or []:
+        if (
+            note.get("user_id") == user_id
+            and note.get("type") == ntype
+            and note.get("related_document_id") == related_document_id
+            and note.get("related_task_id") == related_task_id
+            and note.get("title") == title
+        ):
+            return False
+    add_notification(
+        db,
+        user_id=user_id,
+        ntype=ntype,
+        title=title,
+        message=message,
+        related_document_id=related_document_id,
+        related_task_id=related_task_id,
+    )
+    return True
+
+
+def _business_trip_escalation_user_ids(db: dict[str, Any], trip: dict[str, Any], task: dict[str, Any]) -> list[str]:
+    """Return direct owners plus manager/escalation roles for overdue trips."""
+    ordered: list[str] = []
+
+    def add(uid: Any) -> None:
+        text = str(uid or "").strip()
+        if text and text not in ordered:
+            ordered.append(text)
+
+    requester_id = str(trip.get("requester_id") or "")
+    executor_id = str(task.get("executor_id") or trip.get("executor_id") or "")
+    add(requester_id)
+    add(executor_id)
+
+    profiles = [p for p in db.get("user_profiles") or [] if isinstance(p, dict)]
+    by_uid = {str(p.get("user_id") or ""): p for p in profiles}
+    for uid in (requester_id, executor_id):
+        add((by_uid.get(uid) or {}).get("manager_user_id"))
+
+    site_id = str(trip.get("site_id") or task.get("site_id") or "")
+    dept_id = str(trip.get("department_id") or task.get("department_id") or "")
+    for profile in profiles:
+        roles = {str(v) for v in profile.get("workflow_roles") or []}
+        profile_site_ids = {str(v) for v in profile.get("site_ids") or []}
+        profile_department_ids = {str(v) for v in profile.get("department_ids") or profile.get("org_unit_ids") or []}
+        if site_id and site_id in profile_site_ids and (
+            WF_ROLE_SITE_MANAGER in roles or WF_ROLE_HR in roles
+        ):
+            add(profile.get("user_id"))
+        if dept_id and dept_id in profile_department_ids and (
+            WF_ROLE_DEPT_MANAGER in roles or WF_ROLE_SITE_MANAGER in roles or WF_ROLE_HR in roles
+        ):
+            add(profile.get("user_id"))
+    return ordered
+
+
+def _overdue_trip_update(row: dict[str, Any]) -> dict[str, Any]:
+    """Move an active trip into overdue through legal state-machine hops."""
+    from core.workflow.business_trip import transition_trip_status
+
+    status = row.get("status")
+    updated = row
+    if status == TRIP_STATUS_APPROVED:
+        updated = transition_trip_status(updated, TRIP_STATUS_IN_PROGRESS)
+        status = updated.get("status")
+    if status in (TRIP_STATUS_IN_PROGRESS, TRIP_STATUS_DIARY_DUE):
+        updated = transition_trip_status(updated, TRIP_STATUS_OVERDUE)
+    return updated
 
 
 def _attach_steps(db: dict[str, Any], doc: dict[str, Any]) -> dict[str, Any]:
@@ -817,7 +934,7 @@ def _spawn_execution_tasks(db: dict[str, Any], doc: dict[str, Any], *, actor_id:
         "executor_id": executor_id or doc.get("requester_id", ""),
         "site_id": doc.get("site_id", ""),
         "department_id": doc.get("department_id", ""),
-        "due_date": doc.get("due_date", ""),
+        "due_date": doc.get("due_date") or doc.get("period_end") or doc.get("period_start") or "",
         "priority": "normal",
         "status": TASK_PENDING,
         "ai_recommended_action": "",
@@ -1098,3 +1215,230 @@ def transition_business_trip_lifecycle(
 
     record = with_db(tenant_id)(mut)
     return get_business_trip(tenant_id, record["trip_id"], session=sess)
+
+
+def evaluate_business_trip_overdues(
+    tenant_id: str,
+    *,
+    session: UserSession | None = None,
+    today: str | date | None = None,
+) -> dict[str, Any]:
+    """Mark overdue business-trip execution tasks and escalate once per task/user."""
+    tenant_id = _resolve_tenant(tenant_id)
+    sess = session or require_session()
+    as_of = _today_str(today)
+
+    def mut(db: dict[str, Any]) -> dict[str, Any]:
+        summary = {
+            "as_of": as_of,
+            "delayed_tasks": 0,
+            "overdue_trips": 0,
+            "escalations": 0,
+            "task_ids": [],
+            "trip_ids": [],
+        }
+        for task in db.get("execution_tasks") or []:
+            due = str(task.get("due_date") or "").strip()[:10]
+            if not due or due >= as_of:
+                continue
+            if task.get("status") in (TASK_COMPLETED, TASK_CANCELLED, TASK_DELAYED):
+                continue
+            trip = _business_trip_by_id(db, str(task.get("trip_id") or ""))
+            if not trip:
+                continue
+            if trip.get("status") in (TRIP_STATUS_COMPLETED, TRIP_STATUS_CANCELLED):
+                continue
+            before_task = deepcopy(task)
+            task["status"] = TASK_DELAYED
+            task["delayed_at"] = _now_iso()
+            task["updated_at"] = _now_iso()
+            append_audit(
+                db,
+                actor_id=_uid(sess),
+                action="execution_task_marked_delayed",
+                entity_type="ExecutionTask",
+                entity_id=str(task.get("id") or ""),
+                before=before_task,
+                after=task,
+            )
+            summary["delayed_tasks"] += 1
+            summary["task_ids"].append(task.get("id") or "")
+
+            before_trip = deepcopy(trip)
+            updated_trip = _overdue_trip_update(trip)
+            if updated_trip != before_trip:
+                trip.clear()
+                trip.update(updated_trip)
+                append_audit(
+                    db,
+                    actor_id=_uid(sess),
+                    action="business_trip_lifecycle_overdue_from_evaluator",
+                    entity_type="BusinessTripLifecycle",
+                    entity_id=str(trip.get("trip_id") or ""),
+                    before=before_trip,
+                    after=trip,
+                )
+                summary["overdue_trips"] += 1
+                summary["trip_ids"].append(trip.get("trip_id") or "")
+
+            from services import workspace_store as ws
+
+            title = f"출장 지연 확인: {trip.get('title') or task.get('title') or ''}".strip()
+            message = f"기한 {due}까지 완료되지 않은 출장 실행업무입니다."
+            for uid in _business_trip_escalation_user_ids(db, trip, task):
+                if _add_notification_once(
+                    db,
+                    user_id=uid,
+                    ntype="business_trip_overdue_escalation",
+                    title=title,
+                    message=message,
+                    related_document_id=str(task.get("document_id") or trip.get("approved_document_id") or ""),
+                    related_task_id=str(task.get("id") or ""),
+                ):
+                    summary["escalations"] += 1
+                ws.add_todo_for_user(
+                    uid,
+                    tenant_id,
+                    title,
+                    due_date=as_of,
+                    source="business_trip_overdue",
+                    document_id=str(task.get("document_id") or trip.get("approved_document_id") or ""),
+                    extra={
+                        "source_key": f"business_trip_overdue:{task.get('id')}:{uid}",
+                        "trip_id": str(trip.get("trip_id") or ""),
+                        "task_id": str(task.get("id") or ""),
+                        "escalation": True,
+                    },
+                )
+        return summary
+
+    return with_db(tenant_id)(mut)
+
+
+def list_business_trip_kpi_reflections(
+    tenant_id: str,
+    *,
+    session: UserSession | None = None,
+    kpi_reflection_status: str | None = None,
+) -> list[dict[str, Any]]:
+    """Query visible business trips through the KPI reflection state adapter."""
+    rows = list_business_trips(tenant_id, session=session)
+    if kpi_reflection_status:
+        rows = [row for row in rows if row.get("kpi_reflection_status") == kpi_reflection_status]
+
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        kpi_status = row.get("kpi_reflection_status") or KPI_REFLECTION_BLOCKED
+        blocking_reason = ""
+        if kpi_status == KPI_REFLECTION_BLOCKED:
+            blocking_reason = "출장 실행 완료 후 실적 반영 가능"
+        elif kpi_status == KPI_REFLECTION_NOT_APPLICABLE:
+            blocking_reason = "취소 또는 반려된 출장은 실적 반영 대상이 아님"
+        out.append(
+            {
+                "trip_id": row.get("trip_id", ""),
+                "title": row.get("title", ""),
+                "status": row.get("status", ""),
+                "kpi_reflection_status": kpi_status,
+                "blocking_reason": blocking_reason,
+                "ready": kpi_status == KPI_REFLECTION_READY,
+                "reflected": kpi_status == KPI_REFLECTION_REFLECTED,
+                "executor_id": row.get("executor_id", ""),
+                "requester_id": row.get("requester_id", ""),
+                "site_id": row.get("site_id", ""),
+                "department_id": row.get("department_id", ""),
+                "approved_document_id": row.get("approved_document_id", ""),
+            }
+        )
+    return out
+
+
+def reflect_business_trip_kpi(
+    tenant_id: str,
+    trip_id: str,
+    *,
+    session: UserSession | None = None,
+) -> dict[str, Any]:
+    """Reflect a READY business trip into KPI and mark it REFLECTED idempotently."""
+    tenant_id = _resolve_tenant(tenant_id)
+    sess = session or require_session()
+
+    def mut(db: dict[str, Any]) -> dict[str, Any]:
+        from core.kpi import service as kpi_svc
+        from core.workflow.business_trip import business_trip_view_model
+
+        row = _business_trip_by_id(db, trip_id)
+        if not row:
+            raise LookupError("출장 lifecycle을 찾을 수 없습니다.")
+        if not wf_perm.can_manage_business_trip_lifecycle(sess, row, tenant_id=tenant_id):
+            raise PermissionError("출장 실적을 반영할 권한이 없습니다.")
+        status = row.get("kpi_reflection_status") or KPI_REFLECTION_BLOCKED
+        if status == KPI_REFLECTION_NOT_APPLICABLE:
+            raise ValueError("취소 또는 반려된 출장은 실적 반영 대상이 아닙니다.")
+        if status == KPI_REFLECTION_BLOCKED:
+            raise ValueError("출장 실행 완료 후 실적 반영이 가능합니다.")
+        kpi_record = kpi_svc.upsert_business_trip_reflection(tenant_id, row)
+        if status != KPI_REFLECTION_REFLECTED:
+            before = deepcopy(row)
+            row["kpi_reflection_status"] = KPI_REFLECTION_REFLECTED
+            row["kpi_reflected_at"] = _now_iso()
+            row["updated_at"] = _now_iso()
+            append_audit(
+                db,
+                actor_id=_uid(sess),
+                action="business_trip_kpi_reflected",
+                entity_type="BusinessTripLifecycle",
+                entity_id=str(row.get("trip_id") or trip_id),
+                before=before,
+                after=row,
+            )
+        return {**business_trip_view_model(row), "kpi_record": kpi_record}
+
+    return with_db(tenant_id)(mut)
+
+
+def business_trip_manager_dashboard(
+    tenant_id: str,
+    *,
+    session: UserSession | None = None,
+) -> dict[str, Any]:
+    """Return manager-scoped ongoing/completed/overdue business-trip view models."""
+    rows = list_business_trips(tenant_id, session=session)
+    ongoing_statuses = {TRIP_STATUS_PLANNED, TRIP_STATUS_APPROVED, TRIP_STATUS_IN_PROGRESS, TRIP_STATUS_DIARY_DUE}
+    kpi_summary = {
+        KPI_REFLECTION_BLOCKED: 0,
+        KPI_REFLECTION_READY: 0,
+        KPI_REFLECTION_REFLECTED: 0,
+        KPI_REFLECTION_NOT_APPLICABLE: 0,
+    }
+    view_rows: list[dict[str, Any]] = []
+    for row in rows:
+        status = row.get("status", "")
+        kpi_status = row.get("kpi_reflection_status") or KPI_REFLECTION_BLOCKED
+        if kpi_status in kpi_summary:
+            kpi_summary[kpi_status] += 1
+        view_rows.append(
+            {
+                **row,
+                "status_label": TRIP_STATUS_LABELS.get(status, status),
+                "is_overdue": status == TRIP_STATUS_OVERDUE,
+                "is_completed": status == TRIP_STATUS_COMPLETED,
+                "kpi_ready": kpi_status == KPI_REFLECTION_READY,
+            }
+        )
+    sections = {
+        "ongoing": [row for row in view_rows if row.get("status") in ongoing_statuses],
+        "completed": [row for row in view_rows if row.get("status") == TRIP_STATUS_COMPLETED],
+        "overdue": [row for row in view_rows if row.get("status") == TRIP_STATUS_OVERDUE],
+    }
+    return {
+        "trips": view_rows,
+        "sections": sections,
+        "counts": {
+            "total": len(rows),
+            "ongoing": len(sections["ongoing"]),
+            "completed": len(sections["completed"]),
+            "overdue": len(sections["overdue"]),
+        },
+        "kpi_summary": kpi_summary,
+    }

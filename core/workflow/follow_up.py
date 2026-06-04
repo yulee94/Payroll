@@ -28,6 +28,9 @@ def sync_submission_follow_up(
     doc_no = str(doc.get("document_no") or "")
     doc_id = str(doc.get("id") or "")
     dtype = str(doc.get("document_type") or "")
+    trip_id = ""
+    if isinstance(doc.get("content_json"), dict):
+        trip_id = str(doc["content_json"].get("trip_id") or "")
     dtype_label = DOC_TYPE_LABELS.get(dtype, "문서")
     period_start = str(doc.get("period_start") or doc.get("requested_date") or "")
     period_end = str(doc.get("period_end") or doc.get("due_date") or period_start)
@@ -48,6 +51,7 @@ def sync_submission_follow_up(
         end_date=period_end,
         source="workflow",
         document_id=doc_id,
+        source_key=f"workflow:calendar:{doc_id}:requester:{requester_id}",
     )
     ws.add_todo_for_user(
         requester_id,
@@ -56,6 +60,7 @@ def sync_submission_follow_up(
         due_date=due,
         source="workflow",
         document_id=doc_id,
+        extra={"source_key": f"workflow:todo:{doc_id}:requester:{requester_id}", "trip_id": trip_id},
     )
 
     seen: set[str] = set()
@@ -72,7 +77,7 @@ def sync_submission_follow_up(
             due_date=due,
             source="workflow_approval",
             document_id=doc_id,
-            extra={"role": role},
+            extra={"role": role, "source_key": f"workflow_approval:todo:{doc_id}:{i}:{uid}", "trip_id": trip_id},
         )
         ws.add_calendar_event_for_user(
             uid,
@@ -82,6 +87,7 @@ def sync_submission_follow_up(
             end_date=period_end,
             source="workflow_approval",
             document_id=doc_id,
+            source_key=f"workflow_approval:calendar:{doc_id}:{i}:{uid}",
         )
 
     for uid in cc_user_ids or []:
@@ -95,6 +101,7 @@ def sync_submission_follow_up(
             due_date=due,
             source="workflow_cc",
             document_id=doc_id,
+            extra={"source_key": f"workflow_cc:todo:{doc_id}:{uid}", "trip_id": trip_id},
         )
 
 
@@ -107,6 +114,9 @@ def sync_approval_complete_follow_up(
     """최종 승인 후 실행 담당자 To-Do·일정."""
     title = str(doc.get("title") or "문서")
     doc_id = str(doc.get("id") or "")
+    trip_id = ""
+    if isinstance(doc.get("content_json"), dict):
+        trip_id = str(doc["content_json"].get("trip_id") or "")
     period_end = str(doc.get("period_end") or doc.get("due_date") or "")
     tenant_id = session.tenant_id
     requester_id = str(doc.get("requester_id") or "")
@@ -118,6 +128,7 @@ def sync_approval_complete_follow_up(
         due_date=period_end,
         source="workflow_execution",
         document_id=doc_id,
+        extra={"source_key": f"workflow_execution:todo:{doc_id}:confirm:{requester_id}", "trip_id": trip_id},
     )
 
     if executor_id and executor_id != requester_id:
@@ -128,6 +139,7 @@ def sync_approval_complete_follow_up(
             due_date=period_end,
             source="workflow_execution",
             document_id=doc_id,
+            extra={"source_key": f"workflow_execution:todo:{doc_id}:executor:{executor_id}", "trip_id": trip_id},
         )
         ws.add_calendar_event_for_user(
             executor_id,
@@ -136,4 +148,5 @@ def sync_approval_complete_follow_up(
             period_end or doc.get("period_start", ""),
             source="workflow_execution",
             document_id=doc_id,
+            source_key=f"workflow_execution:calendar:{doc_id}:executor:{executor_id}",
         )

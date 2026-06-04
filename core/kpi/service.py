@@ -406,6 +406,46 @@ def list_records(tab_id: str) -> list[dict[str, Any]]:
     return rows
 
 
+def upsert_business_trip_reflection(tenant_id: str, trip: dict[str, Any]) -> dict[str, Any]:
+    """Reflect one completed business trip into the individual KPI dataset.
+
+    The source key makes the adapter idempotent: repeated workflow reflection
+    updates the same KPI row instead of duplicating 실적 records.
+    """
+    tid = tenant_id or _tid()
+    db = load_module_db(MODULE, tid, _EMPTY)
+    rows: list[dict[str, Any]] = list(db.get("individual") or [])
+    trip_id = str(trip.get("trip_id") or trip.get("id") or "").strip()
+    source_key = f"business_trip:{trip_id}"
+    existing = next((row for row in rows if row.get("source_key") == source_key), None)
+    now = date.today().isoformat()
+    row = {
+        "id": str((existing or {}).get("id") or _new_id()),
+        "employee_name": str(trip.get("executor_id") or trip.get("requester_id") or ""),
+        "org_unit": str(trip.get("department_id") or ""),
+        "site_name": str(trip.get("site_id") or ""),
+        "kpi_name": "출장 실적 반영",
+        "target": "출장 완료",
+        "actual": str(trip.get("title") or trip_id),
+        "score": 100,
+        "payroll_link": "연동",
+        "status": STATUS_OK,
+        "source": "business_trip",
+        "source_key": source_key,
+        "trip_id": trip_id,
+        "document_id": str(trip.get("approved_document_id") or ""),
+        "reflected_at": now,
+    }
+    if existing is None:
+        rows.append(row)
+    else:
+        existing.update(row)
+        row = dict(existing)
+    db["individual"] = rows
+    save_module_db(MODULE, tid, db)
+    return dict(row)
+
+
 def list_sites() -> list[dict[str, Any]]:
     db = _db()
     return list(db.get("sites") or [])
