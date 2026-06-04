@@ -749,6 +749,11 @@ input:focus-visible {
   gap: 10px;
   padding: 12px;
   text-align: left;
+  width: 100%;
+}
+
+button.planner-item {
+  cursor: pointer;
 }
 
 .planner-item div {
