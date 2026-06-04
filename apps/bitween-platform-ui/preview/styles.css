@@ -428,7 +428,24 @@ button {
 .topbar-copy {
   display: grid;
   gap: 4px;
+  flex: 1;
   min-width: 0;
+}
+
+.topbar-copy p {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.45;
+  margin: 0;
+  max-width: 760px;
+}
+
+.topbar-eyebrow {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
 .topbar h1,

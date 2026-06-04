@@ -336,7 +336,9 @@ export function AppShell({
       <View style={styles.main}>
         <View style={[styles.header, compact && styles.headerCompact]}>
           <View style={styles.headerCopy}>
+            <Label size="sm" muted>{active.eyebrow}</Label>
             <Label size="xl" weight="bold">{active.label}</Label>
+            <Label muted>{active.description}</Label>
           </View>
           <View style={styles.headerActions}>
             <Badge tone="neutral">{sessionLabel}</Badge>
