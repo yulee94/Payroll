@@ -219,6 +219,8 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">{tScreen(locale, "login.form.companyCode")}</Label>
           <TextInput
+            accessibilityHint={tScreen(locale, "login.form.companyCodeHint", demoParams)}
+            accessibilityLabel={tScreen(locale, "login.form.companyCode")}
             autoCapitalize="characters"
             autoComplete="organization"
             onChangeText={setCompanyCode}
@@ -232,6 +234,8 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">{tScreen(locale, "login.form.userId")}</Label>
           <TextInput
+            accessibilityHint={tScreen(locale, "login.form.userIdHint", demoParams)}
+            accessibilityLabel={tScreen(locale, "login.form.userId")}
             autoCapitalize="none"
             autoComplete="username"
             onChangeText={setUserId}
@@ -245,6 +249,8 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">{tScreen(locale, "login.form.password")}</Label>
           <TextInput
+            accessibilityHint={tScreen(locale, "login.form.passwordHint", demoParams)}
+            accessibilityLabel={tScreen(locale, "login.form.password")}
             autoComplete="password"
             onChangeText={setPassword}
             placeholder={demoAccount.password}
@@ -262,8 +268,19 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
           </View>
         ) : null}
         <View style={styles.loginActions}>
-          <ActionButton onPress={handleLogin}>{tScreen(locale, canSubmit ? "login.actions.enterHome" : "login.actions.login")}</ActionButton>
-          <ActionButton onPress={handleDemoLogin} variant="secondary">{tScreen(locale, "login.actions.demo")}</ActionButton>
+          <ActionButton
+            accessibilityLabel={tScreen(locale, canSubmit ? "login.actions.enterHomeAccessibility" : "login.actions.loginAccessibility", demoParams)}
+            onPress={handleLogin}
+          >
+            {tScreen(locale, canSubmit ? "login.actions.enterHome" : "login.actions.login")}
+          </ActionButton>
+          <ActionButton
+            accessibilityLabel={tScreen(locale, "login.actions.demoAccessibility", demoParams)}
+            onPress={handleDemoLogin}
+            variant="secondary"
+          >
+            {tScreen(locale, "login.actions.demo")}
+          </ActionButton>
         </View>
       </Card>
     </View>
@@ -628,6 +645,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
             <Label size="sm" weight="bold">{tScreen(locale, "module.search.label")}</Label>
             <TextInput
               autoCapitalize="none"
+              accessibilityLabel={tScreen(locale, "module.search.accessibilityLabel")}
               onChangeText={setSearch}
               placeholder={tScreen(locale, "module.search.placeholder")}
               placeholderTextColor={colors.muted}
@@ -635,6 +653,11 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
               style={styles.input}
               value={search}
             />
+            {search ? (
+              <ActionButton accessibilityLabel={tScreen(locale, "module.search.clearAccessibilityLabel")} onPress={() => setSearch("")} variant="ghost">
+                {tScreen(locale, "module.search.clear")}
+              </ActionButton>
+            ) : null}
           </View>
         </View>
         <View style={styles.listSummary}>
