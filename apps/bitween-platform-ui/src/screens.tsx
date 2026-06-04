@@ -279,7 +279,7 @@ export function LauncherScreen({ locale, onSelect }: ScreenProps) {
         <MetricGrid items={platformMetrics} />
       </Card>
 
-      <CalendarTodoPanel events={calendarEvents} locale={locale} todos={todayTodos} />
+      <CalendarTodoPanel events={calendarEvents} locale={locale} onSelect={onSelect} todos={todayTodos} />
 
       <Card>
         <SectionHeader title={tScreen(locale, "launcher.workQueue.title")} description={tScreen(locale, "launcher.workQueue.description")} />
@@ -426,7 +426,17 @@ function PayrollIntegrationPanel({ locale, onSelect }: Pick<ScreenProps, "locale
   );
 }
 
-function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonly CalendarEvent[]; readonly locale: SupportedLocale; readonly todos: readonly TodoItem[] }) {
+function CalendarTodoPanel({
+  events,
+  locale,
+  onSelect,
+  todos
+}: {
+  readonly events: readonly CalendarEvent[];
+  readonly locale: SupportedLocale;
+  readonly onSelect: (id: PlatformId) => void;
+  readonly todos: readonly TodoItem[];
+}) {
   return (
     <View style={styles.homePlannerGrid}>
       <Card style={styles.homePlannerCard}>
@@ -438,13 +448,18 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
         </View>
         <View style={styles.plannerList}>
           {events.map((event) => (
-            <View key={event.id} style={styles.plannerItem}>
+            <Pressable
+              accessibilityRole="button"
+              key={event.id}
+              onPress={() => onSelect(event.target)}
+              style={({ pressed }) => [styles.plannerItem, pressed && styles.buttonPressed]}
+            >
               <Badge tone={event.tone}>{event.timeLabel}</Badge>
               <View style={styles.plannerCopy}>
                 <Label weight="bold">{event.title}</Label>
-                <Label size="sm" muted>{event.dateLabel}</Label>
+                <Label size="sm" muted>{event.dateLabel} · {tScreen(locale, "workDetail.actions.openRelated")}</Label>
               </View>
-            </View>
+            </Pressable>
           ))}
         </View>
       </Card>
@@ -452,13 +467,18 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
         <SectionHeader title={tScreen(locale, "todo.title")} description={tScreen(locale, "todo.description")} />
         <View style={styles.plannerList}>
           {todos.map((todo) => (
-            <View key={todo.id} style={[styles.todoItem, todo.completed && styles.todoItemDone]}>
+            <Pressable
+              accessibilityRole="button"
+              key={todo.id}
+              onPress={() => onSelect(todo.target)}
+              style={({ pressed }) => [styles.todoItem, todo.completed && styles.todoItemDone, pressed && styles.buttonPressed]}
+            >
               <Badge tone={todo.tone}>{todo.timeLabel}</Badge>
               <View style={styles.plannerCopy}>
                 <Label weight="bold">{todo.title}</Label>
-                <Label size="sm" muted>{todo.owner}</Label>
+                <Label size="sm" muted>{todo.owner} · {tScreen(locale, "workDetail.actions.openRelated")}</Label>
               </View>
-            </View>
+            </Pressable>
           ))}
         </View>
       </Card>

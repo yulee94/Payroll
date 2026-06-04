@@ -90,18 +90,18 @@ const workQueueDefs = [
 ].map(([id, tone, target]) => ({ id, tone, target }));
 
 const calendarEventDefs = [
-  ["calendar-payroll", "2026.06.04", "10:00", "attention"],
-  ["calendar-approval", "2026.06.04", "14:00", "neutral"],
-  ["calendar-recruit", "2026.06.05", "09:30", "ready"],
-  ["calendar-travel", "2026.06.05", "16:00", "attention"]
-].map(([id, date, time, tone]) => ({ id, date, time, tone }));
+  ["calendar-payroll", "2026.06.04", "10:00", "attention", "payroll"],
+  ["calendar-approval", "2026.06.04", "14:00", "neutral", "workflow"],
+  ["calendar-recruit", "2026.06.05", "09:30", "ready", "recruit"],
+  ["calendar-travel", "2026.06.05", "16:00", "attention", "travel"]
+].map(([id, date, time, tone, target]) => ({ id, date, target, time, tone }));
 
 const todayTodoDefs = [
-  ["todo-payroll", "attention", false],
-  ["todo-approval", "neutral", false],
-  ["todo-travel", "attention", false],
-  ["todo-archive", "ready", true]
-].map(([id, tone, done]) => ({ id, tone, done }));
+  ["todo-payroll", "attention", false, "payroll"],
+  ["todo-approval", "neutral", false, "workflow"],
+  ["todo-travel", "attention", false, "travel"],
+  ["todo-archive", "ready", true, "archive"]
+].map(([id, tone, done, target]) => ({ id, done, target, tone }));
 
 const attendanceLogDefs = [
   ["att-log-1", "09:02", "ready"],
@@ -525,13 +525,13 @@ function renderHome() {
         ${sectionHead("", t("screens.calendar.title"), t("screens.calendar.description"))}
         <div class="calendar-day"><span>2026.06</span><strong>04</strong><em>${t("screens.calendar.weekday")}</em></div>
         <div class="planner-list">${calendarEvents().map((event) => `
-          <div class="planner-item">${badge(event.time, event.tone)}<div><strong>${event.title}</strong><span class="helper">${event.date}</span></div></div>
+          <button class="planner-item planner-button" data-target="${event.target}">${badge(event.time, event.tone)}<div><strong>${event.title}</strong><span class="helper">${event.date} · ${t("screens.workDetail.actions.openRelated")}</span></div></button>
         `).join("")}</div>
       </div>
       <div class="card planner-card">
         ${sectionHead("", t("screens.todo.title"), t("screens.todo.description"))}
         <div class="planner-list">${todayTodos().map((item) => `
-          <div class="planner-item todo-item ${item.done ? "done" : ""}">${badge(item.timeLabel, item.tone)}<div><strong>${item.title}</strong><span class="helper">${item.owner}</span></div></div>
+          <button class="planner-item planner-button todo-item ${item.done ? "done" : ""}" data-target="${item.target}">${badge(item.timeLabel, item.tone)}<div><strong>${item.title}</strong><span class="helper">${item.owner} · ${t("screens.workDetail.actions.openRelated")}</span></div></button>
         `).join("")}</div>
       </div>
     </section>
