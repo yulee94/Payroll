@@ -52,20 +52,24 @@ export function Badge({ children, tone }: PropsWithChildren<{ readonly tone: Rea
 }
 
 type ButtonProps = PropsWithChildren<{
+  readonly accessibilityLabel?: string;
   readonly onPress: () => void;
   readonly variant?: "primary" | "secondary" | "ghost";
 }>;
 
-export function ActionButton({ children, onPress, variant = "primary" }: ButtonProps) {
+export function ActionButton({ accessibilityLabel, children, onPress, variant = "primary" }: ButtonProps) {
   return (
     <Pressable
+      accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
+      hitSlop={4}
       onPress={onPress}
-      style={[
+      style={({ pressed }) => [
         styles.button,
         variant === "primary" && styles.buttonPrimary,
         variant === "secondary" && styles.buttonSecondary,
-        variant === "ghost" && styles.buttonGhost
+        variant === "ghost" && styles.buttonGhost,
+        pressed && styles.buttonPressed
       ]}
     >
       <Text
@@ -293,6 +297,9 @@ const styles = StyleSheet.create({
   },
   buttonGhost: {
     backgroundColor: "transparent"
+  },
+  buttonPressed: {
+    opacity: 0.86
   },
   buttonPrimary: {
     backgroundColor: colors.accent
