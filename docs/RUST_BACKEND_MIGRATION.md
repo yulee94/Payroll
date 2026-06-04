@@ -159,6 +159,38 @@ Verification evidence for this checkpoint:
 
 Slice spec: `docs/PAYROLL_RUST_ATTENDANCE_AGGREGATION_SLICE.md`.
 
+## Current implementation checkpoint: Rust payroll fixed-hours application
+
+Implemented on 2026-06-04 as the next payroll record-generation behavior slice:
+
+- `crates/payroll-api` now exposes `FixedHoursProfile`,
+  `FixedHoursInvoice`, `FixedHoursApplication`, and
+  `apply_fixed_hours_to_invoice`.
+- `PayrollApiService::apply_fixed_hours_to_invoice` applies a resolved
+  fixed-hours profile to an invoice-compatible row without reading HR contracts,
+  site templates, local settings, or roster files.
+- Rust preserves Python compatibility metadata: original invoice hour fields are
+  saved under `_invoice_*`, monthly hour source and fixed-hours profile metadata
+  are emitted under `_monthly_*` and `_fixed_hours_*`, and audit flags keep the
+  Korean labels used by payroll reviewers.
+- Python remains responsible for resolving employee contracts, job-group
+  templates, and settings snapshots until those repository/persistence slices
+  are ported separately.
+- TypeScript and Python contract metadata now include fixed-hours profile,
+  invoice, and application DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo fmt --check`
+- `cargo test --workspace`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_fixed_hours tests.test_payroll_api_contract -v`
+- `npm run typecheck --prefix frontend`
+- `git diff --check`
+- `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
+
+Slice spec: `docs/PAYROLL_RUST_FIXED_HOURS_SLICE.md`.
+
 ## Current implementation checkpoint: Rust payroll policy resolution
 
 Implemented on 2026-06-04 as the next service-boundary behavior slice:

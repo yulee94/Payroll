@@ -17,12 +17,13 @@ Rust transition entry point:
 - Validation function: `bitween_payroll_api::validate_payroll_api_payload(payload, policy_snapshot)`
 - Policy-resolved validation function: `PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)`
 - Attendance aggregation function: `PayrollApiService::aggregate_attendance_records(records, workplace, attendance_policy)`
+- Fixed-hours application function: `PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)`
 - Execution plan function: `PayrollApiService::plan_run_request(request, policy_snapshot)`
 - Run-result response function: `PayrollApiService::run_response(result, request_id)`
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -111,6 +112,70 @@ Example invoice-compatible output row:
   "subtotal": 0,
   "_attendance_days": 2,
   "_attendance_input": true
+}
+```
+
+## Fixed-Hours Application
+
+Python compatibility code may still load HR contracts, site job-group templates, payroll settings, and employee rosters. Once a fixed-hours profile has been resolved for an invoice-compatible payroll row, Rust owns the payroll-domain application rule through `apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)` and `PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)`.
+
+Application invariants:
+
+1. Resolved profiles are normalized before application; monthly hours default to 209, or `daily_fixed_hours × 26` when monthly hours are absent.
+2. Original invoice `work_days`, `base_days`, `ot_hours`, `special_hours`, and `special_ext_hours` are preserved under `_invoice_*` fields before replacement.
+3. `fixed_extension_hours` replaces `ot_hours` when positive, and `fixed_overtime_hours` replaces `special_hours` when positive.
+4. `_preserve_reference_hours` keeps the original invoice work/base hours for application while audit flags still compare against the resolved profile.
+5. Audit flags preserve the Python compatibility Korean labels for the profile source, pay type, and hour mismatches.
+
+Example fixed-hours profile:
+
+```json
+{
+  "fixed_hours_mode": true,
+  "monthly_fixed_hours": 209,
+  "daily_fixed_hours": 0,
+  "fixed_overtime_hours": 10,
+  "fixed_extension_hours": 20,
+  "pay_type": "monthly_salary",
+  "job_group": "경비",
+  "source": "contract",
+  "source_label": "근로계약서 기준 고정",
+  "contract_id": "c1"
+}
+```
+
+Example application output:
+
+```json
+{
+  "applied": true,
+  "invoice": {
+    "name": "최연봉",
+    "workplace": "강남경비",
+    "work_days": 209,
+    "base_days": 209,
+    "ot_hours": 20,
+    "special_hours": 10,
+    "special_ext_hours": 2,
+    "_invoice_work_days": 150,
+    "_invoice_base_days": 150,
+    "_invoice_ot_hours": 5,
+    "_invoice_special_hours": 3,
+    "_invoice_special_ext_hours": 2,
+    "_monthly_work_hours": 209,
+    "_monthly_hours_source": "근로계약서 기준 고정",
+    "_fixed_hours_mode": true,
+    "_fixed_hours_source": "contract",
+    "_fixed_hours_pay_type": "monthly_salary",
+    "_fixed_hours_job_group": "경비"
+  },
+  "audit_flags": [
+    "근로계약서 기준 고정 (경비)",
+    "급여형태: 연봉직",
+    "청구서 연장(5h) ≠ 계약 고정(20h)",
+    "청구서 특근(3h) ≠ 계약 고정(10h)",
+    "청구서 근무시간(150h) ≠ 계약 월시간(209h)"
+  ]
 }
 ```
 
@@ -601,6 +666,7 @@ Frontend code must use `error_code`, not parse `error` text.
 - Explicit `invoice`, `attendance`, and `mixed` requests preserve caller selection.
 - Responses include `operation_policy` and `operation_policy_source` (`site`, `tenant`, or `global`) so operators can audit which policy was applied.
 - Rust owns site -> tenant -> global policy-resolution precedence for supplied settings snapshots through `PayrollApiService::validate_run_payload_with_policy_settings`; Python settings persistence remains compatibility-only until the repository/storage migration lands.
+- Rust owns resolved fixed-hours profile application through `PayrollApiService::apply_fixed_hours_to_invoice`; Python contract/template/settings resolution remains compatibility-only until persistence and HR contract repositories move to Rust.
 - Rust now owns run-result success and execution-failure envelope shaping through `PayrollApiService::run_response`; Python execution remains a compatibility source until the Rust executor and persistence slices land.
 - Rust normalizes `operation_policy` known fields before serializing responses: invalid input basis falls back to `hybrid`; attendance minute fields are clamped to Python-compatible ranges; missing-clock policy falls back to `warn`.
 - `PayrollApiService` now owns framework-neutral health/readiness DTOs; future Axum/Actix/Tauri/Kubernetes wrappers should call those Rust functions rather than inventing parallel probe payloads.

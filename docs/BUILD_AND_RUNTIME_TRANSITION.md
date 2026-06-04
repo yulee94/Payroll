@@ -249,13 +249,14 @@ cargo test --workspace
 
 **Acceptance criteria:**
 
-- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, execution planning, authorization, run-result response shaping, health, and readiness.
+- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, fixed-hours application, execution planning, authorization, run-result response shaping, health, and readiness.
 - [ ] Python adapter is retained only as compatibility fallback while rollout is incomplete.
 - [x] Health/readiness behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [x] Run-result success/error envelope behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [x] Tenant/site/global operation-policy resolution behavior is defined in framework-neutral Rust DTOs and API contracts for supplied settings snapshots.
 - [x] Payroll execution routing/planning behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the compatibility executor.
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
+- [x] Fixed-hours payroll row application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the HR contract/settings resolver.
 - [ ] Service-account permissions and initial latency/error budgets are defined for Kubernetes.
 
 **Verification:**
@@ -373,6 +374,35 @@ cargo fmt --check
 cargo test --workspace
 buck2 test //crates/payroll-api:payroll_api_test
 /tmp/payroll-policy-venv/bin/python -m unittest tests.test_attendance_import tests.test_payroll_api_contract -v
+npm run typecheck --prefix frontend
+git diff --check
+cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
+```
+
+## Implementation checkpoint: Rust payroll fixed-hours application
+
+Completed on 2026-06-04 as a payroll record-generation behavior slice:
+
+- `crates/payroll-api` owns fixed-hours profile application through
+  `apply_fixed_hours_to_invoice` and
+  `PayrollApiService::apply_fixed_hours_to_invoice`.
+- Rust normalizes resolved fixed-hours profiles, preserves original invoice hour
+  fields, applies monthly fixed hours and fixed overtime/special hours, and
+  emits Python-compatible audit flags.
+- Python remains the resolver bridge for HR contracts, site job-group templates,
+  roster matching, and local payroll settings until those repositories move to
+  Rust.
+- Contract docs and TypeScript/Python metadata name the fixed-hours profile,
+  invoice, and application DTOs.
+- Slice spec: `docs/PAYROLL_RUST_FIXED_HOURS_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo fmt --check
+cargo test --workspace
+buck2 test //crates/payroll-api:payroll_api_test
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_fixed_hours tests.test_payroll_api_contract -v
 npm run typecheck --prefix frontend
 git diff --check
 cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant

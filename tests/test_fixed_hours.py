@@ -16,6 +16,7 @@ from core.payroll.fixed_hours import (
     PAY_TYPE_MONTHLY_SALARY,
     apply_fixed_hours_to_invoice,
     contract_to_fixed_hours_profile,
+    fixed_hours_audit_flags,
     infer_job_group_from_roster,
     normalize_contract_fixed_hours_fields,
     resolve_employee_fixed_hours,
@@ -212,6 +213,52 @@ class FixedHoursTests(unittest.TestCase):
         self.assertEqual(inv["_invoice_ot_hours"], 3)
         self.assertEqual(inv["ot_hours"], 15)
         self.assertEqual(inv["special_hours"], 10)
+
+    def test_apply_fixed_profile_preserves_metadata_for_rust_parity(self) -> None:
+        inv = {
+            "name": "최연봉",
+            "workplace": "청구지",
+            "work_days": 150,
+            "base_days": 150,
+            "ot_hours": 5,
+            "special_hours": 3,
+            "special_ext_hours": 2,
+        }
+        prof = {
+            "fixed_hours_mode": True,
+            "monthly_fixed_hours": 209,
+            "fixed_overtime_hours": 10,
+            "fixed_extension_hours": 20,
+            "pay_type": PAY_TYPE_MONTHLY_SALARY,
+            "job_group": "경비",
+            "source": "contract",
+            "source_label": FIXED_HOURS_SOURCE_CONTRACT,
+            "contract_id": "c1",
+        }
+
+        applied = apply_fixed_hours_to_invoice(inv, prof, workplace="강남경비")
+        flags = fixed_hours_audit_flags(inv, applied)
+
+        self.assertIs(applied, prof)
+        self.assertEqual(inv["workplace"], "강남경비")
+        self.assertEqual(inv["_monthly_work_hours"], 209)
+        self.assertEqual(inv["_monthly_hours_source"], FIXED_HOURS_SOURCE_CONTRACT)
+        self.assertTrue(inv["_fixed_hours_mode"])
+        self.assertEqual(inv["_fixed_hours_source"], "contract")
+        self.assertEqual(inv["_fixed_hours_pay_type"], PAY_TYPE_MONTHLY_SALARY)
+        self.assertEqual(inv["_fixed_hours_job_group"], "경비")
+        self.assertEqual(inv["base_days"], 209)
+        self.assertEqual(inv["work_days"], 209)
+        self.assertEqual(inv["ot_hours"], 20)
+        self.assertEqual(inv["special_hours"], 10)
+        self.assertEqual(inv["_invoice_work_days"], 150)
+        self.assertEqual(inv["_invoice_base_days"], 150)
+        self.assertEqual(inv["_invoice_ot_hours"], 5)
+        self.assertEqual(inv["_invoice_special_hours"], 3)
+        self.assertEqual(inv["_invoice_special_ext_hours"], 2)
+        self.assertIn("청구서 연장(5h) ≠ 계약 고정(20h)", flags)
+        self.assertIn("청구서 특근(3h) ≠ 계약 고정(10h)", flags)
+        self.assertIn("청구서 근무시간(150h) ≠ 계약 월시간(209h)", flags)
 
     def test_resolve_template_requires_security_cleaning_flag(self) -> None:
         tpl = resolve_job_group_template("경비", {"security_cleaning": False, "job_group_templates": {}})

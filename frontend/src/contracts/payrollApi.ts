@@ -146,6 +146,50 @@ export interface PayrollAttendanceInvoiceRow {
   _attendance_input: true;
 }
 
+export type PayrollFixedHoursPayType = "hourly" | "monthly_salary";
+
+export interface PayrollFixedHoursProfile {
+  fixed_hours_mode: boolean;
+  monthly_fixed_hours: number;
+  daily_fixed_hours: number;
+  fixed_overtime_hours: number;
+  fixed_extension_hours: number;
+  pay_type: PayrollFixedHoursPayType;
+  job_group: string;
+  source: string;
+  source_label: string;
+  contract_id?: string;
+}
+
+export interface PayrollFixedHoursInvoice {
+  name: string;
+  workplace: string;
+  work_days: number;
+  base_days: number;
+  ot_hours: number;
+  special_hours: number;
+  special_ext_hours: number;
+  _invoice_work_days?: number;
+  _invoice_base_days?: number;
+  _invoice_ot_hours?: number;
+  _invoice_special_hours?: number;
+  _invoice_special_ext_hours?: number;
+  _monthly_work_hours?: number;
+  _monthly_hours_source: string;
+  _fixed_hours_mode: boolean;
+  _fixed_hours_source: string;
+  _fixed_hours_pay_type: PayrollFixedHoursPayType | "";
+  _fixed_hours_job_group: string;
+  _preserve_reference_hours: boolean;
+}
+
+export interface PayrollFixedHoursApplication {
+  applied: boolean;
+  invoice: PayrollFixedHoursInvoice;
+  profile: PayrollFixedHoursProfile;
+  audit_flags: string[];
+}
+
 export interface PayrollOperationPolicyResolution {
   workplace: string;
   policy: PayrollOperationPolicy;

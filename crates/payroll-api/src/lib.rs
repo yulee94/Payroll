@@ -2,6 +2,7 @@ pub mod access;
 pub mod attendance;
 pub mod error;
 pub mod execution_plan;
+pub mod fixed_hours;
 pub mod policy;
 pub mod policy_resolution;
 pub mod request;
@@ -18,6 +19,11 @@ pub use error::PayrollApiError;
 pub use execution_plan::{
     plan_payroll_execution, PayrollExecutionBackend, PayrollExecutionPlan, PayrollExecutionStep,
     PayrollExecutionStepKind, PAYROLL_PYTHON_COMPATIBILITY_EXECUTOR,
+};
+pub use fixed_hours::{
+    apply_fixed_hours_to_invoice, fixed_hours_audit_flags, FixedHoursApplication,
+    FixedHoursInvoice, FixedHoursPayType, FixedHoursProfile, FIXED_HOURS_SOURCE_CONTRACT,
+    FIXED_HOURS_SOURCE_TEMPLATE, PAY_TYPE_HOURLY, PAY_TYPE_MONTHLY_SALARY,
 };
 pub use policy::{
     AttendancePolicy, MissingClockPolicy, OperationPolicy, OperationPolicySnapshot,
