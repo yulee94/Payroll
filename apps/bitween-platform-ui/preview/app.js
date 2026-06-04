@@ -422,12 +422,12 @@ function renderLogin() {
           ${field(t("screens.login.form.companyCode"), "company-code", demoAccount.companyCode, "text", state.companyCode)}
           ${field(t("screens.login.form.userId"), "user-id", demoAccount.userId, "text", state.userId)}
           ${field(t("screens.login.form.password"), "password", demoAccount.password, "password", state.password)}
-          ${state.loginFeedbackKey ? `<div class="inline-warning">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey)}</span></div>` : ""}
+          ${state.loginFeedbackKey ? `<div class="inline-warning">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey, demoAccount)}</span></div>` : ""}
           <div class="login-actions">
             <button class="btn primary" type="submit">${t("screens.login.actions.enterHome")}</button>
             <button class="btn secondary" type="button" data-demo-login="true">${t("screens.login.actions.demo")}</button>
           </div>
-          <div class="notice">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.summary")}</span></div>
+          <div class="notice">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.summary", demoAccount)}</span></div>
         </form>
       </div>
     </section>
@@ -656,7 +656,7 @@ function renderModule(id) {
     ${id === "ai" ? aiWorkspacePanel() : ""}
     ${id === "settings" ? i18nSettingsPanel() : ""}
     <section class="card">
-      ${sectionHead("", t("screens.module.list.title"), t("screens.module.list.description"), button(data.secondaryAction.label, data.secondaryAction.target, "secondary"))}
+      ${sectionHead("", t("screens.module.list.title"), "", button(data.secondaryAction.label, data.secondaryAction.target, "secondary"))}
       <div class="list-toolbar">
         <div class="filters">${data.filters.map((filter) => `<button class="filter-chip ${state.filter === filter.id ? "active" : ""}" data-filter="${filter.id}">${filter.label}</button>`).join("")}</div>
         <label class="search-box" for="work-search"><span>${t("screens.module.search.label")}</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="${t("screens.module.search.placeholder")}" /></label>
@@ -666,8 +666,8 @@ function renderModule(id) {
       ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
     <div class="action-panels">
-      <section class="card"><strong>${data.primaryAction.label}</strong><span class="helper">${data.primaryAction.description}</span>${button(t("screens.actions.move"), data.primaryAction.target, "ghost")}</section>
-      <section class="card"><strong>${data.secondaryAction.label}</strong><span class="helper">${data.secondaryAction.description}</span>${button(t("screens.actions.move"), data.secondaryAction.target, "ghost")}</section>
+      <section class="card"><strong>${data.primaryAction.label}</strong>${button(t("screens.actions.move"), data.primaryAction.target, "ghost")}</section>
+      <section class="card"><strong>${data.secondaryAction.label}</strong>${button(t("screens.actions.move"), data.secondaryAction.target, "ghost")}</section>
     </div>
   `;
 }

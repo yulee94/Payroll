@@ -554,7 +554,6 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
       <Card>
         <SectionHeader
           title={tScreen(locale, "module.list.title")}
-          description={tScreen(locale, "module.list.description")}
           action={<ActionButton onPress={() => onSelect(dashboard.secondaryAction.target)} variant="secondary">{dashboard.secondaryAction.label}</ActionButton>}
         />
         <View style={styles.listToolbar}>
@@ -588,7 +587,6 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
         {[dashboard.primaryAction, dashboard.secondaryAction].map((action) => (
           <Card key={action.label} compact style={styles.actionPanelCard}>
             <Label weight="bold">{action.label}</Label>
-            <Label size="sm" muted>{action.description}</Label>
             <ActionButton onPress={() => onSelect(action.target)} variant="ghost">{tScreen(locale, "actions.move")}</ActionButton>
           </Card>
         ))}
