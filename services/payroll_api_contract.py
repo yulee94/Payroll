@@ -451,6 +451,90 @@ def payroll_invoice_audit_row_example() -> dict[str, Any]:
         ],
     }
 
+
+def payroll_invoice_audit_batch_example() -> dict[str, Any]:
+    """Return the Rust-owned supplied-input invoice audit batch contract shape."""
+    return {
+        "rust_entrypoint": "PayrollApiService::audit_invoice_batch(items, workplace)",
+        "auditor_entrypoint": "audit_invoice_batch(items, workplace)",
+        "python_compatibility_source": "core.payroll.invoice_audit.audit_invoice_payroll",
+        "resolver_boundary": (
+            "Python compatibility code may still resolve settings, match ledger records, "
+            "resolve fixed-hours profiles, parse workbooks, and render UI text before "
+            "supplying batch items to Rust."
+        ),
+        "item_fields": [
+            "invoice",
+            "workplace",
+            "policy",
+            "record",
+            "fixed_profile",
+        ],
+        "summary_fields": ["total", "pass", "warn"],
+        "result_fields": [
+            "workplace",
+            "summary",
+            "rows",
+            "pass_count",
+            "warn_count",
+        ],
+        "example_items": [
+            {
+                "invoice": {
+                    "name": "A",
+                    "base_days": 209,
+                    "work_days": 209,
+                    "base_hourly": 10_000,
+                    "base_salary": 2_090_000,
+                },
+                "workplace": "앰코",
+                "policy": {"mode": "fixed", "hours": 209},
+                "record": {"name": "A", "workplace": "앰코", "base_hourly": 10_000},
+            },
+            {
+                "invoice": {
+                    "name": "B",
+                    "base_days": 209,
+                    "work_days": 209,
+                    "base_hourly": 10_000,
+                    "base_salary": 1_000,
+                },
+                "workplace": "앰코",
+                "policy": {"mode": "fixed", "hours": 209},
+                "record": {"name": "B", "workplace": "앰코", "base_hourly": 10_000},
+            },
+            {
+                "invoice": {
+                    "name": "C",
+                    "base_days": 209,
+                    "work_days": 209,
+                    "base_salary": 2_090_000,
+                },
+                "workplace": "앰코",
+                "policy": {"mode": "fixed", "hours": 209},
+                "record": {"name": "C", "workplace": "앰코", "base_hourly": 0},
+            },
+        ],
+        "example_result": {
+            "workplace": "앰코",
+            "summary": {"total": 3, "pass": 2, "warn": 1},
+            "pass_count": 2,
+            "warn_count": 1,
+            "rows": [
+                {"name": "A", "status": "pass"},
+                {"name": "B", "status": "warn"},
+                {"name": "C", "status": "pass"},
+            ],
+        },
+        "invariants": [
+            "batch auditing is pure once each item has invoice, workplace policy, optional ledger record, and optional fixed-hours profile supplied",
+            "row order is preserved exactly as supplied",
+            "summary.total, summary.pass, summary.warn, pass_count, and warn_count are derived from Rust row statuses",
+            "empty item workplace falls back to the batch workplace before the row auditor resolves record or invoice workplace",
+            "settings lookup, ledger matching, fixed-profile resolution, workbook I/O, and UI text rendering remain Python compatibility boundaries in this slice",
+        ],
+    }
+
 def payroll_fixed_hours_application_example() -> dict[str, Any]:
     """Return the Rust-owned fixed-hours application contract shape."""
     return {
@@ -744,6 +828,7 @@ def payroll_api_contract() -> dict[str, Any]:
         "attendance_aggregation": payroll_attendance_aggregation_example(),
         "workplace_hours_application": payroll_workplace_hours_application_example(),
         "invoice_audit_row": payroll_invoice_audit_row_example(),
+        "invoice_audit_batch": payroll_invoice_audit_batch_example(),
         "fixed_hours_application": payroll_fixed_hours_application_example(),
         "policy_resolution": payroll_policy_resolution_example(),
         "execution_plan": payroll_execution_plan_example(),
@@ -930,6 +1015,7 @@ def payroll_api_contract() -> dict[str, Any]:
             "attendance_aggregation_entrypoint": "PayrollApiService::aggregate_attendance_records(records, workplace, attendance_policy)",
             "workplace_hours_application_entrypoint": "PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)",
             "invoice_audit_row_entrypoint": "PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)",
+            "invoice_audit_batch_entrypoint": "PayrollApiService::audit_invoice_batch(items, workplace)",
             "fixed_hours_application_entrypoint": "PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)",
             "never_include": ["exception"],
         },

@@ -171,6 +171,65 @@ pub struct InvoiceAuditRow {
     pub fixed_hours_source: String,
 }
 
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub struct InvoiceAuditBatchItem {
+    pub invoice: InvoiceAuditInvoice,
+    pub workplace: String,
+    pub policy: WorkplaceHoursPolicy,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub record: Option<InvoiceAuditRecord>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fixed_profile: Option<FixedHoursProfile>,
+}
+
+impl InvoiceAuditBatchItem {
+    pub fn new(invoice: InvoiceAuditInvoice) -> Self {
+        Self {
+            invoice,
+            workplace: String::new(),
+            policy: WorkplaceHoursPolicy::new(),
+            record: None,
+            fixed_profile: None,
+        }
+    }
+
+    pub fn with_workplace(mut self, workplace: impl Into<String>) -> Self {
+        self.workplace = clean(workplace);
+        self
+    }
+
+    pub fn with_policy(mut self, policy: WorkplaceHoursPolicy) -> Self {
+        self.policy = policy;
+        self
+    }
+
+    pub fn with_record(mut self, record: InvoiceAuditRecord) -> Self {
+        self.record = Some(record);
+        self
+    }
+
+    pub fn with_fixed_profile(mut self, fixed_profile: FixedHoursProfile) -> Self {
+        self.fixed_profile = Some(fixed_profile);
+        self
+    }
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
+pub struct InvoiceAuditSummary {
+    pub total: usize,
+    pub pass: usize,
+    pub warn: usize,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub struct InvoiceAuditBatchResult {
+    pub workplace: String,
+    pub summary: InvoiceAuditSummary,
+    pub rows: Vec<InvoiceAuditRow>,
+    pub pass_count: usize,
+    pub warn_count: usize,
+}
+
 pub fn estimate_break_hours(
     invoice: &InvoiceAuditInvoice,
     policy: &WorkplaceHoursPolicy,
@@ -204,6 +263,56 @@ pub fn estimate_break_hours(
         }
     }
     None
+}
+
+pub fn audit_invoice_batch<I, S>(items: I, workplace: S) -> InvoiceAuditBatchResult
+where
+    I: IntoIterator<Item = InvoiceAuditBatchItem>,
+    S: AsRef<str>,
+{
+    let workplace = clean_ref(workplace.as_ref());
+    let mut rows = Vec::new();
+    let mut pass_count = 0;
+    let mut warn_count = 0;
+
+    for item in items {
+        let InvoiceAuditBatchItem {
+            invoice,
+            workplace: item_workplace,
+            policy,
+            record,
+            fixed_profile,
+        } = item;
+        let row_workplace = if item_workplace.trim().is_empty() {
+            workplace.clone()
+        } else {
+            clean_ref(&item_workplace)
+        };
+        let row = audit_invoice_row(
+            invoice,
+            row_workplace,
+            &policy,
+            record.as_ref(),
+            fixed_profile.as_ref(),
+        );
+        match row.status {
+            InvoiceAuditStatus::Pass => pass_count += 1,
+            InvoiceAuditStatus::Warn => warn_count += 1,
+        }
+        rows.push(row);
+    }
+
+    InvoiceAuditBatchResult {
+        workplace,
+        summary: InvoiceAuditSummary {
+            total: rows.len(),
+            pass: pass_count,
+            warn: warn_count,
+        },
+        rows,
+        pass_count,
+        warn_count,
+    }
 }
 
 pub fn audit_invoice_row<S>(
@@ -481,8 +590,8 @@ fn clean_ref(value: &str) -> String {
 mod tests {
     use crate::fixed_hours::{FixedHoursPayType, FixedHoursProfile, FIXED_HOURS_SOURCE_CONTRACT};
     use crate::invoice_audit::{
-        audit_invoice_row, estimate_break_hours, InvoiceAuditInvoice, InvoiceAuditRecord,
-        InvoiceAuditStatus,
+        audit_invoice_batch, audit_invoice_row, estimate_break_hours, InvoiceAuditBatchItem,
+        InvoiceAuditInvoice, InvoiceAuditRecord, InvoiceAuditStatus,
     };
     use crate::service::{PayrollApiService, ServiceConfig};
     use crate::workplace_hours::{WorkplaceHoursMode, WorkplaceHoursPolicy};
@@ -623,5 +732,111 @@ mod tests {
 
         assert_eq!(row.status, InvoiceAuditStatus::Pass);
         assert_eq!(row.calc_base_salary, 2_090_000);
+    }
+
+    #[test]
+    fn audits_supplied_batch_and_preserves_summary_shape() {
+        let policy = WorkplaceHoursPolicy::new()
+            .with_mode(WorkplaceHoursMode::Fixed)
+            .with_hours(209.0);
+        let items = vec![
+            InvoiceAuditBatchItem::new(
+                InvoiceAuditInvoice::new("A")
+                    .with_base_days(209.0)
+                    .with_work_days(209.0)
+                    .with_base_hourly(10_000.0)
+                    .with_base_salary(2_090_000),
+            )
+            .with_workplace("앰코")
+            .with_policy(policy.clone()),
+            InvoiceAuditBatchItem::new(
+                InvoiceAuditInvoice::new("B")
+                    .with_base_days(209.0)
+                    .with_work_days(209.0)
+                    .with_base_hourly(10_000.0)
+                    .with_base_salary(1_000),
+            )
+            .with_workplace("앰코")
+            .with_policy(policy.clone()),
+            InvoiceAuditBatchItem::new(
+                InvoiceAuditInvoice::new("C")
+                    .with_base_days(209.0)
+                    .with_work_days(209.0)
+                    .with_base_salary(2_090_000),
+            )
+            .with_workplace("앰코")
+            .with_policy(policy)
+            .with_record(InvoiceAuditRecord::new("C").with_workplace("앰코")),
+        ];
+
+        let result = audit_invoice_batch(items, "앰코");
+
+        assert_eq!(result.workplace, "앰코");
+        assert_eq!(result.summary.total, 3);
+        assert_eq!(result.summary.pass, 2);
+        assert_eq!(result.summary.warn, 1);
+        assert_eq!(result.pass_count, 2);
+        assert_eq!(result.warn_count, 1);
+        assert_eq!(
+            result
+                .rows
+                .iter()
+                .map(|row| row.name.as_str())
+                .collect::<Vec<_>>(),
+            vec!["A", "B", "C"]
+        );
+        assert_eq!(result.rows[1].status, InvoiceAuditStatus::Warn);
+        assert_eq!(result.rows[2].status, InvoiceAuditStatus::Pass);
+        assert!(result.rows[2].flags[0].contains("명부 기본시급 없음"));
+    }
+
+    #[test]
+    fn serializes_batch_compatibility_shape() {
+        let policy = WorkplaceHoursPolicy::new()
+            .with_mode(WorkplaceHoursMode::Fixed)
+            .with_hours(209.0);
+        let items = vec![InvoiceAuditBatchItem::new(
+            InvoiceAuditInvoice::new("A")
+                .with_base_days(209.0)
+                .with_work_days(209.0)
+                .with_base_hourly(10_000.0)
+                .with_base_salary(2_090_000),
+        )
+        .with_workplace("앰코")
+        .with_policy(policy)];
+
+        let result = audit_invoice_batch(items, "앰코");
+        let value = serde_json::to_value(result).unwrap();
+
+        assert_eq!(value["workplace"], "앰코");
+        assert_eq!(value["summary"]["total"], json!(1));
+        assert_eq!(value["summary"]["pass"], json!(1));
+        assert_eq!(value["summary"]["warn"], json!(0));
+        assert_eq!(value["pass_count"], json!(1));
+        assert_eq!(value["warn_count"], json!(0));
+        assert_eq!(value["rows"][0]["name"], "A");
+    }
+
+    #[test]
+    fn service_delegates_invoice_batch_audit() {
+        let service = PayrollApiService::new(ServiceConfig::default());
+        let policy = WorkplaceHoursPolicy::new()
+            .with_mode(WorkplaceHoursMode::Fixed)
+            .with_hours(209.0);
+        let items = vec![InvoiceAuditBatchItem::new(
+            InvoiceAuditInvoice::new("홍길동")
+                .with_base_days(209.0)
+                .with_work_days(209.0)
+                .with_base_hourly(10_000.0)
+                .with_base_salary(2_090_000),
+        )
+        .with_policy(policy)];
+
+        let result = service.audit_invoice_batch(items, "앰코");
+
+        assert_eq!(result.summary.total, 1);
+        assert_eq!(result.summary.pass, 1);
+        assert_eq!(result.rows[0].workplace, "앰코");
+        assert_eq!(result.rows[0].calc_base_salary, 2_090_000);
     }
 }

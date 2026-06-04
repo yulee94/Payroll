@@ -227,6 +227,28 @@ export interface PayrollInvoiceAuditRow {
   fixed_hours_source: string;
 }
 
+export interface PayrollInvoiceAuditBatchItem {
+  invoice: PayrollInvoiceAuditInvoice;
+  workplace?: string;
+  policy: PayrollWorkplaceHoursPolicy;
+  record?: PayrollInvoiceAuditRecord;
+  fixed_profile?: PayrollFixedHoursProfile;
+}
+
+export interface PayrollInvoiceAuditSummary {
+  total: number;
+  pass: number;
+  warn: number;
+}
+
+export interface PayrollInvoiceAuditBatchResult {
+  workplace: string;
+  summary: PayrollInvoiceAuditSummary;
+  rows: PayrollInvoiceAuditRow[];
+  pass_count: number;
+  warn_count: number;
+}
+
 export type PayrollFixedHoursPayType = "hourly" | "monthly_salary";
 
 export interface PayrollFixedHoursProfile {

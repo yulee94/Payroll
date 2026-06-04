@@ -9,7 +9,8 @@ use crate::fixed_hours::{
     apply_fixed_hours_to_invoice, FixedHoursApplication, FixedHoursInvoice, FixedHoursProfile,
 };
 use crate::invoice_audit::{
-    audit_invoice_row, InvoiceAuditInvoice, InvoiceAuditRecord, InvoiceAuditRow,
+    audit_invoice_batch, audit_invoice_row, InvoiceAuditBatchItem, InvoiceAuditBatchResult,
+    InvoiceAuditInvoice, InvoiceAuditRecord, InvoiceAuditRow,
 };
 use crate::policy::{AttendancePolicy, OperationPolicySnapshot};
 use crate::policy_resolution::PayrollPolicySettings;
@@ -206,6 +207,14 @@ impl PayrollApiService {
         S: AsRef<str>,
     {
         audit_invoice_row(invoice, workplace, policy, record, fixed_profile)
+    }
+
+    pub fn audit_invoice_batch<I, S>(&self, items: I, workplace: S) -> InvoiceAuditBatchResult
+    where
+        I: IntoIterator<Item = InvoiceAuditBatchItem>,
+        S: AsRef<str>,
+    {
+        audit_invoice_batch(items, workplace)
     }
 
     pub fn run_response(

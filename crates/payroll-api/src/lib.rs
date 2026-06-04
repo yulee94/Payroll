@@ -28,8 +28,9 @@ pub use fixed_hours::{
     FIXED_HOURS_SOURCE_TEMPLATE, PAY_TYPE_HOURLY, PAY_TYPE_MONTHLY_SALARY,
 };
 pub use invoice_audit::{
-    audit_invoice_row, estimate_break_hours, InvoiceAuditInvoice, InvoiceAuditRecord,
-    InvoiceAuditRow, InvoiceAuditStatus,
+    audit_invoice_batch, audit_invoice_row, estimate_break_hours, InvoiceAuditBatchItem,
+    InvoiceAuditBatchResult, InvoiceAuditInvoice, InvoiceAuditRecord, InvoiceAuditRow,
+    InvoiceAuditStatus, InvoiceAuditSummary,
 };
 pub use policy::{
     AttendancePolicy, MissingClockPolicy, OperationPolicy, OperationPolicySnapshot,
