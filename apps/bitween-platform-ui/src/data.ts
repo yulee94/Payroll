@@ -1,6 +1,8 @@
 import type { NavigationItem, ReadinessCard, WorkQueueItem } from "./types";
 
-export const navigationItems: readonly NavigationItem[] = [
+type NonEmptyNavigation = readonly [NavigationItem, ...NavigationItem[]];
+
+export const navigationItems = [
   {
     id: "home",
     label: "플랫폼 홈",
@@ -57,7 +59,7 @@ export const navigationItems: readonly NavigationItem[] = [
     description: "개인 화면, 급여 운영 기준, 플랫폼 환경을 조정합니다.",
     accent: "#0F766E"
   }
-];
+] satisfies NonEmptyNavigation;
 
 export const readinessCards: readonly ReadinessCard[] = [
   {
