@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView, StyleSheet } from "react-native";
+import { SafeAreaView, StyleSheet, View } from "react-native";
 
 import { AppShell } from "./src/components";
 import { navigationItems } from "./src/data";
@@ -27,12 +27,12 @@ export default function App() {
     return (
       <SafeAreaView style={styles.root}>
         <StatusBar style="dark" />
-        <AppShell active={active} items={navigationItems} onSelect={select}>
+        <View style={styles.loginFrame}>
           <LoginScreen onSelect={(id) => {
             setAuthenticated(true);
             setActiveId(id);
           }} />
-        </AppShell>
+        </View>
       </SafeAreaView>
     );
   }
@@ -57,5 +57,10 @@ const styles = StyleSheet.create({
   root: {
     backgroundColor: colors.bg,
     flex: 1
+  },
+  loginFrame: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 24
   }
 });
