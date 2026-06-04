@@ -588,6 +588,31 @@ Verification evidence for this checkpoint:
 Slice spec: `docs/PAYROLL_RUST_EXECUTION_PLAN_SLICE.md`.
 
 
+## Current implementation checkpoint: Rust business-trip overdue permission core
+
+Implemented on 2026-06-04 as a follow-up workflow authorization slice:
+
+- `crates/workflow-core::business_trip_permissions` now owns pure tenant-wide
+  administer, overdue-evaluator invocation, and scoped overdue-evaluation
+  predicates for supplied principal/profile/trip DTOs.
+- Rust preserves Python compatibility for admin/executive/finance tenant-wide
+  administration, manager/HR evaluator invocation authority, legal-scope gating,
+  site/department scoped overdue evaluation, and the rule that direct
+  requester/executor ownership or viewer/approver grants do not imply overdue
+  side-effect authority.
+- Python still owns `UserSession` conversion, `get_user_profile`, workflow JSON
+  persistence, overdue escalation side effects, document/task/report/KPI writes,
+  notifications, calendar/To-Do links, and UI bridge behavior.
+- Workflow contract metadata now names the Rust overdue/admin entrypoints plus
+  administer and overdue invariants.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-workflow-core business_trip_permissions --lib`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_business_trip_contracts.BusinessTripLifecycleContractTests.test_contract_declares_rust_business_trip_overdue_permissions -v`
+
+Slice spec: `docs/WORKFLOW_RUST_BUSINESS_TRIP_OVERDUE_PERMISSIONS_SLICE.md`.
+
 ## Current implementation checkpoint: Rust business-trip permission core
 
 Implemented on 2026-06-04 as the next workflow-domain Rust slice:

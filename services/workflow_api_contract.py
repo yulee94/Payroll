@@ -95,6 +95,9 @@ def workflow_business_trip_permissions_example() -> dict[str, Any]:
             "is_business_trip_legal_scope_allowed",
             "can_view_business_trip_lifecycle",
             "can_manage_business_trip_lifecycle",
+            "can_evaluate_business_trip_overdue",
+            "can_run_business_trip_overdue_evaluator",
+            "can_administer_business_trip_lifecycle",
         ],
         "python_compatibility_source": "core.workflow.permissions",
         "python_boundary": (
@@ -148,6 +151,19 @@ def workflow_business_trip_permissions_example() -> dict[str, Any]:
             "Admin/executive/finance can manage within legal scope",
             "Requester or executor can manage within legal scope",
             "Manager, site, department, viewer, and approver grants do not imply manage authority",
+        ],
+        "administer_invariants": [
+            "Tenant-wide administration is limited to admin/executive/finance",
+            "Site, department, HR, requester, executor, approver, and viewer roles are not tenant-wide administrators",
+        ],
+        "overdue_invariants": [
+            "Overdue evaluator invocation is limited to admin/executive/finance/site_manager/department_manager/hr",
+            "Overdue evaluation applies legal-scope isolation",
+            "Admin/executive/finance can evaluate any legally scoped trip",
+            "Site manager/HR evaluation is site scoped",
+            "Department manager/site manager/HR evaluation is department scoped",
+            "Requester/executor ownership does not imply overdue evaluation authority",
+            "Viewer and explicit approver grants do not imply overdue evaluation authority",
         ],
     }
 
