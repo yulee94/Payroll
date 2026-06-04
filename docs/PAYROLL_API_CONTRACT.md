@@ -13,8 +13,11 @@ Planned HTTP endpoint:
 Rust transition entry point:
 
 - Rust crate: `crates/payroll-api`
+- Service facade: `bitween_payroll_api::PayrollApiService`
 - Validation function: `bitween_payroll_api::validate_payroll_api_payload(payload, policy_snapshot)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, and stable response shaping into Rust.
+- Health function: `PayrollApiService::health()`
+- Readiness function: `PayrollApiService::readiness(checks)`
+- Purpose: move payroll request validation, scope parsing, input-method resolution, stable response shaping, and probe-safe service boundary responses into Rust.
 
 Compatibility adapter:
 
@@ -31,10 +34,15 @@ Validation endpoint:
 - `POST /api/payroll/v1/runs/validate`
 - Alternative compatibility behavior: `run_payroll_api(payload)` with `validate_only: true` or `dry_run: true` returns validation only.
 
+Health endpoint:
+
+- `GET /api/payroll/v1/healthz`
+- Purpose: cheap liveness-style service response for routers, probes, and diagnostics.
+
 Readiness endpoint:
 
 - `GET /api/payroll/v1/readiness`
-- Purpose: expose roster, policy, source-data, and API-contract readiness cards to frontend dashboards.
+- Purpose: expose Rust service readiness checks for policy, persistence, compatibility fallback, and future tenant dependencies.
 
 ## Kubernetes production behavior
 
@@ -203,6 +211,55 @@ Fields:
 }
 ```
 
+## Health Response
+
+The Rust service facade owns this probe-safe shape before an HTTP framework is selected.
+
+```json
+{
+  "ok": true,
+  "status": "ok",
+  "service": "bitween-payroll-api",
+  "version": "v1",
+  "environment": "production",
+  "build_sha": "",
+  "uptime_seconds": 0
+}
+```
+
+## Readiness Response
+
+Readiness aggregates named checks. Any required `not_ready` check makes the whole response `not_ready`; optional degraded checks document partial rollout state without marking the service ready for production traffic.
+
+```json
+{
+  "ready": false,
+  "state": "not_ready",
+  "service": "bitween-payroll-api",
+  "version": "v1",
+  "checks": [
+    {
+      "name": "policy",
+      "state": "ready",
+      "required": true,
+      "message": "Rust policy invariants loaded"
+    },
+    {
+      "name": "python_execution",
+      "state": "degraded",
+      "required": false,
+      "message": "Compatibility fallback still active"
+    },
+    {
+      "name": "database",
+      "state": "not_ready",
+      "required": true,
+      "message": "Rust persistence is not configured"
+    }
+  ]
+}
+```
+
 ## Error Response
 
 Validation errors return stable JSON and never expose internal exception objects.
@@ -251,3 +308,4 @@ Frontend code must use `error_code`, not parse `error` text.
 - Explicit `invoice`, `attendance`, and `mixed` requests preserve caller selection.
 - Responses include `operation_policy` and `operation_policy_source` so operators can audit which policy was applied.
 - Rust normalizes `operation_policy` known fields before serializing responses: invalid input basis falls back to `hybrid`; attendance minute fields are clamped to Python-compatible ranges; missing-clock policy falls back to `warn`.
+- `PayrollApiService` now owns framework-neutral health/readiness DTOs; future Axum/Actix/Tauri/Kubernetes wrappers should call those Rust functions rather than inventing parallel probe payloads.

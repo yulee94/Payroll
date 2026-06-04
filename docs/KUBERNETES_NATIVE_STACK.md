@@ -54,6 +54,7 @@ Planned service routes:
 | --- | --- | --- |
 | `/api/payroll/v1/runs` | Rust payroll API | Run or validate payroll automation requests. |
 | `/api/payroll/v1/runs/validate` | Rust payroll API | Validate without generating payroll outputs. |
+| `/api/payroll/v1/healthz` | Rust payroll API | Probe-safe health payload from `PayrollApiService::health()`. |
 | `/api/payroll/v1/readiness` | Rust payroll/readiness API | Tenant/site readiness cards for frontend dashboards. |
 | `/api/workflow/v1/*` | Rust workflow API | Documents, inbox, forms, execution tasks, trip lifecycle. |
 | `/api/kpi/v1/*` | Rust KPI API | Individual and manager performance records. |

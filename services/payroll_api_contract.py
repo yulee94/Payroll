@@ -16,6 +16,8 @@ from services.payroll_scope import PayrollScope
 PAYROLL_API_VERSION = "v1"
 PAYROLL_API_ENDPOINT = "/api/payroll/v1/runs"
 PAYROLL_API_VALIDATE_ENDPOINT = "/api/payroll/v1/runs/validate"
+PAYROLL_API_HEALTH_ENDPOINT = "/api/payroll/v1/healthz"
+PAYROLL_API_READINESS_ENDPOINT = "/api/payroll/v1/readiness"
 PAYROLL_API_ENTRYPOINT = "services.payroll_api_adapter.run_payroll_api(payload)"
 PAYROLL_API_VALIDATE_ENTRYPOINT = "services.payroll_api_adapter.validate_payroll_api_payload(payload)"
 PAYROLL_API_INPUT_TYPES: tuple[str, ...] = ("auto", "invoice", "attendance", "mixed")
@@ -147,6 +149,49 @@ def payroll_api_validation_example() -> dict[str, Any]:
     }
 
 
+def payroll_api_health_example() -> dict[str, Any]:
+    """Return the Rust service health response shape."""
+    return {
+        "ok": True,
+        "status": "ok",
+        "service": "bitween-payroll-api",
+        "version": PAYROLL_API_VERSION,
+        "environment": "production",
+        "build_sha": "",
+        "uptime_seconds": 0,
+    }
+
+
+def payroll_api_readiness_example() -> dict[str, Any]:
+    """Return the Rust service readiness response shape."""
+    return {
+        "ready": False,
+        "state": "not_ready",
+        "service": "bitween-payroll-api",
+        "version": PAYROLL_API_VERSION,
+        "checks": [
+            {
+                "name": "policy",
+                "state": "ready",
+                "required": True,
+                "message": "Rust policy invariants loaded",
+            },
+            {
+                "name": "python_execution",
+                "state": "degraded",
+                "required": False,
+                "message": "Compatibility fallback still active",
+            },
+            {
+                "name": "database",
+                "state": "not_ready",
+                "required": True,
+                "message": "Rust persistence is not configured",
+            },
+        ],
+    }
+
+
 def payroll_api_contract() -> dict[str, Any]:
     """Return the versioned contract used by docs and tests."""
     return {
@@ -160,6 +205,8 @@ def payroll_api_contract() -> dict[str, Any]:
             "implemented": False,
             "notes": "HTTP wrapper is planned; the framework-neutral service entrypoint is implemented now.",
             "validation_path": PAYROLL_API_VALIDATE_ENDPOINT,
+            "health_path": PAYROLL_API_HEALTH_ENDPOINT,
+            "readiness_path": PAYROLL_API_READINESS_ENDPOINT,
         },
         "input_types": list(PAYROLL_API_INPUT_TYPES),
         "request": {
@@ -248,6 +295,8 @@ def payroll_api_contract() -> dict[str, Any]:
             "success": payroll_api_success_example(),
             "validation": payroll_api_validation_example(),
             "error": payroll_api_error_example(),
+            "health": payroll_api_health_example(),
+            "readiness": payroll_api_readiness_example(),
             "error_codes": {
                 "invalid_payload": "Request body is not a JSON object/dict.",
                 "invalid_scope": "Scope is not one of the accepted forms.",

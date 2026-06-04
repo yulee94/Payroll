@@ -53,6 +53,31 @@ Verification evidence for this checkpoint:
 
 Slice spec: `docs/PAYROLL_OPERATION_POLICY_RUST_SLICE.md`.
 
+## Current implementation checkpoint: Rust service boundary and probes
+
+Implemented on 2026-06-04 as the first framework-neutral service-boundary
+slice:
+
+- `crates/payroll-api` now exposes `PayrollApiService`.
+- `PayrollApiService::validate_run_payload` delegates request validation,
+  input-method resolution, policy normalization, and response shaping to Rust.
+- `PayrollApiService::health()` returns a stable probe-safe health payload with
+  service name, version, environment, build SHA, and uptime.
+- `PayrollApiService::readiness(checks)` aggregates named readiness checks into
+  `ready`, `degraded`, or `not_ready` states without exposing secrets or payroll
+  runtime data.
+- TypeScript and Python contract metadata now include `/healthz` and
+  `/readiness` DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-payroll-api`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- Python contract test for `tests.test_payroll_api_contract`
+- `npm run typecheck --prefix frontend`
+
+Slice spec: `docs/PAYROLL_RUST_SERVICE_BOUNDARY_SLICE.md`.
+
 ## Required execution disciplines
 
 - **Incremental implementation:** migrate thin vertical slices behind stable contracts; no big-bang rewrite.
