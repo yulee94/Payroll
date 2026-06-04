@@ -40,6 +40,7 @@ Official references checked for this implementation:
 
 ## Tool versions
 
+- Rust baseline: edition `2024`, `rust-version = "1.96"`, and `rust-toolchain.toml` channel `1.96.0`.
 - Local Buck2 verified version: `buck2 2b6f2339eb903743a21606ddb93ea669`.
 - CI installs Reindeer from `facebookincubator/reindeer` at revision `d1638c7675fe31013f101f39cd18248f40b5ce6c` to keep generated Buck output deterministic.
 

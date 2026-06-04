@@ -1,4 +1,4 @@
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::{error::Error, fmt};
 
 #[derive(Clone, Debug, Eq, PartialEq)]

@@ -98,10 +98,10 @@ pub fn resolve_operation_policy(
 ) -> ResolvedOperationPolicy {
     let workplace = canonical_workplace(&clean(workplace), &settings.workplace_aliases);
 
-    if !workplace.is_empty() {
-        if let Some(policy) = settings.site_policies.get(&workplace) {
-            return resolved(workplace, policy.clone(), OperationPolicySource::Site, true);
-        }
+    if !workplace.is_empty()
+        && let Some(policy) = settings.site_policies.get(&workplace)
+    {
+        return resolved(workplace, policy.clone(), OperationPolicySource::Site, true);
     }
 
     if let Some(policy) = settings.tenant_policy.clone() {

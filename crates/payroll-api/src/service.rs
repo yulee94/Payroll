@@ -1,39 +1,42 @@
 use crate::access::{
-    authorize_payroll_request, PayrollAccessDecision, PayrollAction, PayrollPrincipal,
+    PayrollAccessDecision, PayrollAction, PayrollPrincipal, authorize_payroll_request,
 };
 use crate::attendance::{
-    aggregate_attendance_records, AttendanceInvoiceRow, AttendanceSourceRecord,
+    AttendanceInvoiceRow, AttendanceSourceRecord, aggregate_attendance_records,
+};
+use crate::deductions::{
+    PayrollDeductionInput, PayrollDeductionResult, finalize_payroll_deductions,
 };
 use crate::edi_insurance::{
-    apply_edi_premiums_to_invoice, EdiInsuranceApplication, EdiInsuranceConfig,
-    EdiInsuranceInvoice, EdiInsurancePremiumRecord,
+    EdiInsuranceApplication, EdiInsuranceConfig, EdiInsuranceInvoice, EdiInsurancePremiumRecord,
+    apply_edi_premiums_to_invoice,
 };
 use crate::employment_insurance_65::{
-    resolve_ei_65_for_payroll, Ei65PayrollInput, Ei65PayrollResult,
+    Ei65PayrollInput, Ei65PayrollResult, resolve_ei_65_for_payroll,
 };
-use crate::execution_plan::{plan_payroll_execution, PayrollExecutionPlan};
+use crate::execution_plan::{PayrollExecutionPlan, plan_payroll_execution};
 use crate::fixed_hours::{
-    apply_fixed_hours_to_invoice, FixedHoursApplication, FixedHoursInvoice, FixedHoursProfile,
+    FixedHoursApplication, FixedHoursInvoice, FixedHoursProfile, apply_fixed_hours_to_invoice,
 };
 use crate::invoice_audit::{
-    audit_invoice_batch, audit_invoice_row, InvoiceAuditBatchItem, InvoiceAuditBatchResult,
-    InvoiceAuditInvoice, InvoiceAuditRecord, InvoiceAuditRow,
+    InvoiceAuditBatchItem, InvoiceAuditBatchResult, InvoiceAuditInvoice, InvoiceAuditRecord,
+    InvoiceAuditRow, audit_invoice_batch, audit_invoice_row,
 };
 use crate::policy::{AttendancePolicy, OperationPolicySnapshot};
 use crate::policy_resolution::PayrollPolicySettings;
 use crate::request::PayrollRunRequest;
 use crate::response::{
-    validate_payroll_api_payload, validate_payroll_api_payload_with_policy_settings,
-    PayrollApiResponse,
+    PayrollApiResponse, validate_payroll_api_payload,
+    validate_payroll_api_payload_with_policy_settings,
 };
-use crate::run::{run_response_from_result, PayrollRunResponse, PayrollRunResult};
+use crate::run::{PayrollRunResponse, PayrollRunResult, run_response_from_result};
 use crate::site_benefits::{
-    apply_site_benefits_to_invoice, SiteBenefitsApplication, SiteBenefitsConfig,
-    SiteBenefitsInvoice,
+    SiteBenefitsApplication, SiteBenefitsConfig, SiteBenefitsInvoice,
+    apply_site_benefits_to_invoice,
 };
 use crate::workplace_hours::{
-    apply_monthly_hours_to_invoice, resolve_monthly_work_hours, WorkplaceHoursInvoice,
-    WorkplaceHoursPolicy, WorkplaceMonthlyHoursApplication, WorkplaceMonthlyHoursResolution,
+    WorkplaceHoursInvoice, WorkplaceHoursPolicy, WorkplaceMonthlyHoursApplication,
+    WorkplaceMonthlyHoursResolution, apply_monthly_hours_to_invoice, resolve_monthly_work_hours,
 };
 use serde::Serialize;
 use serde_json::Value;
@@ -232,6 +235,13 @@ impl PayrollApiService {
         resolve_ei_65_for_payroll(input)
     }
 
+    pub fn finalize_payroll_deductions(
+        &self,
+        input: PayrollDeductionInput,
+    ) -> PayrollDeductionResult {
+        finalize_payroll_deductions(input)
+    }
+
     pub fn apply_edi_premiums_to_invoice<S>(
         &self,
         invoice: EdiInsuranceInvoice,
@@ -366,6 +376,7 @@ fn readiness_state(checks: &[ReadinessCheck]) -> ReadinessState {
 #[cfg(test)]
 mod tests {
     use crate::access::{PayrollAction, PayrollPosition, PayrollPrincipal, PayrollRole};
+    use crate::deductions::PayrollDeductionInput;
     use crate::edi_insurance::{
         EdiInsuranceConfig, EdiInsuranceInvoice, EdiInsurancePremiumRecord,
     };
@@ -428,6 +439,18 @@ mod tests {
         assert_eq!(value["ok"], true);
         assert_eq!(value["action"], "run");
         assert_eq!(value["scope"], "COSS/Site A/2026-05");
+    }
+
+    #[test]
+    fn service_finalizes_payroll_deductions() {
+        let service = PayrollApiService::new(ServiceConfig::default());
+        let result = service.finalize_payroll_deductions(
+            PayrollDeductionInput::new(3_000_000, 300_000)
+                .with_identity_guarantee_insurance_deduction(-20_000),
+        );
+
+        assert_eq!(result.total_deduction, 551_000);
+        assert_eq!(result.net_pay, 2_449_000);
     }
 
     #[test]
@@ -507,9 +530,11 @@ mod tests {
         assert_eq!(value["checks"][1]["required"], false);
         assert_eq!(value["checks"][2]["state"], "not_ready");
         assert_eq!(value["checks"][2]["required"], true);
-        assert!(value
-            .to_string()
-            .contains("Rust persistence is not configured"));
+        assert!(
+            value
+                .to_string()
+                .contains("Rust persistence is not configured")
+        );
         assert!(!value.to_string().to_ascii_lowercase().contains("secret"));
     }
 }

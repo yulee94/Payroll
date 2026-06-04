@@ -20,6 +20,7 @@ Rust transition entry point:
 - Workplace monthly-hours application function: `PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)`
 - Invoice audit row function: `PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)`
 - Invoice audit batch function: `PayrollApiService::audit_invoice_batch(items, workplace)`
+- Deduction finalization function: `PayrollApiService::finalize_payroll_deductions(input)`
 - Employment-insurance 65+ decision function: `PayrollApiService::resolve_ei_65_for_payroll(input)`
 - EDI insurance premium application function: `PayrollApiService::apply_edi_premiums_to_invoice(invoice, edi_record, edi_config, payroll_period)`
 - Site-benefits application function: `PayrollApiService::apply_site_benefits_to_invoice(invoice, site_benefits_config, payroll_period)`
@@ -29,7 +30,7 @@ Rust transition entry point:
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, employment-insurance 65+ payroll decisions, EDI insurance premium payroll row application, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, final deduction/net-pay calculation, employment-insurance 65+ payroll decisions, EDI insurance premium payroll row application, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -265,6 +266,55 @@ Example batch result shape:
 }
 ```
 
+
+
+## Payroll Deduction Finalization
+
+Python compatibility code may still parse workbooks, match employee rosters,
+resolve social insurance, apply EDI/site/fixed-hour rules, and assemble final
+payroll records. Once callers supply gross pay, insurance total, optional preset
+income/local taxes, and any identity-guarantee insurance deduction, Rust owns the
+pure final deduction and net-pay calculation through
+`finalize_payroll_deductions(input)` and
+`PayrollApiService::finalize_payroll_deductions(input)`.
+
+Deduction invariants:
+
+1. `taxable_pay` is `gross_pay - insurance_total` exactly as supplied.
+2. Positive `preset_income_tax` overrides the simplified tax table.
+3. Positive `preset_local_income_tax` overrides automatic local tax only when
+   preset income tax is used.
+4. Automatic local tax for preset income tax is rounded to the nearest 10 won,
+   matching `payroll_builder`.
+5. Simplified-table local tax is rounded to the nearest won, matching
+   `tax.calculate_tax`.
+6. `identity_guarantee_insurance_deduction` contributes to `total_deduction` by
+   absolute value.
+7. `net_pay` is `gross_pay - total_deduction` with Python-compatible won
+   rounding.
+
+Simplified income-tax brackets preserve the Python compatibility table for one
+monthly dependent: `0`, `8_000`, `42_000`, `120_000`, `210_000`, `310_000`,
+`420_000`, `650_000`, `920_000`, `1_450_000`, and `2_100_000` at the documented
+upper bounds through `10_000_000`; amounts above that use
+`max(0, taxable_pay - 1_500_000) * 0.03` rounded to won.
+
+Example finalization output:
+
+```json
+{
+  "gross_pay": 3000000,
+  "insurance_total": 300000,
+  "taxable_pay": 2700000,
+  "income_tax": 210000,
+  "local_income_tax": 21000,
+  "tax_total": 231000,
+  "identity_guarantee_insurance_deduction": -20000,
+  "total_deduction": 551000,
+  "net_pay": 2449000,
+  "method": "simplified_table"
+}
+```
 
 ## Employment-Insurance 65+ Payroll Decision
 
@@ -993,6 +1043,7 @@ Frontend code must use `error_code`, not parse `error` text.
 - Rust owns supplied-policy workplace monthly-hours application through `PayrollApiService::apply_monthly_hours_to_invoice`; Python settings persistence and canonical workplace alias resolution remain compatibility-only until repository/storage migration lands.
 - Rust owns supplied-input invoice audit row evaluation through `PayrollApiService::audit_invoice_row`; Python settings lookup, ledger matching, fixed-profile resolution, and workbook I/O remain compatibility-only boundaries.
 - Rust owns supplied-input invoice audit batch summarization through `PayrollApiService::audit_invoice_batch`; Python still supplies resolved row inputs and keeps UI text rendering compatibility.
+- Rust owns supplied-input final deduction/net-pay calculation through `PayrollApiService::finalize_payroll_deductions`; Python still parses workbooks, matches rosters, resolves social insurance, and assembles final records.
 - Rust owns supplied-input employment-insurance 65+ payroll decisions through `PayrollApiService::resolve_ei_65_for_payroll`; Python still imports/persists KCOMWEL records, resolves settings/site management numbers, calls future live APIs, coordinates supplied EDI premium inputs, and mutates payroll rows.
 - Rust owns supplied-record EDI insurance premium application through `PayrollApiService::apply_edi_premiums_to_invoice`; Python still imports/stores EDI files, resolves settings/site management numbers, matches employees, and handles workbook I/O.
 - Rust owns supplied-config site-benefits row application through `PayrollApiService::apply_site_benefits_to_invoice`; Python still resolves settings, checks/persists identity-insurance ledgers, and recalculates payroll totals.

@@ -288,7 +288,7 @@ fn clean(value: impl Into<String>) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::attendance::{aggregate_attendance_records, AttendanceSourceRecord};
+    use crate::attendance::{AttendanceSourceRecord, aggregate_attendance_records};
     use crate::policy::AttendancePolicy;
     use crate::service::{PayrollApiService, ServiceConfig};
 
