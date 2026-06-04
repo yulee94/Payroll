@@ -154,6 +154,13 @@ const aiDraftCards = [
   ["초안", "결재 의견 문장", "급여 지급 품의에 붙일 검토 의견 초안을 사람이 확인하기 전 상태로 표시합니다.", "neutral"]
 ];
 
+const settingsPreferenceGroups = [
+  ["화면 밀도", "업무형", "카드와 테이블을 한 화면에서 더 많이 스캔하도록 유지합니다.", "ready", "home"],
+  ["알림", "4개 켜짐", "급여, 결재, 자료함, 출장 업무 알림을 업무별로 관리합니다.", "neutral", "workflow"],
+  ["보안 세션", "관리 필요", "민감 문서 접근과 세션 만료 안내를 관리자 권한과 함께 확인합니다.", "attention", "admin"],
+  ["급여 기준", "확인 필요", "지급일, 반올림, 사업장별 입력 기준을 산출 전 다시 봅니다.", "attention", "payroll"]
+];
+
 const payrollSettingsRows = [
   ["설정 대상", "법인 기본", "급여 담당", "사업장별 예외 여부 확인", "neutral"],
   ["휴업수당 지급률", "법정 기준 확인", "급여 담당", "최저 기준 이상 입력값 검토", "attention"],
@@ -551,6 +558,7 @@ function renderModule(id) {
     ${id === "archive" ? archiveLibraryPanel() : ""}
     ${id === "ai" ? aiWorkspacePanel() : ""}
     ${id === "settings" ? i18nSettingsPanel() : ""}
+    ${id === "settings" ? settingsControlPanel() : ""}
     <section class="card">
       ${sectionHead("", "업무 목록", "필터로 상태를 좁히고 필요한 다음 작업을 확인합니다.", button(secondaryLabel(id), secondaryTarget(id), "secondary"))}
       <div class="list-toolbar">
@@ -580,6 +588,19 @@ function i18nSettingsPanel() {
         <strong>${label}</strong><span class="helper">${state.selectedLanguage === code ? "선택됨" : status}</span>
       </button>
     `).join("")}</div>
+  </section>`;
+}
+
+function settingsControlPanel() {
+  return `<section class="card">
+    ${sectionHead("", "업무 환경 설정", "화면 밀도, 업무 알림, 보안 세션, 급여 기준 확인을 사용자 화면 안에서 빠르게 점검합니다.", button("권한 설정 확인", "admin", "secondary"))}
+    <div class="settings-grid">${settingsPreferenceGroups.map(([label, value, detail, tone, target]) => `
+      <button class="settings-card" data-target="${target}" style="border-top-color:${toneColor(tone)}">
+        <div class="settings-card-head"><span class="helper">${label}</span>${badge(value, tone)}</div>
+        <span>${detail}</span>
+      </button>
+    `).join("")}</div>
+    <div class="notice">${badge("Frontend 설정", "neutral")}<span class="helper">이 화면은 실제 저장 없이 표시 상태만 구성합니다. 운영 설정 저장은 backend/API 계약 후 연결합니다.</span></div>
   </section>`;
 }
 
