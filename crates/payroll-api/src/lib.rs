@@ -14,6 +14,7 @@ pub mod response;
 pub mod run;
 pub mod service;
 pub mod site_benefits;
+pub mod social_insurance;
 pub mod workplace_hours;
 
 pub use access::{
@@ -72,6 +73,11 @@ pub use service::{
 pub use site_benefits::{
     IdentityInsuranceConfig, SiteBenefitsApplication, SiteBenefitsConfig, SiteBenefitsInvoice,
     WorkersDayConfig, apply_site_benefits_to_invoice,
+};
+pub use social_insurance::{
+    EMPLOYMENT_INSURANCE_WORKER_RATE, HEALTH_INSURANCE_RATE, LONG_TERM_CARE_RATIO,
+    NATIONAL_PENSION_RATE, PENSION_CEILING, PENSION_FLOOR, SocialInsuranceInput,
+    SocialInsuranceResult, calculate_employment_insurance, calculate_social_insurance,
 };
 pub use workplace_hours::{
     MODE_BASE_OR_FIXED, MODE_FIXED, MODE_INVOICE_BASE, MODE_INVOICE_WORK, MODE_WORK_OR_FIXED,

@@ -141,6 +141,27 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertIn("audit_invoice_batch", response["invoice_audit_batch_entrypoint"])
 
 
+    def test_contract_declares_rust_social_insurance_calculation(self) -> None:
+        contract = payroll_api_contract()
+        social = contract["social_insurance_calculation"]
+        response = contract["response"]
+
+        self.assertIn("calculate_social_insurance", social["rust_entrypoint"])
+        self.assertIn("insurance.calculate_insurance", social["python_compatibility_source"])
+        self.assertEqual(social["rates"]["national_pension"], 0.045)
+        self.assertEqual(social["rates"]["health_insurance"], 0.03545)
+        self.assertEqual(social["rates"]["long_term_care_ratio"], 0.1295)
+        self.assertEqual(social["rates"]["employment_insurance_worker"], 0.009)
+        self.assertEqual(social["example_result"]["national_pension"], 135_000)
+        self.assertEqual(social["example_result"]["health_insurance"], 106_350)
+        self.assertEqual(social["example_result"]["long_term_care"], 13_772)
+        self.assertEqual(social["example_result"]["employment_insurance"], 27_000)
+        self.assertEqual(social["example_result"]["total"], 282_122)
+        self.assertIn(
+            "calculate_social_insurance",
+            response["social_insurance_calculation_entrypoint"],
+        )
+
     def test_contract_declares_rust_deduction_finalization(self) -> None:
         contract = payroll_api_contract()
         deductions = contract["deduction_finalization"]

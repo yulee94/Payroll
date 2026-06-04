@@ -20,6 +20,7 @@ Rust transition entry point:
 - Workplace monthly-hours application function: `PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)`
 - Invoice audit row function: `PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)`
 - Invoice audit batch function: `PayrollApiService::audit_invoice_batch(items, workplace)`
+- Social-insurance calculation function: `PayrollApiService::calculate_social_insurance(input)`
 - Deduction finalization function: `PayrollApiService::finalize_payroll_deductions(input)`
 - Employment-insurance 65+ decision function: `PayrollApiService::resolve_ei_65_for_payroll(input)`
 - EDI insurance premium application function: `PayrollApiService::apply_edi_premiums_to_invoice(invoice, edi_record, edi_config, payroll_period)`
@@ -30,7 +31,7 @@ Rust transition entry point:
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, final deduction/net-pay calculation, employment-insurance 65+ payroll decisions, EDI insurance premium payroll row application, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, social-insurance calculation, final deduction/net-pay calculation, employment-insurance 65+ payroll decisions, EDI insurance premium payroll row application, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -267,6 +268,46 @@ Example batch result shape:
 ```
 
 
+
+
+## Payroll Social-Insurance Calculation
+
+Python compatibility code may still parse employee identity numbers, determine
+age/KCOMWEL eligibility, read roster/master workbooks, apply EDI premium
+overrides, and mutate workbook/payroll rows. Once callers supply taxable pay,
+optional preset pension/health values, and an already-resolved
+`insurance_exempt` flag, Rust owns the pure social-insurance calculation through
+`calculate_social_insurance(input)` and
+`PayrollApiService::calculate_social_insurance(input)`.
+
+Social-insurance invariants:
+
+1. `taxable_pay` is supplied after non-taxable pay has already been removed by
+   compatibility code.
+2. `insurance_exempt: true` zeroes pension, health, long-term-care, employment,
+   and total worker contributions.
+3. Positive `preset_national_pension` overrides pension-rate calculation after
+   Python-compatible won rounding.
+4. Positive `preset_health_insurance` overrides health-rate calculation; long-
+   term care is recalculated from the rounded health amount.
+5. Pension-rate calculation clamps taxable pay to `390_000..6_170_000` before
+   applying `0.045`.
+6. Health insurance applies `0.03545`, long-term care applies `0.1295` to the
+   rounded health amount, and employment insurance applies `0.009` rounded to the
+   nearest 10 won.
+
+Example social-insurance output:
+
+```json
+{
+  "national_pension": 135000,
+  "health_insurance": 106350,
+  "long_term_care": 13772,
+  "employment_insurance": 27000,
+  "total": 282122,
+  "insurance_exempt": false
+}
+```
 
 ## Payroll Deduction Finalization
 
@@ -1043,6 +1084,7 @@ Frontend code must use `error_code`, not parse `error` text.
 - Rust owns supplied-policy workplace monthly-hours application through `PayrollApiService::apply_monthly_hours_to_invoice`; Python settings persistence and canonical workplace alias resolution remain compatibility-only until repository/storage migration lands.
 - Rust owns supplied-input invoice audit row evaluation through `PayrollApiService::audit_invoice_row`; Python settings lookup, ledger matching, fixed-profile resolution, and workbook I/O remain compatibility-only boundaries.
 - Rust owns supplied-input invoice audit batch summarization through `PayrollApiService::audit_invoice_batch`; Python still supplies resolved row inputs and keeps UI text rendering compatibility.
+- Rust owns supplied-input social-insurance calculation through `PayrollApiService::calculate_social_insurance`; Python still parses identities, determines age/KCOMWEL eligibility, reads roster/master workbooks, applies EDI premium overrides, and mutates payroll rows.
 - Rust owns supplied-input final deduction/net-pay calculation through `PayrollApiService::finalize_payroll_deductions`; Python still parses workbooks, matches rosters, resolves social insurance, and assembles final records.
 - Rust owns supplied-input employment-insurance 65+ payroll decisions through `PayrollApiService::resolve_ei_65_for_payroll`; Python still imports/persists KCOMWEL records, resolves settings/site management numbers, calls future live APIs, coordinates supplied EDI premium inputs, and mutates payroll rows.
 - Rust owns supplied-record EDI insurance premium application through `PayrollApiService::apply_edi_premiums_to_invoice`; Python still imports/stores EDI files, resolves settings/site management numbers, matches employees, and handles workbook I/O.

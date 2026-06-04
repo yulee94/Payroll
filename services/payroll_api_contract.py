@@ -537,6 +537,75 @@ def payroll_invoice_audit_batch_example() -> dict[str, Any]:
 
 
 
+def payroll_social_insurance_calculation_example() -> dict[str, Any]:
+    """Return the Rust-owned supplied-input social-insurance calculation shape."""
+    return {
+        "rust_entrypoint": "PayrollApiService::calculate_social_insurance(input)",
+        "calculator_entrypoint": "calculate_social_insurance(input)",
+        "employment_entrypoint": "calculate_employment_insurance(taxable_total)",
+        "python_compatibility_source": "insurance.calculate_insurance + utils.calc_employment_insurance",
+        "resolver_boundary": (
+            "Python compatibility code may still parse employee identities, determine age/KCOMWEL "
+            "eligibility, read roster/master workbooks, apply EDI premium overrides, and mutate "
+            "workbook/payroll rows before or after supplying pure insurance inputs to Rust."
+        ),
+        "rates": {
+            "national_pension": 0.045,
+            "health_insurance": 0.03545,
+            "long_term_care_ratio": 0.1295,
+            "employment_insurance_worker": 0.009,
+        },
+        "pension_limits": {"floor": 390_000, "ceiling": 6_170_000},
+        "input_fields": [
+            "taxable_pay",
+            "preset_national_pension",
+            "preset_health_insurance",
+            "insurance_exempt",
+        ],
+        "result_fields": [
+            "national_pension",
+            "health_insurance",
+            "long_term_care",
+            "employment_insurance",
+            "total",
+            "insurance_exempt",
+        ],
+        "example_input": {"taxable_pay": 3_000_000, "insurance_exempt": False},
+        "example_result": {
+            "national_pension": 135_000,
+            "health_insurance": 106_350,
+            "long_term_care": 13_772,
+            "employment_insurance": 27_000,
+            "total": 282_122,
+            "insurance_exempt": False,
+        },
+        "example_preset_result": {
+            "national_pension": 123_456,
+            "health_insurance": 76_544,
+            "long_term_care": 9_912,
+            "employment_insurance": 27_000,
+            "total": 236_912,
+            "insurance_exempt": False,
+        },
+        "example_exempt_result": {
+            "national_pension": 0,
+            "health_insurance": 0,
+            "long_term_care": 0,
+            "employment_insurance": 0,
+            "total": 0,
+            "insurance_exempt": True,
+        },
+        "invariants": [
+            "taxable_pay is supplied after non-taxable pay has already been removed by compatibility code",
+            "insurance_exempt true zeroes all worker social-insurance contributions",
+            "positive preset_national_pension overrides pension-rate calculation after Python-compatible won rounding",
+            "positive preset_health_insurance overrides health-rate calculation and long-term care is recalculated from the rounded health amount",
+            "pension-rate calculation clamps taxable pay to 390000..6170000 before applying 4.5%",
+            "employment insurance is taxable pay times 0.009 rounded to the nearest 10 won",
+            "identity parsing, KCOMWEL age-65 decisions, EDI premium overrides, roster/master lookup, and workbook mutation remain Python compatibility boundaries in this slice",
+        ],
+    }
+
 def payroll_deduction_finalization_example() -> dict[str, Any]:
     """Return the Rust-owned supplied-input final deduction/net-pay shape."""
     return {
@@ -1248,6 +1317,7 @@ def payroll_api_contract() -> dict[str, Any]:
         "workplace_hours_application": payroll_workplace_hours_application_example(),
         "invoice_audit_row": payroll_invoice_audit_row_example(),
         "invoice_audit_batch": payroll_invoice_audit_batch_example(),
+        "social_insurance_calculation": payroll_social_insurance_calculation_example(),
         "deduction_finalization": payroll_deduction_finalization_example(),
         "ei65_payroll_decision": payroll_ei65_decision_example(),
         "edi_insurance_application": payroll_edi_insurance_application_example(),
@@ -1439,6 +1509,7 @@ def payroll_api_contract() -> dict[str, Any]:
             "workplace_hours_application_entrypoint": "PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)",
             "invoice_audit_row_entrypoint": "PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)",
             "invoice_audit_batch_entrypoint": "PayrollApiService::audit_invoice_batch(items, workplace)",
+            "social_insurance_calculation_entrypoint": "PayrollApiService::calculate_social_insurance(input)",
             "deduction_finalization_entrypoint": "PayrollApiService::finalize_payroll_deductions(input)",
             "ei65_payroll_decision_entrypoint": "PayrollApiService::resolve_ei_65_for_payroll(input)",
             "edi_insurance_application_entrypoint": "PayrollApiService::apply_edi_premiums_to_invoice(invoice, edi_record, edi_config, payroll_period)",

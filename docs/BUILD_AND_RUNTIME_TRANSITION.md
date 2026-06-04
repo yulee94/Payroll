@@ -852,3 +852,24 @@ npm run typecheck --prefix frontend
 ## Stop condition for this planning PR
 
 This PR is complete when the architecture decision, task breakdown, and first frontend export hook are committed, current checks still pass, and a draft PR is opened from the synced `origin/main` base.
+
+
+### Payroll social-insurance calculation Rust slice — completed 2026-06-04
+
+`crates/payroll-api` now owns supplied-input social-insurance calculation through
+`PayrollApiService::calculate_social_insurance`. Python compatibility code still
+parses identities, determines age/KCOMWEL eligibility, applies EDI overrides,
+looks up roster/master values, and mutates workbooks/payroll rows until those
+boundaries move behind parity tests.
+
+Verification:
+
+```sh
+cargo fmt --check
+cargo test --workspace
+buck2 test //crates/payroll-api:payroll_api_test
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_payroll_api_contract -v
+npm run typecheck --prefix frontend
+git diff --check
+cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
+```
