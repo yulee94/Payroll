@@ -140,6 +140,27 @@ class PayrollApiContractTests(unittest.TestCase):
         self.assertEqual([row["name"] for row in audit["example_result"]["rows"]], ["A", "B", "C"])
         self.assertIn("audit_invoice_batch", response["invoice_audit_batch_entrypoint"])
 
+    def test_contract_declares_rust_site_benefits_application(self) -> None:
+        contract = payroll_api_contract()
+        benefits = contract["site_benefits_application"]
+        response = contract["response"]
+
+        self.assertIn("apply_site_benefits_to_invoice", benefits["rust_entrypoint"])
+        self.assertIn("core.payroll.site_benefits.apply_site_benefits_to_invoice", benefits["python_compatibility_source"])
+        self.assertEqual(benefits["source_values"], ["site", "tenant", "global"])
+        self.assertIn("identity_insurance_already_applied", benefits["config_fields"])
+        self.assertIn("_workers_day_source", benefits["invoice_fields"])
+        self.assertEqual(benefits["example_application"]["workers_day_allowance"], 12_000)
+        self.assertEqual(benefits["example_application"]["identity_guarantee_insurance_deduction"], -20_000)
+        self.assertEqual(
+            benefits["example_application"]["invoice"]["_identity_insurance_source"],
+            "site",
+        )
+        self.assertIn(
+            "apply_site_benefits_to_invoice",
+            response["site_benefits_application_entrypoint"],
+        )
+
     def test_contract_declares_rust_fixed_hours_application(self) -> None:
         contract = payroll_api_contract()
         fixed = contract["fixed_hours_application"]

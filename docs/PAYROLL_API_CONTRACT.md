@@ -20,13 +20,14 @@ Rust transition entry point:
 - Workplace monthly-hours application function: `PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)`
 - Invoice audit row function: `PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)`
 - Invoice audit batch function: `PayrollApiService::audit_invoice_batch(items, workplace)`
+- Site-benefits application function: `PayrollApiService::apply_site_benefits_to_invoice(invoice, site_benefits_config, payroll_period)`
 - Fixed-hours application function: `PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)`
 - Execution plan function: `PayrollApiService::plan_run_request(request, policy_snapshot)`
 - Run-result response function: `PayrollApiService::run_response(result, request_id)`
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -259,6 +260,59 @@ Example batch result shape:
   ],
   "pass_count": 2,
   "warn_count": 1
+}
+```
+
+## Site-Benefits Application
+
+Python compatibility code may still resolve site/tenant/global benefit settings,
+canonicalize workplace aliases, inspect and persist the yearly
+identity-insurance ledger, parse workbooks, and recalculate payroll totals. Once
+callers supply a single invoice row, resolved site-benefits config, and payroll
+period, Rust owns the deterministic row-field application through
+`apply_site_benefits_to_invoice(invoice, site_benefits_config, payroll_period)`
+and
+`PayrollApiService::apply_site_benefits_to_invoice(invoice, site_benefits_config, payroll_period)`.
+
+Config fields:
+
+- `workers_day_allowance`: `{ enabled, default_amount, auto_from_invoice }`
+- `workers_day_source`: `site`, `tenant`, or `global`
+- `identity_guarantee_insurance`: `{ enabled, annual_amount, billing_month }`
+- `identity_insurance_source`: `site`, `tenant`, or `global`
+- `identity_insurance_already_applied`: supplied yearly-ledger decision
+
+Application invariants:
+
+1. Config amounts are clamped at zero and identity billing month is clamped to
+   `1..12`.
+2. Workers' Day invoice-driven mode uses a positive supplied `workers_day_pay`
+   regardless of period month.
+3. Workers' Day fixed-default mode applies only in May when `default_amount` is
+   positive.
+4. Identity-guarantee insurance applies as a negative annual amount only in the
+   configured billing month.
+5. `identity_insurance_already_applied` suppresses the annual deduction without
+   Rust reading or writing compatibility ledgers.
+
+Example application output:
+
+```json
+{
+  "workers_day_allowance": 12000,
+  "identity_guarantee_insurance_deduction": -20000,
+  "workers_day_source": "site",
+  "identity_insurance_source": "site",
+  "invoice": {
+    "name": "박민수",
+    "workplace": "한국앰코",
+    "base_salary": 2090000,
+    "workers_day_pay": 99999,
+    "workers_day_allowance": 12000,
+    "identity_guarantee_insurance_deduction": -20000,
+    "_workers_day_source": "site",
+    "_identity_insurance_source": "site"
+  }
 }
 ```
 
@@ -816,6 +870,7 @@ Frontend code must use `error_code`, not parse `error` text.
 - Rust owns supplied-policy workplace monthly-hours application through `PayrollApiService::apply_monthly_hours_to_invoice`; Python settings persistence and canonical workplace alias resolution remain compatibility-only until repository/storage migration lands.
 - Rust owns supplied-input invoice audit row evaluation through `PayrollApiService::audit_invoice_row`; Python settings lookup, ledger matching, fixed-profile resolution, and workbook I/O remain compatibility-only boundaries.
 - Rust owns supplied-input invoice audit batch summarization through `PayrollApiService::audit_invoice_batch`; Python still supplies resolved row inputs and keeps UI text rendering compatibility.
+- Rust owns supplied-config site-benefits row application through `PayrollApiService::apply_site_benefits_to_invoice`; Python still resolves settings, checks/persists identity-insurance ledgers, and recalculates payroll totals.
 - Rust owns resolved fixed-hours profile application through `PayrollApiService::apply_fixed_hours_to_invoice`; Python contract/template/settings resolution remains compatibility-only until persistence and HR contract repositories move to Rust.
 - Rust now owns run-result success and execution-failure envelope shaping through `PayrollApiService::run_response`; Python execution remains a compatibility source until the Rust executor and persistence slices land.
 - Rust normalizes `operation_policy` known fields before serializing responses: invalid input basis falls back to `hybrid`; attendance minute fields are clamped to Python-compatible ranges; missing-clock policy falls back to `warn`.

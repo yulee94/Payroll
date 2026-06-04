@@ -249,6 +249,47 @@ export interface PayrollInvoiceAuditBatchResult {
   warn_count: number;
 }
 
+export type PayrollBenefitSource = "site" | "tenant" | "global";
+
+export interface PayrollWorkersDayConfig {
+  enabled: boolean;
+  default_amount: number;
+  auto_from_invoice: boolean;
+}
+
+export interface PayrollIdentityInsuranceConfig {
+  enabled: boolean;
+  annual_amount: number;
+  billing_month: number;
+}
+
+export interface PayrollSiteBenefitsConfig {
+  workers_day_allowance: PayrollWorkersDayConfig;
+  workers_day_source: PayrollBenefitSource;
+  identity_guarantee_insurance: PayrollIdentityInsuranceConfig;
+  identity_insurance_source: PayrollBenefitSource;
+  identity_insurance_already_applied: boolean;
+}
+
+export interface PayrollSiteBenefitsInvoice {
+  name: string;
+  workplace: string;
+  base_salary: number;
+  workers_day_pay: number;
+  workers_day_allowance: number;
+  identity_guarantee_insurance_deduction: number;
+  _workers_day_source: PayrollBenefitSource;
+  _identity_insurance_source: PayrollBenefitSource;
+}
+
+export interface PayrollSiteBenefitsApplication {
+  workers_day_allowance: number;
+  identity_guarantee_insurance_deduction: number;
+  workers_day_source: PayrollBenefitSource;
+  identity_insurance_source: PayrollBenefitSource;
+  invoice: PayrollSiteBenefitsInvoice;
+}
+
 export type PayrollFixedHoursPayType = "hourly" | "monthly_salary";
 
 export interface PayrollFixedHoursProfile {

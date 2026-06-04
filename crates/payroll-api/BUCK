@@ -12,6 +12,7 @@ PAYROLL_API_SRCS = [
     "src/response.rs",
     "src/run.rs",
     "src/service.rs",
+    "src/site_benefits.rs",
     "src/workplace_hours.rs",
 ]
 

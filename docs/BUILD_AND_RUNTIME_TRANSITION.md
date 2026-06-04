@@ -249,7 +249,7 @@ cargo test --workspace
 
 **Acceptance criteria:**
 
-- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, fixed-hours application, execution planning, authorization, run-result response shaping, health, and readiness.
+- [x] Rust owns the selected behavior behind a stable API facade for validation, policy normalization, policy resolution precedence, attendance aggregation, workplace-hours application, invoice audit row/batch evaluation, site-benefits application, fixed-hours application, execution planning, authorization, run-result response shaping, health, and readiness.
 - [ ] Python adapter is retained only as compatibility fallback while rollout is incomplete.
 - [x] Health/readiness behavior is defined in framework-neutral Rust DTOs and API contracts.
 - [x] Run-result success/error envelope behavior is defined in framework-neutral Rust DTOs and API contracts.
@@ -257,7 +257,8 @@ cargo test --workspace
 - [x] Payroll execution routing/planning behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the compatibility executor.
 - [x] Attendance-to-invoice aggregation behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the file parser/workbook bridge.
 - [x] Workplace monthly-hours policy application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/canonical-workplace resolver.
-- [x] Invoice audit row behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/fixed-profile resolver and batch/workbook bridge.
+- [x] Invoice audit row and batch behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/fixed-profile resolver and workbook/UI bridge.
+- [x] Site-benefits payroll row application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the settings/ledger/workbook/totals bridge.
 - [x] Fixed-hours payroll row application behavior is defined in framework-neutral Rust DTOs and API contracts while Python remains the HR contract/settings resolver.
 - [ ] Service-account permissions and initial latency/error budgets are defined for Kubernetes.
 
@@ -415,6 +416,42 @@ Task 4 acceptance status:
 
 - [x] Supplied-input invoice audit batch summarization is Rust-owned behind
       parity tests.
+
+## Implementation checkpoint: Rust payroll site-benefits application
+
+Completed on 2026-06-04 as a payroll row-application behavior slice:
+
+- `crates/payroll-api` owns supplied-config site-benefits application through
+  `apply_site_benefits_to_invoice`, `WorkersDayConfig`,
+  `IdentityInsuranceConfig`, `SiteBenefitsConfig`, `SiteBenefitsInvoice`,
+  `SiteBenefitsApplication`, and
+  `PayrollApiService::apply_site_benefits_to_invoice`.
+- Rust normalizes benefit configs, applies Workers' Day invoice/default amount
+  rules, applies identity-guarantee insurance billing-month and already-applied
+  suppression rules, and emits source fields plus compatibility invoice keys.
+- Python remains the resolver/ledger/workbook/totals bridge for
+  site/tenant/global settings, workplace canonicalization, identity-insurance
+  ledger read/write, workbook I/O, and payroll subtotal/gross recalculation.
+- Contract docs and TypeScript/Python metadata name the site-benefits config,
+  invoice, and application DTOs.
+- Slice spec: `docs/PAYROLL_RUST_SITE_BENEFITS_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo fmt --check
+cargo test --workspace
+buck2 test //crates/payroll-api:payroll_api_test
+/tmp/payroll-policy-venv/bin/python -m unittest tests.test_site_benefits tests.test_payroll_api_contract -v
+npm run typecheck --prefix frontend
+git diff --check
+cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
+```
+
+Task 4 acceptance status:
+
+- [x] Supplied-config site-benefits row application is Rust-owned behind parity
+      tests.
 
 ## Implementation checkpoint: Rust payroll invoice audit row
 

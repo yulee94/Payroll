@@ -172,6 +172,56 @@ class SiteBenefitsTests(unittest.TestCase):
         self.assertEqual(inv["subtotal"], 2_015_000)
         self.assertEqual(inv["gross_pay"], 2_115_000)
 
+    def test_supplied_config_application_shape_for_rust_parity(self) -> None:
+        save_site_benefits_config(
+            "한국앰코",
+            workers_day={"enabled": True, "default_amount": 12000, "auto_from_invoice": False},
+            identity_insurance={"enabled": True, "annual_amount": 20000, "billing_month": 5},
+        )
+        inv = {
+            "name": "박민수",
+            "workplace": "한국앰코",
+            "base_salary": 2_090_000,
+            "workers_day_pay": 99999,
+        }
+
+        applied = apply_site_benefits_to_invoice(
+            inv,
+            workplace="한국앰코",
+            payroll_period="2026-05",
+            prior_records=[],
+            persist_ledger=False,
+        )
+
+        self.assertEqual(
+            applied,
+            {
+                "workers_day_allowance": 12000,
+                "identity_guarantee_insurance_deduction": -20000,
+                "workers_day_source": "site",
+                "identity_insurance_source": "site",
+            },
+        )
+        self.assertEqual(inv["workers_day_allowance"], 12000)
+        self.assertEqual(inv["identity_guarantee_insurance_deduction"], -20000)
+        self.assertEqual(inv["_workers_day_source"], "site")
+        self.assertEqual(inv["_identity_insurance_source"], "site")
+
+        already_applied = calc_identity_guarantee_insurance_deduction(
+            {"enabled": True, "annual_amount": 20000, "billing_month": 5},
+            payroll_period="2026-05",
+            workplace="한국앰코",
+            employee_name="박민수",
+            prior_records=[
+                {
+                    "name": "박민수",
+                    "workplace": "한국앰코",
+                    "identity_guarantee_insurance_deduction": -20000,
+                }
+            ],
+        )
+        self.assertEqual(already_applied, 0)
+
     def test_build_payroll_records_includes_benefits(self) -> None:
         save_site_benefits_config(
             "한국앰코",
