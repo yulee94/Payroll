@@ -256,6 +256,47 @@ pub fn can_administer_business_trip_lifecycle(
     has_admin_view_role(&roles)
 }
 
+pub fn can_view_site_report(
+    principal: &BusinessTripPrincipal,
+    profile: Option<&BusinessTripProfile>,
+    site_id: &str,
+) -> bool {
+    let roles = workflow_roles(principal, profile);
+    if has_admin_view_role(&roles) {
+        return true;
+    }
+
+    let Some(profile) = profile else {
+        return false;
+    };
+    contains_id(&profile.site_ids, &clean(site_id))
+}
+
+pub fn can_close_month(
+    principal: &BusinessTripPrincipal,
+    profile: Option<&BusinessTripProfile>,
+    site_id: &str,
+) -> bool {
+    let roles = workflow_roles(principal, profile);
+    if roles.contains(WF_ROLE_ADMIN) || roles.contains(WF_ROLE_FINANCE) {
+        return can_view_site_report(principal, profile, site_id);
+    }
+    roles.contains(WF_ROLE_SITE_MANAGER) && can_view_site_report(principal, profile, site_id)
+}
+
+pub fn can_manage_execution_task(
+    principal: &BusinessTripPrincipal,
+    profile: Option<&BusinessTripProfile>,
+    executor_id: &str,
+) -> bool {
+    let roles = workflow_roles(principal, profile);
+    if roles.contains(WF_ROLE_ADMIN) {
+        return true;
+    }
+
+    clean(&principal.user_id) == clean(executor_id)
+}
+
 pub fn can_run_business_trip_overdue_evaluator(
     principal: &BusinessTripPrincipal,
     profile: Option<&BusinessTripProfile>,
@@ -538,6 +579,70 @@ mod tests {
             document_type: document_type.to_string(),
             ..BusinessTripPermissionDocument::default()
         }
+    }
+
+    #[test]
+    fn site_report_visibility_and_month_close_match_python_roles() {
+        assert!(can_view_site_report(
+            &principal("admin-1", "tenant-a", "admin"),
+            None,
+            "site-1"
+        ));
+        assert!(can_close_month(
+            &principal("finance-1", "tenant-a", "finance"),
+            None,
+            "site-1"
+        ));
+
+        let mut site_manager = profile(&["site_manager"]);
+        site_manager.site_ids = vec!["site-1".to_string()];
+        assert!(can_view_site_report(
+            &principal("site-manager-1", "tenant-a", "staff"),
+            Some(&site_manager),
+            "site-1"
+        ));
+        assert!(can_close_month(
+            &principal("site-manager-1", "tenant-a", "staff"),
+            Some(&site_manager),
+            "site-1"
+        ));
+        assert!(!can_view_site_report(
+            &principal("site-manager-1", "tenant-a", "staff"),
+            Some(&site_manager),
+            "site-2"
+        ));
+
+        let mut hr_profile = profile(&["hr"]);
+        hr_profile.site_ids = vec!["site-1".to_string()];
+        assert!(can_view_site_report(
+            &principal("hr-1", "tenant-a", "staff"),
+            Some(&hr_profile),
+            "site-1"
+        ));
+        assert!(!can_close_month(
+            &principal("hr-1", "tenant-a", "staff"),
+            Some(&hr_profile),
+            "site-1"
+        ));
+    }
+
+    #[test]
+    fn execution_task_management_matches_python_assignment_rule() {
+        assert!(can_manage_execution_task(
+            &principal("admin-1", "tenant-a", "staff"),
+            Some(&profile(&["admin"])),
+            "someone-else"
+        ));
+        assert!(can_manage_execution_task(
+            &principal("executor-1", "tenant-a", "staff"),
+            None,
+            "executor-1"
+        ));
+        assert!(!can_manage_execution_task(
+            &principal("executor-role-only", "tenant-a", "staff"),
+            Some(&profile(&["executor"])),
+            "other-executor"
+        ));
     }
 
     #[test]

@@ -100,6 +100,9 @@ def workflow_business_trip_permissions_example() -> dict[str, Any]:
             "can_evaluate_business_trip_overdue",
             "can_run_business_trip_overdue_evaluator",
             "can_administer_business_trip_lifecycle",
+            "can_manage_execution_task",
+            "can_close_month",
+            "can_view_site_report",
         ],
         "python_compatibility_source": "core.workflow.permissions",
         "python_boundary": (
@@ -177,6 +180,16 @@ def workflow_business_trip_permissions_example() -> dict[str, Any]:
             "related documents use the requested workflow storage tenant as row tenant",
             "missing principal tenant preserves legacy document-scope compatibility",
             "sibling legal-tenant principals fail related-document scope",
+        ],
+        "operational_invariants": [
+            "Admin/executive/finance can view any site report",
+            "Non-admin site report visibility requires matching supplied profile site_ids",
+            "Admin/finance can close month only when they can view the site report",
+            "Site managers can close month only for visible sites",
+            "HR and viewer site visibility does not imply month-close authority",
+            "Admin can manage any execution task",
+            "Assigned executor can manage their execution task",
+            "Executor role without assignment does not grant task management",
         ],
     }
 

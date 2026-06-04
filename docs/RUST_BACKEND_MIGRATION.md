@@ -588,6 +588,30 @@ Verification evidence for this checkpoint:
 Slice spec: `docs/PAYROLL_RUST_EXECUTION_PLAN_SLICE.md`.
 
 
+## Current implementation checkpoint: Rust workflow operational permissions core
+
+Implemented on 2026-06-04 as a workflow operational authorization slice:
+
+- `crates/workflow-core::business_trip_permissions` now owns pure supplied-profile
+  site-report visibility, month-close authority, and execution-task management
+  predicates.
+- Rust preserves Python compatibility for admin/executive/finance report
+  visibility, profile `site_ids` report visibility, admin/finance/site-manager
+  month-close checks through report visibility, direct executor task management,
+  and executor-role-without-assignment denial.
+- Python still owns `UserSession` conversion, `get_user_profile`, workflow JSON
+  persistence, site/task storage lookups, close-month side effects, task
+  mutation, notifications, calendar/To-Do links, and UI bridge behavior.
+- Workflow contract metadata now names the Rust operational permission
+  entrypoints and invariants.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-workflow-core business_trip_permissions --lib`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_permissions_contracts -v`
+
+Slice spec: `docs/WORKFLOW_RUST_OPERATIONAL_PERMISSIONS_SLICE.md`.
+
 ## Current implementation checkpoint: Rust business-trip document legal-scope core
 
 Implemented on 2026-06-04 as a workflow document authorization slice:
