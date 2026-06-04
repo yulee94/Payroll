@@ -710,11 +710,11 @@ function table(rows, selectable = false) {
       const key = rowKey([category, status, owner, next, tone]);
       const content = `<span><strong>${category}</strong></span><span>${badge(status, tone)}</span><span>${owner}</span><span>${next}</span>`;
       return selectable ? `
-      <button class="table-row row-button ${state.selectedRowKey === key ? "selected" : ""}" data-row-key="${escapeText(key)}">
+      <button class="table-row row-button ${state.selectedRowKey === key ? "selected" : ""}" data-row-key="${escapeText(key)}" style="border-left-color:${toneColor(tone)}">
         ${content}
       </button>
     ` : `
-      <div class="table-row">
+      <div class="table-row" style="border-left-color:${toneColor(tone)}">
         <span><strong>${category}</strong></span><span>${badge(status, tone)}</span><span>${owner}</span><span>${next}</span>
       </div>
     `;
