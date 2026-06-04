@@ -148,6 +148,13 @@ const aiDraftDefs = [
   ["draft-comment", "neutral"]
 ].map(([id, tone]) => ({ id, tone }));
 
+const settingsPreferenceDefs = [
+  ["density", "ready", "home"],
+  ["notice", "neutral", "workflow"],
+  ["security", "attention", "admin"],
+  ["payroll", "attention", "payroll"]
+].map(([id, tone, target]) => ({ id, target, tone }));
+
 const moduleDefs = {
   hr: {
     filters: ["all", "roster", "resume", "resignation", "certificate"],
@@ -655,6 +662,7 @@ function renderModule(id) {
     ${id === "archive" ? archiveLibraryPanel() : ""}
     ${id === "ai" ? aiWorkspacePanel() : ""}
     ${id === "settings" ? i18nSettingsPanel() : ""}
+    ${id === "settings" ? settingsControlPanel() : ""}
     <section class="card">
       ${sectionHead("", t("screens.module.list.title"), t("screens.module.list.description"), button(data.secondaryAction.label, data.secondaryAction.target, "secondary"))}
       <div class="list-toolbar">
@@ -685,6 +693,19 @@ function i18nSettingsPanel() {
       </button>
     `).join("")}</div>
     <div class="notice">${badge(t("settings.i18n.catalogRule.title"), "neutral")}<span class="helper">${t("settings.i18n.catalogRule.description")}</span></div>
+  </section>`;
+}
+
+function settingsControlPanel() {
+  return `<section class="card">
+    ${sectionHead("", t("screens.settingsControl.title"), t("screens.settingsControl.description"), button(t("screens.settingsControl.action"), "admin", "secondary"))}
+    <div class="settings-grid">${settingsPreferenceDefs.map((item) => `
+      <button class="settings-card" data-target="${item.target}" style="border-top-color:${toneColor(item.tone)}">
+        <div class="settings-card-head"><span class="helper">${t(`screens.settingsControl.cards.${item.id}.label`)}</span>${badge(t(`screens.settingsControl.cards.${item.id}.value`), item.tone)}</div>
+        <span>${t(`screens.settingsControl.cards.${item.id}.detail`)}</span>
+      </button>
+    `).join("")}</div>
+    <div class="notice">${badge(t("screens.settingsControl.notice.badge"), "neutral")}<span class="helper">${t("screens.settingsControl.notice.description")}</span></div>
   </section>`;
 }
 
