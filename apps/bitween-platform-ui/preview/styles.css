@@ -419,6 +419,21 @@ button {
   padding: 14px;
 }
 
+.select-card {
+  color: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+.select-card:hover,
+.select-card.selected {
+  background: var(--accent-soft);
+}
+
+.select-card.selected {
+  border-color: var(--accent);
+}
+
 .metric-card {
   border-left: 4px solid var(--muted);
 }

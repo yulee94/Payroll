@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import {
   ActionButton,
@@ -23,7 +23,7 @@ import {
   workQueue
 } from "./data";
 import { colors, radius, spacing, toneColor } from "./theme";
-import type { ModuleRow, NavigationItem, PlatformId } from "./types";
+import type { ModuleRow, NavigationItem, PayrollStep, PlatformId, ReadinessCard } from "./types";
 
 type ScreenProps = {
   readonly active: NavigationItem;
@@ -222,9 +222,15 @@ export function LauncherScreen({ onSelect }: ScreenProps) {
 }
 
 export function PayrollScreen({ onSelect }: ScreenProps) {
+  const [selectedReadinessId, setSelectedReadinessId] = useState<string | undefined>(readinessCards[0]?.id);
+  const [selectedStepId, setSelectedStepId] = useState<string | undefined>(payrollSteps[0]?.id);
+  const selectedReadiness = readinessCards.find((card) => card.id === selectedReadinessId) ?? readinessCards[0];
+  const selectedStep = payrollSteps.find((step) => step.id === selectedStepId) ?? payrollSteps[0];
+
   return (
     <View style={styles.stack}>
-      <PayrollReadiness onSelect={onSelect} />
+      <PayrollReadiness onSelect={onSelect} selectedId={selectedReadiness?.id} onSelectCard={(card) => setSelectedReadinessId(card.id)} />
+      {selectedReadiness ? <PayrollReadinessDetail card={selectedReadiness} /> : null}
       <Card>
         <SectionHeader
           eyebrow="Payroll flow"
@@ -234,14 +240,25 @@ export function PayrollScreen({ onSelect }: ScreenProps) {
         />
         <View style={styles.stepGrid}>
           {payrollSteps.map((step, index) => (
-            <View key={step.id} style={[styles.stepCard, { borderTopColor: toneColor(step.tone) }]}>
+            <Pressable
+              accessibilityRole="button"
+              key={step.id}
+              onPress={() => setSelectedStepId(step.id)}
+              style={({ pressed }) => [
+                styles.stepCard,
+                { borderTopColor: toneColor(step.tone) },
+                selectedStepId === step.id && styles.stepCardSelected,
+                pressed && styles.buttonPressed
+              ]}
+            >
               <Text style={styles.stepIndex}>{String(index + 1).padStart(2, "0")}</Text>
               <Badge tone={step.tone}>{step.status}</Badge>
               <Label weight="bold">{step.title}</Label>
               <Label size="sm" muted>{step.detail}</Label>
-            </View>
+            </Pressable>
           ))}
         </View>
+        {selectedStep ? <PayrollStepDetail step={selectedStep} /> : null}
         <View style={styles.actionRow}>
           <ActionButton onPress={() => onSelect("payroll")}>산출 화면 유지</ActionButton>
           <ActionButton onPress={() => onSelect("archive")} variant="secondary">월별 자료함</ActionButton>
@@ -357,7 +374,12 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
   );
 }
 
-function PayrollReadiness({ onSelect }: Pick<ScreenProps, "onSelect">) {
+type PayrollReadinessProps = Pick<ScreenProps, "onSelect"> & {
+  readonly onSelectCard: (card: ReadinessCard) => void;
+  readonly selectedId?: string;
+};
+
+function PayrollReadiness({ onSelect, onSelectCard, selectedId }: PayrollReadinessProps) {
   return (
     <Card>
       <SectionHeader
@@ -368,14 +390,62 @@ function PayrollReadiness({ onSelect }: Pick<ScreenProps, "onSelect">) {
       />
       <View style={styles.readinessGrid}>
         {readinessCards.map((card) => (
-          <View key={card.id} style={[styles.readinessCard, { borderTopColor: toneColor(card.tone) }]}>
+          <Pressable
+            accessibilityRole="button"
+            key={card.id}
+            onPress={() => onSelectCard(card)}
+            style={({ pressed }) => [
+              styles.readinessCard,
+              { borderTopColor: toneColor(card.tone) },
+              selectedId === card.id && styles.readinessCardSelected,
+              pressed && styles.buttonPressed
+            ]}
+          >
             <Label size="sm" muted>{card.title}</Label>
             <Text style={[styles.readinessValue, { color: toneColor(card.tone) }]}>{card.value}</Text>
             <Label size="sm">{card.detail}</Label>
-          </View>
+          </Pressable>
         ))}
       </View>
     </Card>
+  );
+}
+
+function PayrollReadinessDetail({ card }: { readonly card: ReadinessCard }) {
+  return (
+    <View style={styles.detailPanel}>
+      <View style={styles.detailHeader}>
+        <View style={styles.detailTitle}>
+          <Label size="sm" muted>선택한 준비 항목</Label>
+          <Label weight="bold">{card.title}</Label>
+        </View>
+        <Badge tone={card.tone}>{card.value}</Badge>
+      </View>
+      <Label>{card.detail}</Label>
+      <View style={styles.actionRow}>
+        <ActionButton onPress={() => undefined} variant="secondary">준비 상태 확인</ActionButton>
+        <ActionButton onPress={() => undefined} variant="ghost">관련 자료 보기</ActionButton>
+      </View>
+    </View>
+  );
+}
+
+function PayrollStepDetail({ step }: { readonly step: PayrollStep }) {
+  return (
+    <View style={styles.detailPanel}>
+      <View style={styles.detailHeader}>
+        <View style={styles.detailTitle}>
+          <Label size="sm" muted>선택한 산출 단계</Label>
+          <Label weight="bold">{step.title}</Label>
+        </View>
+        <Badge tone={step.tone}>{step.status}</Badge>
+      </View>
+      <Label>{step.detail}</Label>
+      <View style={styles.actionRow}>
+        <ActionButton onPress={() => undefined} variant="secondary">단계 작업 보기</ActionButton>
+        <ActionButton onPress={() => undefined} variant="ghost">도움말 확인</ActionButton>
+      </View>
+    </View>
   );
 }
 
@@ -421,6 +491,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm
+  },
+  buttonPressed: {
+    opacity: 0.86
   },
   detailGrid: {
     flexDirection: "row",
@@ -615,6 +688,10 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     padding: spacing.md
   },
+  readinessCardSelected: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent
+  },
   readinessGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -638,6 +715,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     gap: spacing.sm,
     padding: spacing.md
+  },
+  stepCardSelected: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent
   },
   stepGrid: {
     flexDirection: "row",

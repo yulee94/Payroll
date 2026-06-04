@@ -31,6 +31,8 @@ const state = {
   filter: "전체",
   loginFeedback: "",
   password: "",
+  selectedPayrollCardKey: "",
+  selectedPayrollStepKey: "",
   search: "",
   selectedRowKey: "",
   userId: ""
@@ -265,27 +267,31 @@ function renderHome() {
 }
 
 function renderPayroll() {
+  const selectedReadiness = selectedPayrollReadiness();
+  const selectedStep = selectedPayrollStep();
   return html`
     <section class="card">
       ${sectionHead("Readiness", "급여 자동화 준비 현황", "산출 전 필요한 기준과 자료 상태를 먼저 확인합니다.", button("설정 확인", "settings", "secondary"))}
       <div class="card-grid">${readinessCards.map(([title, value, detail, tone]) => `
-        <article class="mini-card readiness-card" style="border-top-color:${toneColor(tone)}">
+        <button class="mini-card readiness-card select-card ${state.selectedPayrollCardKey === payrollCardKey([title, value, detail, tone]) ? "selected" : ""}" data-payroll-card-key="${escapeText(payrollCardKey([title, value, detail, tone]))}" style="border-top-color:${toneColor(tone)}">
           <span class="helper">${title}</span>
           <strong class="metric-value" style="color:${toneColor(tone)}">${value}</strong>
           <span>${detail}</span>
-        </article>
+        </button>
       `).join("")}</div>
+      ${selectedReadiness ? payrollReadinessDetail(selectedReadiness) : ""}
     </section>
     <section class="card">
       ${sectionHead("Payroll flow", "급여 산출 작업 흐름", "운영 기준 확인부터 입력 자료 준비, 결과 검토, 자료함 저장까지 순서대로 진행합니다.", button("급여 설정 확인", "settings", "secondary"))}
       <div class="step-grid">${payrollSteps.map(([index, title, detail, status, tone]) => `
-        <article class="step-card" style="border-top-color:${toneColor(tone)}">
+        <button class="step-card select-card ${state.selectedPayrollStepKey === payrollStepKey([index, title, detail, status, tone]) ? "selected" : ""}" data-payroll-step-key="${escapeText(payrollStepKey([index, title, detail, status, tone]))}" style="border-top-color:${toneColor(tone)}">
           <span class="eyebrow">${index}</span>
           ${badge(status, tone)}
           <strong>${title}</strong>
           <span class="helper">${detail}</span>
-        </article>
+        </button>
       `).join("")}</div>
+      ${selectedStep ? payrollStepDetail(selectedStep) : ""}
       <div class="action-row">${button("산출 화면 유지", "payroll", "primary")}${button("월별 자료함", "archive")}${button("AI 검토 준비", "ai", "ghost")}</div>
     </section>
     <section class="card">
@@ -297,6 +303,38 @@ function renderPayroll() {
       ${table(previewRows)}
     </section>
   `;
+}
+
+function payrollCardKey(row) {
+  return row.slice(0, 2).join("|");
+}
+
+function payrollStepKey(row) {
+  return row.slice(0, 2).join("|");
+}
+
+function selectedPayrollReadiness() {
+  return readinessCards.find((row) => payrollCardKey(row) === state.selectedPayrollCardKey) || readinessCards[0];
+}
+
+function selectedPayrollStep() {
+  return payrollSteps.find((row) => payrollStepKey(row) === state.selectedPayrollStepKey) || payrollSteps[0];
+}
+
+function payrollReadinessDetail([title, value, detail, tone]) {
+  return `<div class="detail-panel">
+    <div class="detail-head"><div><span class="helper">선택한 준비 항목</span><strong>${escapeText(title)}</strong></div>${badge(value, tone)}</div>
+    <span>${escapeText(detail)}</span>
+    <div class="action-row">${button("준비 상태 확인", "payroll", "secondary")}${button("관련 자료 보기", "archive", "ghost")}</div>
+  </div>`;
+}
+
+function payrollStepDetail([, title, detail, status, tone]) {
+  return `<div class="detail-panel">
+    <div class="detail-head"><div><span class="helper">선택한 산출 단계</span><strong>${escapeText(title)}</strong></div>${badge(status, tone)}</div>
+    <span>${escapeText(detail)}</span>
+    <div class="action-row">${button("단계 작업 보기", "payroll", "secondary")}${button("도움말 확인", "ai", "ghost")}</div>
+  </div>`;
 }
 
 function renderModule(id) {
@@ -444,6 +482,8 @@ function bindEvents() {
       state.filter = "전체";
       state.search = "";
       state.selectedRowKey = "";
+      state.selectedPayrollCardKey = "";
+      state.selectedPayrollStepKey = "";
       state.loginFeedback = "";
       render();
       toast(`"${navItems.find((item) => item.id === state.activeId)?.label || "화면"}" 화면으로 이동했습니다.`);
@@ -467,6 +507,22 @@ function bindEvents() {
     });
   });
 
+  document.querySelectorAll("[data-payroll-card-key]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.selectedPayrollCardKey = el.dataset.payrollCardKey;
+      render();
+      toast("급여 준비 항목을 선택했습니다.");
+    });
+  });
+
+  document.querySelectorAll("[data-payroll-step-key]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.selectedPayrollStepKey = el.dataset.payrollStepKey;
+      render();
+      toast("급여 산출 단계를 선택했습니다.");
+    });
+  });
+
   document.querySelectorAll("[data-logout]").forEach((el) => {
     el.addEventListener("click", () => {
       state.authed = false;
@@ -474,6 +530,8 @@ function bindEvents() {
       state.filter = "전체";
       state.loginFeedback = "";
       state.password = "";
+      state.selectedPayrollCardKey = "";
+      state.selectedPayrollStepKey = "";
       state.search = "";
       state.selectedRowKey = "";
       render();
@@ -491,6 +549,8 @@ function bindEvents() {
       state.activeId = "home";
       state.filter = "전체";
       state.search = "";
+      state.selectedPayrollCardKey = "";
+      state.selectedPayrollStepKey = "";
       state.selectedRowKey = "";
       render();
       toast("Demo 계정으로 접속했습니다.");
