@@ -1284,6 +1284,18 @@ input:focus-visible {
   padding: 10px 12px;
 }
 
+.list-summary-count {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 8px;
+}
+
+.list-summary-copy {
+  flex: 1;
+  min-width: 160px;
+}
+
 .table {
   border: 1px solid var(--border);
   border-radius: 8px;
