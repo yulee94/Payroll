@@ -33,6 +33,12 @@ class PayrollApiAdapterTests(unittest.TestCase):
 
         self.assertEqual(scope_from_api_payload({"scope": original.key}), original)
 
+    def test_scope_can_be_built_from_api_scope_string(self) -> None:
+        self.assertEqual(
+            scope_from_api_payload({"scope": "Affiliate/Site A/2026-05"}),
+            PayrollScope("Affiliate", "Site A", "2026-05"),
+        )
+
     def test_build_request_accepts_camel_case_paths_and_metadata(self) -> None:
         request = build_payroll_api_request(
             {
@@ -74,6 +80,8 @@ class PayrollApiAdapterTests(unittest.TestCase):
         payload = payroll_api_response(result, request_id="req-1")
 
         self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["scope"], "Affiliate/Site A/2026-05")
+        self.assertEqual(payload["scope_key"], PayrollScope("Affiliate", "Site A", "2026-05").key)
         self.assertEqual(payload["error"], "boom")
         self.assertEqual(payload["request_id"], "req-1")
         self.assertNotIn("exception", payload)

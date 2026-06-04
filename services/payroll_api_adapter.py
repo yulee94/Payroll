@@ -57,12 +57,29 @@ def _request_id(payload: Mapping[str, Any] | None) -> str:
     )
 
 
+def _scope_from_api_string(value: str) -> PayrollScope | None:
+    scope = PayrollScope.from_key(value)
+    if scope is not None:
+        return scope
+    parts = [p.strip() for p in value.split("/", 2)]
+    if len(parts) != 3 or not all(parts):
+        return None
+    affiliate, workplace, period = parts
+    if not _PERIOD_RE.match(period):
+        raise ValueError("period는 YYYY-MM 형식이어야 합니다.")
+    return PayrollScope(affiliate, workplace, period)
+
+
+def _scope_display(scope: PayrollScope) -> str:
+    return f"{scope.affiliate}/{scope.workplace}/{scope.period}"
+
+
 def scope_from_api_payload(payload: Mapping[str, Any] | None) -> PayrollScope:
     """Build PayrollScope from scope key or affiliate/workplace/period fields."""
     data = _payload_mapping(payload)
     raw_scope = data.get("scope")
     if isinstance(raw_scope, str):
-        scope = PayrollScope.from_key(raw_scope)
+        scope = _scope_from_api_string(raw_scope)
         if scope is None:
             raise ValueError("scope 키 형식이 올바르지 않습니다.")
         return scope
@@ -124,6 +141,8 @@ def payroll_api_response(
 ) -> dict[str, Any]:
     """Return a stable JSON-friendly response shape."""
     payload = result.as_dict()
+    payload["scope_key"] = payload.get("scope", "")
+    payload["scope"] = _scope_display(result.scope)
     payload["status"] = "success" if result.ok else "error"
     if request_id:
         payload["request_id"] = request_id

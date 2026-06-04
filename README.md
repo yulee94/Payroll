@@ -17,7 +17,7 @@ Bitween Payroll은 Python 3 + Tkinter 기반의 데스크톱 업무 플랫폼입
 
 - Windows 데스크톱
 - Python 3.11 이상 권장
-- 주요 의존성: `openpyxl`, `openai`, `windnd`, `matplotlib`
+- 주요 의존성: `openpyxl`, `openai`, `windnd`, `matplotlib`, `requests`
 
 ```powershell
 python -m pip install --upgrade pip
@@ -40,6 +40,7 @@ python main.py
 
 - `services/payroll_automation.py`가 청구서/근태/혼합 입력을 받는 공통 백엔드 진입점입니다.
 - `services/payroll_api_adapter.py`가 JSON에 가까운 API 요청/응답 형태를 내부 급여 자동화 요청으로 변환합니다.
+- `services/payroll_api_contract.py`와 `docs/PAYROLL_API_CONTRACT.md`가 향후 HTTP 래퍼/외부 연동에서 사용할 요청·응답 계약을 고정합니다.
 - `services/payroll_policy_store.py`가 법인 기본값과 사업장별 운영 기준을 저장하고 해석합니다.
 - `services/attendance_import.py`와 `services/attendance_invoice_bridge.py`가 외부 근태 파일을 기존 급여 엔진이 읽을 수 있는 청구서형 데이터로 변환합니다.
 - `services/payroll_ui_bridge.py`와 `services/payroll_settings_ui_bridge.py`가 데스크톱 UI를 새 자동화 서비스와 설정 UX에 연결합니다.
@@ -50,7 +51,7 @@ python main.py
 PR 자동검사와 동일한 핵심 테스트부터 실행합니다.
 
 ```powershell
-python -m unittest tests.test_attendance_import tests.test_payroll_api_adapter tests.test_payroll_automation tests.test_payroll_operation_policy tests.test_payroll_ui_bridge tests.test_payroll_settings_ui_bridge tests.test_preview_grid_filter tests.test_workflow tests.test_org_access -v
+python -m unittest tests.test_attendance_import tests.test_payroll_api_adapter tests.test_payroll_api_contract tests.test_payroll_automation tests.test_payroll_operation_policy tests.test_payroll_ui_bridge tests.test_payroll_settings_ui_bridge tests.test_preview_grid_filter tests.test_workflow tests.test_org_access -v
 ```
 
 전체 테스트는 변경 범위가 넓을 때 실행합니다.
