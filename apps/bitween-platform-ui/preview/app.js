@@ -715,7 +715,10 @@ function renderModule(id) {
     <section class="card">
       ${sectionHead("", t("screens.module.list.title"), t("screens.module.list.description"), button(data.secondaryAction.label, data.secondaryAction.target, "secondary"))}
       <div class="list-toolbar">
-        <div class="filters">${data.filters.map((filter) => `<button aria-pressed="${state.filter === filter.id}" class="filter-chip ${state.filter === filter.id ? "active" : ""}" data-filter="${filter.id}">${filter.label}</button>`).join("")}</div>
+        <div class="filters">${data.filters.map((filter) => {
+          const selected = state.filter === filter.id;
+          return `<button aria-pressed="${selected ? "true" : "false"}" class="filter-chip ${selected ? "active" : ""}" data-filter="${filter.id}">${selected ? '<span class="filter-chip-mark" aria-hidden="true"></span>' : ""}<span>${filter.label}</span></button>`;
+        }).join("")}</div>
         <label class="search-box" for="work-search"><span>${t("screens.module.search.label")}</span><input id="work-search" type="search" value="${escapeText(state.search)}" placeholder="${t("screens.module.search.placeholder")}" /></label>
       </div>
       <div aria-atomic="true" aria-live="polite" class="list-summary" role="status"><strong>${t("screens.module.list.count", { count: rows.length })}</strong><span class="helper">${state.search ? t("screens.module.list.filteredWithSearch", { filter: filterLabel, search: state.search }) : t("screens.module.list.filtered", { filter: filterLabel })}</span></div>
