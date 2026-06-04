@@ -1,0 +1,30 @@
+# Normalize text files in the repository.
+* text=auto
+
+# Source and documentation should stay LF in Git.
+*.py text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.spec text eol=lf
+*.iss text eol=lf
+
+# Windows scripts should keep CRLF on checkout.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary assets and Office workbooks.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.xlsx binary
+*.xls binary
+*.pdf binary
+*.zip binary
+*.exe binary

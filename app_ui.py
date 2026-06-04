@@ -1076,6 +1076,7 @@ class PayrollDashboard(tk.Tk):
             on_login=lambda: self.show_page("login"),
             on_logout=self._do_logout_to_login,
             on_theme_select=self._on_theme_selected,
+            on_open_payroll_page=self._open_payroll_page,
             on_open_compliance_docs=lambda: self._open_platform_tab("hr", "compliance_docs"),
         )
         self.launcher_panel.pack(fill=tk.BOTH, expand=True)

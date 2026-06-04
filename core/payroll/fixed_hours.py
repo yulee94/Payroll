@@ -304,8 +304,6 @@ def apply_fixed_hours_to_invoice(
     )
     if inv.get("_preserve_reference_hours") and invoice_h > 0:
         monthly_h = invoice_h
-    elif invoice_h > 0 and invoice_h < monthly_h - 0.01:
-        monthly_h = invoice_h
     inv["_monthly_work_hours"] = monthly_h
     inv["_monthly_hours_source"] = profile.get("source_label", FIXED_HOURS_SOURCE_CONTRACT)
     inv["_fixed_hours_mode"] = True

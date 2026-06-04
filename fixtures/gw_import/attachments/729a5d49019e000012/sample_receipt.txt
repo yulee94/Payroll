@@ -1,0 +1,1 @@
+COSS GW import fixture - sample attachment for tests.

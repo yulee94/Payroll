@@ -1,0 +1,20 @@
+{
+  "gw_doc_id": "729a5d49019e000012",
+  "title": "피오르빌아파트 5월 정기소모품 구입",
+  "doc_number": "COSS-2026-0001",
+  "drafter": "이종호",
+  "drafted_at": "2026-05-28",
+  "form_name": "지출결의서",
+  "gw_list": "draft",
+  "content_html": "<p>5월 정기 소모품 구입 내역입니다.</p><ul><li>세제</li><li>장갑</li></ul>",
+  "content_text": "5월 정기 소모품 구입 내역입니다.",
+  "approval_workflow_json": {
+    "steps": [
+      {"name": "이종호", "role": "기안", "status": "approved"},
+      {"name": "전성진", "role": "결재", "status": "approved"}
+    ]
+  },
+  "attachments": [
+    {"name": "sample_receipt.txt", "path": "", "size": 0}
+  ]
+}
