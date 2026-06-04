@@ -129,6 +129,12 @@ const adminPermissionDefs = [
   ["role-employee", "attention"]
 ].map(([id, tone]) => ({ id, tone }));
 
+const adminReviewDefs = [
+  ["payrollPermission", "attention", "payroll"],
+  ["archiveAccess", "neutral", "archive"],
+  ["branchAccounts", "ready", "settings"]
+].map(([id, tone, target]) => ({ id, target, tone }));
+
 const archiveFolderDefs = [
   ["folder-payroll", "ready", "payroll"],
   ["folder-attendance", "attention", "attendance"],
@@ -839,6 +845,16 @@ function adminAccountPanel() {
     <div class="admin-branch-grid">
       <article class="detail-item"><span class="helper">${t("screens.admin.branchAccount.label")}</span><strong>${t("screens.admin.branchAccount.value")}</strong><span>${t("screens.admin.branchAccount.detail")}</span></article>
       <article class="detail-item"><span class="helper">${t("screens.admin.subaccount.label")}</span><strong>${t("screens.admin.subaccount.value")}</strong><span>${t("screens.admin.subaccount.detail")}</span></article>
+    </div>
+    <div class="admin-review-panel">
+      ${sectionHead("", t("screens.admin.review.title"), t("screens.admin.review.description"))}
+      <div class="admin-review-grid">${adminReviewDefs.map((item) => `
+        <button class="admin-review-card" data-target="${item.target}" style="border-top-color:${toneColor(item.tone)}">
+          <div class="admin-review-head"><span class="helper">${t(`screens.admin.review.cards.${item.id}.label`)}</span>${badge(t(`screens.admin.review.cards.${item.id}.status`), item.tone)}</div>
+          <strong>${t(`screens.admin.review.cards.${item.id}.title`)}</strong>
+          <span class="helper">${t(`screens.admin.review.cards.${item.id}.detail`)}</span>
+        </button>
+      `).join("")}</div>
     </div>
     <div class="permission-matrix">${adminPermissionDefs.map((item) => `
       <article class="permission-row">

@@ -953,6 +953,41 @@ input:focus-visible {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
+.admin-review-panel {
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.admin-review-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.admin-review-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  border-top: 4px solid var(--muted);
+  color: var(--text);
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  text-align: left;
+}
+
+.admin-review-head {
+  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
 .permission-matrix {
   display: grid;
   gap: 10px;
