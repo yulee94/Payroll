@@ -1,5 +1,13 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View
+} from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
 
 import { colors, radius, spacing, toneBackground, toneColor } from "./theme";
 import type { MetricItem, ModuleRow, NavigationItem, ReadinessTone } from "./types";
@@ -27,8 +35,12 @@ export function Label({ children, muted = false, size = "md", weight = "regular"
   );
 }
 
-export function Card({ children, compact = false }: PropsWithChildren<{ readonly compact?: boolean }>) {
-  return <View style={[styles.card, compact && styles.cardCompact]}>{children}</View>;
+export function Card({
+  children,
+  compact = false,
+  style
+}: PropsWithChildren<{ readonly compact?: boolean; readonly style?: StyleProp<ViewStyle> }>) {
+  return <View style={[styles.card, compact && styles.cardCompact, style]}>{children}</View>;
 }
 
 export function Badge({ children, tone }: PropsWithChildren<{ readonly tone: ReadinessTone }>) {
@@ -443,6 +455,7 @@ const styles = StyleSheet.create({
   rowCardHeader: {
     alignItems: "flex-start",
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.md,
     justifyContent: "space-between"
   },
@@ -455,6 +468,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     alignItems: "flex-start",
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.md,
     justifyContent: "space-between"
   },
