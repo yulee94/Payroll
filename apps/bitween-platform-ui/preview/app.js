@@ -33,6 +33,7 @@ const state = {
   password: "",
   selectedPayrollCardKey: "",
   selectedPayrollStepKey: "",
+  selectedQueueKey: "",
   search: "",
   selectedRowKey: "",
   userId: ""
@@ -237,6 +238,8 @@ function renderScreen(id) {
 }
 
 function renderHome() {
+  const selectedQueue = selectedQueueItem();
+
   return html`
     <section class="card">
       ${sectionHead("Overview", "오늘의 플랫폼 상태", "중요한 업무 상태를 먼저 보고 필요한 메뉴로 바로 이동합니다.", button("급여 준비 확인", "payroll", "secondary"))}
@@ -245,12 +248,13 @@ function renderHome() {
     <section class="card">
       ${sectionHead("", "오늘의 업무", "처리 우선순위가 높은 업무를 카드로 정리합니다.")}
       <div class="queue-grid">${workQueue.map(([title, meta, owner, due, status, tone]) => `
-        <article class="queue-card">
+        <button class="queue-card select-card ${state.selectedQueueKey === queueKey([title, meta, owner, due, status, tone]) ? "selected" : ""}" data-queue-key="${escapeText(queueKey([title, meta, owner, due, status, tone]))}">
           <div class="queue-head">${badge(status, tone)}<span class="helper">${due}</span></div>
           <strong>${title}</strong>
           <span class="helper">${meta} · ${owner}</span>
-        </article>
+        </button>
       `).join("")}</div>
+      ${selectedQueue ? queueDetail(selectedQueue) : ""}
     </section>
     <section class="card">
       ${sectionHead("", "플랫폼 바로가기", "업무별 화면이 같은 구조로 이어지도록 정리했습니다.")}
@@ -264,6 +268,33 @@ function renderHome() {
       `).join("")}</div>
     </section>
   `;
+}
+
+function queueKey(row) {
+  return row.slice(0, 3).join("|");
+}
+
+function selectedQueueItem() {
+  return workQueue.find((row) => queueKey(row) === state.selectedQueueKey) || workQueue[0];
+}
+
+function queueDetail([title, meta, owner, due, status, tone]) {
+  return `<div class="detail-panel">
+    <div class="detail-head"><div><span class="helper">선택한 오늘의 업무</span><strong>${escapeText(title)}</strong></div>${badge(status, tone)}</div>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="helper">담당</span><strong>${escapeText(owner)}</strong></div>
+      <div class="detail-item"><span class="helper">기한</span><strong>${escapeText(due)}</strong></div>
+      <div class="detail-item"><span class="helper">업무 영역</span><span>${escapeText(meta)}</span></div>
+    </div>
+    <div class="action-row">${button("관련 화면 열기", queueTarget(meta), "secondary")}${button("담당 흐름 확인", state.activeId, "ghost")}</div>
+  </div>`;
+}
+
+function queueTarget(meta) {
+  if (meta.includes("급여")) return "payroll";
+  if (meta.includes("워크") || meta.includes("결재")) return "workflow";
+  if (meta.includes("아카이브") || meta.includes("자료")) return "archive";
+  return "home";
 }
 
 function renderPayroll() {
@@ -484,6 +515,7 @@ function bindEvents() {
       state.selectedRowKey = "";
       state.selectedPayrollCardKey = "";
       state.selectedPayrollStepKey = "";
+      state.selectedQueueKey = "";
       state.loginFeedback = "";
       render();
       toast(`"${navItems.find((item) => item.id === state.activeId)?.label || "화면"}" 화면으로 이동했습니다.`);
@@ -523,6 +555,14 @@ function bindEvents() {
     });
   });
 
+  document.querySelectorAll("[data-queue-key]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.selectedQueueKey = el.dataset.queueKey;
+      render();
+      toast("오늘의 업무 상세를 열었습니다.");
+    });
+  });
+
   document.querySelectorAll("[data-logout]").forEach((el) => {
     el.addEventListener("click", () => {
       state.authed = false;
@@ -532,6 +572,7 @@ function bindEvents() {
       state.password = "";
       state.selectedPayrollCardKey = "";
       state.selectedPayrollStepKey = "";
+      state.selectedQueueKey = "";
       state.search = "";
       state.selectedRowKey = "";
       render();
@@ -551,6 +592,7 @@ function bindEvents() {
       state.search = "";
       state.selectedPayrollCardKey = "";
       state.selectedPayrollStepKey = "";
+      state.selectedQueueKey = "";
       state.selectedRowKey = "";
       render();
       toast("Demo 계정으로 접속했습니다.");

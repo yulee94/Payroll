@@ -23,7 +23,7 @@ import {
   workQueue
 } from "./data";
 import { colors, radius, spacing, toneColor } from "./theme";
-import type { ModuleRow, NavigationItem, PayrollStep, PlatformId, ReadinessCard } from "./types";
+import type { ModuleRow, NavigationItem, PayrollStep, PlatformId, ReadinessCard, WorkQueueItem } from "./types";
 
 type ScreenProps = {
   readonly active: NavigationItem;
@@ -157,6 +157,8 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
 
 export function LauncherScreen({ onSelect }: ScreenProps) {
   const launcherItems = useMemo(() => navigationItems.filter((item) => item.id !== "home"), []);
+  const [selectedQueueId, setSelectedQueueId] = useState<string | undefined>(workQueue[0]?.id);
+  const selectedQueue = workQueue.find((item) => item.id === selectedQueueId) ?? workQueue[0];
 
   return (
     <View style={styles.stack}>
@@ -174,16 +176,26 @@ export function LauncherScreen({ onSelect }: ScreenProps) {
         <SectionHeader title="오늘의 업무" description="처리 우선순위가 높은 업무를 카드로 정리합니다." />
         <View style={styles.queueGrid}>
           {workQueue.map((item) => (
-            <View key={item.id} style={styles.queueItem}>
+            <Pressable
+              accessibilityRole="button"
+              key={item.id}
+              onPress={() => setSelectedQueueId(item.id)}
+              style={({ pressed }) => [
+                styles.queueItem,
+                selectedQueueId === item.id && styles.queueItemSelected,
+                pressed && styles.buttonPressed
+              ]}
+            >
               <View style={styles.queueHeader}>
                 <Badge tone={item.tone}>{item.status}</Badge>
                 <Label size="sm" muted>{item.due}</Label>
               </View>
               <Label weight="bold">{item.title}</Label>
               <Label size="sm" muted>{item.meta} · {item.owner}</Label>
-            </View>
+            </Pressable>
           ))}
         </View>
+        {selectedQueue ? <WorkQueueDetailPanel item={selectedQueue} onSelect={onSelect} /> : null}
       </Card>
 
       <Card>
@@ -477,6 +489,56 @@ function WorkDetailPanel({ row }: { readonly row: ModuleRow }) {
   );
 }
 
+function WorkQueueDetailPanel({ item, onSelect }: { readonly item: WorkQueueItem; readonly onSelect: (id: PlatformId) => void }) {
+  const target = workQueueTarget(item);
+
+  return (
+    <View style={styles.detailPanel}>
+      <View style={styles.detailHeader}>
+        <View style={styles.detailTitle}>
+          <Label size="sm" muted>선택한 오늘의 업무</Label>
+          <Label weight="bold">{item.title}</Label>
+        </View>
+        <Badge tone={item.tone}>{item.status}</Badge>
+      </View>
+      <View style={styles.detailGrid}>
+        <View style={styles.detailItem}>
+          <Label size="sm" muted>담당</Label>
+          <Label weight="bold">{item.owner}</Label>
+        </View>
+        <View style={styles.detailItem}>
+          <Label size="sm" muted>기한</Label>
+          <Label weight="bold">{item.due}</Label>
+        </View>
+        <View style={styles.detailItem}>
+          <Label size="sm" muted>업무 영역</Label>
+          <Label>{item.meta}</Label>
+        </View>
+      </View>
+      <View style={styles.actionRow}>
+        <ActionButton onPress={() => onSelect(target)} variant="secondary">관련 화면 열기</ActionButton>
+        <ActionButton onPress={() => undefined} variant="ghost">담당 흐름 확인</ActionButton>
+      </View>
+    </View>
+  );
+}
+
+function workQueueTarget(item: WorkQueueItem): PlatformId {
+  if (item.meta.includes("급여")) {
+    return "payroll";
+  }
+
+  if (item.meta.includes("워크") || item.meta.includes("결재")) {
+    return "workflow";
+  }
+
+  if (item.meta.includes("아카이브") || item.meta.includes("자료")) {
+    return "archive";
+  }
+
+  return "home";
+}
+
 const styles = StyleSheet.create({
   actionPanels: {
     flexDirection: "row",
@@ -676,6 +738,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     gap: spacing.sm,
     padding: spacing.md
+  },
+  queueItemSelected: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent
   },
   readinessCard: {
     backgroundColor: colors.bg,
