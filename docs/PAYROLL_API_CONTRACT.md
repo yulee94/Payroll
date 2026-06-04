@@ -17,7 +17,8 @@ Rust transition entry point:
 - Validation function: `bitween_payroll_api::validate_payroll_api_payload(payload, policy_snapshot)`
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, stable response shaping, and probe-safe service boundary responses into Rust.
+- Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
+- Purpose: move payroll request validation, scope parsing, input-method resolution, stable response shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -211,6 +212,66 @@ Fields:
 }
 ```
 
+## Authorization Invariants
+
+The HTTP/session/JWT wrapper is not selected yet, but the Rust service facade now owns the payroll authorization decision once a trusted principal is supplied. Frontend labels are not authorization input. Server-side wrappers must build `PayrollPrincipal` from trusted session/JWT state and call `PayrollApiService::authorize_run_request(request, principal, action)`.
+
+Actions and required permissions:
+
+| action | Required permission | Purpose |
+| --- | --- | --- |
+| `validate` | `platform.payroll` | Validate payroll request shape and preview policy/input resolution. |
+| `run` | `platform.payroll.executive` | Execute payroll-producing automation. |
+| `settings` | `platform.payroll.settings` | Change tenant/site payroll operation policy. |
+
+RBAC role families are `staff`, `finance`, and `admin`. Position families are `ceo`, `executive`, `director`, `manager`, `team_lead`, `senior`, `member`, and `intern`. Rust preserves the Python compatibility rule that CEO position bypasses team platform filtering, while non-CEO admin/finance grants are still filtered by `effective_platform_ids`.
+
+ABAC attributes are `tenant_id`, `affiliate`, `workplace`, `period`, `org_unit_id`, `effective_platform_ids`, `allowed_affiliates`, and `allowed_workplaces`. A supplied request `tenant_id` must match the principal tenant. Non-empty affiliate/workplace allow-lists restrict the request scope.
+
+Stable denial reason codes:
+
+| reason_code | Meaning |
+| --- | --- |
+| `missing_principal_tenant` | Trusted principal does not name a tenant/legal entity. |
+| `tenant_mismatch` | Request tenant and principal tenant differ. |
+| `missing_permission` | Principal lacks the action permission after role/position/platform filtering. |
+| `affiliate_not_allowed` | Request affiliate is outside the principal ABAC scope. |
+| `workplace_not_allowed` | Request workplace is outside the principal ABAC scope. |
+
+## Authorization Decision Response
+
+```json
+{
+  "ok": true,
+  "allowed": true,
+  "action": "run",
+  "user_id": "user-finance",
+  "tenant_id": "coss",
+  "scope": "COSS/Site A/2026-05",
+  "reason_code": "",
+  "reason": "",
+  "required_permissions": ["platform.payroll.executive"],
+  "granted_permissions": ["platform.payroll", "platform.payroll.executive"]
+}
+```
+
+Denied example:
+
+```json
+{
+  "ok": false,
+  "allowed": false,
+  "action": "run",
+  "user_id": "user-finance",
+  "tenant_id": "other",
+  "scope": "COSS/Site A/2026-05",
+  "reason_code": "tenant_mismatch",
+  "reason": "Payroll request tenant does not match the principal tenant.",
+  "required_permissions": [],
+  "granted_permissions": ["platform.payroll", "platform.payroll.executive"]
+}
+```
+
 ## Health Response
 
 The Rust service facade owns this probe-safe shape before an HTTP framework is selected.
@@ -309,3 +370,4 @@ Frontend code must use `error_code`, not parse `error` text.
 - Responses include `operation_policy` and `operation_policy_source` so operators can audit which policy was applied.
 - Rust normalizes `operation_policy` known fields before serializing responses: invalid input basis falls back to `hybrid`; attendance minute fields are clamped to Python-compatible ranges; missing-clock policy falls back to `warn`.
 - `PayrollApiService` now owns framework-neutral health/readiness DTOs; future Axum/Actix/Tauri/Kubernetes wrappers should call those Rust functions rather than inventing parallel probe payloads.
+- `PayrollApiService::authorize_run_request` owns tenant/RBAC/ABAC payroll action decisions; wrappers must supply trusted principals and must not authorize from frontend labels.

@@ -224,7 +224,7 @@ cargo test --workspace
 **Acceptance criteria:**
 
 - [x] Public request/response DTOs are documented for payroll validation and operation policy normalization.
-- [ ] Tenant/legal-entity authorization invariants, RBAC role families, and ABAC attributes are explicit for the eventual service boundary.
+- [x] Tenant/legal-entity authorization invariants, RBAC role families, and ABAC attributes are explicit in Rust service-boundary contracts.
 - [x] Existing Python behavior has characterization tests before Rust code is added for payroll operation policy normalization.
 
 **Verification:**
@@ -293,6 +293,29 @@ Verified commands:
 cargo test -p bitween-payroll-api
 buck2 test //crates/payroll-api:payroll_api_test
 python -m unittest tests.test_payroll_operation_policy tests.test_payroll_api_adapter -v
+npm run typecheck --prefix frontend
+```
+
+## Implementation checkpoint: Rust payroll authorization invariants
+
+Completed on 2026-06-04 as a service-boundary hardening slice:
+
+- `crates/payroll-api` owns payroll action authorization decisions through
+  `authorize_payroll_request` and `PayrollApiService::authorize_run_request`.
+- Trusted server/session/JWT wrappers supply `PayrollPrincipal`; frontend labels
+  are explicitly not authorization input.
+- Rust checks tenant match, action permission, role/position families, effective
+  org-unit platform filtering, and affiliate/workplace ABAC scope limits.
+- Contract docs and TypeScript/Python metadata name stable denial reason codes
+  for future HTTP/Tauri/mobile wrappers.
+- Slice spec: `docs/PAYROLL_RUST_AUTHORIZATION_SLICE.md`.
+
+Verified commands:
+
+```sh
+cargo test -p bitween-payroll-api access::tests
+cargo test -p bitween-payroll-api service::tests
+python -m unittest tests.test_org_access tests.test_payroll_api_contract -v
 npm run typecheck --prefix frontend
 ```
 

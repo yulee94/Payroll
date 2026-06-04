@@ -1,4 +1,8 @@
+use crate::access::{
+    authorize_payroll_request, PayrollAccessDecision, PayrollAction, PayrollPrincipal,
+};
 use crate::policy::OperationPolicySnapshot;
+use crate::request::PayrollRunRequest;
 use crate::response::{validate_payroll_api_payload, PayrollApiResponse};
 use serde::Serialize;
 use serde_json::Value;
@@ -95,6 +99,15 @@ impl PayrollApiService {
         policy_snapshot: impl Into<Option<OperationPolicySnapshot>>,
     ) -> PayrollApiResponse {
         validate_payroll_api_payload(payload, policy_snapshot)
+    }
+
+    pub fn authorize_run_request(
+        &self,
+        request: &PayrollRunRequest,
+        principal: &PayrollPrincipal,
+        action: PayrollAction,
+    ) -> PayrollAccessDecision {
+        authorize_payroll_request(request, principal, action)
     }
 
     pub fn health(&self) -> HealthResponse {
@@ -197,7 +210,9 @@ fn readiness_state(checks: &[ReadinessCheck]) -> ReadinessState {
 
 #[cfg(test)]
 mod tests {
+    use crate::access::{PayrollAction, PayrollPosition, PayrollPrincipal, PayrollRole};
     use crate::policy::{OperationPolicy, OperationPolicySnapshot, PayrollInputBasis};
+    use crate::request::parse_payroll_api_request;
     use crate::service::{
         HealthStatus, PayrollApiService, ReadinessCheck, ReadinessState, ServiceConfig,
     };
@@ -225,6 +240,33 @@ mod tests {
         assert_eq!(value["status"], "validated");
         assert_eq!(value["input_type"], "attendance");
         assert_eq!(value["operation_policy_source"], "site");
+    }
+
+    #[test]
+    fn service_authorizes_parsed_payroll_request() {
+        let service = PayrollApiService::new(ServiceConfig::default());
+        let request = parse_payroll_api_request(json!({
+            "request_id": "req-auth-service",
+            "affiliate": "COSS",
+            "workplace": "Site A",
+            "period": "2026-05",
+            "invoice_path": "invoice.xlsx",
+            "tenant_id": "coss"
+        }))
+        .unwrap();
+        let principal = PayrollPrincipal::new("user-finance", "coss")
+            .with_role(PayrollRole::Finance)
+            .with_position(PayrollPosition::Manager)
+            .with_org_unit("finance")
+            .with_effective_platforms(["payroll"]);
+
+        let decision = service.authorize_run_request(&request, &principal, PayrollAction::Run);
+        let value = serde_json::to_value(&decision).unwrap();
+
+        assert!(decision.allowed);
+        assert_eq!(value["ok"], true);
+        assert_eq!(value["action"], "run");
+        assert_eq!(value["scope"], "COSS/Site A/2026-05");
     }
 
     #[test]
