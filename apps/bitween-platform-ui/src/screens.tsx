@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 import {
@@ -30,10 +30,41 @@ type ScreenProps = {
   readonly onSelect: (id: PlatformId) => void;
 };
 
+type ModuleId = keyof typeof moduleDashboards;
+
+const demoAccount = {
+  companyCode: "0000",
+  password: "admin",
+  userId: "admin"
+} as const;
+
+function isModuleId(id: PlatformId): id is ModuleId {
+  return id !== "home" && id !== "payroll";
+}
+
 export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
   const [companyCode, setCompanyCode] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [password, setPassword] = useState("");
   const [userId, setUserId] = useState("");
-  const canSubmit = companyCode.trim().length > 0 && userId.trim().length > 0;
+  const canSubmit = companyCode.trim().length > 0 && userId.trim().length > 0 && password.trim().length > 0;
+
+  const handleLogin = () => {
+    if (!canSubmit) {
+      setFeedback("demo 계정은 법인코드 0000, 아이디 admin, 비밀번호 admin입니다.");
+      return;
+    }
+    if (
+      companyCode.trim() !== demoAccount.companyCode ||
+      userId.trim() !== demoAccount.userId ||
+      password.trim() !== demoAccount.password
+    ) {
+      setFeedback("demo 계정 정보가 일치하지 않습니다. 법인코드 0000, 아이디 admin, 비밀번호 admin으로 입력하세요.");
+      return;
+    }
+    setFeedback("");
+    onSelect("home");
+  };
 
   return (
     <View style={styles.loginLayout}>
@@ -62,9 +93,11 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
           <Label size="sm" weight="bold">법인 코드</Label>
           <TextInput
             autoCapitalize="characters"
+            autoComplete="organization"
             onChangeText={setCompanyCode}
-            placeholder="예: BTW-2026"
+            placeholder="0000"
             placeholderTextColor={colors.muted}
+            returnKeyType="next"
             style={styles.input}
             value={companyCode}
           />
@@ -73,9 +106,11 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
           <Label size="sm" weight="bold">아이디</Label>
           <TextInput
             autoCapitalize="none"
+            autoComplete="username"
             onChangeText={setUserId}
-            placeholder="업무 계정 아이디"
+            placeholder="admin"
             placeholderTextColor={colors.muted}
+            returnKeyType="next"
             style={styles.input}
             value={userId}
           />
@@ -83,16 +118,26 @@ export function LoginScreen({ onSelect }: Pick<ScreenProps, "onSelect">) {
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">비밀번호</Label>
           <TextInput
-            placeholder="비밀번호"
+            autoComplete="password"
+            onChangeText={setPassword}
+            placeholder="admin"
             placeholderTextColor={colors.muted}
+            returnKeyType="done"
             secureTextEntry
             style={styles.input}
+            value={password}
           />
         </View>
-        <ActionButton onPress={() => onSelect("home")}>{canSubmit ? "플랫폼 홈으로 이동" : "로그인"}</ActionButton>
+        {feedback ? (
+          <View style={styles.inlineNotice}>
+            <Badge tone="attention">확인 필요</Badge>
+            <Label size="sm" muted>{feedback}</Label>
+          </View>
+        ) : null}
+        <ActionButton onPress={handleLogin}>{canSubmit ? "플랫폼 홈으로 이동" : "로그인"}</ActionButton>
         <View style={styles.inlineNotice}>
-          <Badge tone="neutral">관리자 발급</Badge>
-          <Label size="sm" muted>계정이 없으면 관리자에게 법인 계정 발급을 요청하세요.</Label>
+          <Badge tone="neutral">Demo 계정</Badge>
+          <Label size="sm" muted>법인코드 0000 · 아이디 admin · 비밀번호 admin</Label>
         </View>
       </Card>
     </View>
@@ -143,6 +188,24 @@ export function LauncherScreen({ onSelect }: ScreenProps) {
           ))}
         </View>
       </Card>
+      <Card>
+        <SectionHeader
+          eyebrow="Settings summary"
+          title="급여 산출 설정 요약"
+          description="산출 전 확인해야 할 핵심 급여 기준을 한눈에 검토합니다."
+          action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">상세 설정</ActionButton>}
+        />
+        <DataTable rows={payrollSettingsRows} />
+      </Card>
+      <Card>
+        <SectionHeader
+          eyebrow="Preview and archive"
+          title="파일 미리보기 작업"
+          description="Excel 미리보기, 시트 선택, 필터 초기화, 수정본 업로드 같은 사용자 흐름을 분리했습니다."
+          action={<ActionButton onPress={() => onSelect("archive")} variant="secondary">자료함 열기</ActionButton>}
+        />
+        <DataTable rows={previewRows} />
+      </Card>
     </View>
   );
 }
@@ -174,30 +237,12 @@ export function PayrollScreen({ onSelect }: ScreenProps) {
           <ActionButton onPress={() => onSelect("ai")} variant="ghost">AI 검토 준비</ActionButton>
         </View>
       </Card>
-      <Card>
-        <SectionHeader
-          eyebrow="Settings summary"
-          title="급여 산출 설정 요약"
-          description="산출 전 확인해야 할 핵심 급여 기준을 한눈에 검토합니다."
-          action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">상세 설정</ActionButton>}
-        />
-        <DataTable rows={payrollSettingsRows} />
-      </Card>
-      <Card>
-        <SectionHeader
-          eyebrow="Preview and archive"
-          title="파일 미리보기 작업"
-          description="Excel 미리보기, 시트 선택, 필터 초기화, 수정본 업로드 같은 사용자 흐름을 분리했습니다."
-          action={<ActionButton onPress={() => onSelect("archive")} variant="secondary">자료함 열기</ActionButton>}
-        />
-        <DataTable rows={previewRows} />
-      </Card>
     </View>
   );
 }
 
 export function ModuleScreen({ active, onSelect }: ScreenProps) {
-  if (active.id === "home" || active.id === "payroll") {
+  if (!isModuleId(active.id)) {
     return (
       <Card>
         <EmptyState title="화면을 준비하고 있습니다." description="선택한 메뉴는 전용 화면으로 이동됩니다." />
@@ -206,6 +251,23 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
   }
 
   const dashboard = moduleDashboards[active.id];
+  const defaultFilter = dashboard.filters[0] ?? "전체";
+  const [activeFilter, setActiveFilter] = useState<string>(defaultFilter);
+  const [search, setSearch] = useState("");
+  const filteredRows = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    return dashboard.rows.filter((row) => {
+      const haystack = [row.category, row.status, row.owner, row.nextStep].join(" ").toLowerCase();
+      const matchesFilter = activeFilter === "전체" || haystack.includes(activeFilter.toLowerCase());
+      const matchesSearch = normalizedSearch.length === 0 || haystack.includes(normalizedSearch);
+      return matchesFilter && matchesSearch;
+    });
+  }, [activeFilter, dashboard.rows, search]);
+
+  useEffect(() => {
+    setActiveFilter(defaultFilter);
+    setSearch("");
+  }, [active.id, defaultFilter]);
 
   return (
     <View style={styles.stack}>
@@ -225,12 +287,26 @@ export function ModuleScreen({ active, onSelect }: ScreenProps) {
           description="필터로 상태를 좁히고 필요한 다음 작업을 확인합니다."
           action={<ActionButton onPress={() => onSelect(dashboard.secondaryAction.target)} variant="secondary">{dashboard.secondaryAction.label}</ActionButton>}
         />
-        <FilterBar filters={dashboard.filters} />
-        {dashboard.rows.length > 0 ? (
-          <DataTable rows={dashboard.rows} />
-        ) : (
-          <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />
-        )}
+        <View style={styles.listToolbar}>
+          <FilterBar active={activeFilter} filters={dashboard.filters} onSelect={setActiveFilter} />
+          <View style={styles.searchGroup}>
+            <Label size="sm" weight="bold">검색</Label>
+            <TextInput
+              autoCapitalize="none"
+              onChangeText={setSearch}
+              placeholder="업무, 상태, 담당자 검색"
+              placeholderTextColor={colors.muted}
+              returnKeyType="search"
+              style={styles.input}
+              value={search}
+            />
+          </View>
+        </View>
+        <View style={styles.listSummary}>
+          <Label weight="bold">{filteredRows.length}건</Label>
+          <Label size="sm" muted>{activeFilter} 필터{search ? ` · "${search}" 검색` : ""}</Label>
+        </View>
+        {dashboard.rows.length > 0 ? <DataTable rows={filteredRows} /> : <EmptyState title={dashboard.emptyTitle} description={dashboard.emptyDescription} />}
       </Card>
 
       <View style={styles.actionPanels}>
@@ -286,18 +362,18 @@ const styles = StyleSheet.create({
   formGroup: {
     gap: spacing.xs
   },
-  heroBrand: {
-    color: colors.card,
-    fontSize: 24,
-    fontWeight: "800",
-    lineHeight: 32
-  },
   heroCopy: {
     color: colors.card,
     fontSize: 15,
     fontWeight: "600",
     lineHeight: 22,
     maxWidth: 460
+  },
+  heroBrand: {
+    color: colors.card,
+    fontSize: 24,
+    fontWeight: "800",
+    lineHeight: 32
   },
   heroStatus: {
     backgroundColor: "#FFFFFF22",
@@ -341,6 +417,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md
   },
+  listSummary: {
+    alignItems: "center",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm
+  },
+  listToolbar: {
+    alignItems: "flex-end",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md
+  },
   launcherCard: {
     backgroundColor: colors.bg,
     borderColor: colors.border,
@@ -356,10 +450,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.md
-  },
-  loginCard: {
-    flexBasis: 360,
-    flexGrow: 1
   },
   loginHero: {
     backgroundColor: colors.accent,
@@ -382,6 +472,15 @@ const styles = StyleSheet.create({
     gap: spacing.xl,
     maxWidth: 1120,
     width: "100%"
+  },
+  loginCard: {
+    flexBasis: 360,
+    flexGrow: 1
+  },
+  searchGroup: {
+    flexBasis: 240,
+    flexGrow: 1,
+    gap: spacing.xs
   },
   queueGrid: {
     flexDirection: "row",

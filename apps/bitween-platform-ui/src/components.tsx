@@ -119,15 +119,27 @@ export function MetricGrid({ items }: { readonly items: readonly MetricItem[] })
   );
 }
 
-export function FilterBar({ active = 0, filters }: { readonly active?: number; readonly filters: readonly string[] }) {
+type FilterBarProps = {
+  readonly active?: string;
+  readonly filters: readonly string[];
+  readonly onSelect?: (filter: string) => void;
+};
+
+export function FilterBar({ active, filters, onSelect }: FilterBarProps) {
+  const selectedFilter = active ?? filters[0] ?? "";
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterBar}>
-      {filters.map((filter, index) => {
-        const selected = index === active;
+      {filters.map((filter) => {
+        const selected = filter === selectedFilter;
         return (
-          <View key={filter} style={[styles.filterChip, selected && styles.filterChipActive]}>
+          <Pressable
+            accessibilityRole="button"
+            key={filter}
+            onPress={() => onSelect?.(filter)}
+            style={({ pressed }) => [styles.filterChip, selected && styles.filterChipActive, pressed && styles.buttonPressed]}
+          >
             <Text style={[styles.filterText, selected && styles.filterTextActive]}>{filter}</Text>
-          </View>
+          </Pressable>
         );
       })}
     </ScrollView>
@@ -298,11 +310,11 @@ const styles = StyleSheet.create({
   buttonGhost: {
     backgroundColor: "transparent"
   },
-  buttonPressed: {
-    opacity: 0.86
-  },
   buttonPrimary: {
     backgroundColor: colors.accent
+  },
+  buttonPressed: {
+    opacity: 0.86
   },
   buttonSecondary: {
     backgroundColor: colors.accentSoft,
