@@ -8,6 +8,7 @@ const clients = new Set();
 const types = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
   ".js": "text/javascript; charset=utf-8"
 };
 
@@ -37,6 +38,10 @@ const server = http.createServer((req, res) => {
   }
 
   const urlPath = decodeURIComponent((req.url || "/").split("?")[0]);
+  if (urlPath === "/catalog.json") {
+    sendFile(res, path.join(root, "..", "src", "i18n", "catalog.json"));
+    return;
+  }
   const safePath = urlPath === "/" ? "/index.html" : urlPath;
   const filePath = path.normalize(path.join(root, safePath));
   if (!filePath.startsWith(root)) {
@@ -47,8 +52,13 @@ const server = http.createServer((req, res) => {
   sendFile(res, filePath);
 });
 
-for (const file of ["index.html", "styles.css", "app.js"]) {
-  fs.watch(path.join(root, file), { persistent: false }, () => {
+for (const filePath of [
+  path.join(root, "index.html"),
+  path.join(root, "styles.css"),
+  path.join(root, "app.js"),
+  path.join(root, "..", "src", "i18n", "catalog.json")
+]) {
+  fs.watch(filePath, { persistent: false }, () => {
     for (const client of clients) client.write("event: reload\ndata: now\n\n");
   });
 }

@@ -49,6 +49,7 @@ export type WorkQueueItem = {
   readonly owner: string;
   readonly due: string;
   readonly status: string;
+  readonly target: PlatformId;
   readonly tone: ReadinessTone;
 };
 
@@ -89,6 +90,7 @@ export type ModuleRow = {
   readonly status: string;
   readonly owner: string;
   readonly nextStep: string;
+  readonly target: PlatformId;
   readonly tone: ReadinessTone;
 };
 
