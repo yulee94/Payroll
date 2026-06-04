@@ -16,6 +16,8 @@ pub const WF_ROLE_FINANCE: &str = "finance";
 pub const WF_ROLE_HR: &str = "hr";
 pub const WF_ROLE_VIEWER: &str = "viewer";
 
+pub const DOC_TYPE_BUSINESS_TRIP_REQUEST: &str = "BUSINESS_TRIP_REQUEST";
+
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BusinessTripPrincipal {
     pub user_id: String,
@@ -39,6 +41,7 @@ pub struct BusinessTripPermissionTrip {
     pub tenant_id: String,
     pub origin_tenant_id: String,
     pub legal_tenant_id: String,
+    pub legal_entity_id: String,
     pub requester_id: String,
     pub traveler_user_id: String,
     pub executor_id: String,
@@ -47,6 +50,18 @@ pub struct BusinessTripPermissionTrip {
     pub org_unit_id: String,
     pub approver_ids: Vec<String>,
     pub approval_user_ids: Vec<String>,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BusinessTripPermissionDocument {
+    pub document_type: String,
+    pub origin_tenant_id: String,
+    pub legal_tenant_id: String,
+    pub legal_entity_id: String,
+    pub content_trip_id: String,
+    pub content_origin_tenant_id: String,
+    pub content_legal_tenant_id: String,
+    pub content_legal_entity_id: String,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -119,6 +134,39 @@ pub fn is_business_trip_legal_scope_allowed(
         return true;
     }
     !storage_tenant.is_empty() && user_tenant == storage_tenant && storage_tenant != origin_tenant
+}
+
+pub fn is_business_trip_related_document(document: &BusinessTripPermissionDocument) -> bool {
+    clean(&document.document_type) == DOC_TYPE_BUSINESS_TRIP_REQUEST
+        || !clean(&document.content_trip_id).is_empty()
+}
+
+pub fn is_business_trip_document_legal_scope_allowed(
+    principal: &BusinessTripPrincipal,
+    document: &BusinessTripPermissionDocument,
+    tenant_id: &str,
+) -> bool {
+    if !is_business_trip_related_document(document) {
+        return true;
+    }
+
+    let storage_tenant = clean(tenant_id);
+    let origin_tenant = first_nonempty(&[
+        document.origin_tenant_id.as_str(),
+        document.content_origin_tenant_id.as_str(),
+        document.content_legal_tenant_id.as_str(),
+        storage_tenant.as_str(),
+    ]);
+    let trip = BusinessTripPermissionTrip {
+        tenant_id: storage_tenant.clone(),
+        origin_tenant_id: origin_tenant,
+        legal_entity_id: first_nonempty(&[
+            document.legal_entity_id.as_str(),
+            document.content_legal_entity_id.as_str(),
+        ]),
+        ..BusinessTripPermissionTrip::default()
+    };
+    is_business_trip_legal_scope_allowed(principal, &trip, &storage_tenant)
 }
 
 pub fn can_view_business_trip_lifecycle(input: &BusinessTripPermissionInput) -> bool {
@@ -483,6 +531,74 @@ mod tests {
 
         assert!(can_view_business_trip_lifecycle(&permission));
         assert!(!can_manage_business_trip_lifecycle(&permission));
+    }
+
+    fn document(document_type: &str) -> BusinessTripPermissionDocument {
+        BusinessTripPermissionDocument {
+            document_type: document_type.to_string(),
+            ..BusinessTripPermissionDocument::default()
+        }
+    }
+
+    #[test]
+    fn business_trip_document_relatedness_matches_python_shape() {
+        let mut request_document = document(DOC_TYPE_BUSINESS_TRIP_REQUEST);
+        assert!(is_business_trip_related_document(&request_document));
+
+        request_document.document_type = "GENERAL".to_string();
+        request_document.content_trip_id = "trip-1".to_string();
+        assert!(is_business_trip_related_document(&request_document));
+
+        let unrelated = document("GENERAL");
+        assert!(!is_business_trip_related_document(&unrelated));
+    }
+
+    #[test]
+    fn business_trip_document_legal_scope_matches_python_boundary() {
+        let mut unrelated = document("GENERAL");
+        unrelated.origin_tenant_id = "tenant-a".to_string();
+        assert!(is_business_trip_document_legal_scope_allowed(
+            &principal("sibling-admin", "tenant-b", "admin"),
+            &unrelated,
+            "workflow-root"
+        ));
+
+        let mut related = document(DOC_TYPE_BUSINESS_TRIP_REQUEST);
+        related.origin_tenant_id = "tenant-a".to_string();
+        assert!(is_business_trip_document_legal_scope_allowed(
+            &principal("hq-admin", "workflow-root", "admin"),
+            &related,
+            "workflow-root"
+        ));
+        assert!(is_business_trip_document_legal_scope_allowed(
+            &principal("tenant-admin", "tenant-a", "admin"),
+            &related,
+            "workflow-root"
+        ));
+        assert!(is_business_trip_document_legal_scope_allowed(
+            &principal("legacy-session", "", "staff"),
+            &related,
+            "workflow-root"
+        ));
+        assert!(!is_business_trip_document_legal_scope_allowed(
+            &principal("sibling-admin", "tenant-b", "admin"),
+            &related,
+            "workflow-root"
+        ));
+
+        let mut payload_scoped = document("GENERAL");
+        payload_scoped.content_trip_id = "trip-2".to_string();
+        payload_scoped.content_legal_tenant_id = "tenant-c".to_string();
+        assert!(is_business_trip_document_legal_scope_allowed(
+            &principal("tenant-c-user", "tenant-c", "staff"),
+            &payload_scoped,
+            "workflow-root"
+        ));
+        assert!(!is_business_trip_document_legal_scope_allowed(
+            &principal("tenant-a-user", "tenant-a", "staff"),
+            &payload_scoped,
+            "workflow-root"
+        ));
     }
 
     #[test]
