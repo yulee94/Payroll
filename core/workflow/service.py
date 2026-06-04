@@ -47,6 +47,7 @@ from core.workflow.constants import (
     TRIP_STATUS_OVERDUE,
     TRIP_STATUS_PLANNED,
     TRIP_STATUS_LABELS,
+    TRIP_STATUSES,
     WF_ROLE_ADMIN,
     WF_ROLE_DEPT_MANAGER,
     WF_ROLE_EXECUTIVE,
@@ -79,6 +80,13 @@ def _uid(sess: UserSession) -> str:
 def _assert_session_tenant(sess: UserSession, tenant_id: str, message: str) -> None:
     if _resolve_tenant(sess.tenant_id) != tenant_id:
         raise PermissionError(message)
+
+
+def _normalize_requested_trip_status(status: str) -> str:
+    target = str(status or "").strip()
+    if target not in TRIP_STATUSES:
+        raise ValueError(f"Invalid business trip status: {status}")
+    return target
 
 
 def _is_business_trip_document(doc: dict[str, Any]) -> bool:
@@ -236,6 +244,8 @@ def _assert_business_trip_completion_prerequisites(db: dict[str, Any], trip: dic
 
 
 def _assert_business_trip_terminal_fields_allowed(db: dict[str, Any], trip: dict[str, Any]) -> None:
+    if trip.get("status") == TRIP_STATUS_DIARY_DUE:
+        _assert_business_trip_execution_task_completed(db, trip)
     if trip.get("status") == TRIP_STATUS_COMPLETED or trip.get("kpi_reflection_status") in (
         KPI_REFLECTION_READY,
         KPI_REFLECTION_REFLECTED,
@@ -580,6 +590,7 @@ def list_documents(
 ) -> list[dict[str, Any]]:
     tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "문서를 조회할 권한이 없습니다.")
     db = _load_raw(tenant_id)
     docs = [_attach_steps(db, d) for d in db.get("documents") or []]
     visible = [d for d in docs if wf_perm.can_view_document(sess, d, tenant_id=tenant_id)]
@@ -604,6 +615,7 @@ def inbox_counts(tenant_id: str, *, session: UserSession | None = None) -> dict[
 def get_document(tenant_id: str, document_id: str, *, session: UserSession | None = None) -> dict[str, Any]:
     tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "문서를 조회할 권한이 없습니다.")
     db = _load_raw(tenant_id)
     for d in db.get("documents") or []:
         if d.get("id") == document_id:
@@ -659,6 +671,7 @@ def create_document(
     sess = session or require_session()
     origin_tid = sess.tenant_id
     wf_tid = _resolve_tenant(tenant_id or origin_tid)
+    _assert_session_tenant(sess, wf_tid, "문서를 작성할 권한이 없습니다.")
     from core.group_store import get_group_for_tenant
     from core.workflow.config_store import get_entity_for_tenant
 
@@ -739,7 +752,9 @@ def update_document(
     fields: dict[str, Any],
     session: UserSession | None = None,
 ) -> dict[str, Any]:
+    tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "문서를 수정할 권한이 없습니다.")
 
     def mut(db: dict[str, Any]) -> None:
         for d in db.get("documents") or []:
@@ -850,6 +865,7 @@ def submit_document(
 ) -> dict[str, Any]:
     tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "상신할 수 없습니다.")
     if not approval_line:
         raise ValueError("결재라인이 필요합니다.")
     for i, step in enumerate(approval_line, start=1):
@@ -938,6 +954,7 @@ def approve_document(
 ) -> dict[str, Any]:
     tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "결재할 권한이 없습니다.")
 
     def mut(db: dict[str, Any]) -> None:
         doc = next((d for d in db.get("documents") or [] if d.get("id") == document_id), None)
@@ -1017,6 +1034,7 @@ def reject_document(
 ) -> dict[str, Any]:
     tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "반려할 권한이 없습니다.")
 
     def mut(db: dict[str, Any]) -> None:
         doc = next((d for d in db.get("documents") or [] if d.get("id") == document_id), None)
@@ -1063,6 +1081,7 @@ def cancel_document(
 ) -> dict[str, Any]:
     tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "문서를 취소할 권한이 없습니다.")
 
     def mut(db: dict[str, Any]) -> None:
         doc = next((d for d in db.get("documents") or [] if d.get("id") == document_id), None)
@@ -1113,7 +1132,9 @@ def request_changes(
     comment: str = "",
     session: UserSession | None = None,
 ) -> dict[str, Any]:
+    tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "보완 요청 권한이 없습니다.")
 
     def mut(db: dict[str, Any]) -> None:
         doc = next((d for d in db.get("documents") or [] if d.get("id") == document_id), None)
@@ -1244,7 +1265,9 @@ def complete_execution_task(
 
 
 def site_summary(tenant_id: str, month: str, *, session: UserSession | None = None) -> dict[str, Any]:
+    tenant_id = _resolve_tenant(tenant_id)
     sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "사업장 보고서를 조회할 권한이 없습니다.")
     db = _load_raw(tenant_id)
     docs = db.get("documents") or []
     tasks = db.get("execution_tasks") or []
@@ -1288,7 +1311,10 @@ def site_summary(tenant_id: str, month: str, *, session: UserSession | None = No
 
 
 def executive_summary(tenant_id: str, month: str, *, session: UserSession | None = None) -> dict[str, Any]:
-    site = site_summary(tenant_id, month, session=session)
+    tenant_id = _resolve_tenant(tenant_id)
+    sess = session or require_session()
+    _assert_session_tenant(sess, tenant_id, "임원 보고서를 조회할 권한이 없습니다.")
+    site = site_summary(tenant_id, month, session=sess)
     total_expense = sum(s.get("expense_amount", 0) for s in site.get("sites", []))
     total_purchase = sum(s.get("purchase_amount", 0) for s in site.get("sites", []))
     pending = sum(s.get("pending_approvals", 0) for s in site.get("sites", []))
@@ -1432,6 +1458,7 @@ def transition_business_trip_lifecycle(
         raise PermissionError("출장 lifecycle을 변경할 권한이 없습니다.")
     if not wf_perm.can_administer_business_trip_lifecycle(sess, tenant_id=tenant_id):
         raise PermissionError("출장 lifecycle을 변경할 권한이 없습니다.")
+    target_status = _normalize_requested_trip_status(status)
 
     def mut(db: dict[str, Any]) -> dict[str, Any]:
         from core.workflow.business_trip import transition_trip_status
@@ -1439,12 +1466,12 @@ def transition_business_trip_lifecycle(
         for row in db.get("business_trips") or []:
             if row.get("trip_id") != trip_id and row.get("id") != trip_id:
                 continue
-            if status in (TRIP_STATUS_DIARY_DUE, TRIP_STATUS_COMPLETED):
+            if target_status in (TRIP_STATUS_DIARY_DUE, TRIP_STATUS_COMPLETED):
                 _assert_business_trip_execution_task_completed(db, row)
-            if status == TRIP_STATUS_COMPLETED and not _business_trip_report_document_is_approved(db, row):
+            if target_status == TRIP_STATUS_COMPLETED and not _business_trip_report_document_is_approved(db, row):
                 raise ValueError("승인된 출장보고서 연결 후 완료 전이가 가능합니다.")
             before = deepcopy(row)
-            updated = transition_trip_status(row, status)
+            updated = transition_trip_status(row, target_status)
             if updated == before:
                 return updated
             row.clear()

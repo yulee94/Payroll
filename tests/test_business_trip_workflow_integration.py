@@ -223,6 +223,30 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         diary_due_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
         self.assertEqual(diary_due_trip["status"], TRIP_STATUS_DIARY_DUE)
 
+    def test_admin_repair_normalizes_status_before_terminal_gates(self) -> None:
+        sess = self._session()
+        doc = self._create_business_trip_document(session=sess)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": sess.user_id, "approver_role": "admin"}],
+            session=sess,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=sess)
+
+        wf_svc.transition_business_trip_lifecycle(self._tenant, trip_id, "in_progress", session=sess)
+        for raw_status in ("diary_due ", " completed "):
+            with self.assertRaises(ValueError):
+                wf_svc.transition_business_trip_lifecycle(self._tenant, trip_id, raw_status, session=sess)
+        with self.assertRaises(ValueError):
+            wf_svc.transition_business_trip_lifecycle(self._tenant, trip_id, "COMPLETED", session=sess)
+
+        pending_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=sess)
+        self.assertEqual(pending_trip["status"], TRIP_STATUS_IN_PROGRESS)
+        self.assertEqual(pending_trip["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
+        self.assertEqual(pending_trip["report_document_id"], "")
+
     def test_same_tenant_user_cannot_link_report_to_another_users_trip(self) -> None:
         owner = self._session("owner", role="admin")
         doc = self._create_business_trip_document(session=owner)
@@ -340,6 +364,75 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
         ready_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=owner)
         self.assertEqual(ready_trip["kpi_reflection_status"], KPI_REFLECTION_READY)
 
+    def test_cross_tenant_admin_cannot_mutate_trip_report_documents(self) -> None:
+        owner = self._session("owner", role="admin")
+        doc = self._create_business_trip_document(session=owner)
+        trip_id = doc["content_json"]["trip_id"]
+        wf_svc.submit_document(
+            self._tenant,
+            doc["id"],
+            [{"approver_id": owner.user_id, "approver_role": "admin"}],
+            session=owner,
+        )
+        wf_svc.approve_document(self._tenant, doc["id"], session=owner)
+        task = wf_svc.list_execution_tasks(self._tenant, session=owner)[0]
+        wf_svc.complete_execution_task(self._tenant, task["id"], session=owner)
+        other_admin = UserSession(
+            user_id="other-admin",
+            tenant_id="other-tenant",
+            username="other-admin",
+            display_name="other-admin",
+            role="admin",
+        )
+
+        with self.assertRaises(PermissionError):
+            wf_svc.create_document(
+                self._tenant,
+                document_type=DOC_TYPE_GENERAL,
+                title="출장보고서",
+                summary="타 테넌트 관리자 보고",
+                payload={
+                    "trip_id": trip_id,
+                    "source_document_id": doc["id"],
+                    "template_name": "출장보고서",
+                    "business_trip_artifact": "trip_report",
+                },
+                session=other_admin,
+            )
+
+        report = wf_svc.create_document(
+            self._tenant,
+            document_type=DOC_TYPE_GENERAL,
+            title="출장보고서",
+            summary="출장 결과 보고",
+            payload={
+                "trip_id": trip_id,
+                "source_document_id": doc["id"],
+                "template_name": "출장보고서",
+                "business_trip_artifact": "trip_report",
+            },
+            session=owner,
+        )
+        with self.assertRaises(PermissionError):
+            wf_svc.submit_document(
+                self._tenant,
+                report["id"],
+                [{"approver_id": "other-admin", "approver_role": "admin"}],
+                session=other_admin,
+            )
+        wf_svc.submit_document(
+            self._tenant,
+            report["id"],
+            [{"approver_id": "other-admin", "approver_role": "admin"}],
+            session=owner,
+        )
+        with self.assertRaises(PermissionError):
+            wf_svc.approve_document(self._tenant, report["id"], session=other_admin)
+
+        unchanged_trip = wf_svc.get_business_trip(self._tenant, trip_id, session=owner)
+        self.assertEqual(unchanged_trip["status"], TRIP_STATUS_DIARY_DUE)
+        self.assertEqual(unchanged_trip["kpi_reflection_status"], KPI_REFLECTION_BLOCKED)
+
     def test_reject_and_cancel_paths_update_lifecycle_without_duplicate_rows(self) -> None:
         sess = self._session()
         rejected_doc = self._create_business_trip_document(session=sess)
@@ -436,6 +529,24 @@ class BusinessTripWorkflowIntegrationTests(unittest.TestCase):
 
         self.assertEqual(trip["tenant_id"], self._tenant)
         self.assertEqual(len(wf_svc.list_business_trips(self._tenant, session=sess)), 1)
+
+    def test_direct_upsert_cannot_seed_diary_due_without_execution_task(self) -> None:
+        sess = self._session()
+        with self.assertRaises(ValueError):
+            wf_svc.upsert_business_trip_lifecycle(
+                self._tenant,
+                fields={
+                    "trip_id": "manual-diary-due-without-task",
+                    "title": "실행 증빙 없는 보고 대기 출장",
+                    "status": TRIP_STATUS_DIARY_DUE,
+                    "requester_id": sess.user_id,
+                    "executor_id": sess.user_id,
+                    "site_id": "site-a",
+                    "department_id": "dept-a",
+                    "source": {"kind": "manual", "dedupe_key": "manual:diary-due-without-task"},
+                },
+                session=sess,
+            )
 
     def test_cross_tenant_session_cannot_complete_execution_task(self) -> None:
         owner = self._session("owner", role="admin")
