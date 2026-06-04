@@ -11,7 +11,9 @@
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
     "check:strict-config": "node scripts/check-strict-config.js",
-    "preview": "node preview/server.js"
+    "preview": "node preview/server.js",
+    "export:web": "expo export --platform web",
+    "verify:i18n": "node scripts/verify-i18n-catalog.mjs"
   },
   "dependencies": {
     "@expo/metro-runtime": "^6.1.2",
