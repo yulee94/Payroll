@@ -43,6 +43,20 @@ def _scope_payload(payload: Mapping[str, Any]) -> Mapping[str, Any]:
     return payload
 
 
+def _request_id(payload: Mapping[str, Any] | None) -> str:
+    try:
+        data = _payload_mapping(payload)
+    except TypeError:
+        return ""
+    metadata = data.get("metadata") if isinstance(data.get("metadata"), Mapping) else {}
+    return _text(
+        data.get("request_id")
+        or data.get("requestId")
+        or metadata.get("request_id")
+        or metadata.get("requestId")
+    )
+
+
 def scope_from_api_payload(payload: Mapping[str, Any] | None) -> PayrollScope:
     """Build PayrollScope from scope key or affiliate/workplace/period fields."""
     data = _payload_mapping(payload)
@@ -103,14 +117,41 @@ def build_payroll_api_request(payload: Mapping[str, Any] | None) -> PayrollAutom
     )
 
 
-def payroll_api_response(result: PayrollAutomationResult) -> dict[str, Any]:
+def payroll_api_response(
+    result: PayrollAutomationResult,
+    *,
+    request_id: str = "",
+) -> dict[str, Any]:
     """Return a stable JSON-friendly response shape."""
     payload = result.as_dict()
     payload["status"] = "success" if result.ok else "error"
+    if request_id:
+        payload["request_id"] = request_id
+    return payload
+
+
+def payroll_api_error_response(
+    exc: Exception,
+    *,
+    request_id: str = "",
+) -> dict[str, Any]:
+    message = str(exc) or "급여 자동화 요청을 처리할 수 없습니다."
+    payload: dict[str, Any] = {
+        "ok": False,
+        "status": "error",
+        "error": message,
+        "warnings": [message],
+    }
+    if request_id:
+        payload["request_id"] = request_id
     return payload
 
 
 def run_payroll_api(payload: Mapping[str, Any] | None) -> dict[str, Any]:
     """Framework-neutral API entrypoint for payroll automation."""
-    request = build_payroll_api_request(payload)
-    return payroll_api_response(run_payroll_automation(request))
+    request_id = _request_id(payload)
+    try:
+        request = build_payroll_api_request(payload)
+    except (TypeError, ValueError) as exc:
+        return payroll_api_error_response(exc, request_id=request_id)
+    return payroll_api_response(run_payroll_automation(request), request_id=request_id)
