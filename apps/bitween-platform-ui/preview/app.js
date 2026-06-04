@@ -465,7 +465,7 @@ function languageSelector() {
 }
 
 function field(label, id, placeholder, type = "text", value = "") {
-  return `<label class="field" for="${id}"><span>${escapeText(label)}</span><input id="${id}" type="${type}" value="${escapeText(value)}" placeholder="${escapeText(placeholder)}" /></label>`;
+  return `<label class="field" for="${id}"><span>${escapeText(label)}</span><input aria-label="${escapeText(label)}" id="${id}" type="${type}" value="${escapeText(value)}" placeholder="${escapeText(placeholder)}" /></label>`;
 }
 
 function renderShell() {
