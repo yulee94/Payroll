@@ -117,6 +117,12 @@ const travelStageDefs = [
   ["travel-review", "05", "ready"]
 ].map(([id, index, tone]) => ({ id, index, tone }));
 
+const hrPeopleReviewDefs = [
+  ["roster", "ready", "attendance"],
+  ["certificates", "attention", "archive"],
+  ["placement", "neutral", "recruit"]
+].map(([id, tone, target]) => ({ id, target, tone }));
+
 const adminPermissionDefs = [
   ["role-owner", "ready"],
   ["role-manager", "neutral"],
@@ -650,6 +656,7 @@ function renderModule(id) {
       ${metrics(data.metrics)}
     </section>
     ${id === "attendance" ? attendancePhonePanel() : ""}
+    ${id === "hr" ? hrPeoplePanel() : ""}
     ${id === "travel" ? travelWorklogPanel() : ""}
     ${id === "admin" ? adminAccountPanel() : ""}
     ${id === "archive" ? archiveLibraryPanel() : ""}
@@ -711,6 +718,20 @@ function aiWorkspacePanel() {
         <div class="action-row">${button(t("screens.ai.preview.actions.payroll"), "payroll", "secondary")}${button(t("screens.ai.preview.actions.archive"), "archive", "ghost")}</div>
       </div>
     </div>
+  </section>`;
+}
+
+function hrPeoplePanel() {
+  return `<section class="card">
+    ${sectionHead("", t("screens.hrPeople.title"), t("screens.hrPeople.description"), button(t("screens.hrPeople.action"), "recruit", "secondary"))}
+    <div class="hr-people-grid">${hrPeopleReviewDefs.map((item) => `
+      <button class="hr-people-card" data-target="${item.target}" style="border-top-color:${toneColor(item.tone)}">
+        <div class="hr-people-head"><span class="helper">${t(`screens.hrPeople.cards.${item.id}.label`)}</span>${badge(t(`screens.hrPeople.cards.${item.id}.status`), item.tone)}</div>
+        <strong>${t(`screens.hrPeople.cards.${item.id}.title`)}</strong>
+        <span class="helper">${t(`screens.hrPeople.cards.${item.id}.detail`)}</span>
+      </button>
+    `).join("")}</div>
+    <div class="notice">${badge(t("screens.hrPeople.notice.badge"), "neutral")}<span class="helper">${t("screens.hrPeople.notice.description")}</span></div>
   </section>`;
 }
 
