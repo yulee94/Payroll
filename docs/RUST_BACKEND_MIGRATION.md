@@ -298,6 +298,38 @@ Verification evidence for this checkpoint:
 
 Slice spec: `docs/PAYROLL_RUST_EARNINGS_CALCULATION_SLICE.md`.
 
+## Current implementation checkpoint: Rust payroll salary calculation
+
+Implemented on 2026-06-04 as the next payroll calculation behavior slice:
+
+- `crates/payroll-api` now exposes `PayrollSalaryInput`,
+  `PayrollSalaryDeductions`, `PayrollSalaryTaxMethod`,
+  `PayrollSalaryResult`, and `calculate_payroll_salary`.
+- `PayrollApiService::calculate_payroll_salary` composes Rust-owned earnings
+  and social-insurance calculations with calculator-compatible income/local tax
+  handling to produce a complete supplied-input one-employee salary result.
+- Rust preserves Python compatibility for `calculator.calculate_salary` labels,
+  ordinary hourly output, hours, earnings, insurance deductions, income/local tax
+  rounding, uppercase tax method values, total deductions, and net pay.
+- Python remains responsible for invoice parsing, employee master merge,
+  string/cell normalization, age/KCOMWEL/EDI resolution, workbook
+  parsing/writing, and final payroll record assembly until those boundaries move
+  behind parity tests.
+- TypeScript and Python contract metadata now include salary input, deductions,
+  tax-method, and result DTO shapes.
+
+Verification evidence for this checkpoint:
+
+- `cargo fmt --check`
+- `cargo test --workspace`
+- `buck2 test //crates/payroll-api:payroll_api_test`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_payroll_api_contract -v`
+- `npm run typecheck --prefix frontend`
+- `git diff --check`
+- `cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant`
+
+Slice spec: `docs/PAYROLL_RUST_SALARY_CALCULATION_SLICE.md`.
+
 ## Current implementation checkpoint: Rust payroll EI 65+ decision
 
 Implemented on 2026-06-04 as the next payroll decision behavior slice:

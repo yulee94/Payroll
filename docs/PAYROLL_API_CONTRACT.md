@@ -22,6 +22,7 @@ Rust transition entry point:
 - Invoice audit batch function: `PayrollApiService::audit_invoice_batch(items, workplace)`
 - Social-insurance calculation function: `PayrollApiService::calculate_social_insurance(input)`
 - Earnings calculation function: `PayrollApiService::calculate_payroll_earnings(input)`
+- Salary calculation function: `PayrollApiService::calculate_payroll_salary(input)`
 - Deduction finalization function: `PayrollApiService::finalize_payroll_deductions(input)`
 - Employment-insurance 65+ decision function: `PayrollApiService::resolve_ei_65_for_payroll(input)`
 - EDI insurance premium application function: `PayrollApiService::apply_edi_premiums_to_invoice(invoice, edi_record, edi_config, payroll_period)`
@@ -32,7 +33,7 @@ Rust transition entry point:
 - Health function: `PayrollApiService::health()`
 - Readiness function: `PayrollApiService::readiness(checks)`
 - Authorization function: `PayrollApiService::authorize_run_request(request, principal, action)`
-- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, social-insurance calculation, supplied-input earnings/gross/taxable-pay calculation, final deduction/net-pay calculation, employment-insurance 65+ payroll decisions, EDI insurance premium payroll row application, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
+- Purpose: move payroll request validation, scope parsing, input-method resolution, operation-policy resolution precedence, attendance aggregation, workplace monthly-hours application, invoice audit row evaluation and batch summarization, social-insurance calculation, supplied-input earnings/gross/taxable-pay calculation, supplied-input salary calculation, final deduction/net-pay calculation, employment-insurance 65+ payroll decisions, EDI insurance premium payroll row application, site-benefits payroll row application, fixed-hours payroll row application, execution routing/planning, run-result response envelope shaping, probe-safe service boundary responses, and tenant/RBAC/ABAC authorization decisions into Rust.
 
 Compatibility adapter:
 
@@ -363,6 +364,55 @@ Example earnings output:
   "gross_pay": 2871528,
   "non_taxable_pay": 121000,
   "taxable_pay": 2750528
+}
+```
+
+## Payroll Salary Calculation
+
+Python compatibility code may still parse invoices, merge employee masters,
+normalize strings/cell values, determine age/KCOMWEL or EDI overrides, write
+workbooks, and assemble final payroll records. Once callers supply normalized
+salary inputs, Rust owns the pure one-employee salary calculation through
+`calculate_payroll_salary(input)` and
+`PayrollApiService::calculate_payroll_salary(input)`.
+
+Salary calculation invariants:
+
+1. Salary calculation composes the Rust-owned earnings and social-insurance
+   calculations from supplied inputs.
+2. `taxable_pay` remains the earnings taxable pay (`gross_pay -
+   non_taxable_pay`) used by `calculator.calculate_salary`.
+3. Preset income tax is rounded to won and local income tax is rounded to won at
+   10%, preserving `tax.calculate_tax` behavior for this calculator path.
+4. `tax_method` uses calculator-compatible uppercase values: `PRESET` and
+   `SIMPLIFIED_TABLE`.
+5. `total_deductions` is social-insurance total plus income/local tax total, and
+   `net_pay` is `gross_pay - total_deductions`.
+
+Example supplied salary output:
+
+```json
+{
+  "name": "홍길동",
+  "emp_no": "E001",
+  "department": "Payroll",
+  "account_no": "111-222",
+  "ordinary_hourly": 10478.47,
+  "deductions": {
+    "national_pension": 123774,
+    "health_insurance": 97506,
+    "long_term_care": 12627,
+    "employment_insurance": 24750,
+    "income_tax": 210000,
+    "local_income_tax": 21000,
+    "total": 489657
+  },
+  "gross_pay": 2871528,
+  "non_taxable_pay": 121000,
+  "taxable_pay": 2750528,
+  "total_deductions": 489657,
+  "net_pay": 2381871,
+  "tax_method": "SIMPLIFIED_TABLE"
 }
 ```
 
@@ -1143,6 +1193,7 @@ Frontend code must use `error_code`, not parse `error` text.
 - Rust owns supplied-input invoice audit batch summarization through `PayrollApiService::audit_invoice_batch`; Python still supplies resolved row inputs and keeps UI text rendering compatibility.
 - Rust owns supplied-input social-insurance calculation through `PayrollApiService::calculate_social_insurance`; Python still parses identities, determines age/KCOMWEL eligibility, reads roster/master workbooks, applies EDI premium overrides, and mutates payroll rows.
 - Rust owns supplied-input earnings/gross/non-taxable/taxable-pay calculation through `PayrollApiService::calculate_payroll_earnings`; Python still parses invoices, merges employee masters, normalizes cells, calculates insurance/tax/deductions, and assembles final payroll records.
+- Rust owns supplied-input one-employee salary calculation through `PayrollApiService::calculate_payroll_salary`; Python still parses/merges payroll sources, resolves age/KCOMWEL/EDI data, writes workbooks, and assembles final payroll records.
 - Rust owns supplied-input final deduction/net-pay calculation through `PayrollApiService::finalize_payroll_deductions`; Python still parses workbooks, matches rosters, resolves social insurance, and assembles final records.
 - Rust owns supplied-input employment-insurance 65+ payroll decisions through `PayrollApiService::resolve_ei_65_for_payroll`; Python still imports/persists KCOMWEL records, resolves settings/site management numbers, calls future live APIs, coordinates supplied EDI premium inputs, and mutates payroll rows.
 - Rust owns supplied-record EDI insurance premium application through `PayrollApiService::apply_edi_premiums_to_invoice`; Python still imports/stores EDI files, resolves settings/site management numbers, matches employees, and handles workbook I/O.
