@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView, StyleSheet, View } from "react-native";
 
-import { AppShell } from "./src/components";
+import { AppShell, Badge, Label } from "./src/components";
 import { defaultLocale, t, type SupportedLocale } from "./src/i18n";
 import { colors, defaultSidebarThemeId, getSidebarTheme } from "./src/theme";
 import type { PlatformId, SidebarThemeId } from "./src/types";
@@ -80,6 +80,15 @@ export default function App() {
         sessionLabel={sessionLabel}
         sidebarTheme={sidebarTheme}
       >
+        {demoDataEnabled ? (
+          <View style={styles.demoBanner}>
+            <Badge tone="attention">{t(locale, "preview.demoMode.badge")}</Badge>
+            <View style={styles.demoBannerCopy}>
+              <Label weight="bold">{t(locale, "preview.demoMode.title")}</Label>
+              <Label size="sm" muted>{t(locale, "preview.demoMode.description")}</Label>
+            </View>
+          </View>
+        ) : null}
         {activeId === "home" ? (
           <LauncherScreen active={active} data={viewModel.launcher} locale={locale} onSelect={select} payroll={viewModel.payroll} />
         ) : activeId === "payroll" ? (
@@ -108,5 +117,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 24
+  },
+  demoBanner: {
+    alignItems: "flex-start",
+    backgroundColor: "#fff7ed",
+    borderColor: "#fed7aa",
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    padding: 14
+  },
+  demoBannerCopy: {
+    flex: 1,
+    gap: 2
   }
 });

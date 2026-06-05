@@ -32,6 +32,10 @@ if (!appSource.includes("demoDataEnabled ? getPreviewPlatformViewModel(locale) :
   errors.push("App.tsx must keep preview/dummy data behind the explicit demo mode flag.");
 }
 
+if (!/\{demoDataEnabled\s*\?\s*\([\s\S]*?preview\.demoMode\.badge[\s\S]*?preview\.demoMode\.title[\s\S]*?preview\.demoMode\.description/.test(appSource)) {
+  errors.push("App.tsx must show a visible demo-mode banner when demo data is explicitly enabled.");
+}
+
 if (packageJson.scripts?.demo !== "node scripts/run-demo-preview.mjs") {
   errors.push("package.json demo script must start the explicit demo preview wrapper.");
 }
