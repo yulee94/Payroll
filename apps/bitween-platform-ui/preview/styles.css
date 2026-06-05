@@ -311,7 +311,7 @@ button {
   color: var(--text);
   display: grid;
   gap: 8px;
-  grid-template-columns: 18px 1fr;
+  grid-template-columns: 18px minmax(0, 1fr) 7px;
   min-height: 34px;
   padding: 7px;
   text-align: left;
@@ -327,8 +327,21 @@ button {
   box-shadow: inset 3px 0 0 var(--nav-active-text);
 }
 
+.sidebar-theme-chip::after {
+  background: transparent;
+  border-radius: 999px;
+  content: "";
+  height: 7px;
+  width: 7px;
+}
+
+.sidebar-theme-chip.active::after {
+  background: var(--nav-active-text);
+}
+
 .sidebar-theme-chip strong {
   font-size: 12px;
+  min-width: 0;
 }
 
 .sidebar-swatch {

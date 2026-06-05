@@ -139,6 +139,7 @@ export function FilterBar({ active, filters, onSelect }: FilterBarProps) {
         return (
           <Pressable
             accessibilityRole="button"
+            accessibilityState={{ selected }}
             key={filter}
             onPress={() => onSelect?.(filter)}
             style={({ pressed }) => [styles.filterChip, selected && styles.filterChipActive, pressed && styles.buttonPressed]}
@@ -269,7 +270,9 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
             const selected = item.id === theme.id;
             return (
               <Pressable
+                accessibilityLabel={`${item.label}. ${item.description}`}
                 accessibilityRole="button"
+                accessibilityState={{ selected }}
                 key={item.id}
                 onPress={() => onThemeChange(item.id)}
                 style={({ pressed }) => [
@@ -282,6 +285,7 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
                   <View style={[styles.themeSwatchInset, { backgroundColor: item.swatchEnd }]} />
                 </View>
                 <Text style={[styles.themeChipText, selected && { color: theme.activeText }]}>{item.label}</Text>
+                {selected ? <View style={[styles.themeSelectedMark, { backgroundColor: theme.activeText }]} /> : null}
               </Pressable>
             );
           })}
@@ -298,6 +302,7 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
           return (
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ selected: active }}
               key={item.id}
               onPress={() => onSelect(item.id)}
               style={[
@@ -655,9 +660,16 @@ const styles = StyleSheet.create({
   },
   themeChipText: {
     color: colors.text,
+    flexShrink: 1,
     fontSize: 12,
     fontWeight: "700",
     lineHeight: 16
+  },
+  themeSelectedMark: {
+    borderRadius: 999,
+    height: 7,
+    marginLeft: "auto",
+    width: 7
   },
   themePanel: {
     backgroundColor: "rgba(255, 255, 255, 0.54)",

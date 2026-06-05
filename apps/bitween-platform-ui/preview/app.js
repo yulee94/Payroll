@@ -465,7 +465,13 @@ function renderShell() {
           <span class="sidebar-options-title">${t("shell.themePanel.title")}</span>
           <div class="sidebar-theme-grid">
             ${sidebarThemes().map((theme) => `
-              <button class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}" data-sidebar-theme="${theme.id}" title="${escapeText(theme.description)}">
+              <button
+                class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}"
+                data-sidebar-theme="${theme.id}"
+                aria-label="${escapeText(`${theme.label}. ${theme.description}`)}"
+                aria-pressed="${state.sidebarTheme === theme.id ? "true" : "false"}"
+                title="${escapeText(theme.description)}"
+              >
                 <span class="sidebar-swatch sidebar-swatch-${theme.id}"></span>
                 <strong>${theme.label}</strong>
               </button>
@@ -474,7 +480,7 @@ function renderShell() {
         </div>
         <nav class="nav" aria-label="${t("shell.navigation.aria")}">
             ${items.map((item) => `
-            <button class="nav-button ${item.id === active.id ? "active" : ""}" data-target="${item.id}" style="${item.id === active.id ? `border-left-color:${item.accent}` : ""}">
+            <button class="nav-button ${item.id === active.id ? "active" : ""}" data-target="${item.id}" aria-current="${item.id === active.id ? "page" : "false"}" style="${item.id === active.id ? `border-left-color:${item.accent}` : ""}">
               <strong>${item.label}</strong>
             </button>
           `).join("")}
