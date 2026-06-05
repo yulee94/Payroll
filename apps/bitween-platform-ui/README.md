@@ -16,13 +16,14 @@ This app is the documented frontend direction for Bitween. It is isolated from b
 
 ## Source Map
 
-- `App.tsx`: auth preview state, screen routing, shell entry
+- `App.tsx`: auth state, explicit demo-data gate, screen routing, shell entry
 - `src/components.tsx`: shared React Native UI primitives
 - `src/screens.tsx`: login, launcher, payroll, and module screens
-- `src/data.ts`: typed safe mock data for frontend preview
+- `src/data.ts`: typed safe mock data for explicit demo mode and dependency-free demo preview
 - `src/i18n/catalog.json`: catalog-array source for localized UI copy
 - `src/i18n/index.ts`: locale normalization, translation lookup, and language option helpers
 - `scripts/verify-i18n-catalog.mjs`: verifies every catalog row has Korean, English, Chinese, and Japanese values and rejects localized UI copy outside the catalog in the React Native and static preview sources
+- `scripts/verify-runtime-data-mode.mjs`: verifies the default app runtime does not load preview/mock data without the explicit demo flag
 - `src/viewModel.ts`: frontend read-only view-model boundary and adapter shape
 - `src/types.ts`: strict frontend domain types
 - `src/theme.ts`: color, spacing, radius, and status-tone tokens
@@ -37,23 +38,24 @@ The package is aligned to Expo SDK 54, which targets React Native 0.81, React 19
 
 ```powershell
 npm install
+npm run verify:data-mode
 npm run verify:i18n
 npm run typecheck
 npm run export:web
 npm run web
 ```
 
-Dependency-free UI preview:
+Dependency-free demo preview:
 
 ```powershell
-node preview/server.js
+npm run demo
 ```
 
-Then open `http://127.0.0.1:4173/` in a browser. This preview mirrors the current screen structure and interactions without requiring Expo dependencies; it reads the same catalog array through `/catalog.json`.
+Then open `http://127.0.0.1:4173/` in a browser. This route is explicitly demo-only and intentionally uses safe mock data. It mirrors the current screen structure and interactions without requiring Expo dependencies and reads the same catalog array through `/catalog.json`.
 
 ## View Model Boundary
 
-`src/viewModel.ts` is the frontend integration seam. During the preview phase it exports `previewPlatformViewModel`; later, Rust/API data should be mapped into the same read-only `PlatformViewModel` shape without changing payroll calculation or service internals.
+`src/viewModel.ts` is the frontend integration boundary. The default runtime uses an empty non-demo `PlatformViewModel` until a real adapter is wired. Demo/mock data is exposed separately through `getPreviewPlatformViewModel` and must stay behind the explicit demo-data gate. Later, Rust/API data should be mapped into the same read-only `PlatformViewModel` shape without changing payroll calculation or service internals.
 
 ## Kubernetes Integration
 
@@ -62,7 +64,9 @@ Production delivery should package this frontend as a containerized workload ser
 ## Review Checklist
 
 - Confirm `npm run verify:i18n` passes before adding user-facing copy.
+- Confirm `npm run verify:data-mode` passes before changing runtime data selection.
 - Confirm login renders without authenticated navigation.
+- Confirm demo credentials are shown only in explicit demo mode.
 - Confirm login button moves to the platform launcher.
 - Confirm navigation switches between payroll, HR, workflow, archive, AI, admin, and settings.
 - Confirm payroll readiness cards and payroll workflow cards wrap without text clipping.
@@ -80,6 +84,6 @@ Do not hardcode user-facing labels, statuses, errors, helper text, auth/security
 
 ## Backend Integration Policy
 
-The current implementation uses typed mock data. Existing API-ready outputs should be connected through a small adapter layer once the backend contract is approved.
+The default frontend runtime must not use typed mock data. Existing API-ready outputs should be connected through a small adapter layer once the backend contract is approved. Until then, the default app renders empty non-demo states and the mock data remains isolated to explicit demo mode.
 
 Do not change backend internals from this frontend app. Missing fields should be documented as backend requests.
