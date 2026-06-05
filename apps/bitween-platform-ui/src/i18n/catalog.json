@@ -160,6 +160,132 @@
       }
     },
     {
+      "key": "screens.empty.platformMetrics.title",
+      "values": {
+        "ko-KR": "플랫폼 지표가 아직 없습니다.",
+        "en-US": "No platform metrics yet.",
+        "zh-Hans-CN": "暂无平台指标。",
+        "ja-JP": "プラットフォーム指標はまだありません。"
+      }
+    },
+    {
+      "key": "screens.empty.platformMetrics.description",
+      "values": {
+        "ko-KR": "실제 어댑터가 연결되면 승인, 급여, 운영 지표가 이 영역에 표시됩니다.",
+        "en-US": "Approval, payroll, and operations metrics appear here after a real adapter is connected.",
+        "zh-Hans-CN": "连接真实适配器后，审批、薪资和运营指标会显示在这里。",
+        "ja-JP": "実アダプターが接続されると、承認、給与、運用指標がここに表示されます。"
+      }
+    },
+    {
+      "key": "screens.empty.workQueue.title",
+      "values": {
+        "ko-KR": "오늘 처리할 업무가 없습니다.",
+        "en-US": "No work queued for today.",
+        "zh-Hans-CN": "今天没有待处理工作。",
+        "ja-JP": "本日処理する業務はありません。"
+      }
+    },
+    {
+      "key": "screens.empty.workQueue.description",
+      "values": {
+        "ko-KR": "워크플로우 어댑터가 연결되면 담당 업무와 마감 정보가 표시됩니다.",
+        "en-US": "Assigned work and due dates appear after the workflow adapter is connected.",
+        "zh-Hans-CN": "连接工作流适配器后，会显示负责人工作和截止时间。",
+        "ja-JP": "ワークフローアダプターが接続されると、担当業務と期限が表示されます。"
+      }
+    },
+    {
+      "key": "screens.empty.calendar.title",
+      "values": {
+        "ko-KR": "등록된 일정이 없습니다.",
+        "en-US": "No scheduled events.",
+        "zh-Hans-CN": "暂无已登记日程。",
+        "ja-JP": "登録された予定はありません。"
+      }
+    },
+    {
+      "key": "screens.empty.calendar.description",
+      "values": {
+        "ko-KR": "캘린더 데이터가 연결되면 급여, 승인, 근태 일정이 표시됩니다.",
+        "en-US": "Payroll, approval, and attendance events appear after calendar data is connected.",
+        "zh-Hans-CN": "连接日历数据后，会显示薪资、审批和考勤日程。",
+        "ja-JP": "カレンダーデータが接続されると、給与、承認、勤怠予定が表示されます。"
+      }
+    },
+    {
+      "key": "screens.empty.todo.title",
+      "values": {
+        "ko-KR": "오늘 할 일이 없습니다.",
+        "en-US": "No tasks for today.",
+        "zh-Hans-CN": "今天没有任务。",
+        "ja-JP": "本日のタスクはありません。"
+      }
+    },
+    {
+      "key": "screens.empty.todo.description",
+      "values": {
+        "ko-KR": "사용자별 할 일 어댑터가 연결되면 개인 업무가 이 영역에 표시됩니다.",
+        "en-US": "Personal tasks appear here after the user task adapter is connected.",
+        "zh-Hans-CN": "连接用户任务适配器后，个人任务会显示在这里。",
+        "ja-JP": "ユーザー別タスクアダプターが接続されると、個人タスクがここに表示されます。"
+      }
+    },
+    {
+      "key": "screens.empty.moduleMetrics.title",
+      "values": {
+        "ko-KR": "모듈 요약 지표가 없습니다.",
+        "en-US": "No module summary metrics.",
+        "zh-Hans-CN": "暂无模块摘要指标。",
+        "ja-JP": "モジュール概要指標はありません。"
+      }
+    },
+    {
+      "key": "screens.empty.moduleMetrics.description",
+      "values": {
+        "ko-KR": "해당 모듈의 읽기 전용 데이터가 연결되면 주요 지표가 표시됩니다.",
+        "en-US": "Key metrics appear after read-only data for this module is connected.",
+        "zh-Hans-CN": "连接该模块的只读数据后，会显示关键指标。",
+        "ja-JP": "このモジュールの読み取り専用データが接続されると、主要指標が表示されます。"
+      }
+    },
+    {
+      "key": "screens.empty.payrollReadiness.title",
+      "values": {
+        "ko-KR": "급여 준비 상태가 없습니다.",
+        "en-US": "No payroll readiness status.",
+        "zh-Hans-CN": "暂无薪资准备状态。",
+        "ja-JP": "給与準備状況はありません。"
+      }
+    },
+    {
+      "key": "screens.empty.payrollReadiness.description",
+      "values": {
+        "ko-KR": "급여 스냅샷 어댑터가 연결되면 준비 상태 카드가 표시됩니다.",
+        "en-US": "Readiness cards appear after the payroll snapshot adapter is connected.",
+        "zh-Hans-CN": "连接薪资快照适配器后，会显示准备状态卡片。",
+        "ja-JP": "給与スナップショットアダプターが接続されると、準備状況カードが表示されます。"
+      }
+    },
+    {
+      "key": "screens.empty.payrollSteps.title",
+      "values": {
+        "ko-KR": "급여 산출 단계가 없습니다.",
+        "en-US": "No payroll calculation steps.",
+        "zh-Hans-CN": "暂无薪资计算步骤。",
+        "ja-JP": "給与計算ステップはありません。"
+      }
+    },
+    {
+      "key": "screens.empty.payrollSteps.description",
+      "values": {
+        "ko-KR": "급여 정책과 실행 상태가 연결되면 월별 처리 단계가 표시됩니다.",
+        "en-US": "Monthly processing steps appear after payroll policy and run status are connected.",
+        "zh-Hans-CN": "连接薪资政策和执行状态后，会显示月度处理步骤。",
+        "ja-JP": "給与ポリシーと実行状況が接続されると、月次処理ステップが表示されます。"
+      }
+    },
+    {
       "key": "table.mobile.owner",
       "values": {
         "ko-KR": "담당: {owner}",

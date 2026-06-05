@@ -277,34 +277,42 @@ export function LauncherScreen({ data, locale, onSelect, payroll }: LauncherScre
           description={tScreen(locale, "launcher.platformStatus.description")}
           action={<ActionButton onPress={() => onSelect("payroll")} variant="secondary">{tScreen(locale, "launcher.platformStatus.action")}</ActionButton>}
         />
-        <MetricGrid items={platformMetrics} />
+        {platformMetrics.length > 0 ? (
+          <MetricGrid items={platformMetrics} />
+        ) : (
+          <EmptyState title={tScreen(locale, "empty.platformMetrics.title")} description={tScreen(locale, "empty.platformMetrics.description")} />
+        )}
       </Card>
 
       <CalendarTodoPanel events={calendarEvents} locale={locale} todos={todayTodos} />
 
       <Card>
         <SectionHeader title={tScreen(locale, "launcher.workQueue.title")} description={tScreen(locale, "launcher.workQueue.description")} />
-        <View style={styles.queueGrid}>
-          {workQueue.map((item) => (
-            <Pressable
-              accessibilityRole="button"
-              key={item.id}
-              onPress={() => setSelectedQueueId(item.id)}
-              style={({ pressed }) => [
-                styles.queueItem,
-                selectedQueueId === item.id && styles.queueItemSelected,
-                pressed && styles.buttonPressed
-              ]}
-            >
-              <View style={styles.queueHeader}>
-                <Badge tone={item.tone}>{item.status}</Badge>
-                <Label size="sm" muted>{item.due}</Label>
-              </View>
-              <Label weight="bold">{item.title}</Label>
-              <Label size="sm" muted>{tScreen(locale, "launcher.workQueue.metaOwner", { meta: item.meta, owner: item.owner })}</Label>
-            </Pressable>
-          ))}
-        </View>
+        {workQueue.length > 0 ? (
+          <View style={styles.queueGrid}>
+            {workQueue.map((item) => (
+              <Pressable
+                accessibilityRole="button"
+                key={item.id}
+                onPress={() => setSelectedQueueId(item.id)}
+                style={({ pressed }) => [
+                  styles.queueItem,
+                  selectedQueueId === item.id && styles.queueItemSelected,
+                  pressed && styles.buttonPressed
+                ]}
+              >
+                <View style={styles.queueHeader}>
+                  <Badge tone={item.tone}>{item.status}</Badge>
+                  <Label size="sm" muted>{item.due}</Label>
+                </View>
+                <Label weight="bold">{item.title}</Label>
+                <Label size="sm" muted>{tScreen(locale, "launcher.workQueue.metaOwner", { meta: item.meta, owner: item.owner })}</Label>
+              </Pressable>
+            ))}
+          </View>
+        ) : (
+          <EmptyState title={tScreen(locale, "empty.workQueue.title")} description={tScreen(locale, "empty.workQueue.description")} />
+        )}
         {selectedQueue ? <WorkQueueDetailPanel item={selectedQueue} locale={locale} onSelect={onSelect} /> : null}
       </Card>
 
@@ -368,26 +376,30 @@ export function PayrollScreen({ data, demoMode, locale, onSelect }: PayrollScree
           description={tScreen(locale, "payroll.flow.description")}
           action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">{tScreen(locale, "payroll.flow.action")}</ActionButton>}
         />
-        <View style={styles.stepGrid}>
-          {payrollSteps.map((step, index) => (
-            <Pressable
-              accessibilityRole="button"
-              key={step.id}
-              onPress={() => setSelectedStepId(step.id)}
-              style={({ pressed }) => [
-                styles.stepCard,
-                { borderTopColor: toneColor(step.tone) },
-                selectedStepId === step.id && styles.stepCardSelected,
-                pressed && styles.buttonPressed
-              ]}
-            >
-              <Text style={styles.stepIndex}>{String(index + 1).padStart(2, "0")}</Text>
-              <Badge tone={step.tone}>{step.status}</Badge>
-              <Label weight="bold">{step.title}</Label>
-              <Label size="sm" muted>{step.detail}</Label>
-            </Pressable>
-          ))}
-        </View>
+        {payrollSteps.length > 0 ? (
+          <View style={styles.stepGrid}>
+            {payrollSteps.map((step, index) => (
+              <Pressable
+                accessibilityRole="button"
+                key={step.id}
+                onPress={() => setSelectedStepId(step.id)}
+                style={({ pressed }) => [
+                  styles.stepCard,
+                  { borderTopColor: toneColor(step.tone) },
+                  selectedStepId === step.id && styles.stepCardSelected,
+                  pressed && styles.buttonPressed
+                ]}
+              >
+                <Text style={styles.stepIndex}>{String(index + 1).padStart(2, "0")}</Text>
+                <Badge tone={step.tone}>{step.status}</Badge>
+                <Label weight="bold">{step.title}</Label>
+                <Label size="sm" muted>{step.detail}</Label>
+              </Pressable>
+            ))}
+          </View>
+        ) : (
+          <EmptyState title={tScreen(locale, "empty.payrollSteps.title")} description={tScreen(locale, "empty.payrollSteps.description")} />
+        )}
         {selectedStep ? <PayrollStepDetail locale={locale} step={selectedStep} /> : null}
         <View style={styles.actionRow}>
           <ActionButton onPress={() => onSelect("payroll")}>{tScreen(locale, "payroll.actions.keepPayroll")}</ActionButton>
@@ -448,29 +460,37 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
           <Label size="sm" muted>{tScreen(locale, "calendar.weekday")}</Label>
         </View>
         <View style={styles.plannerList}>
-          {events.map((event) => (
-            <View key={event.id} style={styles.plannerItem}>
-              <Badge tone={event.tone}>{event.timeLabel}</Badge>
-              <View style={styles.plannerCopy}>
-                <Label weight="bold">{event.title}</Label>
-                <Label size="sm" muted>{event.dateLabel}</Label>
+          {events.length > 0 ? (
+            events.map((event) => (
+              <View key={event.id} style={styles.plannerItem}>
+                <Badge tone={event.tone}>{event.timeLabel}</Badge>
+                <View style={styles.plannerCopy}>
+                  <Label weight="bold">{event.title}</Label>
+                  <Label size="sm" muted>{event.dateLabel}</Label>
+                </View>
               </View>
-            </View>
-          ))}
+            ))
+          ) : (
+            <EmptyState title={tScreen(locale, "empty.calendar.title")} description={tScreen(locale, "empty.calendar.description")} />
+          )}
         </View>
       </Card>
       <Card style={styles.homePlannerCard}>
         <SectionHeader title={tScreen(locale, "todo.title")} description={tScreen(locale, "todo.description")} />
         <View style={styles.plannerList}>
-          {todos.map((todo) => (
-            <View key={todo.id} style={[styles.todoItem, todo.completed && styles.todoItemDone]}>
-              <Badge tone={todo.tone}>{todo.timeLabel}</Badge>
-              <View style={styles.plannerCopy}>
-                <Label weight="bold">{todo.title}</Label>
-                <Label size="sm" muted>{todo.owner}</Label>
+          {todos.length > 0 ? (
+            todos.map((todo) => (
+              <View key={todo.id} style={[styles.todoItem, todo.completed && styles.todoItemDone]}>
+                <Badge tone={todo.tone}>{todo.timeLabel}</Badge>
+                <View style={styles.plannerCopy}>
+                  <Label weight="bold">{todo.title}</Label>
+                  <Label size="sm" muted>{todo.owner}</Label>
+                </View>
               </View>
-            </View>
-          ))}
+            ))
+          ) : (
+            <EmptyState title={tScreen(locale, "empty.todo.title")} description={tScreen(locale, "empty.todo.description")} />
+          )}
         </View>
       </Card>
     </View>
@@ -532,7 +552,11 @@ export function ModuleScreen({ active, dashboard, demoMode, locale, onLocaleChan
           title={dashboard.title}
           action={<ActionButton onPress={() => onSelect(dashboard.primaryAction.target)}>{dashboard.primaryAction.label}</ActionButton>}
         />
-        <MetricGrid items={dashboard.metrics} />
+        {dashboard.metrics.length > 0 ? (
+          <MetricGrid items={dashboard.metrics} />
+        ) : (
+          <EmptyState title={tScreen(locale, "empty.moduleMetrics.title")} description={tScreen(locale, "empty.moduleMetrics.description")} />
+        )}
       </Card>
 
       {demoMode && active.id === "attendance" ? <AttendancePhonePanel locale={locale} /> : null}
@@ -634,23 +658,27 @@ function PayrollReadiness({ cards, locale, onSelect, onSelectCard, selectedId }:
         action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">{tScreen(locale, "payroll.readiness.action")}</ActionButton>}
       />
       <View style={styles.readinessGrid}>
-        {cards.map((card) => (
-          <Pressable
-            accessibilityRole="button"
-            key={card.id}
-            onPress={() => onSelectCard(card)}
-            style={({ pressed }) => [
-              styles.readinessCard,
-              { borderTopColor: toneColor(card.tone) },
-              selectedId === card.id && styles.readinessCardSelected,
-              pressed && styles.buttonPressed
-            ]}
-          >
-            <Label size="sm" muted>{card.title}</Label>
-            <Text style={[styles.readinessValue, { color: toneColor(card.tone) }]}>{card.value}</Text>
-            <Label size="sm">{card.detail}</Label>
-          </Pressable>
-        ))}
+        {cards.length > 0 ? (
+          cards.map((card) => (
+            <Pressable
+              accessibilityRole="button"
+              key={card.id}
+              onPress={() => onSelectCard(card)}
+              style={({ pressed }) => [
+                styles.readinessCard,
+                { borderTopColor: toneColor(card.tone) },
+                selectedId === card.id && styles.readinessCardSelected,
+                pressed && styles.buttonPressed
+              ]}
+            >
+              <Label size="sm" muted>{card.title}</Label>
+              <Text style={[styles.readinessValue, { color: toneColor(card.tone) }]}>{card.value}</Text>
+              <Label size="sm">{card.detail}</Label>
+            </Pressable>
+          ))
+        ) : (
+          <EmptyState title={tScreen(locale, "empty.payrollReadiness.title")} description={tScreen(locale, "empty.payrollReadiness.description")} />
+        )}
       </View>
     </Card>
   );
