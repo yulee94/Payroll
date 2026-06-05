@@ -336,7 +336,12 @@ export function LauncherScreen({ data, locale, onSelect, payroll }: LauncherScre
           description={tScreen(locale, "launcher.settingsSummary.description")}
           action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">{tScreen(locale, "launcher.settingsSummary.action")}</ActionButton>}
         />
-        <DataTable locale={locale} rows={payrollSettingsRows} />
+        <DataTable
+          emptyDescription={tScreen(locale, "empty.payrollSettings.description")}
+          emptyTitle={tScreen(locale, "empty.payrollSettings.title")}
+          locale={locale}
+          rows={payrollSettingsRows}
+        />
       </Card>
       <Card>
         <SectionHeader
@@ -345,7 +350,12 @@ export function LauncherScreen({ data, locale, onSelect, payroll }: LauncherScre
           description={tScreen(locale, "launcher.previewArchive.description")}
           action={<ActionButton onPress={() => onSelect("archive")} variant="secondary">{tScreen(locale, "launcher.previewArchive.action")}</ActionButton>}
         />
-        <DataTable locale={locale} rows={previewRows} />
+        <DataTable
+          emptyDescription={tScreen(locale, "empty.archivePreview.description")}
+          emptyTitle={tScreen(locale, "empty.archivePreview.title")}
+          locale={locale}
+          rows={previewRows}
+        />
       </Card>
     </View>
   );
@@ -438,7 +448,12 @@ function PayrollIntegrationPanel({
           ))}
         </View>
       ) : null}
-      <DataTable locale={locale} rows={rows} />
+      <DataTable
+        emptyDescription={tScreen(locale, "empty.payrollIntegration.description")}
+        emptyTitle={tScreen(locale, "empty.payrollIntegration.title")}
+        locale={locale}
+        rows={rows}
+      />
       {demoMode ? (
         <View style={styles.inlineNotice}>
           <Badge tone="neutral">{tScreen(locale, "payroll.integration.notice.badge")}</Badge>

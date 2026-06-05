@@ -286,6 +286,60 @@
       }
     },
     {
+      "key": "screens.empty.payrollSettings.title",
+      "values": {
+        "ko-KR": "급여 설정 요약이 없습니다.",
+        "en-US": "No payroll settings summary.",
+        "zh-Hans-CN": "暂无薪资设置摘要。",
+        "ja-JP": "給与設定サマリーはありません。"
+      }
+    },
+    {
+      "key": "screens.empty.payrollSettings.description",
+      "values": {
+        "ko-KR": "급여 설정 어댑터가 연결되면 산출 기준과 정책 점검 항목이 표시됩니다.",
+        "en-US": "Calculation rules and policy checks appear after the payroll settings adapter is connected.",
+        "zh-Hans-CN": "连接薪资设置适配器后，会显示计算规则和政策检查项。",
+        "ja-JP": "給与設定アダプターが接続されると、計算基準とポリシー確認項目が表示されます。"
+      }
+    },
+    {
+      "key": "screens.empty.archivePreview.title",
+      "values": {
+        "ko-KR": "보관함 미리보기가 없습니다.",
+        "en-US": "No archive preview yet.",
+        "zh-Hans-CN": "暂无归档预览。",
+        "ja-JP": "アーカイブプレビューはまだありません。"
+      }
+    },
+    {
+      "key": "screens.empty.archivePreview.description",
+      "values": {
+        "ko-KR": "문서 보관 어댑터가 연결되면 급여 파일과 승인 문서 요약이 표시됩니다.",
+        "en-US": "Payroll files and approval document summaries appear after the archive adapter is connected.",
+        "zh-Hans-CN": "连接文档归档适配器后，会显示薪资文件和审批文档摘要。",
+        "ja-JP": "文書アーカイブアダプターが接続されると、給与ファイルと承認文書サマリーが表示されます。"
+      }
+    },
+    {
+      "key": "screens.empty.payrollIntegration.title",
+      "values": {
+        "ko-KR": "급여 연동 상태가 없습니다.",
+        "en-US": "No payroll integration status.",
+        "zh-Hans-CN": "暂无薪资联动状态。",
+        "ja-JP": "給与連携状況はありません。"
+      }
+    },
+    {
+      "key": "screens.empty.payrollIntegration.description",
+      "values": {
+        "ko-KR": "급여 연동 어댑터가 연결되면 기관 제출, 매핑, 정책 점검 결과가 표시됩니다.",
+        "en-US": "Agency submission, mapping, and policy check results appear after the payroll integration adapter is connected.",
+        "zh-Hans-CN": "连接薪资联动适配器后，会显示机构提交、映射和政策检查结果。",
+        "ja-JP": "給与連携アダプターが接続されると、機関提出、マッピング、ポリシー確認結果が表示されます。"
+      }
+    },
+    {
       "key": "table.mobile.owner",
       "values": {
         "ko-KR": "담당: {owner}",

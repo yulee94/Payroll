@@ -162,6 +162,8 @@ export function EmptyState({ description, title }: { readonly description: strin
 }
 
 type DataTableProps = {
+  readonly emptyDescription?: string;
+  readonly emptyTitle?: string;
   readonly onRowPress?: (row: ModuleRow) => void;
   readonly rows: readonly ModuleRow[];
   readonly selectedRowId?: string;
@@ -171,12 +173,12 @@ type LocalizedDataTableProps = DataTableProps & {
   readonly locale: SupportedLocale;
 };
 
-export function DataTable({ locale, onRowPress, rows, selectedRowId }: LocalizedDataTableProps) {
+export function DataTable({ emptyDescription, emptyTitle, locale, onRowPress, rows, selectedRowId }: LocalizedDataTableProps) {
   const { width } = useWindowDimensions();
   const compact = width < 760;
 
   if (rows.length === 0) {
-    return <EmptyState title={t(locale, "table.empty.title")} description={t(locale, "table.empty.description")} />;
+    return <EmptyState title={emptyTitle ?? t(locale, "table.empty.title")} description={emptyDescription ?? t(locale, "table.empty.description")} />;
   }
 
   if (compact) {
