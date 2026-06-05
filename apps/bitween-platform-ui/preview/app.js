@@ -64,6 +64,13 @@ const payrollIntegrationCheckDefs = [
   ["policy", "ready"]
 ].map(([id, tone]) => ({ id, tone }));
 
+const cossPreviewFileDefs = [
+  ["payroll-ledgers", "ready"],
+  ["billing-files", "ready"],
+  ["worker-roster", "attention"],
+  ["edi-pending", "neutral"]
+].map(([id, tone]) => ({ id, tone }));
+
 const rowGroups = {
   payrollSettings: [
     ["payroll-setting-1", "neutral", "settings"],
@@ -422,7 +429,7 @@ function renderLogin() {
           ${field(t("screens.login.form.companyCode"), "company-code", demoAccount.companyCode, "text", state.companyCode)}
           ${field(t("screens.login.form.userId"), "user-id", demoAccount.userId, "text", state.userId)}
           ${field(t("screens.login.form.password"), "password", demoAccount.password, "password", state.password)}
-          ${state.loginFeedbackKey ? `<div class="inline-warning">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey)}</span></div>` : ""}
+          ${state.loginFeedbackKey ? `<div class="inline-warning" role="alert" aria-live="assertive" aria-atomic="true" aria-label="${escapeText(`${t("screens.login.feedback.badge")}. ${t(state.loginFeedbackKey, demoAccount)}`)}">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey, demoAccount)}</span></div>` : ""}
           <div class="login-actions">
             <button class="btn primary" type="submit">${t("screens.login.actions.enterHome")}</button>
             <button class="btn secondary" type="button" data-demo-login="true">${t("screens.login.actions.demo")}</button>
@@ -438,7 +445,7 @@ function languageSelector() {
   return `<section class="language-panel">
     <span class="helper">${t("settings.i18n.title")}</span>
     <div class="language-grid">${supportedLocales.map((locale) => `
-      <button class="language-option ${state.locale === locale ? "selected" : ""}" type="button" data-language="${locale}">
+      <button class="language-option ${state.locale === locale ? "selected" : ""}" type="button" data-language="${locale}" aria-pressed="${state.locale === locale ? "true" : "false"}">
         <strong>${languageName(locale)}</strong><span class="helper">${state.locale === locale ? t("settings.i18n.status.selected") : t("settings.i18n.status.available")}</span>
       </button>
     `).join("")}</div>
@@ -596,6 +603,7 @@ function renderPayroll() {
       `).join("")}</div>
       ${selectedReadiness ? payrollReadinessDetail(selectedReadiness) : ""}
     </section>
+    ${cossPreviewFilePanel()}
     ${payrollIntegrationPanel()}
     <section class="card">
       ${sectionHead(t("screens.payroll.flow.eyebrow"), t("screens.payroll.flow.title"), t("screens.payroll.flow.description"), button(t("screens.payroll.flow.action"), "settings", "secondary"))}
@@ -619,6 +627,20 @@ function renderPayroll() {
       ${table(localizedRows("preview"))}
     </section>
   `;
+}
+
+function cossPreviewFilePanel() {
+  return `<section class="card">
+    ${sectionHead(t("screens.payroll.cossPreview.eyebrow"), t("screens.payroll.cossPreview.title"), t("screens.payroll.cossPreview.description"))}
+    <div class="integration-grid">${cossPreviewFileDefs.map((item) => `
+      <article class="integration-card" style="border-top-color:${toneColor(item.tone)}">
+        <span class="helper">${t(`screens.payroll.cossPreview.files.${item.id}.label`)}</span>
+        <strong class="metric-value" style="color:${toneColor(item.tone)}">${t(`screens.payroll.cossPreview.files.${item.id}.value`)}</strong>
+        <span>${t(`screens.payroll.cossPreview.files.${item.id}.detail`)}</span>
+      </article>
+    `).join("")}</div>
+    <div class="notice">${badge(t("screens.payroll.cossPreview.notice.badge"), "attention")}<span class="helper">${t("screens.payroll.cossPreview.notice.description")}</span></div>
+  </section>`;
 }
 
 function payrollIntegrationPanel() {

@@ -6467,6 +6467,159 @@
         "zh-Hans-CN": "已退出登录。",
         "ja-JP": "ログアウトしました。"
       }
+    },
+    {
+      "key": "screens.payroll.cossPreview.eyebrow",
+      "values": {
+        "ko-KR": "COSS file scope",
+        "en-US": "COSS file scope",
+        "zh-Hans-CN": "COSS file scope",
+        "ja-JP": "COSS file scope"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.title",
+      "values": {
+        "ko-KR": "Amkor Korea Jan-May payroll run prep",
+        "en-US": "Amkor Korea Jan-May payroll run prep",
+        "zh-Hans-CN": "Amkor Korea Jan-May payroll run prep",
+        "ja-JP": "Amkor Korea Jan-May payroll run prep"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.description",
+      "values": {
+        "ko-KR": "Preview reflects only the January-May payroll ledgers, billing files, and May worker roster requested for review.",
+        "en-US": "Preview reflects only the January-May payroll ledgers, billing files, and May worker roster requested for review.",
+        "zh-Hans-CN": "Preview reflects only the January-May payroll ledgers, billing files, and May worker roster requested for review.",
+        "ja-JP": "Preview reflects only the January-May payroll ledgers, billing files, and May worker roster requested for review."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.files.payroll-ledgers.label",
+      "values": {
+        "ko-KR": "Payroll ledgers",
+        "en-US": "Payroll ledgers",
+        "zh-Hans-CN": "Payroll ledgers",
+        "ja-JP": "Payroll ledgers"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.files.payroll-ledgers.value",
+      "values": {
+        "ko-KR": "5 months",
+        "en-US": "5 months",
+        "zh-Hans-CN": "5 months",
+        "ja-JP": "5 months"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.files.payroll-ledgers.detail",
+      "values": {
+        "ko-KR": "Detected monthly payroll ledger structures from January through May 2026.",
+        "en-US": "Detected monthly payroll ledger structures from January through May 2026.",
+        "zh-Hans-CN": "Detected monthly payroll ledger structures from January through May 2026.",
+        "ja-JP": "Detected monthly payroll ledger structures from January through May 2026."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.files.billing-files.label",
+      "values": {
+        "ko-KR": "Billing files",
+        "en-US": "Billing files",
+        "zh-Hans-CN": "Billing files",
+        "ja-JP": "Billing files"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.files.billing-files.value",
+      "values": {
+        "ko-KR": "5 files",
+        "en-US": "5 files",
+        "zh-Hans-CN": "5 files",
+        "ja-JP": "5 files"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.files.billing-files.detail",
+      "values": {
+        "ko-KR": "Separates billing and attendance sheets for statutory insurance comparison.",
+        "en-US": "Separates billing and attendance sheets for statutory insurance comparison.",
+        "zh-Hans-CN": "Separates billing and attendance sheets for statutory insurance comparison.",
+        "ja-JP": "Separates billing and attendance sheets for statutory insurance comparison."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.files.worker-roster.label",
+      "values": {
+        "ko-KR": "Worker roster",
+        "en-US": "Worker roster",
+        "zh-Hans-CN": "Worker roster",
+        "ja-JP": "Worker roster"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.files.worker-roster.value",
+      "values": {
+        "ko-KR": "May baseline",
+        "en-US": "May baseline",
+        "zh-Hans-CN": "May baseline",
+        "ja-JP": "May baseline"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.files.worker-roster.detail",
+      "values": {
+        "ko-KR": "Prepares hire date, termination date, and insurance-status mapping from the May roster.",
+        "en-US": "Prepares hire date, termination date, and insurance-status mapping from the May roster.",
+        "zh-Hans-CN": "Prepares hire date, termination date, and insurance-status mapping from the May roster.",
+        "ja-JP": "Prepares hire date, termination date, and insurance-status mapping from the May roster."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.files.edi-pending.label",
+      "values": {
+        "ko-KR": "EDI/API",
+        "en-US": "EDI/API",
+        "zh-Hans-CN": "EDI/API",
+        "ja-JP": "EDI/API"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.files.edi-pending.value",
+      "values": {
+        "ko-KR": "Pending",
+        "en-US": "Pending",
+        "zh-Hans-CN": "Pending",
+        "ja-JP": "Pending"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.files.edi-pending.detail",
+      "values": {
+        "ko-KR": "Shows official-rate cross-checks until NHIS EDI and NPS EDI API integration is connected.",
+        "en-US": "Shows official-rate cross-checks until NHIS EDI and NPS EDI API integration is connected.",
+        "zh-Hans-CN": "Shows official-rate cross-checks until NHIS EDI and NPS EDI API integration is connected.",
+        "ja-JP": "Shows official-rate cross-checks until NHIS EDI and NPS EDI API integration is connected."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.notice.badge",
+      "values": {
+        "ko-KR": "Preview",
+        "en-US": "Preview",
+        "zh-Hans-CN": "Preview",
+        "ja-JP": "Preview"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.notice.description",
+      "values": {
+        "ko-KR": "The preview does not store personal data or real amounts from the files; it only mirrors the approved file scope with dummy status.",
+        "en-US": "The preview does not store personal data or real amounts from the files; it only mirrors the approved file scope with dummy status.",
+        "zh-Hans-CN": "The preview does not store personal data or real amounts from the files; it only mirrors the approved file scope with dummy status.",
+        "ja-JP": "The preview does not store personal data or real amounts from the files; it only mirrors the approved file scope with dummy status."
+      }
     }
   ],
   "languageDisplayNames": [

@@ -70,6 +70,18 @@ if (!/el\.setAttribute\("aria-label", text\)/.test(previewAppSource)) {
   errors.push("preview/app.js toast updates must mirror the visible text to aria-label.");
 }
 
+if (!screensSource.includes('accessibilityRole="alert"')) {
+  errors.push("screens.tsx login feedback must expose alert accessibility role.");
+}
+
+if (!/class="inline-warning" role="alert" aria-live="assertive" aria-atomic="true"/.test(previewAppSource)) {
+  errors.push("preview/app.js login feedback must expose assertive atomic alert semantics.");
+}
+
+if (!/data-language="\$\{locale\}" aria-pressed="\$\{state\.locale === locale \? "true" : "false"\}"/.test(previewAppSource)) {
+  errors.push("preview/app.js language buttons must expose pressed state.");
+}
+
 if (!appSource.includes('"session.emptyCompanyCodeLabel"')) {
   errors.push("App.tsx must replace empty company-code placeholders with a non-demo disconnected label.");
 }

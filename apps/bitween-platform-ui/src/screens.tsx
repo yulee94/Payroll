@@ -83,6 +83,13 @@ const payrollIntegrationCheckDefinitions = [
   { id: "policy", tone: "ready" }
 ] as const satisfies readonly ToneDefinition[];
 
+const cossPreviewFileDefinitions = [
+  { id: "payroll-ledgers", tone: "ready" },
+  { id: "billing-files", tone: "ready" },
+  { id: "worker-roster", tone: "attention" },
+  { id: "edi-pending", tone: "neutral" }
+] as const satisfies readonly ToneDefinition[];
+
 const archiveFolderDefinitions = [
   { id: "folder-payroll", tone: "ready", target: "payroll" },
   { id: "folder-attendance", tone: "attention", target: "attendance" },
@@ -183,6 +190,7 @@ export function LoginScreen({ demoMode, locale, onLocaleChange, onSelect }: Logi
             return (
               <Pressable
                 accessibilityRole="button"
+                accessibilityState={{ selected }}
                 key={option.locale}
                 onPress={() => onLocaleChange(option.locale)}
                 style={({ pressed }) => [styles.languageOption, selected && styles.languageOptionSelected, pressed && styles.buttonPressed]}
@@ -233,7 +241,11 @@ export function LoginScreen({ demoMode, locale, onLocaleChange, onSelect }: Logi
           />
         </View>
         {feedbackKey ? (
-          <View style={styles.inlineNotice}>
+          <View
+            accessibilityLabel={`${tScreen(locale, "login.feedback.badge")}. ${tScreen(locale, feedbackKey, demoParams)}`}
+            accessibilityRole="alert"
+            style={styles.inlineNotice}
+          >
             <Badge tone="attention">{tScreen(locale, "login.feedback.badge")}</Badge>
             <Label size="sm" muted>{tScreen(locale, feedbackKey, demoParams)}</Label>
           </View>
@@ -378,6 +390,7 @@ export function PayrollScreen({ data, demoMode, locale, onSelect }: PayrollScree
     <View style={styles.stack}>
       <PayrollReadiness cards={readinessCards} locale={locale} onSelect={onSelect} selectedId={selectedReadiness?.id} onSelectCard={(card) => setSelectedReadinessId(card.id)} />
       {selectedReadiness ? <PayrollReadinessDetail card={selectedReadiness} locale={locale} /> : null}
+      {demoMode ? <CossPreviewFilePanel locale={locale} /> : null}
       <PayrollIntegrationPanel demoMode={demoMode} locale={locale} onSelect={onSelect} rows={data.integrationRows} />
       <Card>
         <SectionHeader
@@ -418,6 +431,31 @@ export function PayrollScreen({ data, demoMode, locale, onSelect }: PayrollScree
         </View>
       </Card>
     </View>
+  );
+}
+
+function CossPreviewFilePanel({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <Card>
+      <SectionHeader
+        eyebrow={tScreen(locale, "payroll.cossPreview.eyebrow")}
+        title={tScreen(locale, "payroll.cossPreview.title")}
+        description={tScreen(locale, "payroll.cossPreview.description")}
+      />
+      <View style={styles.integrationGrid}>
+        {cossPreviewFileDefinitions.map((item) => (
+          <View key={item.id} style={[styles.integrationCard, { borderTopColor: toneColor(item.tone) }]}>
+            <Label size="sm" muted>{tScreen(locale, `payroll.cossPreview.files.${item.id}.label`)}</Label>
+            <Text style={[styles.integrationValue, { color: toneColor(item.tone) }]}>{tScreen(locale, `payroll.cossPreview.files.${item.id}.value`)}</Text>
+            <Label size="sm">{tScreen(locale, `payroll.cossPreview.files.${item.id}.detail`)}</Label>
+          </View>
+        ))}
+      </View>
+      <View style={styles.inlineNotice}>
+        <Badge tone="attention">{tScreen(locale, "payroll.cossPreview.notice.badge")}</Badge>
+        <Label size="sm" muted>{tScreen(locale, "payroll.cossPreview.notice.description")}</Label>
+      </View>
+    </Card>
   );
 }
 
@@ -589,6 +627,7 @@ export function ModuleScreen({ active, dashboard, demoMode, locale, onLocaleChan
               return (
                 <Pressable
                   accessibilityRole="button"
+                  accessibilityState={{ selected }}
                   key={option.locale}
                   onPress={() => onLocaleChange(option.locale)}
                   style={({ pressed }) => [styles.languageOption, selected && styles.languageOptionSelected, pressed && styles.buttonPressed]}
