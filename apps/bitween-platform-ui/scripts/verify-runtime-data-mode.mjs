@@ -36,6 +36,14 @@ if (!/\{demoDataEnabled\s*\?\s*\([\s\S]*?preview\.demoMode\.badge[\s\S]*?preview
   errors.push("App.tsx must show a visible demo-mode banner when demo data is explicitly enabled.");
 }
 
+if (!/accessibilityLabel=\{`\$\{t\(locale, "preview\.demoMode\.title"\)\}\. \$\{t\(locale, "preview\.demoMode\.description"\)\}`\}/.test(appSource)) {
+  errors.push("App.tsx demo-mode banner must expose an accessibility label.");
+}
+
+if (!appSource.includes('accessibilityRole="summary"')) {
+  errors.push("App.tsx demo-mode banner must use a summary accessibility role.");
+}
+
 if (packageJson.scripts?.demo !== "node scripts/run-demo-preview.mjs") {
   errors.push("package.json demo script must start the explicit demo preview wrapper.");
 }

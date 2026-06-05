@@ -81,7 +81,11 @@ export default function App() {
         sidebarTheme={sidebarTheme}
       >
         {demoDataEnabled ? (
-          <View style={styles.demoBanner}>
+          <View
+            accessibilityLabel={`${t(locale, "preview.demoMode.title")}. ${t(locale, "preview.demoMode.description")}`}
+            accessibilityRole="summary"
+            style={styles.demoBanner}
+          >
             <Badge tone="attention">{t(locale, "preview.demoMode.badge")}</Badge>
             <View style={styles.demoBannerCopy}>
               <Label weight="bold">{t(locale, "preview.demoMode.title")}</Label>
