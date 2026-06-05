@@ -642,6 +642,36 @@ Verification evidence for this checkpoint:
 Slice spec: `docs/WORKFLOW_RUST_FORM_VALUES_SLICE.md`.
 
 
+## Current implementation checkpoint: Rust workflow follow-up planner core
+
+Implemented on 2026-06-04 as a workflow submission/completion follow-up
+planning slice:
+
+- `crates/workflow-core::workflow_follow_up` now owns pure follow-up intent
+  generation for requester calendar/To-Do, approver approval To-Dos/calendars,
+  cc reference To-Dos, requester execution confirmation, and distinct executor
+  execution To-Dos/calendars.
+- Rust preserves Python compatibility for document title and type-label
+  defaults, requester/session fallback, period and due fallback order,
+  original approval-step numbering, blank/duplicate approver suppression,
+  cc skip rules, workspace source-key formats, source values, and trip-id
+  propagation into To-Do intents.
+- Python still owns `UserSession` adaptation, document hydration from workflow
+  JSON, `DOC_TYPE_LABELS` lookup, `content_json` trip-id extraction,
+  workspace-store execution/idempotent updates, workflow persistence,
+  notifications, and UI rendering.
+- Workflow contract metadata now names the Rust follow-up DTOs, entrypoints,
+  action types, source values, and invariants.
+
+Verification evidence for this checkpoint:
+
+- `cargo test -p bitween-workflow-core workflow_follow_up --lib`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_follow_up_contracts -v`
+- `/tmp/payroll-policy-venv/bin/python -m unittest tests.test_business_trip_followup_kpi_manager tests.test_workflow_forms -v`
+
+Slice spec: `docs/WORKFLOW_RUST_FOLLOW_UP_PLANNER_SLICE.md`.
+
+
 ## Current implementation checkpoint: Rust workflow document permission core
 
 Implemented on 2026-06-04 as a workflow document authorization slice:
