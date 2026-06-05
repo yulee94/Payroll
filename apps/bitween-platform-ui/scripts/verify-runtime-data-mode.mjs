@@ -4,7 +4,9 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const appPath = join(__dirname, "..", "App.tsx");
+const screensPath = join(__dirname, "..", "src", "screens.tsx");
 const appSource = readFileSync(appPath, "utf8");
+const screensSource = readFileSync(screensPath, "utf8");
 const errors = [];
 
 if (!appSource.includes("createEmptyPlatformViewModel")) {
@@ -23,6 +25,24 @@ if (!appSource.includes("demoDataEnabled ? getPreviewPlatformViewModel(locale) :
   errors.push("App.tsx must keep preview/dummy data behind the explicit demo mode flag.");
 }
 
+if (/from\s+["']\.\/data["']/.test(screensSource)) {
+  errors.push("screens.tsx must render passed view-model data instead of importing preview/mock data directly.");
+}
+
+const demoOnlyPanels = [
+  "AttendancePhonePanel",
+  "TravelWorklogPanel",
+  "AdminAccountPanel",
+  "ArchiveLibraryPanel",
+  "AiWorkspacePanel"
+];
+for (const panel of demoOnlyPanels) {
+  const gatedPattern = new RegExp(`demoMode\\s*&&\\s*active\\.id\\s*===\\s*["'][a-z]+["']\\s*\\?\\s*<${panel}\\b`);
+  if (!gatedPattern.test(screensSource)) {
+    errors.push(`${panel} must remain gated behind demoMode before rendering static demo panels.`);
+  }
+}
+
 if (errors.length > 0) {
   console.error("runtime data mode verification failed:");
   for (const error of errors) {
@@ -31,4 +51,4 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log("runtime data mode verified: App.tsx keeps dummy data behind explicit demo mode");
+console.log("runtime data mode verified: dummy data stays behind explicit demo mode");
