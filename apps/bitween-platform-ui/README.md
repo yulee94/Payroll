@@ -24,11 +24,12 @@ This app is the documented frontend direction for Bitween. It is isolated from b
 - `src/i18n/index.ts`: locale normalization, translation lookup, and language option helpers
 - `scripts/verify-i18n-catalog.mjs`: verifies every catalog row has Korean, English, Chinese, and Japanese values and rejects localized UI copy outside the catalog in the React Native and static preview sources
 - `scripts/verify-runtime-data-mode.mjs`: verifies the default app runtime does not load preview/mock data without the explicit demo flag
+- `scripts/run-demo-preview.mjs`: explicit demo-only wrapper for the dependency-free preview server
 - `src/viewModel.ts`: frontend read-only view-model boundary and adapter shape
 - `src/types.ts`: strict frontend domain types
 - `src/theme.ts`: color, spacing, radius, and status-tone tokens
-- `preview/index.html`: dependency-free interactive browser preview for design review
-- `preview/server.js`: tiny local static server for the preview
+- `preview/index.html`: dependency-free interactive demo preview for design review
+- `preview/server.js`: tiny local static server for the explicit demo-only preview
 
 ## Dependency Baseline
 
@@ -51,7 +52,7 @@ Dependency-free demo preview:
 npm run demo
 ```
 
-Then open `http://127.0.0.1:4173/` in a browser. This route is explicitly demo-only and intentionally uses safe mock data. It mirrors the current screen structure and interactions without requiring Expo dependencies and reads the same catalog array through `/catalog.json`.
+Then open `http://127.0.0.1:4173/` in a browser. `npm run preview` is kept as a compatibility alias for the same demo-only launcher. This route is explicitly demo-only and intentionally uses safe mock data. It mirrors the current screen structure and interactions without requiring Expo dependencies and reads the same catalog array through `/catalog.json`.
 
 ## View Model Boundary
 

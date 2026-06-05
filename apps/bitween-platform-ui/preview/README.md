@@ -10,6 +10,8 @@ This path intentionally uses safe mock data. Use it only when the demo version i
 npm run demo
 ```
 
+`npm run preview` starts the same demo-only route for compatibility.
+
 Open `http://127.0.0.1:4173/`.
 
 Demo login:
