@@ -90,6 +90,14 @@ if (!previewAppSource.includes("cossStatutoryBasisDefs")) {
   errors.push("preview/app.js demo payroll preview must mirror statutory deduction basis checks.");
 }
 
+if (!screensSource.includes("cossMonthlyFileDefinitions")) {
+  errors.push("screens.tsx demo payroll preview must expose the monthly COSS file intake checklist.");
+}
+
+if (!previewAppSource.includes("cossMonthlyFileIds")) {
+  errors.push("preview/app.js demo payroll preview must mirror the monthly COSS file intake checklist.");
+}
+
 if (!appSource.includes('"session.emptyCompanyCodeLabel"')) {
   errors.push("App.tsx must replace empty company-code placeholders with a non-demo disconnected label.");
 }

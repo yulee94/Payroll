@@ -6746,6 +6746,159 @@
         "zh-Hans-CN": "Track worker-paid employment insurance separately from employer-paid industrial accident insurance and industry rates.",
         "ja-JP": "Track worker-paid employment insurance separately from employer-paid industrial accident insurance and industry rates."
       }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.title",
+      "values": {
+        "ko-KR": "Monthly intake checklist",
+        "en-US": "Monthly intake checklist",
+        "zh-Hans-CN": "Monthly intake checklist",
+        "ja-JP": "Monthly intake checklist"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.description",
+      "values": {
+        "ko-KR": "Each month keeps one payroll ledger and one billing file in the preview scope; the May worker roster is the latest roster baseline.",
+        "en-US": "Each month keeps one payroll ledger and one billing file in the preview scope; the May worker roster is the latest roster baseline.",
+        "zh-Hans-CN": "Each month keeps one payroll ledger and one billing file in the preview scope; the May worker roster is the latest roster baseline.",
+        "ja-JP": "Each month keeps one payroll ledger and one billing file in the preview scope; the May worker roster is the latest roster baseline."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.jan.badge",
+      "values": {
+        "ko-KR": "Jan",
+        "en-US": "Jan",
+        "zh-Hans-CN": "Jan",
+        "ja-JP": "Jan"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.jan.title",
+      "values": {
+        "ko-KR": "January files detected",
+        "en-US": "January files detected",
+        "zh-Hans-CN": "January files detected",
+        "ja-JP": "January files detected"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.jan.detail",
+      "values": {
+        "ko-KR": "1 payroll ledger and 1 billing file are in scope for January.",
+        "en-US": "1 payroll ledger and 1 billing file are in scope for January.",
+        "zh-Hans-CN": "1 payroll ledger and 1 billing file are in scope for January.",
+        "ja-JP": "1 payroll ledger and 1 billing file are in scope for January."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.feb.badge",
+      "values": {
+        "ko-KR": "Feb",
+        "en-US": "Feb",
+        "zh-Hans-CN": "Feb",
+        "ja-JP": "Feb"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.feb.title",
+      "values": {
+        "ko-KR": "February files detected",
+        "en-US": "February files detected",
+        "zh-Hans-CN": "February files detected",
+        "ja-JP": "February files detected"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.feb.detail",
+      "values": {
+        "ko-KR": "1 payroll ledger and 1 billing file are in scope for February.",
+        "en-US": "1 payroll ledger and 1 billing file are in scope for February.",
+        "zh-Hans-CN": "1 payroll ledger and 1 billing file are in scope for February.",
+        "ja-JP": "1 payroll ledger and 1 billing file are in scope for February."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.mar.badge",
+      "values": {
+        "ko-KR": "Mar",
+        "en-US": "Mar",
+        "zh-Hans-CN": "Mar",
+        "ja-JP": "Mar"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.mar.title",
+      "values": {
+        "ko-KR": "March files detected",
+        "en-US": "March files detected",
+        "zh-Hans-CN": "March files detected",
+        "ja-JP": "March files detected"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.mar.detail",
+      "values": {
+        "ko-KR": "1 payroll ledger and 1 billing file are in scope for March.",
+        "en-US": "1 payroll ledger and 1 billing file are in scope for March.",
+        "zh-Hans-CN": "1 payroll ledger and 1 billing file are in scope for March.",
+        "ja-JP": "1 payroll ledger and 1 billing file are in scope for March."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.apr.badge",
+      "values": {
+        "ko-KR": "Apr",
+        "en-US": "Apr",
+        "zh-Hans-CN": "Apr",
+        "ja-JP": "Apr"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.apr.title",
+      "values": {
+        "ko-KR": "April files detected",
+        "en-US": "April files detected",
+        "zh-Hans-CN": "April files detected",
+        "ja-JP": "April files detected"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.apr.detail",
+      "values": {
+        "ko-KR": "1 billing file and the differently named Amkor April payroll ledger are in scope.",
+        "en-US": "1 billing file and the differently named Amkor April payroll ledger are in scope.",
+        "zh-Hans-CN": "1 billing file and the differently named Amkor April payroll ledger are in scope.",
+        "ja-JP": "1 billing file and the differently named Amkor April payroll ledger are in scope."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.may.badge",
+      "values": {
+        "ko-KR": "May",
+        "en-US": "May",
+        "zh-Hans-CN": "May",
+        "ja-JP": "May"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.may.title",
+      "values": {
+        "ko-KR": "May files and roster detected",
+        "en-US": "May files and roster detected",
+        "zh-Hans-CN": "May files and roster detected",
+        "ja-JP": "May files and roster detected"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.monthly.may.detail",
+      "values": {
+        "ko-KR": "1 payroll ledger, 1 billing file, and the May worker roster baseline are in scope.",
+        "en-US": "1 payroll ledger, 1 billing file, and the May worker roster baseline are in scope.",
+        "zh-Hans-CN": "1 payroll ledger, 1 billing file, and the May worker roster baseline are in scope.",
+        "ja-JP": "1 payroll ledger, 1 billing file, and the May worker roster baseline are in scope."
+      }
     }
   ],
   "languageDisplayNames": [
