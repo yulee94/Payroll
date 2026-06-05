@@ -4201,6 +4201,15 @@
       }
     },
     {
+      "key": "screens.login.feedback.missingRequired",
+      "values": {
+        "ko-KR": "법인코드, 사용자 ID, 비밀번호를 입력하세요.",
+        "en-US": "Enter the company code, user ID, and password.",
+        "zh-Hans-CN": "请输入公司代码、用户 ID 和密码。",
+        "ja-JP": "法人コード、ユーザー ID、パスワードを入力してください。"
+      }
+    },
+    {
       "key": "screens.login.feedback.invalidDemo",
       "values": {
         "ko-KR": "demo 계정 정보가 일치하지 않습니다. 법인코드 {companyCode}, 아이디 {userId}, 비밀번호 {password}로 입력하세요.",
@@ -6106,6 +6115,33 @@
         "en-US": "Bitween platform UI preview",
         "zh-Hans-CN": "Bitween 平台 UI 预览",
         "ja-JP": "Bitween プラットフォーム UI プレビュー"
+      }
+    },
+    {
+      "key": "preview.demoMode.badge",
+      "values": {
+        "ko-KR": "Demo",
+        "en-US": "Demo",
+        "zh-Hans-CN": "演示",
+        "ja-JP": "Demo"
+      }
+    },
+    {
+      "key": "preview.demoMode.title",
+      "values": {
+        "ko-KR": "데모 데이터 모드",
+        "en-US": "Demo data mode",
+        "zh-Hans-CN": "演示数据模式",
+        "ja-JP": "デモデータモード"
+      }
+    },
+    {
+      "key": "preview.demoMode.description",
+      "values": {
+        "ko-KR": "이 preview 경로는 요청된 데모 검토용 mock 데이터만 표시합니다.",
+        "en-US": "This preview path shows mock data only for requested demo review.",
+        "zh-Hans-CN": "此预览路径仅为已请求的演示评审显示模拟数据。",
+        "ja-JP": "この preview パスは依頼されたデモ確認用の mock データのみを表示します。"
       }
     },
     {

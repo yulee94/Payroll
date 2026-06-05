@@ -490,6 +490,13 @@ function renderShell() {
             <button class="btn ghost compact-btn" data-logout="true">${t("shell.logout")}</button>
           </div>
         </header>
+        <div class="demo-mode-banner">
+          ${badge(t("preview.demoMode.badge"), "attention")}
+          <div>
+            <strong>${t("preview.demoMode.title")}</strong>
+            <span>${t("preview.demoMode.description")}</span>
+          </div>
+        </div>
         <div class="content">${renderScreen(active.id)}</div>
       </div>
     </section>

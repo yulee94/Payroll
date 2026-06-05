@@ -6,20 +6,30 @@ import { AppShell } from "./src/components";
 import { defaultLocale, t, type SupportedLocale } from "./src/i18n";
 import { colors, defaultSidebarThemeId, getSidebarTheme } from "./src/theme";
 import type { PlatformId, SidebarThemeId } from "./src/types";
-import { getNavigationItem, getPreviewPlatformViewModel } from "./src/viewModel";
+import { createEmptyPlatformViewModel, getNavigationItem, getPreviewPlatformViewModel, isDemoDataMode } from "./src/viewModel";
 import { LauncherScreen, LoginScreen, ModuleScreen, PayrollScreen } from "./src/screens";
+
+type ModuleId = Exclude<PlatformId, "home" | "payroll">;
+
+function isModuleId(id: PlatformId): id is ModuleId {
+  return id !== "home" && id !== "payroll";
+}
 
 export default function App() {
   const [activeId, setActiveId] = useState<PlatformId>("home");
   const [authenticated, setAuthenticated] = useState(false);
   const [locale, setLocale] = useState<SupportedLocale>(defaultLocale);
   const [sidebarThemeId, setSidebarThemeId] = useState<SidebarThemeId>(defaultSidebarThemeId);
-  const viewModel = useMemo(() => getPreviewPlatformViewModel(locale), [locale]);
+  const demoDataEnabled = isDemoDataMode();
+  const viewModel = useMemo(
+    () => (demoDataEnabled ? getPreviewPlatformViewModel(locale) : createEmptyPlatformViewModel(locale)),
+    [demoDataEnabled, locale]
+  );
   const active = useMemo(() => getNavigationItem(activeId, locale), [activeId, locale]);
   const navigationItems = viewModel.launcher.navigation;
   const sidebarTheme = useMemo(() => getSidebarTheme(sidebarThemeId, locale), [locale, sidebarThemeId]);
   const session = viewModel.session;
-  const sessionLabel = `${session.tenantName} · ${session.roleLabel} · ${session.companyCodeLabel}`;
+  const sessionLabel = `${session.tenantName} / ${session.roleLabel} / ${session.companyCodeLabel}`;
 
   const select = (id: PlatformId) => {
     if (!authenticated && id !== "home") {
@@ -39,6 +49,7 @@ export default function App() {
         <StatusBar style="dark" />
         <View style={styles.loginFrame}>
           <LoginScreen
+            demoMode={demoDataEnabled}
             locale={locale}
             onLocaleChange={setLocale}
             onSelect={(id) => {
@@ -67,12 +78,19 @@ export default function App() {
         sidebarTheme={sidebarTheme}
       >
         {activeId === "home" ? (
-          <LauncherScreen active={active} locale={locale} onSelect={select} />
+          <LauncherScreen active={active} data={viewModel.launcher} locale={locale} onSelect={select} payroll={viewModel.payroll} />
         ) : activeId === "payroll" ? (
-          <PayrollScreen active={active} locale={locale} onSelect={select} />
-        ) : (
-          <ModuleScreen active={active} locale={locale} onLocaleChange={setLocale} onSelect={select} />
-        )}
+          <PayrollScreen active={active} data={viewModel.payroll} demoMode={demoDataEnabled} locale={locale} onSelect={select} />
+        ) : isModuleId(activeId) ? (
+          <ModuleScreen
+            active={active}
+            dashboard={viewModel.modules[activeId]}
+            demoMode={demoDataEnabled}
+            locale={locale}
+            onLocaleChange={setLocale}
+            onSelect={select}
+          />
+        ) : null}
       </AppShell>
     </SafeAreaView>
   );

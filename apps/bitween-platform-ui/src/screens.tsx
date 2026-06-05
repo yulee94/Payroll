@@ -12,22 +12,10 @@ import {
   MetricGrid,
   SectionHeader
 } from "./components";
-import {
-  getCalendarEvents,
-  getModuleDashboards,
-  getNavigationItems,
-  getPayrollIntegrationRows,
-  getPayrollSettingsRows,
-  getPayrollSteps,
-  getPlatformMetrics,
-  getPreviewRows,
-  getReadinessCards,
-  getTodayTodos,
-  getWorkQueue
-} from "./data";
 import { getLanguageOptions, t, type SupportedLocale } from "./i18n";
 import { colors, radius, spacing, toneColor } from "./theme";
-import type { CalendarEvent, ModuleRow, NavigationItem, PayrollStep, PlatformId, ReadinessCard, ReadinessTone, TodoItem, WorkQueueItem } from "./types";
+import type { CalendarEvent, ModuleDashboard, ModuleRow, NavigationItem, PayrollStep, PlatformId, ReadinessCard, ReadinessTone, TodoItem, WorkQueueItem } from "./types";
+import type { LauncherViewModel, PayrollViewModel } from "./viewModel";
 
 type ScreenProps = {
   readonly active: NavigationItem;
@@ -36,10 +24,23 @@ type ScreenProps = {
 };
 
 type LoginScreenProps = Pick<ScreenProps, "locale" | "onSelect"> & {
+  readonly demoMode: boolean;
   readonly onLocaleChange: (locale: SupportedLocale) => void;
 };
 
+type LauncherScreenProps = ScreenProps & {
+  readonly data: LauncherViewModel;
+  readonly payroll: PayrollViewModel;
+};
+
+type PayrollScreenProps = ScreenProps & {
+  readonly data: PayrollViewModel;
+  readonly demoMode: boolean;
+};
+
 type LocalizedScreenProps = ScreenProps & {
+  readonly dashboard: ModuleDashboard;
+  readonly demoMode: boolean;
   readonly onLocaleChange: (locale: SupportedLocale) => void;
 };
 
@@ -114,7 +115,7 @@ function isModuleId(id: PlatformId): id is ModuleId {
   return id !== "home" && id !== "payroll";
 }
 
-export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenProps) {
+export function LoginScreen({ demoMode, locale, onLocaleChange, onSelect }: LoginScreenProps) {
   const [companyCode, setCompanyCode] = useState("");
   const [feedbackKey, setFeedbackKey] = useState<string | undefined>();
   const [password, setPassword] = useState("");
@@ -125,7 +126,12 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
 
   const handleLogin = () => {
     if (!canSubmit) {
-      setFeedbackKey("login.feedback.missingDemo");
+      setFeedbackKey(demoMode ? "login.feedback.missingDemo" : "login.feedback.missingRequired");
+      return;
+    }
+    if (!demoMode) {
+      setFeedbackKey(undefined);
+      onSelect("home");
       return;
     }
     if (
@@ -193,7 +199,7 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
             autoCapitalize="characters"
             autoComplete="organization"
             onChangeText={setCompanyCode}
-            placeholder={demoAccount.companyCode}
+            placeholder={demoMode ? demoAccount.companyCode : ""}
             placeholderTextColor={colors.muted}
             returnKeyType="next"
             style={styles.input}
@@ -206,7 +212,7 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
             autoCapitalize="none"
             autoComplete="username"
             onChangeText={setUserId}
-            placeholder={demoAccount.userId}
+            placeholder={demoMode ? demoAccount.userId : ""}
             placeholderTextColor={colors.muted}
             returnKeyType="next"
             style={styles.input}
@@ -218,7 +224,7 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
           <TextInput
             autoComplete="password"
             onChangeText={setPassword}
-            placeholder={demoAccount.password}
+            placeholder={demoMode ? demoAccount.password : ""}
             placeholderTextColor={colors.muted}
             returnKeyType="done"
             secureTextEntry
@@ -234,25 +240,27 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         ) : null}
         <View style={styles.loginActions}>
           <ActionButton onPress={handleLogin}>{tScreen(locale, canSubmit ? "login.actions.enterHome" : "login.actions.login")}</ActionButton>
-          <ActionButton onPress={handleDemoLogin} variant="secondary">{tScreen(locale, "login.actions.demo")}</ActionButton>
+          {demoMode ? <ActionButton onPress={handleDemoLogin} variant="secondary">{tScreen(locale, "login.actions.demo")}</ActionButton> : null}
         </View>
-        <View style={styles.inlineNotice}>
-          <Badge tone="neutral">{tScreen(locale, "login.demo.badge")}</Badge>
-          <Label size="sm" muted>{tScreen(locale, "login.demo.summary", demoParams)}</Label>
-        </View>
+        {demoMode ? (
+          <View style={styles.inlineNotice}>
+            <Badge tone="neutral">{tScreen(locale, "login.demo.badge")}</Badge>
+            <Label size="sm" muted>{tScreen(locale, "login.demo.summary", demoParams)}</Label>
+          </View>
+        ) : null}
       </Card>
     </View>
   );
 }
 
-export function LauncherScreen({ locale, onSelect }: ScreenProps) {
-  const navigationItems = useMemo(() => getNavigationItems(locale), [locale]);
-  const platformMetrics = useMemo(() => getPlatformMetrics(locale), [locale]);
-  const workQueue = useMemo(() => getWorkQueue(locale), [locale]);
-  const calendarEvents = useMemo(() => getCalendarEvents(locale), [locale]);
-  const todayTodos = useMemo(() => getTodayTodos(locale), [locale]);
-  const payrollSettingsRows = useMemo(() => getPayrollSettingsRows(locale), [locale]);
-  const previewRows = useMemo(() => getPreviewRows(locale), [locale]);
+export function LauncherScreen({ data, locale, onSelect, payroll }: LauncherScreenProps) {
+  const navigationItems = data.navigation;
+  const platformMetrics = data.metrics;
+  const workQueue = data.workQueue;
+  const calendarEvents = data.calendarEvents;
+  const todayTodos = data.todayTodos;
+  const payrollSettingsRows = payroll.settingsRows;
+  const previewRows = payroll.previewRows;
   const launcherItems = useMemo(() => navigationItems.filter((item) => item.id !== "home"), [navigationItems]);
   const [selectedQueueId, setSelectedQueueId] = useState<string | undefined>(workQueue[0]?.id);
   const selectedQueue = workQueue.find((item) => item.id === selectedQueueId) ?? workQueue[0];
@@ -335,9 +343,9 @@ export function LauncherScreen({ locale, onSelect }: ScreenProps) {
   );
 }
 
-export function PayrollScreen({ locale, onSelect }: ScreenProps) {
-  const readinessCards = useMemo(() => getReadinessCards(locale), [locale]);
-  const payrollSteps = useMemo(() => getPayrollSteps(locale), [locale]);
+export function PayrollScreen({ data, demoMode, locale, onSelect }: PayrollScreenProps) {
+  const readinessCards = data.readinessCards;
+  const payrollSteps = data.steps;
   const [selectedReadinessId, setSelectedReadinessId] = useState<string | undefined>(readinessCards[0]?.id);
   const [selectedStepId, setSelectedStepId] = useState<string | undefined>(payrollSteps[0]?.id);
   const selectedReadiness = readinessCards.find((card) => card.id === selectedReadinessId) ?? readinessCards[0];
@@ -352,7 +360,7 @@ export function PayrollScreen({ locale, onSelect }: ScreenProps) {
     <View style={styles.stack}>
       <PayrollReadiness cards={readinessCards} locale={locale} onSelect={onSelect} selectedId={selectedReadiness?.id} onSelectCard={(card) => setSelectedReadinessId(card.id)} />
       {selectedReadiness ? <PayrollReadinessDetail card={selectedReadiness} locale={locale} /> : null}
-      <PayrollIntegrationPanel locale={locale} onSelect={onSelect} />
+      <PayrollIntegrationPanel demoMode={demoMode} locale={locale} onSelect={onSelect} rows={data.integrationRows} />
       <Card>
         <SectionHeader
           eyebrow={tScreen(locale, "payroll.flow.eyebrow")}
@@ -391,9 +399,15 @@ export function PayrollScreen({ locale, onSelect }: ScreenProps) {
   );
 }
 
-function PayrollIntegrationPanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "onSelect">) {
-  const payrollIntegrationRows = useMemo(() => getPayrollIntegrationRows(locale), [locale]);
-
+function PayrollIntegrationPanel({
+  demoMode,
+  locale,
+  onSelect,
+  rows
+}: Pick<ScreenProps, "locale" | "onSelect"> & {
+  readonly demoMode: boolean;
+  readonly rows: readonly ModuleRow[];
+}) {
   return (
     <Card>
       <SectionHeader
@@ -401,20 +415,24 @@ function PayrollIntegrationPanel({ locale, onSelect }: Pick<ScreenProps, "locale
         description={tScreen(locale, "payroll.integration.description")}
         action={<ActionButton onPress={() => onSelect("admin")} variant="secondary">{tScreen(locale, "payroll.integration.action")}</ActionButton>}
       />
-      <View style={styles.integrationGrid}>
-        {payrollIntegrationCheckDefinitions.map((item) => (
-          <View key={item.id} style={[styles.integrationCard, { borderTopColor: toneColor(item.tone) }]}>
-            <Label size="sm" muted>{tScreen(locale, `payroll.integrationChecks.${item.id}.label`)}</Label>
-            <Text style={[styles.integrationValue, { color: toneColor(item.tone) }]}>{tScreen(locale, `payroll.integrationChecks.${item.id}.value`)}</Text>
-            <Label size="sm">{tScreen(locale, `payroll.integrationChecks.${item.id}.detail`)}</Label>
-          </View>
-        ))}
-      </View>
-      <DataTable locale={locale} rows={payrollIntegrationRows} />
-      <View style={styles.inlineNotice}>
-        <Badge tone="neutral">{tScreen(locale, "payroll.integration.notice.badge")}</Badge>
-        <Label size="sm" muted>{tScreen(locale, "payroll.integration.notice.description")}</Label>
-      </View>
+      {demoMode ? (
+        <View style={styles.integrationGrid}>
+          {payrollIntegrationCheckDefinitions.map((item) => (
+            <View key={item.id} style={[styles.integrationCard, { borderTopColor: toneColor(item.tone) }]}>
+              <Label size="sm" muted>{tScreen(locale, `payroll.integrationChecks.${item.id}.label`)}</Label>
+              <Text style={[styles.integrationValue, { color: toneColor(item.tone) }]}>{tScreen(locale, `payroll.integrationChecks.${item.id}.value`)}</Text>
+              <Label size="sm">{tScreen(locale, `payroll.integrationChecks.${item.id}.detail`)}</Label>
+            </View>
+          ))}
+        </View>
+      ) : null}
+      <DataTable locale={locale} rows={rows} />
+      {demoMode ? (
+        <View style={styles.inlineNotice}>
+          <Badge tone="neutral">{tScreen(locale, "payroll.integration.notice.badge")}</Badge>
+          <Label size="sm" muted>{tScreen(locale, "payroll.integration.notice.description")}</Label>
+        </View>
+      ) : null}
     </Card>
   );
 }
@@ -459,9 +477,7 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
   );
 }
 
-export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: LocalizedScreenProps) {
-  const moduleDashboards = useMemo(() => getModuleDashboards(locale), [locale]);
-
+export function ModuleScreen({ active, dashboard, demoMode, locale, onLocaleChange, onSelect }: LocalizedScreenProps) {
   if (!isModuleId(active.id)) {
     return (
       <Card>
@@ -470,7 +486,6 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
     );
   }
 
-  const dashboard = moduleDashboards[active.id];
   const defaultFilter = dashboard.filters[0] ?? tScreen(locale, "filters.all");
   const [activeFilter, setActiveFilter] = useState<string>(defaultFilter);
   const [search, setSearch] = useState("");
@@ -520,11 +535,11 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
         <MetricGrid items={dashboard.metrics} />
       </Card>
 
-      {active.id === "attendance" ? <AttendancePhonePanel locale={locale} /> : null}
-      {active.id === "travel" ? <TravelWorklogPanel locale={locale} /> : null}
-      {active.id === "admin" ? <AdminAccountPanel locale={locale} /> : null}
-      {active.id === "archive" ? <ArchiveLibraryPanel locale={locale} onSelect={onSelect} /> : null}
-      {active.id === "ai" ? <AiWorkspacePanel locale={locale} onSelect={onSelect} /> : null}
+      {demoMode && active.id === "attendance" ? <AttendancePhonePanel locale={locale} /> : null}
+      {demoMode && active.id === "travel" ? <TravelWorklogPanel locale={locale} /> : null}
+      {demoMode && active.id === "admin" ? <AdminAccountPanel locale={locale} /> : null}
+      {demoMode && active.id === "archive" ? <ArchiveLibraryPanel locale={locale} onSelect={onSelect} /> : null}
+      {demoMode && active.id === "ai" ? <AiWorkspacePanel locale={locale} onSelect={onSelect} /> : null}
 
       {active.id === "settings" ? (
         <Card>
