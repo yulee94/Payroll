@@ -453,6 +453,7 @@ function renderShell() {
   const items = navigationItems();
   const active = items.find((item) => item.id === state.activeId) || items[0];
   const sessionLabel = `${session.tenantName} · ${t("session.roleLabel")} · ${demoAccount.companyCode}`;
+  const demoModeLabel = `${t("preview.demoMode.title")}. ${t("preview.demoMode.description")}`;
   return html`
     <section class="shell sidebar-theme-${state.sidebarTheme}">
       <aside class="sidebar">
@@ -490,7 +491,7 @@ function renderShell() {
             <button class="btn ghost compact-btn" data-logout="true">${t("shell.logout")}</button>
           </div>
         </header>
-        <div class="demo-mode-banner">
+        <div class="demo-mode-banner" role="status" aria-label="${escapeText(demoModeLabel)}">
           ${badge(t("preview.demoMode.badge"), "attention")}
           <div>
             <strong>${t("preview.demoMode.title")}</strong>

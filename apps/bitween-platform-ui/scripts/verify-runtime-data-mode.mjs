@@ -5,11 +5,13 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const appPath = join(__dirname, "..", "App.tsx");
 const packagePath = join(__dirname, "..", "package.json");
+const previewAppPath = join(__dirname, "..", "preview", "app.js");
 const previewServerPath = join(__dirname, "..", "preview", "server.js");
 const screensPath = join(__dirname, "..", "src", "screens.tsx");
 const viewModelPath = join(__dirname, "..", "src", "viewModel.ts");
 const appSource = readFileSync(appPath, "utf8");
 const packageSource = readFileSync(packagePath, "utf8");
+const previewAppSource = readFileSync(previewAppPath, "utf8");
 const previewServerSource = readFileSync(previewServerPath, "utf8");
 const screensSource = readFileSync(screensPath, "utf8");
 const viewModelSource = readFileSync(viewModelPath, "utf8");
@@ -54,6 +56,10 @@ if (packageJson.scripts?.preview !== "node scripts/run-demo-preview.mjs") {
 
 if (!previewServerSource.includes("demo-only preview")) {
   errors.push("preview/server.js startup log must identify the route as demo-only.");
+}
+
+if (!/class="demo-mode-banner" role="status" aria-label="\$\{escapeText\(demoModeLabel\)\}"/.test(previewAppSource)) {
+  errors.push("preview/app.js demo banner must expose a status role and escaped aria-label.");
 }
 
 if (!appSource.includes('"session.emptyCompanyCodeLabel"')) {
