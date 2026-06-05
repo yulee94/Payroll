@@ -71,6 +71,13 @@ const cossPreviewFileDefs = [
   ["edi-pending", "neutral"]
 ].map(([id, tone]) => ({ id, tone }));
 
+const cossStatutoryBasisDefs = [
+  ["income-tax", "attention"],
+  ["national-pension", "attention"],
+  ["health-insurance", "attention"],
+  ["employment-insurance", "neutral"]
+].map(([id, tone]) => ({ id, tone }));
+
 const rowGroups = {
   payrollSettings: [
     ["payroll-setting-1", "neutral", "settings"],
@@ -640,6 +647,16 @@ function cossPreviewFilePanel() {
       </article>
     `).join("")}</div>
     <div class="notice">${badge(t("screens.payroll.cossPreview.notice.badge"), "attention")}<span class="helper">${t("screens.payroll.cossPreview.notice.description")}</span></div>
+    <div class="detail-panel">
+      ${sectionHead("", t("screens.payroll.cossPreview.statutory.title"), t("screens.payroll.cossPreview.statutory.description"))}
+      <div class="detail-grid">${cossStatutoryBasisDefs.map((item) => `
+        <article class="detail-item">
+          ${badge(t(`screens.payroll.cossPreview.statutory.${item.id}.badge`), item.tone)}
+          <strong>${t(`screens.payroll.cossPreview.statutory.${item.id}.title`)}</strong>
+          <span class="helper">${t(`screens.payroll.cossPreview.statutory.${item.id}.detail`)}</span>
+        </article>
+      `).join("")}</div>
+    </div>
   </section>`;
 }
 

@@ -82,6 +82,14 @@ if (!/data-language="\$\{locale\}" aria-pressed="\$\{state\.locale === locale \?
   errors.push("preview/app.js language buttons must expose pressed state.");
 }
 
+if (!screensSource.includes("cossStatutoryBasisDefinitions")) {
+  errors.push("screens.tsx demo payroll preview must expose statutory deduction basis checks.");
+}
+
+if (!previewAppSource.includes("cossStatutoryBasisDefs")) {
+  errors.push("preview/app.js demo payroll preview must mirror statutory deduction basis checks.");
+}
+
 if (!appSource.includes('"session.emptyCompanyCodeLabel"')) {
   errors.push("App.tsx must replace empty company-code placeholders with a non-demo disconnected label.");
 }

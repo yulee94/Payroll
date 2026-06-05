@@ -6620,6 +6620,132 @@
         "zh-Hans-CN": "The preview does not store personal data or real amounts from the files; it only mirrors the approved file scope with dummy status.",
         "ja-JP": "The preview does not store personal data or real amounts from the files; it only mirrors the approved file scope with dummy status."
       }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.title",
+      "values": {
+        "ko-KR": "Statutory deduction basis",
+        "en-US": "Statutory deduction basis",
+        "zh-Hans-CN": "Statutory deduction basis",
+        "ja-JP": "Statutory deduction basis"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.description",
+      "values": {
+        "ko-KR": "Preview tracks the required legal deduction sources without storing final calculated amounts until official EDI/API checks are connected.",
+        "en-US": "Preview tracks the required legal deduction sources without storing final calculated amounts until official EDI/API checks are connected.",
+        "zh-Hans-CN": "Preview tracks the required legal deduction sources without storing final calculated amounts until official EDI/API checks are connected.",
+        "ja-JP": "Preview tracks the required legal deduction sources without storing final calculated amounts until official EDI/API checks are connected."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.income-tax.badge",
+      "values": {
+        "ko-KR": "NTS",
+        "en-US": "NTS",
+        "zh-Hans-CN": "NTS",
+        "ja-JP": "NTS"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.income-tax.title",
+      "values": {
+        "ko-KR": "Earned income withholding",
+        "en-US": "Earned income withholding",
+        "zh-Hans-CN": "Earned income withholding",
+        "ja-JP": "Earned income withholding"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.income-tax.detail",
+      "values": {
+        "ko-KR": "Use the National Tax Service simplified withholding table as the source for income tax and local income tax checks.",
+        "en-US": "Use the National Tax Service simplified withholding table as the source for income tax and local income tax checks.",
+        "zh-Hans-CN": "Use the National Tax Service simplified withholding table as the source for income tax and local income tax checks.",
+        "ja-JP": "Use the National Tax Service simplified withholding table as the source for income tax and local income tax checks."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.national-pension.badge",
+      "values": {
+        "ko-KR": "NPS",
+        "en-US": "NPS",
+        "zh-Hans-CN": "NPS",
+        "ja-JP": "NPS"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.national-pension.title",
+      "values": {
+        "ko-KR": "National pension",
+        "en-US": "National pension",
+        "zh-Hans-CN": "National pension",
+        "ja-JP": "National pension"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.national-pension.detail",
+      "values": {
+        "ko-KR": "Map monthly standard income and contribution eligibility, then replace preview estimates with NPS EDI/API results.",
+        "en-US": "Map monthly standard income and contribution eligibility, then replace preview estimates with NPS EDI/API results.",
+        "zh-Hans-CN": "Map monthly standard income and contribution eligibility, then replace preview estimates with NPS EDI/API results.",
+        "ja-JP": "Map monthly standard income and contribution eligibility, then replace preview estimates with NPS EDI/API results."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.health-insurance.badge",
+      "values": {
+        "ko-KR": "NHIS",
+        "en-US": "NHIS",
+        "zh-Hans-CN": "NHIS",
+        "ja-JP": "NHIS"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.health-insurance.title",
+      "values": {
+        "ko-KR": "Health and long-term care",
+        "en-US": "Health and long-term care",
+        "zh-Hans-CN": "Health and long-term care",
+        "ja-JP": "Health and long-term care"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.health-insurance.detail",
+      "values": {
+        "ko-KR": "Map remuneration basis and long-term care linkage, then confirm final deductions through NHIS EDI/API.",
+        "en-US": "Map remuneration basis and long-term care linkage, then confirm final deductions through NHIS EDI/API.",
+        "zh-Hans-CN": "Map remuneration basis and long-term care linkage, then confirm final deductions through NHIS EDI/API.",
+        "ja-JP": "Map remuneration basis and long-term care linkage, then confirm final deductions through NHIS EDI/API."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.employment-insurance.badge",
+      "values": {
+        "ko-KR": "MOEL",
+        "en-US": "MOEL",
+        "zh-Hans-CN": "MOEL",
+        "ja-JP": "MOEL"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.employment-insurance.title",
+      "values": {
+        "ko-KR": "Employment and industrial accident",
+        "en-US": "Employment and industrial accident",
+        "zh-Hans-CN": "Employment and industrial accident",
+        "ja-JP": "Employment and industrial accident"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.statutory.employment-insurance.detail",
+      "values": {
+        "ko-KR": "Track worker-paid employment insurance separately from employer-paid industrial accident insurance and industry rates.",
+        "en-US": "Track worker-paid employment insurance separately from employer-paid industrial accident insurance and industry rates.",
+        "zh-Hans-CN": "Track worker-paid employment insurance separately from employer-paid industrial accident insurance and industry rates.",
+        "ja-JP": "Track worker-paid employment insurance separately from employer-paid industrial accident insurance and industry rates."
+      }
     }
   ],
   "languageDisplayNames": [
