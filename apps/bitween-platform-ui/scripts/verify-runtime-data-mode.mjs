@@ -40,6 +40,34 @@ if (/from\s+["']\.\/data["']/.test(screensSource)) {
   errors.push("screens.tsx must render passed view-model data instead of importing preview/mock data directly.");
 }
 
+const demoLoginGuards = [
+  {
+    label: "demo login action",
+    pattern: /\{demoMode\s*\?\s*<ActionButton[^>]+onPress=\{handleDemoLogin\}/
+  },
+  {
+    label: "demo account notice",
+    pattern: /\{demoMode\s*\?\s*\(\s*<View[^>]+style=\{styles\.inlineNotice\}>[\s\S]*?login\.demo\.badge/
+  },
+  {
+    label: "demo company-code placeholder",
+    pattern: /placeholder=\{demoMode\s*\?\s*demoAccount\.companyCode\s*:\s*""\}/
+  },
+  {
+    label: "demo user-id placeholder",
+    pattern: /placeholder=\{demoMode\s*\?\s*demoAccount\.userId\s*:\s*""\}/
+  },
+  {
+    label: "demo password placeholder",
+    pattern: /placeholder=\{demoMode\s*\?\s*demoAccount\.password\s*:\s*""\}/
+  }
+];
+for (const guard of demoLoginGuards) {
+  if (!guard.pattern.test(screensSource)) {
+    errors.push(`Login ${guard.label} must remain gated behind demoMode.`);
+  }
+}
+
 const demoOnlyPanels = [
   "AttendancePhonePanel",
   "TravelWorklogPanel",
