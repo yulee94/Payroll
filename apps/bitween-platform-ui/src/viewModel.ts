@@ -105,7 +105,7 @@ export const createEmptyPlatformViewModel = (locale: SupportedLocale): PlatformV
     companyCodeLabel: "-",
     displayName: "",
     employeeNumber: "-",
-    roleLabel: t(locale, "session.roleLabel"),
+    roleLabel: t(locale, "session.emptyRoleLabel"),
     tenantName: "Bitween"
   }
 });

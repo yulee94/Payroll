@@ -5,8 +5,10 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const appPath = join(__dirname, "..", "App.tsx");
 const screensPath = join(__dirname, "..", "src", "screens.tsx");
+const viewModelPath = join(__dirname, "..", "src", "viewModel.ts");
 const appSource = readFileSync(appPath, "utf8");
 const screensSource = readFileSync(screensPath, "utf8");
+const viewModelSource = readFileSync(viewModelPath, "utf8");
 const errors = [];
 
 if (!appSource.includes("createEmptyPlatformViewModel")) {
@@ -23,6 +25,15 @@ if (/useMemo\(\s*\(\)\s*=>\s*getPreviewPlatformViewModel/.test(appSource)) {
 
 if (!appSource.includes("demoDataEnabled ? getPreviewPlatformViewModel(locale) : createEmptyPlatformViewModel(locale)")) {
   errors.push("App.tsx must keep preview/dummy data behind the explicit demo mode flag.");
+}
+
+const emptyModelSource = viewModelSource.split("export const getPreviewSession")[0] ?? "";
+if (emptyModelSource.includes('"session.roleLabel"')) {
+  errors.push("createEmptyPlatformViewModel must not use the demo session role label.");
+}
+
+if (!emptyModelSource.includes('"session.emptyRoleLabel"')) {
+  errors.push("createEmptyPlatformViewModel must use the non-demo empty session role label.");
 }
 
 if (/from\s+["']\.\/data["']/.test(screensSource)) {

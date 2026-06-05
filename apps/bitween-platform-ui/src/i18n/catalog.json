@@ -142,6 +142,15 @@
       }
     },
     {
+      "key": "session.emptyRoleLabel",
+      "values": {
+        "ko-KR": "역할 미연동",
+        "en-US": "Role not connected",
+        "zh-Hans-CN": "角色未连接",
+        "ja-JP": "ロール未接続"
+      }
+    },
+    {
       "key": "table.empty.title",
       "values": {
         "ko-KR": "표시할 항목이 없습니다.",
