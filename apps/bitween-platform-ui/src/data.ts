@@ -40,194 +40,86 @@ const navigationItemDefinitions = [
   { id: "settings", accent: "#0F766E" }
 ] as const satisfies readonly { readonly id: PlatformId; readonly accent: string }[];
 
-const platformMetricDefinitions = [
-  { id: "today", tone: "attention" },
-  { id: "ready", tone: "ready" },
-  { id: "blocked", tone: "blocked" },
-  { id: "docs", tone: "neutral" }
-] as const satisfies readonly MetricDefinition[];
-
-const readinessDefinitions = [
-  { id: "roster", tone: "attention" },
-  { id: "policy", tone: "neutral" },
-  { id: "outputs", tone: "ready" },
-  { id: "api", tone: "attention" }
-] as const satisfies readonly MetricDefinition[];
-
-const payrollStepDefinitions = [
-  { id: "settings", tone: "attention" },
-  { id: "upload", tone: "neutral" },
-  { id: "preview", tone: "ready" },
-  { id: "archive", tone: "neutral" }
-] as const satisfies readonly MetricDefinition[];
-
-const payrollSettingRowDefinitions = [
-  { id: "payroll-setting-1", target: "settings", tone: "neutral" },
-  { id: "payroll-setting-2", target: "settings", tone: "attention" },
-  { id: "payroll-setting-3", target: "settings", tone: "ready" }
-] as const satisfies readonly RowDefinition[];
-
-const payrollIntegrationRowDefinitions = [
-  { id: "payroll-integration-1", target: "payroll", tone: "attention" },
-  { id: "payroll-integration-2", target: "payroll", tone: "neutral" },
-  { id: "payroll-integration-3", target: "payroll", tone: "ready" }
-] as const satisfies readonly RowDefinition[];
-
-const previewRowDefinitions = [
-  { id: "preview-1", target: "archive", tone: "ready" },
-  { id: "preview-2", target: "archive", tone: "neutral" },
-  { id: "preview-3", target: "archive", tone: "attention" }
-] as const satisfies readonly RowDefinition[];
-
-const workQueueDefinitions = [
-  { id: "payroll-june", target: "payroll", tone: "attention" },
-  { id: "approval-pending", target: "workflow", tone: "neutral" },
-  { id: "travel-diary", target: "travel", tone: "attention" },
-  { id: "archive-preview", target: "archive", tone: "ready" }
-] as const satisfies readonly RowDefinition[];
-
-const calendarEventDefinitions = [
-  { dateLabel: "2026.06.04", id: "calendar-payroll", timeLabel: "10:00", tone: "attention" },
-  { dateLabel: "2026.06.04", id: "calendar-approval", timeLabel: "14:00", tone: "neutral" },
-  { dateLabel: "2026.06.05", id: "calendar-recruit", timeLabel: "09:30", tone: "ready" },
-  { dateLabel: "2026.06.05", id: "calendar-travel", timeLabel: "16:00", tone: "attention" }
-] as const satisfies readonly { readonly dateLabel: string; readonly id: string; readonly timeLabel: string; readonly tone: ReadinessTone }[];
-
-const todoDefinitions = [
-  { completed: false, id: "todo-payroll", tone: "attention" },
-  { completed: false, id: "todo-approval", tone: "neutral" },
-  { completed: false, id: "todo-travel", tone: "attention" },
-  { completed: true, id: "todo-archive", tone: "ready" }
-] as const satisfies readonly { readonly completed: boolean; readonly id: string; readonly tone: ReadinessTone }[];
+const platformMetricDefinitions: readonly MetricDefinition[] = [];
+const readinessDefinitions: readonly MetricDefinition[] = [];
+const payrollStepDefinitions: readonly MetricDefinition[] = [];
+const payrollSettingRowDefinitions: readonly RowDefinition[] = [];
+const payrollIntegrationRowDefinitions: readonly RowDefinition[] = [];
+const previewRowDefinitions: readonly RowDefinition[] = [];
+const workQueueDefinitions: readonly RowDefinition[] = [];
+const calendarEventDefinitions: readonly {
+  readonly dateLabel: string;
+  readonly id: string;
+  readonly timeLabel: string;
+  readonly tone: ReadinessTone;
+}[] = [];
+const todoDefinitions: readonly {
+  readonly completed: boolean;
+  readonly id: string;
+  readonly tone: ReadinessTone;
+}[] = [];
 
 const moduleDefinitions = {
   hr: {
     filters: ["all", "roster", "resume", "resignation", "certificate"],
-    metrics: [
-      { id: "employees", tone: "ready" },
-      { id: "attendance", tone: "attention" },
-      { id: "certs", tone: "neutral" }
-    ],
-    rows: [
-      { id: "hr-1", target: "hr", tone: "attention" },
-      { id: "hr-2", target: "hr", tone: "neutral" },
-      { id: "hr-3", target: "hr", tone: "ready" }
-    ],
+    metrics: [],
+    rows: [],
     primaryAction: { target: "hr" },
     secondaryAction: { target: "payroll" }
   },
   attendance: {
     filters: ["all", "checkIn", "checkOut", "attention"],
-    metrics: [
-      { id: "checked-in", tone: "ready" },
-      { id: "pending", tone: "attention" },
-      { id: "weekly", tone: "neutral" }
-    ],
-    rows: [
-      { id: "attendance-1", target: "attendance", tone: "ready" },
-      { id: "attendance-2", target: "attendance", tone: "attention" }
-    ],
+    metrics: [],
+    rows: [],
     primaryAction: { target: "attendance" },
     secondaryAction: { target: "hr" }
   },
   recruit: {
     filters: ["all", "applicant", "career", "credential", "placement"],
-    metrics: [
-      { id: "applicants", tone: "ready" },
-      { id: "qualified", tone: "attention" },
-      { id: "placement", tone: "neutral" }
-    ],
-    rows: [
-      { id: "recruit-1", target: "recruit", tone: "attention" },
-      { id: "recruit-2", target: "recruit", tone: "ready" }
-    ],
+    metrics: [],
+    rows: [],
     primaryAction: { target: "recruit" },
     secondaryAction: { target: "hr" }
   },
   travel: {
     filters: ["all", "plan", "run", "diary", "result", "review"],
-    metrics: [
-      { id: "plans", tone: "neutral" },
-      { id: "diary", tone: "attention" },
-      { id: "completed", tone: "ready" }
-    ],
-    rows: [
-      { id: "travel-1", target: "travel", tone: "attention" },
-      { id: "travel-2", target: "travel", tone: "neutral" },
-      { id: "travel-3", target: "travel", tone: "ready" }
-    ],
+    metrics: [],
+    rows: [],
     primaryAction: { target: "travel" },
     secondaryAction: { target: "workflow" }
   },
   workflow: {
     filters: ["all", "pending", "ongoing", "returned"],
-    metrics: [
-      { id: "pending", tone: "attention" },
-      { id: "drafts", tone: "neutral" },
-      { id: "done", tone: "ready" }
-    ],
-    rows: [
-      { id: "wf-1", target: "workflow", tone: "attention" },
-      { id: "wf-2", target: "workflow", tone: "neutral" }
-    ],
+    metrics: [],
+    rows: [],
     primaryAction: { target: "workflow" },
     secondaryAction: { target: "archive" }
   },
   archive: {
     filters: ["all", "payroll", "contract", "report"],
-    metrics: [
-      { id: "reports", tone: "ready" },
-      { id: "missing", tone: "attention" },
-      { id: "shared", tone: "ready" }
-    ],
-    rows: [
-      { id: "ar-1", target: "archive", tone: "ready" },
-      { id: "ar-2", target: "archive", tone: "attention" }
-    ],
+    metrics: [],
+    rows: [],
     primaryAction: { target: "archive" },
     secondaryAction: { target: "payroll" }
   },
   ai: {
     filters: ["all", "summary", "draft", "review"],
-    metrics: [
-      { id: "prompts", tone: "ready" },
-      { id: "reviews", tone: "attention" },
-      { id: "policy", tone: "neutral" }
-    ],
-    rows: [
-      { id: "ai-1", target: "ai", tone: "ready" },
-      { id: "ai-2", target: "ai", tone: "attention" }
-    ],
+    metrics: [],
+    rows: [],
     primaryAction: { target: "ai" },
     secondaryAction: { target: "settings" }
   },
   admin: {
     filters: ["all", "permission", "branch", "subaccount", "audit"],
-    metrics: [
-      { id: "branch", tone: "ready" },
-      { id: "users", tone: "ready" },
-      { id: "roles", tone: "attention" },
-      { id: "audit", tone: "ready" }
-    ],
-    rows: [
-      { id: "ad-1", target: "admin", tone: "attention" },
-      { id: "ad-2", target: "admin", tone: "ready" },
-      { id: "ad-3", target: "admin", tone: "attention" }
-    ],
+    metrics: [],
+    rows: [],
     primaryAction: { target: "admin" },
     secondaryAction: { target: "settings" }
   },
   settings: {
     filters: ["all", "personal", "payroll", "notification"],
-    metrics: [
-      { id: "profile", tone: "ready" },
-      { id: "payroll", tone: "attention" },
-      { id: "notice", tone: "neutral" }
-    ],
-    rows: [
-      { id: "st-1", target: "settings", tone: "attention" },
-      { id: "st-2", target: "settings", tone: "ready" }
-    ],
+    metrics: [],
+    rows: [],
     primaryAction: { target: "settings" },
     secondaryAction: { target: "payroll" }
   }

@@ -19,7 +19,7 @@ This app is the documented frontend direction for Bitween. It is isolated from b
 - `App.tsx`: auth preview state, screen routing, shell entry
 - `src/components.tsx`: shared React Native UI primitives
 - `src/screens.tsx`: login, launcher, payroll, and module screens
-- `src/data.ts`: typed safe mock data for frontend preview
+- `src/data.ts`: navigation definitions and empty live-data adapters for preview
 - `src/i18n/catalog.json`: catalog-array source for localized UI copy
 - `src/i18n/index.ts`: locale normalization, translation lookup, and language option helpers
 - `scripts/verify-i18n-catalog.mjs`: verifies every catalog row has Korean, English, Chinese, and Japanese values and rejects localized UI copy outside the catalog in the React Native and static preview sources
@@ -49,7 +49,7 @@ Dependency-free UI preview:
 node preview/server.js
 ```
 
-Then open `http://127.0.0.1:4173/` in a browser. This preview mirrors the current screen structure and interactions without requiring Expo dependencies; it reads the same catalog array through `/catalog.json`.
+Then open `http://127.0.0.1:4173/` in a browser. This preview mirrors the current screen structure and interactions without requiring Expo dependencies; it reads the same catalog array through `/catalog.json` and shows empty states until a real data source is connected.
 
 ## View Model Boundary
 
@@ -63,11 +63,10 @@ Production delivery should package this frontend as a containerized workload ser
 
 - Confirm `npm run verify:i18n` passes before adding user-facing copy.
 - Confirm login renders without authenticated navigation.
-- Confirm login button moves to the platform launcher.
+- Confirm login does not accept fabricated credentials.
 - Confirm navigation switches between payroll, HR, workflow, archive, AI, admin, and settings.
-- Confirm payroll readiness cards and payroll workflow cards wrap without text clipping.
-- Confirm payroll setting summary and file preview/archive rows are visible on the payroll screen.
-- Confirm module tables show as table rows on wide screens and card rows on narrow screens.
+- Confirm empty-shell review opens the platform launcher without fabricated records.
+- Confirm payroll readiness, payroll workflow, module tables, and special panels show empty states when live data is unavailable.
 - Confirm new user-facing copy comes from catalog arrays instead of inline component strings.
 - Confirm language settings include Korean, English, Chinese, and Japanese.
 - Confirm no backend service, calculation, runtime data, template, or credential file is touched.
@@ -76,10 +75,10 @@ Production delivery should package this frontend as a containerized workload ser
 
 Production UI copy must be catalog-array driven. Add new copy to `src/i18n/catalog.json` as `{ key, values }` rows for `ko-KR`, `en-US`, `zh-Hans-CN`, and `ja-JP`; then reference the key from UI code through `src/i18n/index.ts` or the static preview translator.
 
-Do not hardcode user-facing labels, statuses, errors, helper text, auth/security copy, or desktop command messages inside components. Source arrays should hold stable ids, tone, target, dates, and sample data only; labels, statuses, details, empty states, table headers, toast messages, and language names come from the catalog. `npm run verify:i18n` fails when localized CJK/Korean/Japanese/Chinese copy appears in the React Native source or dependency-free preview outside `catalog.json`.
+Do not hardcode user-facing labels, statuses, errors, helper text, auth/security copy, or desktop command messages inside components. Source arrays should hold stable ids and route targets only; labels, statuses, details, empty states, table headers, toast messages, and language names come from the catalog. Do not add local sample records, fake credentials, or stubbed business data for previews. `npm run verify:i18n` fails when localized CJK/Korean/Japanese/Chinese copy appears in the React Native source or dependency-free preview outside `catalog.json`.
 
 ## Backend Integration Policy
 
-The current implementation uses typed mock data. Existing API-ready outputs should be connected through a small adapter layer once the backend contract is approved.
+The current implementation uses empty view models until a real backend/API adapter is connected. Existing API-ready outputs should be connected through a small adapter layer once the backend contract is approved.
 
-Do not change backend internals from this frontend app. Missing fields should be documented as backend requests.
+Do not change backend internals from this frontend app. Missing fields should be documented as backend requests instead of filling the gap with local fake data.

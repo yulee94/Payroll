@@ -47,65 +47,16 @@ type ModuleId = Exclude<PlatformId, "home" | "payroll">;
 type ToneDefinition = { readonly id: string; readonly tone: ReadinessTone };
 type TargetToneDefinition = ToneDefinition & { readonly target: PlatformId };
 
-const demoAccount = {
-  companyCode: "0000",
-  password: "admin",
-  userId: "admin"
-} as const;
-
 const heroStatusIds = ["roleMenu", "workflowStatus", "dataProtection"] as const;
 
-const attendanceLogDefinitions = [
-  { id: "att-log-1", time: "09:02", tone: "ready" },
-  { id: "att-log-2", time: "13:40", tone: "attention" },
-  { id: "att-log-3", time: "--:--", tone: "neutral" }
-] as const satisfies readonly (ToneDefinition & { readonly time: string })[];
-
-const travelWorkflowStageDefinitions = [
-  { id: "travel-plan", tone: "neutral" },
-  { id: "travel-run", tone: "attention" },
-  { id: "travel-diary", tone: "attention" },
-  { id: "travel-result", tone: "neutral" },
-  { id: "travel-review", tone: "ready" }
-] as const satisfies readonly ToneDefinition[];
-
-const adminPermissionDefinitions = [
-  { id: "role-owner", tone: "ready" },
-  { id: "role-manager", tone: "neutral" },
-  { id: "role-employee", tone: "attention" }
-] as const satisfies readonly ToneDefinition[];
-
-const payrollIntegrationCheckDefinitions = [
-  { id: "branch-docs", tone: "attention" },
-  { id: "edi", tone: "attention" },
-  { id: "mapping", tone: "neutral" },
-  { id: "policy", tone: "ready" }
-] as const satisfies readonly ToneDefinition[];
-
-const archiveFolderDefinitions = [
-  { id: "folder-payroll", tone: "ready", target: "payroll" },
-  { id: "folder-attendance", tone: "attention", target: "attendance" },
-  { id: "folder-approval", tone: "neutral", target: "workflow" },
-  { id: "folder-travel", tone: "ready", target: "travel" }
-] as const satisfies readonly TargetToneDefinition[];
-
-const archiveDocumentDefinitions = [
-  { id: "doc-payroll", tone: "ready" },
-  { id: "doc-attendance", tone: "attention" },
-  { id: "doc-travel", tone: "neutral" }
-] as const satisfies readonly ToneDefinition[];
-
-const aiRecommendationDefinitions = [
-  { id: "ai-payroll-errors", tone: "ready", target: "payroll" },
-  { id: "ai-approval-comment", tone: "attention", target: "workflow" },
-  { id: "ai-archive-summary", tone: "neutral", target: "archive" }
-] as const satisfies readonly TargetToneDefinition[];
-
-const aiDraftDefinitions = [
-  { id: "draft-summary", tone: "ready" },
-  { id: "draft-question", tone: "attention" },
-  { id: "draft-comment", tone: "neutral" }
-] as const satisfies readonly ToneDefinition[];
+const attendanceLogDefinitions: readonly (ToneDefinition & { readonly time: string })[] = [];
+const travelWorkflowStageDefinitions: readonly ToneDefinition[] = [];
+const adminPermissionDefinitions: readonly ToneDefinition[] = [];
+const payrollIntegrationCheckDefinitions: readonly ToneDefinition[] = [];
+const archiveFolderDefinitions: readonly TargetToneDefinition[] = [];
+const archiveDocumentDefinitions: readonly ToneDefinition[] = [];
+const aiRecommendationDefinitions: readonly TargetToneDefinition[] = [];
+const aiDraftDefinitions: readonly ToneDefinition[] = [];
 
 const tScreen = (locale: SupportedLocale, key: string, params?: Readonly<Record<string, string | number>>) =>
   t(locale, `screens.${key}`, params);
@@ -121,31 +72,13 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
   const [userId, setUserId] = useState("");
   const canSubmit = companyCode.trim().length > 0 && userId.trim().length > 0 && password.trim().length > 0;
   const languageOptions = useMemo(() => getLanguageOptions(locale), [locale]);
-  const demoParams = demoAccount;
 
   const handleLogin = () => {
     if (!canSubmit) {
-      setFeedbackKey("login.feedback.missingDemo");
+      setFeedbackKey("login.feedback.missingRequired");
       return;
     }
-    if (
-      companyCode.trim() !== demoAccount.companyCode ||
-      userId.trim() !== demoAccount.userId ||
-      password.trim() !== demoAccount.password
-    ) {
-      setFeedbackKey("login.feedback.invalidDemo");
-      return;
-    }
-    setFeedbackKey(undefined);
-    onSelect("home");
-  };
-
-  const handleDemoLogin = () => {
-    setCompanyCode(demoAccount.companyCode);
-    setUserId(demoAccount.userId);
-    setPassword(demoAccount.password);
-    setFeedbackKey(undefined);
-    onSelect("home");
+    setFeedbackKey("login.feedback.liveAuthUnavailable");
   };
 
   return (
@@ -193,7 +126,6 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
             autoCapitalize="characters"
             autoComplete="organization"
             onChangeText={setCompanyCode}
-            placeholder={demoAccount.companyCode}
             placeholderTextColor={colors.muted}
             returnKeyType="next"
             style={styles.input}
@@ -206,7 +138,6 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
             autoCapitalize="none"
             autoComplete="username"
             onChangeText={setUserId}
-            placeholder={demoAccount.userId}
             placeholderTextColor={colors.muted}
             returnKeyType="next"
             style={styles.input}
@@ -218,7 +149,6 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
           <TextInput
             autoComplete="password"
             onChangeText={setPassword}
-            placeholder={demoAccount.password}
             placeholderTextColor={colors.muted}
             returnKeyType="done"
             secureTextEntry
@@ -229,16 +159,16 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         {feedbackKey ? (
           <View style={styles.inlineNotice}>
             <Badge tone="attention">{tScreen(locale, "login.feedback.badge")}</Badge>
-            <Label size="sm" muted>{tScreen(locale, feedbackKey, demoParams)}</Label>
+            <Label size="sm" muted>{tScreen(locale, feedbackKey)}</Label>
           </View>
         ) : null}
         <View style={styles.loginActions}>
-          <ActionButton onPress={handleLogin}>{tScreen(locale, canSubmit ? "login.actions.enterHome" : "login.actions.login")}</ActionButton>
-          <ActionButton onPress={handleDemoLogin} variant="secondary">{tScreen(locale, "login.actions.demo")}</ActionButton>
+          <ActionButton onPress={handleLogin}>{tScreen(locale, "login.actions.login")}</ActionButton>
+          <ActionButton onPress={() => onSelect("home")} variant="secondary">{tScreen(locale, "login.actions.reviewEmptyShell")}</ActionButton>
         </View>
         <View style={styles.inlineNotice}>
-          <Badge tone="neutral">{tScreen(locale, "login.demo.badge")}</Badge>
-          <Label size="sm" muted>{tScreen(locale, "login.demo.summary", demoParams)}</Label>
+          <Badge tone="neutral">{tScreen(locale, "login.live.badge")}</Badge>
+          <Label size="sm" muted>{tScreen(locale, "login.live.summary")}</Label>
         </View>
       </Card>
     </View>
@@ -276,27 +206,31 @@ export function LauncherScreen({ locale, onSelect }: ScreenProps) {
 
       <Card>
         <SectionHeader title={tScreen(locale, "launcher.workQueue.title")} description={tScreen(locale, "launcher.workQueue.description")} />
-        <View style={styles.queueGrid}>
-          {workQueue.map((item) => (
-            <Pressable
-              accessibilityRole="button"
-              key={item.id}
-              onPress={() => setSelectedQueueId(item.id)}
-              style={({ pressed }) => [
-                styles.queueItem,
-                selectedQueueId === item.id && styles.queueItemSelected,
-                pressed && styles.buttonPressed
-              ]}
-            >
-              <View style={styles.queueHeader}>
-                <Badge tone={item.tone}>{item.status}</Badge>
-                <Label size="sm" muted>{item.due}</Label>
-              </View>
-              <Label weight="bold">{item.title}</Label>
-              <Label size="sm" muted>{tScreen(locale, "launcher.workQueue.metaOwner", { meta: item.meta, owner: item.owner })}</Label>
-            </Pressable>
-          ))}
-        </View>
+        {workQueue.length > 0 ? (
+          <View style={styles.queueGrid}>
+            {workQueue.map((item) => (
+              <Pressable
+                accessibilityRole="button"
+                key={item.id}
+                onPress={() => setSelectedQueueId(item.id)}
+                style={({ pressed }) => [
+                  styles.queueItem,
+                  selectedQueueId === item.id && styles.queueItemSelected,
+                  pressed && styles.buttonPressed
+                ]}
+              >
+                <View style={styles.queueHeader}>
+                  <Badge tone={item.tone}>{item.status}</Badge>
+                  <Label size="sm" muted>{item.due}</Label>
+                </View>
+                <Label weight="bold">{item.title}</Label>
+                <Label size="sm" muted>{tScreen(locale, "launcher.workQueue.metaOwner", { meta: item.meta, owner: item.owner })}</Label>
+              </Pressable>
+            ))}
+          </View>
+        ) : (
+          <EmptyState title={t(locale, "preview.liveData.emptyTitle")} description={t(locale, "preview.liveData.noWorkQueue")} />
+        )}
         {selectedQueue ? <WorkQueueDetailPanel item={selectedQueue} locale={locale} onSelect={onSelect} /> : null}
       </Card>
 
@@ -360,26 +294,30 @@ export function PayrollScreen({ locale, onSelect }: ScreenProps) {
           description={tScreen(locale, "payroll.flow.description")}
           action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">{tScreen(locale, "payroll.flow.action")}</ActionButton>}
         />
-        <View style={styles.stepGrid}>
-          {payrollSteps.map((step, index) => (
-            <Pressable
-              accessibilityRole="button"
-              key={step.id}
-              onPress={() => setSelectedStepId(step.id)}
-              style={({ pressed }) => [
-                styles.stepCard,
-                { borderTopColor: toneColor(step.tone) },
-                selectedStepId === step.id && styles.stepCardSelected,
-                pressed && styles.buttonPressed
-              ]}
-            >
-              <Text style={styles.stepIndex}>{String(index + 1).padStart(2, "0")}</Text>
-              <Badge tone={step.tone}>{step.status}</Badge>
-              <Label weight="bold">{step.title}</Label>
-              <Label size="sm" muted>{step.detail}</Label>
-            </Pressable>
-          ))}
-        </View>
+        {payrollSteps.length > 0 ? (
+          <View style={styles.stepGrid}>
+            {payrollSteps.map((step, index) => (
+              <Pressable
+                accessibilityRole="button"
+                key={step.id}
+                onPress={() => setSelectedStepId(step.id)}
+                style={({ pressed }) => [
+                  styles.stepCard,
+                  { borderTopColor: toneColor(step.tone) },
+                  selectedStepId === step.id && styles.stepCardSelected,
+                  pressed && styles.buttonPressed
+                ]}
+              >
+                <Text style={styles.stepIndex}>{String(index + 1).padStart(2, "0")}</Text>
+                <Badge tone={step.tone}>{step.status}</Badge>
+                <Label weight="bold">{step.title}</Label>
+                <Label size="sm" muted>{step.detail}</Label>
+              </Pressable>
+            ))}
+          </View>
+        ) : (
+          <EmptyState title={t(locale, "preview.liveData.emptyTitle")} description={t(locale, "preview.liveData.noPayrollFlow")} />
+        )}
         {selectedStep ? <PayrollStepDetail locale={locale} step={selectedStep} /> : null}
         <View style={styles.actionRow}>
           <ActionButton onPress={() => onSelect("payroll")}>{tScreen(locale, "payroll.actions.keepPayroll")}</ActionButton>
@@ -424,36 +362,46 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
     <View style={styles.homePlannerGrid}>
       <Card style={styles.homePlannerCard}>
         <SectionHeader title={tScreen(locale, "calendar.title")} description={tScreen(locale, "calendar.description")} />
-        <View style={styles.calendarDay}>
-          <Text style={styles.calendarMonth}>2026.06</Text>
-          <Text style={styles.calendarDate}>04</Text>
-          <Label size="sm" muted>{tScreen(locale, "calendar.weekday")}</Label>
-        </View>
-        <View style={styles.plannerList}>
-          {events.map((event) => (
-            <View key={event.id} style={styles.plannerItem}>
-              <Badge tone={event.tone}>{event.timeLabel}</Badge>
-              <View style={styles.plannerCopy}>
-                <Label weight="bold">{event.title}</Label>
-                <Label size="sm" muted>{event.dateLabel}</Label>
-              </View>
+        {events.length > 0 ? (
+          <>
+            <View style={styles.calendarDay}>
+              <Text style={styles.calendarMonth}>{events[0]?.dateLabel ?? ""}</Text>
+              <Text style={styles.calendarDate}></Text>
+              <Label size="sm" muted>{tScreen(locale, "calendar.weekday")}</Label>
             </View>
-          ))}
-        </View>
+            <View style={styles.plannerList}>
+              {events.map((event) => (
+                <View key={event.id} style={styles.plannerItem}>
+                  <Badge tone={event.tone}>{event.timeLabel}</Badge>
+                  <View style={styles.plannerCopy}>
+                    <Label weight="bold">{event.title}</Label>
+                    <Label size="sm" muted>{event.dateLabel}</Label>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </>
+        ) : (
+          <EmptyState title={t(locale, "preview.liveData.emptyTitle")} description={t(locale, "preview.liveData.noCalendar")} />
+        )}
       </Card>
       <Card style={styles.homePlannerCard}>
         <SectionHeader title={tScreen(locale, "todo.title")} description={tScreen(locale, "todo.description")} />
-        <View style={styles.plannerList}>
-          {todos.map((todo) => (
-            <View key={todo.id} style={[styles.todoItem, todo.completed && styles.todoItemDone]}>
-              <Badge tone={todo.tone}>{todo.timeLabel}</Badge>
-              <View style={styles.plannerCopy}>
-                <Label weight="bold">{todo.title}</Label>
-                <Label size="sm" muted>{todo.owner}</Label>
+        {todos.length > 0 ? (
+          <View style={styles.plannerList}>
+            {todos.map((todo) => (
+              <View key={todo.id} style={[styles.todoItem, todo.completed && styles.todoItemDone]}>
+                <Badge tone={todo.tone}>{todo.timeLabel}</Badge>
+                <View style={styles.plannerCopy}>
+                  <Label weight="bold">{todo.title}</Label>
+                  <Label size="sm" muted>{todo.owner}</Label>
+                </View>
               </View>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        ) : (
+          <EmptyState title={t(locale, "preview.liveData.emptyTitle")} description={t(locale, "preview.liveData.noTodos")} />
+        )}
       </Card>
     </View>
   );
@@ -618,25 +566,29 @@ function PayrollReadiness({ cards, locale, onSelect, onSelectCard, selectedId }:
         description={tScreen(locale, "payroll.readiness.description")}
         action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">{tScreen(locale, "payroll.readiness.action")}</ActionButton>}
       />
-      <View style={styles.readinessGrid}>
-        {cards.map((card) => (
-          <Pressable
-            accessibilityRole="button"
-            key={card.id}
-            onPress={() => onSelectCard(card)}
-            style={({ pressed }) => [
-              styles.readinessCard,
-              { borderTopColor: toneColor(card.tone) },
-              selectedId === card.id && styles.readinessCardSelected,
-              pressed && styles.buttonPressed
-            ]}
-          >
-            <Label size="sm" muted>{card.title}</Label>
-            <Text style={[styles.readinessValue, { color: toneColor(card.tone) }]}>{card.value}</Text>
-            <Label size="sm">{card.detail}</Label>
-          </Pressable>
-        ))}
-      </View>
+      {cards.length > 0 ? (
+        <View style={styles.readinessGrid}>
+          {cards.map((card) => (
+            <Pressable
+              accessibilityRole="button"
+              key={card.id}
+              onPress={() => onSelectCard(card)}
+              style={({ pressed }) => [
+                styles.readinessCard,
+                { borderTopColor: toneColor(card.tone) },
+                selectedId === card.id && styles.readinessCardSelected,
+                pressed && styles.buttonPressed
+              ]}
+            >
+              <Label size="sm" muted>{card.title}</Label>
+              <Text style={[styles.readinessValue, { color: toneColor(card.tone) }]}>{card.value}</Text>
+              <Label size="sm">{card.detail}</Label>
+            </Pressable>
+          ))}
+        </View>
+      ) : (
+        <EmptyState title={t(locale, "preview.liveData.emptyTitle")} description={t(locale, "preview.liveData.noPayrollReadiness")} />
+      )}
     </Card>
   );
 }
@@ -687,54 +639,7 @@ function ArchiveLibraryPanel({ locale, onSelect }: Pick<ScreenProps, "locale" | 
         description={tScreen(locale, "archive.description")}
         action={<ActionButton onPress={() => onSelect("payroll")} variant="secondary">{tScreen(locale, "archive.action")}</ActionButton>}
       />
-      <View style={styles.archiveFolderGrid}>
-        {archiveFolderDefinitions.map((folder) => (
-          <Pressable
-            accessibilityRole="button"
-            key={folder.id}
-            onPress={() => onSelect(folder.target)}
-            style={({ pressed }) => [styles.archiveFolderCard, { borderTopColor: toneColor(folder.tone) }, pressed && styles.buttonPressed]}
-          >
-            <Badge tone={folder.tone}>{tScreen(locale, `archive.folders.${folder.id}.count`)}</Badge>
-            <Label weight="bold">{tScreen(locale, `archive.folders.${folder.id}.label`)}</Label>
-            <Label size="sm" muted>{tScreen(locale, `archive.folders.${folder.id}.owner`)}</Label>
-          </Pressable>
-        ))}
-      </View>
-      <View style={styles.archivePreviewGrid}>
-        <View style={styles.archiveDocumentList}>
-          {archiveDocumentDefinitions.map((document) => (
-            <View key={document.id} style={styles.archiveDocumentItem}>
-              <Badge tone={document.tone}>{tScreen(locale, `archive.documents.${document.id}.status`)}</Badge>
-              <View style={styles.plannerCopy}>
-                <Label weight="bold">{tScreen(locale, `archive.documents.${document.id}.title`)}</Label>
-                <Label size="sm" muted>{tScreen(locale, "archive.documents.meta", {
-                  type: tScreen(locale, `archive.documents.${document.id}.type`),
-                  owner: tScreen(locale, `archive.documents.${document.id}.owner`)
-                })}</Label>
-              </View>
-            </View>
-          ))}
-        </View>
-        <View style={styles.archivePreviewPane}>
-          <Label size="sm" muted>{tScreen(locale, "archive.preview.label")}</Label>
-          <Label weight="bold">{tScreen(locale, "archive.preview.title")}</Label>
-          <View style={styles.archiveMetaGrid}>
-            <View style={styles.archiveMetaItem}>
-              <Label size="sm" muted>{tScreen(locale, "archive.preview.securityScope.label")}</Label>
-              <Label weight="bold">{tScreen(locale, "archive.preview.securityScope.value")}</Label>
-            </View>
-            <View style={styles.archiveMetaItem}>
-              <Label size="sm" muted>{tScreen(locale, "archive.preview.status.label")}</Label>
-              <Label weight="bold">{tScreen(locale, "archive.preview.status.value")}</Label>
-            </View>
-          </View>
-          <View style={styles.actionRow}>
-            <ActionButton onPress={() => onSelect("payroll")} variant="secondary">{tScreen(locale, "archive.preview.actions.payroll")}</ActionButton>
-            <ActionButton onPress={() => onSelect("admin")} variant="ghost">{tScreen(locale, "archive.preview.actions.permissions")}</ActionButton>
-          </View>
-        </View>
-      </View>
+      <EmptyState title={t(locale, "preview.liveData.emptyTitle")} description={t(locale, "preview.liveData.noArchive")} />
     </Card>
   );
 }
@@ -747,41 +652,7 @@ function AiWorkspacePanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "on
         description={tScreen(locale, "ai.description")}
         action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">{tScreen(locale, "ai.action")}</ActionButton>}
       />
-      <View style={styles.aiWorkspaceGrid}>
-        <View style={styles.aiRecommendationList}>
-          {aiRecommendationDefinitions.map((item) => (
-            <Pressable
-              accessibilityRole="button"
-              key={item.id}
-              onPress={() => onSelect(item.target)}
-              style={({ pressed }) => [styles.aiRecommendationItem, { borderLeftColor: toneColor(item.tone) }, pressed && styles.buttonPressed]}
-            >
-              <Badge tone={item.tone}>{tScreen(locale, `ai.recommendations.${item.id}.status`)}</Badge>
-              <View style={styles.plannerCopy}>
-                <Label weight="bold">{tScreen(locale, `ai.recommendations.${item.id}.title`)}</Label>
-                <Label size="sm" muted>{tScreen(locale, `ai.recommendations.${item.id}.source`)}</Label>
-              </View>
-            </Pressable>
-          ))}
-        </View>
-        <View style={styles.aiPreviewPane}>
-          <Label size="sm" muted>{tScreen(locale, "ai.preview.label")}</Label>
-          <Label weight="bold">{tScreen(locale, "ai.preview.title")}</Label>
-          <View style={styles.aiDraftGrid}>
-            {aiDraftDefinitions.map((card) => (
-              <View key={card.id} style={[styles.aiDraftCard, { borderTopColor: toneColor(card.tone) }]}>
-                <Badge tone={card.tone}>{tScreen(locale, `ai.drafts.${card.id}.label`)}</Badge>
-                <Label weight="bold">{tScreen(locale, `ai.drafts.${card.id}.title`)}</Label>
-                <Label size="sm" muted>{tScreen(locale, `ai.drafts.${card.id}.detail`)}</Label>
-              </View>
-            ))}
-          </View>
-          <View style={styles.actionRow}>
-            <ActionButton onPress={() => onSelect("payroll")} variant="secondary">{tScreen(locale, "ai.preview.actions.payroll")}</ActionButton>
-            <ActionButton onPress={() => onSelect("archive")} variant="ghost">{tScreen(locale, "ai.preview.actions.archive")}</ActionButton>
-          </View>
-        </View>
-      </View>
+      <EmptyState title={t(locale, "preview.liveData.emptyTitle")} description={t(locale, "preview.liveData.noAi")} />
     </Card>
   );
 }
@@ -790,39 +661,7 @@ function AdminAccountPanel({ locale }: Pick<ScreenProps, "locale">) {
   return (
     <Card>
       <SectionHeader title={tScreen(locale, "admin.title")} description={tScreen(locale, "admin.description")} />
-      <View style={styles.adminBranchGrid}>
-        <View style={styles.adminBranchCard}>
-          <Label size="sm" muted>{tScreen(locale, "admin.branchAccount.label")}</Label>
-          <Label weight="bold">{tScreen(locale, "admin.branchAccount.value")}</Label>
-          <Label size="sm" muted>{tScreen(locale, "admin.branchAccount.detail")}</Label>
-        </View>
-        <View style={styles.adminBranchCard}>
-          <Label size="sm" muted>{tScreen(locale, "admin.subaccount.label")}</Label>
-          <Label weight="bold">{tScreen(locale, "admin.subaccount.value")}</Label>
-          <Label size="sm" muted>{tScreen(locale, "admin.subaccount.detail")}</Label>
-        </View>
-      </View>
-      <View style={styles.permissionMatrix}>
-        {adminPermissionDefinitions.map((row) => (
-          <View key={row.id} style={styles.permissionRow}>
-            <View style={styles.permissionRole}>
-              <Badge tone={row.tone}>{tScreen(locale, `admin.permissions.${row.id}.role`)}</Badge>
-            </View>
-            <View style={styles.permissionCell}>
-              <Label size="sm" muted>{tScreen(locale, "admin.permissions.columns.payroll")}</Label>
-              <Label weight="bold">{tScreen(locale, `admin.permissions.${row.id}.payroll`)}</Label>
-            </View>
-            <View style={styles.permissionCell}>
-              <Label size="sm" muted>{tScreen(locale, "admin.permissions.columns.executive")}</Label>
-              <Label weight="bold">{tScreen(locale, `admin.permissions.${row.id}.executive`)}</Label>
-            </View>
-            <View style={styles.permissionCell}>
-              <Label size="sm" muted>{tScreen(locale, "admin.permissions.columns.archive")}</Label>
-              <Label weight="bold">{tScreen(locale, `admin.permissions.${row.id}.archive`)}</Label>
-            </View>
-          </View>
-        ))}
-      </View>
+      <EmptyState title={t(locale, "preview.liveData.emptyTitle")} description={t(locale, "preview.liveData.noAdmin")} />
     </Card>
   );
 }
@@ -831,28 +670,7 @@ function TravelWorklogPanel({ locale }: Pick<ScreenProps, "locale">) {
   return (
     <Card>
       <SectionHeader title={tScreen(locale, "travel.title")} description={tScreen(locale, "travel.description")} />
-      <View style={styles.travelStageGrid}>
-        {travelWorkflowStageDefinitions.map((stage, index) => (
-          <View key={stage.id} style={[styles.travelStageCard, { borderTopColor: toneColor(stage.tone) }]}>
-            <Text style={styles.travelStageStep}>{String(index + 1).padStart(2, "0")}</Text>
-            <Badge tone={stage.tone}>{tScreen(locale, `travel.stages.${stage.id}.status`)}</Badge>
-            <Label weight="bold">{tScreen(locale, `travel.stages.${stage.id}.label`)}</Label>
-            <Label size="sm" muted>{tScreen(locale, `travel.stages.${stage.id}.detail`)}</Label>
-          </View>
-        ))}
-      </View>
-      <View style={styles.travelReviewGrid}>
-        <View style={styles.travelReviewCard}>
-          <Label size="sm" muted>{tScreen(locale, "travel.review.ongoing.label")}</Label>
-          <Label weight="bold">{tScreen(locale, "travel.review.ongoing.value")}</Label>
-          <Label size="sm" muted>{tScreen(locale, "travel.review.ongoing.detail")}</Label>
-        </View>
-        <View style={styles.travelReviewCard}>
-          <Label size="sm" muted>{tScreen(locale, "travel.review.completed.label")}</Label>
-          <Label weight="bold">{tScreen(locale, "travel.review.completed.value")}</Label>
-          <Label size="sm" muted>{tScreen(locale, "travel.review.completed.detail")}</Label>
-        </View>
-      </View>
+      <EmptyState title={t(locale, "preview.liveData.emptyTitle")} description={t(locale, "preview.liveData.noTravel")} />
     </Card>
   );
 }
@@ -861,48 +679,7 @@ function AttendancePhonePanel({ locale }: Pick<ScreenProps, "locale">) {
   return (
     <Card>
       <SectionHeader title={tScreen(locale, "attendance.title")} description={tScreen(locale, "attendance.description")} />
-      <View style={styles.attendanceGrid}>
-        <View style={styles.phoneFrame}>
-          <View style={styles.phoneHeader}>
-            <Label size="sm" muted>{tScreen(locale, "attendance.phone.todayStatus")}</Label>
-            <Badge tone="ready">{tScreen(locale, "attendance.phone.checkedIn")}</Badge>
-          </View>
-          <View style={styles.phoneClock}>
-            <Text style={styles.phoneTime}>09:02</Text>
-            <Label size="sm" muted>{tScreen(locale, "attendance.phone.location")}</Label>
-          </View>
-          <View style={styles.punchActions}>
-            <Pressable accessibilityRole="button" style={({ pressed }) => [styles.punchButton, pressed && styles.buttonPressed]}>
-              <Text style={styles.punchButtonText}>{tScreen(locale, "attendance.phone.checkIn")}</Text>
-            </Pressable>
-            <Pressable accessibilityRole="button" style={({ pressed }) => [styles.punchButtonSecondary, pressed && styles.buttonPressed]}>
-              <Text style={styles.punchButtonSecondaryText}>{tScreen(locale, "attendance.phone.checkOut")}</Text>
-            </Pressable>
-          </View>
-          <View style={styles.locationNotice}>
-            <Label size="sm" weight="bold">{tScreen(locale, "attendance.locationNotice.title")}</Label>
-            <Label size="sm" muted>{tScreen(locale, "attendance.locationNotice.description")}</Label>
-          </View>
-        </View>
-        <View style={styles.attendanceSide}>
-          <View style={styles.attendanceSummaryCard}>
-            <Label size="sm" muted>{tScreen(locale, "attendance.manager.label")}</Label>
-            <Label weight="bold">{tScreen(locale, "attendance.manager.value")}</Label>
-            <Label size="sm" muted>{tScreen(locale, "attendance.manager.detail")}</Label>
-          </View>
-          <View style={styles.attendanceLogList}>
-            {attendanceLogDefinitions.map((log) => (
-              <View key={log.id} style={styles.attendanceLogItem}>
-                <Badge tone={log.tone}>{tScreen(locale, `attendance.logs.${log.id}.label`)}</Badge>
-                <View style={styles.plannerCopy}>
-                  <Label weight="bold">{log.time}</Label>
-                  <Label size="sm" muted>{tScreen(locale, `attendance.logs.${log.id}.place`)}</Label>
-                </View>
-              </View>
-            ))}
-          </View>
-        </View>
-      </View>
+      <EmptyState title={t(locale, "preview.liveData.emptyTitle")} description={t(locale, "preview.liveData.noAttendance")} />
     </Card>
   );
 }

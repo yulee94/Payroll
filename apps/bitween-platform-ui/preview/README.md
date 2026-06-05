@@ -11,16 +11,14 @@ node preview/server.js
 
 Open `http://127.0.0.1:4173/`.
 
-Demo login:
-
-- Company code: `0000`
-- User ID: `admin`
-- Password: `admin`
+The preview does not provide demo credentials, fake authentication, fabricated
+business records, or stubbed payroll data. Until a real backend is connected,
+use **Review empty shell** to inspect navigation and layout without live data.
 
 ## Scope
 
 - Mirrors the current login, launcher, sidebar, payroll, HR, workflow, archive, AI, admin, and settings screen structure.
-- Uses safe mock data only.
+- Uses empty states when live data is unavailable.
 - Pulls labels, statuses, helper text, toast copy, and language names from the same catalog array as the React Native app.
 - Does not call backend services or touch payroll calculation logic.
 - Exists for quick design review; the production implementation remains the React Native TypeScript app under `src/`.

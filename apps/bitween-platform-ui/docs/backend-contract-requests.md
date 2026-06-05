@@ -1,6 +1,6 @@
 # Backend Contract Requests
 
-Initial React Native migration does not require backend changes. The current app uses typed mock data so frontend layout, navigation, responsive behavior, empty states, and screen copy can be reviewed without touching payroll logic.
+Initial React Native migration does not require backend changes. The current app uses empty live-data states so frontend layout, navigation, responsive behavior, and screen copy can be reviewed without touching payroll logic or fabricating business records.
 
 Future frontend integration should map backend/API-ready outputs into the read-only `PlatformViewModel` shape in `apps/bitween-platform-ui/src/viewModel.ts`.
 
@@ -20,4 +20,4 @@ Future frontend integration will need stable read-only endpoints or adapters for
 
 These should be exposed through existing API-ready/service contracts where possible.
 
-Frontend should consume these as read-only view models. If the backend shape is not available yet, keep mock data local to `apps/bitween-platform-ui/src/data.ts` and document the missing field here instead of editing backend services.
+Frontend should consume these as read-only view models. If the backend shape is not available yet, keep the UI in empty-state mode and document the missing field here instead of adding local fake data or editing backend services.

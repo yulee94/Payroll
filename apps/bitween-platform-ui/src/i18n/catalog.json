@@ -6224,6 +6224,204 @@
         "zh-Hans-CN": "已退出登录。",
         "ja-JP": "ログアウトしました。"
       }
+    },
+    {
+      "key": "screens.login.feedback.missingRequired",
+      "values": {
+        "ko-KR": "Enter company code, user ID, and password.",
+        "en-US": "Enter company code, user ID, and password.",
+        "zh-Hans-CN": "Enter company code, user ID, and password.",
+        "ja-JP": "Enter company code, user ID, and password."
+      }
+    },
+    {
+      "key": "screens.login.feedback.liveAuthUnavailable",
+      "values": {
+        "ko-KR": "No live authentication service is connected to this preview.",
+        "en-US": "No live authentication service is connected to this preview.",
+        "zh-Hans-CN": "No live authentication service is connected to this preview.",
+        "ja-JP": "No live authentication service is connected to this preview."
+      }
+    },
+    {
+      "key": "screens.login.actions.reviewEmptyShell",
+      "values": {
+        "ko-KR": "Review empty shell",
+        "en-US": "Review empty shell",
+        "zh-Hans-CN": "Review empty shell",
+        "ja-JP": "Review empty shell"
+      }
+    },
+    {
+      "key": "screens.login.live.badge",
+      "values": {
+        "ko-KR": "Live data only",
+        "en-US": "Live data only",
+        "zh-Hans-CN": "Live data only",
+        "ja-JP": "Live data only"
+      }
+    },
+    {
+      "key": "screens.login.live.summary",
+      "values": {
+        "ko-KR": "This preview does not use demo accounts or fabricated records. Connect a real backend to sign in.",
+        "en-US": "This preview does not use demo accounts or fabricated records. Connect a real backend to sign in.",
+        "zh-Hans-CN": "This preview does not use demo accounts or fabricated records. Connect a real backend to sign in.",
+        "ja-JP": "This preview does not use demo accounts or fabricated records. Connect a real backend to sign in."
+      }
+    },
+    {
+      "key": "preview.toast.emptyShell",
+      "values": {
+        "ko-KR": "Opened the empty shell without live data.",
+        "en-US": "Opened the empty shell without live data.",
+        "zh-Hans-CN": "Opened the empty shell without live data.",
+        "ja-JP": "Opened the empty shell without live data."
+      }
+    },
+    {
+      "key": "preview.toast.liveAuthUnavailable",
+      "values": {
+        "ko-KR": "Live authentication is not connected.",
+        "en-US": "Live authentication is not connected.",
+        "zh-Hans-CN": "Live authentication is not connected.",
+        "ja-JP": "Live authentication is not connected."
+      }
+    },
+    {
+      "key": "preview.liveData.sessionUnavailable",
+      "values": {
+        "ko-KR": "No live session",
+        "en-US": "No live session",
+        "zh-Hans-CN": "No live session",
+        "ja-JP": "No live session"
+      }
+    },
+    {
+      "key": "preview.liveData.employeeUnavailable",
+      "values": {
+        "ko-KR": "No employee record loaded",
+        "en-US": "No employee record loaded",
+        "zh-Hans-CN": "No employee record loaded",
+        "ja-JP": "No employee record loaded"
+      }
+    },
+    {
+      "key": "preview.liveData.emptyTitle",
+      "values": {
+        "ko-KR": "No live data loaded",
+        "en-US": "No live data loaded",
+        "zh-Hans-CN": "No live data loaded",
+        "ja-JP": "No live data loaded"
+      }
+    },
+    {
+      "key": "preview.liveData.noCalendar",
+      "values": {
+        "ko-KR": "Calendar events will appear only after a real data source is connected.",
+        "en-US": "Calendar events will appear only after a real data source is connected.",
+        "zh-Hans-CN": "Calendar events will appear only after a real data source is connected.",
+        "ja-JP": "Calendar events will appear only after a real data source is connected."
+      }
+    },
+    {
+      "key": "preview.liveData.noTodos",
+      "values": {
+        "ko-KR": "To-do items will appear only after a real data source is connected.",
+        "en-US": "To-do items will appear only after a real data source is connected.",
+        "zh-Hans-CN": "To-do items will appear only after a real data source is connected.",
+        "ja-JP": "To-do items will appear only after a real data source is connected."
+      }
+    },
+    {
+      "key": "preview.liveData.noWorkQueue",
+      "values": {
+        "ko-KR": "Work queue records will appear only after a real data source is connected.",
+        "en-US": "Work queue records will appear only after a real data source is connected.",
+        "zh-Hans-CN": "Work queue records will appear only after a real data source is connected.",
+        "ja-JP": "Work queue records will appear only after a real data source is connected."
+      }
+    },
+    {
+      "key": "preview.liveData.noPayrollReadiness",
+      "values": {
+        "ko-KR": "Payroll readiness data will appear only after a real data source is connected.",
+        "en-US": "Payroll readiness data will appear only after a real data source is connected.",
+        "zh-Hans-CN": "Payroll readiness data will appear only after a real data source is connected.",
+        "ja-JP": "Payroll readiness data will appear only after a real data source is connected."
+      }
+    },
+    {
+      "key": "preview.liveData.noPayrollFlow",
+      "values": {
+        "ko-KR": "Payroll flow status will appear only after a real data source is connected.",
+        "en-US": "Payroll flow status will appear only after a real data source is connected.",
+        "zh-Hans-CN": "Payroll flow status will appear only after a real data source is connected.",
+        "ja-JP": "Payroll flow status will appear only after a real data source is connected."
+      }
+    },
+    {
+      "key": "preview.liveData.noIntegration",
+      "values": {
+        "ko-KR": "Integration checks will appear only after a real data source is connected.",
+        "en-US": "Integration checks will appear only after a real data source is connected.",
+        "zh-Hans-CN": "Integration checks will appear only after a real data source is connected.",
+        "ja-JP": "Integration checks will appear only after a real data source is connected."
+      }
+    },
+    {
+      "key": "preview.liveData.noAi",
+      "values": {
+        "ko-KR": "AI recommendations will appear only after a real data source is connected.",
+        "en-US": "AI recommendations will appear only after a real data source is connected.",
+        "zh-Hans-CN": "AI recommendations will appear only after a real data source is connected.",
+        "ja-JP": "AI recommendations will appear only after a real data source is connected."
+      }
+    },
+    {
+      "key": "preview.liveData.noArchive",
+      "values": {
+        "ko-KR": "Archive records will appear only after a real data source is connected.",
+        "en-US": "Archive records will appear only after a real data source is connected.",
+        "zh-Hans-CN": "Archive records will appear only after a real data source is connected.",
+        "ja-JP": "Archive records will appear only after a real data source is connected."
+      }
+    },
+    {
+      "key": "preview.liveData.noAdmin",
+      "values": {
+        "ko-KR": "Admin account and permission records will appear only after a real data source is connected.",
+        "en-US": "Admin account and permission records will appear only after a real data source is connected.",
+        "zh-Hans-CN": "Admin account and permission records will appear only after a real data source is connected.",
+        "ja-JP": "Admin account and permission records will appear only after a real data source is connected."
+      }
+    },
+    {
+      "key": "preview.liveData.noTravel",
+      "values": {
+        "ko-KR": "Travel records will appear only after a real data source is connected.",
+        "en-US": "Travel records will appear only after a real data source is connected.",
+        "zh-Hans-CN": "Travel records will appear only after a real data source is connected.",
+        "ja-JP": "Travel records will appear only after a real data source is connected."
+      }
+    },
+    {
+      "key": "preview.liveData.noAttendance",
+      "values": {
+        "ko-KR": "Attendance records will appear only after a real data source is connected.",
+        "en-US": "Attendance records will appear only after a real data source is connected.",
+        "zh-Hans-CN": "Attendance records will appear only after a real data source is connected.",
+        "ja-JP": "Attendance records will appear only after a real data source is connected."
+      }
+    },
+    {
+      "key": "preview.liveData.noMetrics",
+      "values": {
+        "ko-KR": "Metrics will appear only after a real data source is connected.",
+        "en-US": "Metrics will appear only after a real data source is connected.",
+        "zh-Hans-CN": "Metrics will appear only after a real data source is connected.",
+        "ja-JP": "Metrics will appear only after a real data source is connected."
+      }
     }
   ],
   "languageDisplayNames": [

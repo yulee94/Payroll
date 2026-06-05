@@ -61,11 +61,11 @@ export type PlatformViewModelAdapter = {
 };
 
 export const getPreviewSession = (locale: SupportedLocale): SessionViewModel => ({
-  companyCodeLabel: "0000",
-  displayName: "admin",
-  employeeNumber: "BW-0001",
-  roleLabel: t(locale, "session.roleLabel"),
-  tenantName: "Bitween Demo"
+  companyCodeLabel: "",
+  displayName: t(locale, "preview.liveData.sessionUnavailable"),
+  employeeNumber: "",
+  roleLabel: t(locale, "preview.liveData.employeeUnavailable"),
+  tenantName: ""
 });
 
 export const getPreviewPlatformViewModel = (locale: SupportedLocale): PlatformViewModel => ({

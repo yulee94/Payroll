@@ -5,17 +5,6 @@ const tones = {
   neutral: "tone-neutral"
 };
 
-const demoAccount = {
-  companyCode: "0000",
-  password: "admin",
-  userId: "admin"
-};
-
-const employeeNumber = "BW-0001";
-const session = {
-  roleLabel: "admin",
-  tenantName: "Bitween Demo"
-};
 const companyLogoUri =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F3864'/%3E%3Cpath d='M18 18h18c7 0 11 4 11 9 0 4-2 7-6 8 5 1 8 5 8 10 0 6-5 10-13 10H18V18zm11 14h6c3 0 5-1 5-4s-2-4-5-4h-6v8zm0 17h7c4 0 6-2 6-5s-2-5-6-5h-7v10z' fill='white'/%3E%3C/svg%3E";
 
@@ -36,171 +25,81 @@ const navDefs = [
 const sidebarThemeIds = ["steel", "graphite", "teal", "navy"];
 const supportedLocales = ["ko-KR", "en-US", "zh-Hans-CN", "ja-JP"];
 
-const metricDefs = [
-  ["today", "attention"],
-  ["ready", "ready"],
-  ["blocked", "blocked"],
-  ["docs", "neutral"]
-].map(([id, tone]) => ({ id, tone }));
-
-const readinessDefs = [
-  ["roster", "attention"],
-  ["policy", "neutral"],
-  ["outputs", "ready"],
-  ["api", "attention"]
-].map(([id, tone]) => ({ id, tone }));
-
-const payrollStepDefs = [
-  ["settings", "01", "attention"],
-  ["upload", "02", "neutral"],
-  ["preview", "03", "ready"],
-  ["archive", "04", "neutral"]
-].map(([id, index, tone]) => ({ id, index, tone }));
-
-const payrollIntegrationCheckDefs = [
-  ["branch-docs", "attention"],
-  ["edi", "attention"],
-  ["mapping", "neutral"],
-  ["policy", "ready"]
-].map(([id, tone]) => ({ id, tone }));
+const metricDefs = [];
+const readinessDefs = [];
+const payrollStepDefs = [];
+const payrollIntegrationCheckDefs = [];
 
 const rowGroups = {
-  payrollSettings: [
-    ["payroll-setting-1", "neutral", "settings"],
-    ["payroll-setting-2", "attention", "settings"],
-    ["payroll-setting-3", "ready", "settings"]
-  ],
-  payrollIntegration: [
-    ["payroll-integration-1", "attention", "admin"],
-    ["payroll-integration-2", "neutral", "admin"],
-    ["payroll-integration-3", "ready", "payroll"]
-  ],
-  preview: [
-    ["preview-1", "ready", "archive"],
-    ["preview-2", "neutral", "payroll"],
-    ["preview-3", "attention", "archive"]
-  ]
+  payrollSettings: [],
+  payrollIntegration: [],
+  preview: []
 };
 
-const workQueueDefs = [
-  ["payroll-june", "attention", "payroll"],
-  ["approval-pending", "neutral", "workflow"],
-  ["travel-diary", "attention", "travel"],
-  ["archive-preview", "ready", "archive"]
-].map(([id, tone, target]) => ({ id, tone, target }));
-
-const calendarEventDefs = [
-  ["calendar-payroll", "2026.06.04", "10:00", "attention"],
-  ["calendar-approval", "2026.06.04", "14:00", "neutral"],
-  ["calendar-recruit", "2026.06.05", "09:30", "ready"],
-  ["calendar-travel", "2026.06.05", "16:00", "attention"]
-].map(([id, date, time, tone]) => ({ id, date, time, tone }));
-
-const todayTodoDefs = [
-  ["todo-payroll", "attention", false],
-  ["todo-approval", "neutral", false],
-  ["todo-travel", "attention", false],
-  ["todo-archive", "ready", true]
-].map(([id, tone, done]) => ({ id, tone, done }));
-
-const attendanceLogDefs = [
-  ["att-log-1", "09:02", "ready"],
-  ["att-log-2", "13:40", "attention"],
-  ["att-log-3", "--:--", "neutral"]
-].map(([id, time, tone]) => ({ id, time, tone }));
-
-const travelStageDefs = [
-  ["travel-plan", "01", "neutral"],
-  ["travel-run", "02", "attention"],
-  ["travel-diary", "03", "attention"],
-  ["travel-result", "04", "neutral"],
-  ["travel-review", "05", "ready"]
-].map(([id, index, tone]) => ({ id, index, tone }));
-
-const adminPermissionDefs = [
-  ["role-owner", "ready"],
-  ["role-manager", "neutral"],
-  ["role-employee", "attention"]
-].map(([id, tone]) => ({ id, tone }));
-
-const archiveFolderDefs = [
-  ["folder-payroll", "ready", "payroll"],
-  ["folder-attendance", "attention", "attendance"],
-  ["folder-approval", "neutral", "workflow"],
-  ["folder-travel", "ready", "travel"]
-].map(([id, tone, target]) => ({ id, tone, target }));
-
-const archiveDocumentDefs = [
-  ["doc-payroll", "ready"],
-  ["doc-attendance", "attention"],
-  ["doc-travel", "neutral"]
-].map(([id, tone]) => ({ id, tone }));
-
-const aiRecommendationDefs = [
-  ["ai-payroll-errors", "ready", "payroll"],
-  ["ai-approval-comment", "attention", "workflow"],
-  ["ai-archive-summary", "neutral", "archive"]
-].map(([id, tone, target]) => ({ id, tone, target }));
-
-const aiDraftDefs = [
-  ["draft-summary", "ready"],
-  ["draft-question", "attention"],
-  ["draft-comment", "neutral"]
-].map(([id, tone]) => ({ id, tone }));
+const workQueueDefs = [];
+const calendarEventDefs = [];
+const todayTodoDefs = [];
+const attendanceLogDefs = [];
+const travelStageDefs = [];
+const adminPermissionDefs = [];
+const archiveFolderDefs = [];
+const archiveDocumentDefs = [];
+const aiRecommendationDefs = [];
+const aiDraftDefs = [];
 
 const moduleDefs = {
   hr: {
     filters: ["all", "roster", "resume", "resignation", "certificate"],
-    metrics: [["employees", "ready"], ["attendance", "attention"], ["certs", "neutral"]],
-    rows: [["hr-1", "attention", "hr", ["roster"]], ["hr-2", "neutral", "hr", ["certificate"]], ["hr-3", "ready", "hr", ["resume", "resignation"]]],
+    metrics: [],
+    rows: [],
     secondaryTarget: "payroll"
   },
   attendance: {
     filters: ["all", "checkIn", "checkOut", "attention"],
-    metrics: [["checked-in", "ready"], ["pending", "attention"], ["weekly", "neutral"]],
-    rows: [["attendance-1", "ready", "attendance", ["checkIn", "checkOut"]], ["attendance-2", "attention", "attendance", ["attention"]]],
+    metrics: [],
+    rows: [],
     secondaryTarget: "hr"
   },
   recruit: {
     filters: ["all", "applicant", "career", "credential", "placement"],
-    metrics: [["applicants", "ready"], ["qualified", "attention"], ["placement", "neutral"]],
-    rows: [["recruit-1", "attention", "recruit", ["applicant", "career"]], ["recruit-2", "ready", "recruit", ["credential", "placement"]]],
+    metrics: [],
+    rows: [],
     secondaryTarget: "hr"
   },
   travel: {
     filters: ["all", "plan", "run", "diary", "result", "review"],
-    metrics: [["plans", "neutral"], ["diary", "attention"], ["completed", "ready"]],
-    rows: [["travel-1", "attention", "travel", ["plan", "run", "diary"]], ["travel-2", "neutral", "travel", ["review", "result"]], ["travel-3", "ready", "travel", ["result"]]],
+    metrics: [],
+    rows: [],
     secondaryTarget: "workflow"
   },
   workflow: {
     filters: ["all", "pending", "ongoing", "returned"],
-    metrics: [["pending", "attention"], ["drafts", "neutral"], ["done", "ready"]],
-    rows: [["wf-1", "attention", "workflow", ["pending"]], ["wf-2", "neutral", "workflow", ["ongoing"]]],
+    metrics: [],
+    rows: [],
     secondaryTarget: "archive"
   },
   archive: {
     filters: ["all", "payroll", "contract", "report"],
-    metrics: [["reports", "ready"], ["missing", "attention"], ["shared", "ready"]],
-    rows: [["ar-1", "ready", "archive", ["payroll", "report"]], ["ar-2", "attention", "archive", ["report"]]],
+    metrics: [],
+    rows: [],
     secondaryTarget: "payroll"
   },
   ai: {
     filters: ["all", "summary", "draft", "review"],
-    metrics: [["prompts", "ready"], ["reviews", "attention"], ["policy", "neutral"]],
-    rows: [["ai-1", "ready", "ai", ["summary"]], ["ai-2", "attention", "ai", ["draft", "review"]]],
+    metrics: [],
+    rows: [],
     secondaryTarget: "settings"
   },
   admin: {
     filters: ["all", "permission", "branch", "subaccount", "audit"],
-    metrics: [["branch", "ready"], ["users", "ready"], ["roles", "attention"], ["audit", "ready"]],
-    rows: [["ad-1", "attention", "admin", ["subaccount", "permission"]], ["ad-2", "ready", "admin", ["branch"]], ["ad-3", "attention", "admin", ["permission", "audit"]]],
+    metrics: [],
+    rows: [],
     secondaryTarget: "settings"
   },
   settings: {
     filters: ["all", "personal", "payroll", "notification"],
-    metrics: [["profile", "ready"], ["payroll", "attention"], ["notice", "neutral"]],
-    rows: [["st-1", "attention", "settings", ["payroll"]], ["st-2", "ready", "settings", ["personal"]]],
+    metrics: [],
+    rows: [],
     secondaryTarget: "payroll"
   }
 };
@@ -293,7 +192,7 @@ function payrollSteps() {
 }
 
 function localizedRows(group) {
-  return rowGroups[group].map(([id, tone, target]) => localizedRow(`rows.${group}.${id}`, id, tone, target));
+  return (rowGroups[group] || []).map(([id, tone, target]) => localizedRow(`rows.${group}.${id}`, id, tone, target));
 }
 
 function localizedRow(prefix, id, tone, target, filters = []) {
@@ -419,15 +318,15 @@ function renderLogin() {
         <form class="card login-card" id="login-form">
           ${sectionHead(t("screens.login.form.eyebrow"), t("screens.login.form.title"), t("screens.login.form.description"))}
           ${languageSelector()}
-          ${field(t("screens.login.form.companyCode"), "company-code", demoAccount.companyCode, "text", state.companyCode)}
-          ${field(t("screens.login.form.userId"), "user-id", demoAccount.userId, "text", state.userId)}
-          ${field(t("screens.login.form.password"), "password", demoAccount.password, "password", state.password)}
+          ${field(t("screens.login.form.companyCode"), "company-code", "", "text", state.companyCode)}
+          ${field(t("screens.login.form.userId"), "user-id", "", "text", state.userId)}
+          ${field(t("screens.login.form.password"), "password", "", "password", state.password)}
           ${state.loginFeedbackKey ? `<div class="inline-warning">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey)}</span></div>` : ""}
           <div class="login-actions">
-            <button class="btn primary" type="submit">${t("screens.login.actions.enterHome")}</button>
-            <button class="btn secondary" type="button" data-demo-login="true">${t("screens.login.actions.demo")}</button>
+            <button class="btn primary" type="submit">${t("screens.login.actions.login")}</button>
+            <button class="btn secondary" type="button" data-empty-shell="true">${t("screens.login.actions.reviewEmptyShell")}</button>
           </div>
-          <div class="notice">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.summary")}</span></div>
+          <div class="notice">${badge(t("screens.login.live.badge"), "neutral")}<span class="helper">${t("screens.login.live.summary")}</span></div>
         </form>
       </div>
     </section>
@@ -452,7 +351,7 @@ function field(label, id, placeholder, type = "text", value = "") {
 function renderShell() {
   const items = navigationItems();
   const active = items.find((item) => item.id === state.activeId) || items[0];
-  const sessionLabel = `${session.tenantName} · ${t("session.roleLabel")} · ${demoAccount.companyCode}`;
+  const sessionLabel = t("preview.liveData.sessionUnavailable");
   return html`
     <section class="shell sidebar-theme-${state.sidebarTheme}">
       <aside class="sidebar">
@@ -486,7 +385,7 @@ function renderShell() {
           </div>
           <div class="top-actions">
             ${badge(sessionLabel, "neutral")}
-            ${badge(t("shell.employeeNumber", { number: employeeNumber }), "neutral")}
+            ${badge(t("preview.liveData.employeeUnavailable"), "neutral")}
             <button class="btn ghost compact-btn" data-logout="true">${t("shell.logout")}</button>
           </div>
         </header>
@@ -505,6 +404,8 @@ function renderScreen(id) {
 
 function renderHome() {
   const queueItems = workQueue();
+  const events = calendarEvents();
+  const todos = todayTodos();
   const selectedQueue = queueItems.find((row) => row.id === state.selectedQueueKey) || queueItems[0];
   const items = navigationItems();
 
@@ -516,27 +417,27 @@ function renderHome() {
     <section class="planner-grid">
       <div class="card planner-card">
         ${sectionHead("", t("screens.calendar.title"), t("screens.calendar.description"))}
-        <div class="calendar-day"><span>2026.06</span><strong>04</strong><em>${t("screens.calendar.weekday")}</em></div>
-        <div class="planner-list">${calendarEvents().map((event) => `
+        ${events.length ? `<div class="calendar-day"><span></span><strong></strong><em>${t("screens.calendar.weekday")}</em></div>
+        <div class="planner-list">${events.map((event) => `
           <div class="planner-item">${badge(event.time, event.tone)}<div><strong>${event.title}</strong><span class="helper">${event.date}</span></div></div>
-        `).join("")}</div>
+        `).join("")}</div>` : empty(t("preview.liveData.emptyTitle"), t("preview.liveData.noCalendar"))}
       </div>
       <div class="card planner-card">
         ${sectionHead("", t("screens.todo.title"), t("screens.todo.description"))}
-        <div class="planner-list">${todayTodos().map((item) => `
+        ${todos.length ? `<div class="planner-list">${todos.map((item) => `
           <div class="planner-item todo-item ${item.done ? "done" : ""}">${badge(item.timeLabel, item.tone)}<div><strong>${item.title}</strong><span class="helper">${item.owner}</span></div></div>
-        `).join("")}</div>
+        `).join("")}</div>` : empty(t("preview.liveData.emptyTitle"), t("preview.liveData.noTodos"))}
       </div>
     </section>
     <section class="card">
       ${sectionHead("", t("screens.launcher.workQueue.title"), t("screens.launcher.workQueue.description"))}
-      <div class="queue-grid">${queueItems.map((item) => `
+      ${queueItems.length ? `<div class="queue-grid">${queueItems.map((item) => `
         <button class="queue-card select-card ${state.selectedQueueKey === item.id ? "selected" : ""}" data-queue-key="${item.id}">
           <div class="queue-head">${badge(item.status, item.tone)}<span class="helper">${item.due}</span></div>
           <strong>${item.title}</strong>
           <span class="helper">${t("screens.launcher.workQueue.metaOwner", { meta: item.meta, owner: item.owner })}</span>
         </button>
-      `).join("")}</div>
+      `).join("")}</div>` : empty(t("preview.liveData.emptyTitle"), t("preview.liveData.noWorkQueue"))}
       ${selectedQueue ? queueDetail(selectedQueue) : ""}
     </section>
     <section class="card">
@@ -573,26 +474,26 @@ function renderPayroll() {
   return html`
     <section class="card">
       ${sectionHead(t("screens.payroll.readiness.eyebrow"), t("screens.payroll.readiness.title"), t("screens.payroll.readiness.description"), button(t("screens.payroll.readiness.action"), "settings", "secondary"))}
-      <div class="card-grid">${cards.map((item) => `
+      ${cards.length ? `<div class="card-grid">${cards.map((item) => `
         <button class="mini-card readiness-card select-card ${state.selectedPayrollCardKey === item.id ? "selected" : ""}" data-payroll-card-key="${item.id}" style="border-top-color:${toneColor(item.tone)}">
           <span class="helper">${item.title}</span>
           <strong class="metric-value" style="color:${toneColor(item.tone)}">${item.value}</strong>
           <span>${item.detail}</span>
         </button>
-      `).join("")}</div>
+      `).join("")}</div>` : empty(t("preview.liveData.emptyTitle"), t("preview.liveData.noPayrollReadiness"))}
       ${selectedReadiness ? payrollReadinessDetail(selectedReadiness) : ""}
     </section>
     ${payrollIntegrationPanel()}
     <section class="card">
       ${sectionHead(t("screens.payroll.flow.eyebrow"), t("screens.payroll.flow.title"), t("screens.payroll.flow.description"), button(t("screens.payroll.flow.action"), "settings", "secondary"))}
-      <div class="step-grid">${steps.map((item) => `
+      ${steps.length ? `<div class="step-grid">${steps.map((item) => `
         <button class="step-card select-card ${state.selectedPayrollStepKey === item.id ? "selected" : ""}" data-payroll-step-key="${item.id}" style="border-top-color:${toneColor(item.tone)}">
           <span class="eyebrow">${item.index}</span>
           ${badge(item.status, item.tone)}
           <strong>${item.title}</strong>
           <span class="helper">${item.detail}</span>
         </button>
-      `).join("")}</div>
+      `).join("")}</div>` : empty(t("preview.liveData.emptyTitle"), t("preview.liveData.noPayrollFlow"))}
       ${selectedStep ? payrollStepDetail(selectedStep) : ""}
       <div class="action-row">${button(t("screens.payroll.actions.keepPayroll"), "payroll", "primary")}${button(t("screens.payroll.actions.monthlyArchive"), "archive")}${button(t("screens.payroll.actions.prepareAiReview"), "ai", "ghost")}</div>
     </section>
@@ -610,13 +511,13 @@ function renderPayroll() {
 function payrollIntegrationPanel() {
   return `<section class="card">
     ${sectionHead("", t("screens.payroll.integration.title"), t("screens.payroll.integration.description"), button(t("screens.payroll.integration.action"), "admin", "secondary"))}
-    <div class="integration-grid">${payrollIntegrationCheckDefs.map((item) => `
+    ${payrollIntegrationCheckDefs.length ? `<div class="integration-grid">${payrollIntegrationCheckDefs.map((item) => `
       <article class="integration-card" style="border-top-color:${toneColor(item.tone)}">
         <span class="helper">${t(`screens.payroll.integrationChecks.${item.id}.label`)}</span>
         <strong class="metric-value" style="color:${toneColor(item.tone)}">${t(`screens.payroll.integrationChecks.${item.id}.value`)}</strong>
         <span>${t(`screens.payroll.integrationChecks.${item.id}.detail`)}</span>
       </article>
-    `).join("")}</div>
+    `).join("")}</div>` : empty(t("preview.liveData.emptyTitle"), t("preview.liveData.noIntegration"))}
     ${table(localizedRows("payrollIntegration"))}
     <div class="notice">${badge(t("screens.payroll.integration.notice.badge"), "neutral")}<span class="helper">${t("screens.payroll.integration.notice.description")}</span></div>
   </section>`;
@@ -692,113 +593,40 @@ function i18nSettingsPanel() {
 function aiWorkspacePanel() {
   return `<section class="card">
     ${sectionHead("", t("screens.ai.title"), t("screens.ai.description"), button(t("screens.ai.action"), "settings", "secondary"))}
-    <div class="ai-workspace-grid">
-      <div class="ai-recommendation-list">${aiRecommendationDefs.map((item) => `
-        <button class="ai-recommendation-item" data-target="${item.target}" style="border-left-color:${toneColor(item.tone)}">
-          ${badge(t(`screens.ai.recommendations.${item.id}.status`), item.tone)}
-          <div><strong>${t(`screens.ai.recommendations.${item.id}.title`)}</strong><span class="helper">${t(`screens.ai.recommendations.${item.id}.source`)}</span></div>
-        </button>
-      `).join("")}</div>
-      <div class="ai-preview-pane">
-        <span class="helper">${t("screens.ai.preview.label")}</span>
-        <strong>${t("screens.ai.preview.title")}</strong>
-        <div class="ai-draft-grid">${aiDraftDefs.map((item) => `
-          <article class="ai-draft-card" style="border-top-color:${toneColor(item.tone)}">
-            ${badge(t(`screens.ai.drafts.${item.id}.label`), item.tone)}
-            <strong>${t(`screens.ai.drafts.${item.id}.title`)}</strong>
-            <span class="helper">${t(`screens.ai.drafts.${item.id}.detail`)}</span>
-          </article>
-        `).join("")}</div>
-        <div class="action-row">${button(t("screens.ai.preview.actions.payroll"), "payroll", "secondary")}${button(t("screens.ai.preview.actions.archive"), "archive", "ghost")}</div>
-      </div>
-    </div>
+    ${empty(t("preview.liveData.emptyTitle"), t("preview.liveData.noAi"))}
   </section>`;
 }
 
 function archiveLibraryPanel() {
   return `<section class="card">
     ${sectionHead("", t("screens.archive.title"), t("screens.archive.description"), button(t("screens.archive.action"), "payroll", "secondary"))}
-    <div class="archive-folder-grid">${archiveFolderDefs.map((item) => `
-      <button class="archive-folder-card" data-target="${item.target}" style="border-top-color:${toneColor(item.tone)}">
-        ${badge(t(`screens.archive.folders.${item.id}.count`), item.tone)}
-        <strong>${t(`screens.archive.folders.${item.id}.label`)}</strong>
-        <span class="helper">${t(`screens.archive.folders.${item.id}.owner`)}</span>
-      </button>
-    `).join("")}</div>
-    <div class="archive-preview-grid">
-      <div class="archive-document-list">${archiveDocumentDefs.map((item) => `
-        <article class="archive-document-item">${badge(t(`screens.archive.documents.${item.id}.status`), item.tone)}<div><strong>${t(`screens.archive.documents.${item.id}.title`)}</strong><span class="helper">${t("screens.archive.documents.meta", { type: t(`screens.archive.documents.${item.id}.type`), owner: t(`screens.archive.documents.${item.id}.owner`) })}</span></div></article>
-      `).join("")}</div>
-      <div class="archive-preview-pane">
-        <span class="helper">${t("screens.archive.preview.label")}</span>
-        <strong>${t("screens.archive.preview.title")}</strong>
-        <div class="archive-meta-grid">
-          <div class="detail-item"><span class="helper">${t("screens.archive.preview.securityScope.label")}</span><strong>${t("screens.archive.preview.securityScope.value")}</strong></div>
-          <div class="detail-item"><span class="helper">${t("screens.archive.preview.status.label")}</span><strong>${t("screens.archive.preview.status.value")}</strong></div>
-        </div>
-        <div class="action-row">${button(t("screens.archive.preview.actions.payroll"), "payroll", "secondary")}${button(t("screens.archive.preview.actions.permissions"), "admin", "ghost")}</div>
-      </div>
-    </div>
+    ${empty(t("preview.liveData.emptyTitle"), t("preview.liveData.noArchive"))}
   </section>`;
 }
 
 function adminAccountPanel() {
   return `<section class="card">
     ${sectionHead("", t("screens.admin.title"), t("screens.admin.description"))}
-    <div class="admin-branch-grid">
-      <article class="detail-item"><span class="helper">${t("screens.admin.branchAccount.label")}</span><strong>${t("screens.admin.branchAccount.value")}</strong><span>${t("screens.admin.branchAccount.detail")}</span></article>
-      <article class="detail-item"><span class="helper">${t("screens.admin.subaccount.label")}</span><strong>${t("screens.admin.subaccount.value")}</strong><span>${t("screens.admin.subaccount.detail")}</span></article>
-    </div>
-    <div class="permission-matrix">${adminPermissionDefs.map((item) => `
-      <article class="permission-row">
-        <div class="permission-role">${badge(t(`screens.admin.permissions.${item.id}.role`), item.tone)}</div>
-        <div class="permission-cell"><span class="helper">${t("screens.admin.permissions.columns.payroll")}</span><strong>${t(`screens.admin.permissions.${item.id}.payroll`)}</strong></div>
-        <div class="permission-cell"><span class="helper">${t("screens.admin.permissions.columns.executive")}</span><strong>${t(`screens.admin.permissions.${item.id}.executive`)}</strong></div>
-        <div class="permission-cell"><span class="helper">${t("screens.admin.permissions.columns.archive")}</span><strong>${t(`screens.admin.permissions.${item.id}.archive`)}</strong></div>
-      </article>
-    `).join("")}</div>
+    ${empty(t("preview.liveData.emptyTitle"), t("preview.liveData.noAdmin"))}
   </section>`;
 }
 
 function travelWorklogPanel() {
   return `<section class="card">
     ${sectionHead("", t("screens.travel.title"), t("screens.travel.description"))}
-    <div class="travel-stage-grid">${travelStageDefs.map((item) => `
-      <article class="travel-stage-card" style="border-top-color:${toneColor(item.tone)}">
-        <span class="eyebrow">${item.index}</span>
-        ${badge(t(`screens.travel.stages.${item.id}.status`), item.tone)}
-        <strong>${t(`screens.travel.stages.${item.id}.label`)}</strong>
-        <span class="helper">${t(`screens.travel.stages.${item.id}.detail`)}</span>
-      </article>
-    `).join("")}</div>
-    <div class="travel-review-grid">
-      <article class="detail-item"><span class="helper">${t("screens.travel.review.ongoing.label")}</span><strong>${t("screens.travel.review.ongoing.value")}</strong><span>${t("screens.travel.review.ongoing.detail")}</span></article>
-      <article class="detail-item"><span class="helper">${t("screens.travel.review.completed.label")}</span><strong>${t("screens.travel.review.completed.value")}</strong><span>${t("screens.travel.review.completed.detail")}</span></article>
-    </div>
+    ${empty(t("preview.liveData.emptyTitle"), t("preview.liveData.noTravel"))}
   </section>`;
 }
 
 function attendancePhonePanel() {
   return `<section class="card">
     ${sectionHead("", t("screens.attendance.title"), t("screens.attendance.description"))}
-    <div class="attendance-grid">
-      <div class="phone-frame">
-        <div class="phone-head"><span class="helper">${t("screens.attendance.phone.todayStatus")}</span>${badge(t("screens.attendance.phone.checkedIn"), "ready")}</div>
-        <div class="phone-clock"><strong>09:02</strong><span class="helper">${t("screens.attendance.phone.location")}</span></div>
-        <div class="punch-actions"><button class="punch primary">${t("screens.attendance.phone.checkIn")}</button><button class="punch secondary">${t("screens.attendance.phone.checkOut")}</button></div>
-        <div class="location-notice"><strong>${t("screens.attendance.locationNotice.title")}</strong><span class="helper">${t("screens.attendance.locationNotice.description")}</span></div>
-      </div>
-      <div class="attendance-side">
-        <div class="detail-item"><span class="helper">${t("screens.attendance.manager.label")}</span><strong>${t("screens.attendance.manager.value")}</strong><span>${t("screens.attendance.manager.detail")}</span></div>
-        <div class="planner-list">${attendanceLogDefs.map((item) => `
-          <div class="planner-item">${badge(t(`screens.attendance.logs.${item.id}.label`), item.tone)}<div><strong>${item.time}</strong><span class="helper">${t(`screens.attendance.logs.${item.id}.place`)}</span></div></div>
-        `).join("")}</div>
-      </div>
-    </div>
+    ${empty(t("preview.liveData.emptyTitle"), t("preview.liveData.noAttendance"))}
   </section>`;
 }
 
 function metrics(items) {
+  if (!items.length) return empty(t("preview.liveData.emptyTitle"), t("preview.liveData.noMetrics"));
   return `<div class="metric-grid">${items.map((item) => `
     <article class="metric-card" style="border-left-color:${toneColor(item.tone)}">
       <span class="helper">${item.label}</span>
@@ -956,11 +784,8 @@ function bindEvents() {
     });
   });
 
-  document.querySelectorAll("[data-demo-login]").forEach((el) => {
+  document.querySelectorAll("[data-empty-shell]").forEach((el) => {
     el.addEventListener("click", () => {
-      state.companyCode = demoAccount.companyCode;
-      state.userId = demoAccount.userId;
-      state.password = demoAccount.password;
       state.loginFeedbackKey = "";
       state.authed = true;
       state.activeId = "home";
@@ -971,7 +796,7 @@ function bindEvents() {
       state.selectedQueueKey = "";
       state.selectedRowKey = "";
       render();
-      toast(t("preview.toast.demoLogin"));
+      toast(t("preview.toast.emptyShell"));
     });
   });
 
@@ -1021,26 +846,14 @@ function bindEvents() {
       state.userId = document.getElementById("user-id")?.value.trim() || "";
       state.password = document.getElementById("password")?.value.trim() || "";
       if (!state.companyCode || !state.userId || !state.password) {
-        state.loginFeedbackKey = "screens.login.feedback.missingDemo";
+        state.loginFeedbackKey = "screens.login.feedback.missingRequired";
         render();
         toast(t("preview.toast.checkLogin"));
         return;
       }
-      if (
-        state.companyCode !== demoAccount.companyCode ||
-        state.userId !== demoAccount.userId ||
-        state.password !== demoAccount.password
-      ) {
-        state.loginFeedbackKey = "screens.login.feedback.invalidDemo";
-        render();
-        toast(t("preview.toast.checkLogin"));
-        return;
-      }
-      state.loginFeedbackKey = "";
-      state.authed = true;
-      state.activeId = "home";
+      state.loginFeedbackKey = "screens.login.feedback.liveAuthUnavailable";
       render();
-      toast(t("preview.toast.home"));
+      toast(t("preview.toast.liveAuthUnavailable"));
     });
   }
 }
