@@ -1116,21 +1116,27 @@ button {
   background: var(--accent-pressed);
   border-radius: 8px;
   bottom: 18px;
+  box-shadow: var(--shadow);
   color: var(--card);
   font-size: 13px;
   font-weight: 750;
   left: 50%;
+  max-width: min(420px, calc(100vw - 32px));
   opacity: 0;
   padding: 12px 14px;
   position: fixed;
+  text-align: center;
   transform: translate(-50%, 12px);
   transition: 180ms ease;
+  visibility: hidden;
+  width: max-content;
   z-index: 20;
 }
 
 .toast.show {
   opacity: 1;
   transform: translate(-50%, 0);
+  visibility: visible;
 }
 
 @media (max-width: 980px) {

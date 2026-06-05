@@ -62,6 +62,14 @@ if (!/class="demo-mode-banner" role="status" aria-label="\$\{escapeText\(demoMod
   errors.push("preview/app.js demo banner must expose a status role and escaped aria-label.");
 }
 
+if (!/id="toast" role="status" aria-live="polite" aria-atomic="true"/.test(previewAppSource)) {
+  errors.push("preview/app.js toast must expose a polite atomic status live region.");
+}
+
+if (!/el\.setAttribute\("aria-label", text\)/.test(previewAppSource)) {
+  errors.push("preview/app.js toast updates must mirror the visible text to aria-label.");
+}
+
 if (!appSource.includes('"session.emptyCompanyCodeLabel"')) {
   errors.push("App.tsx must replace empty company-code placeholders with a non-demo disconnected label.");
 }

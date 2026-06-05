@@ -507,7 +507,7 @@ function renderShell() {
         <div class="content">${renderScreen(active.id)}</div>
       </div>
     </section>
-    <div class="toast" id="toast">${t("preview.toast.default")}</div>
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">${t("preview.toast.default")}</div>
   `;
 }
 
@@ -1063,9 +1063,13 @@ function toast(text) {
   const el = document.getElementById("toast");
   if (!el) return;
   el.textContent = text;
+  el.setAttribute("aria-label", text);
   el.classList.add("show");
   window.clearTimeout(toast.timer);
-  toast.timer = window.setTimeout(() => el.classList.remove("show"), 1400);
+  toast.timer = window.setTimeout(() => {
+    el.classList.remove("show");
+    el.removeAttribute("aria-label");
+  }, 1800);
 }
 
 if ("EventSource" in window) {
