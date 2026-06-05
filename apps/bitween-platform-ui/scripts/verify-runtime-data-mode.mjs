@@ -27,6 +27,14 @@ if (!appSource.includes("demoDataEnabled ? getPreviewPlatformViewModel(locale) :
   errors.push("App.tsx must keep preview/dummy data behind the explicit demo mode flag.");
 }
 
+if (!appSource.includes('"session.emptyCompanyCodeLabel"')) {
+  errors.push("App.tsx must replace empty company-code placeholders with a non-demo disconnected label.");
+}
+
+if (!appSource.includes('"shell.employeeNumber.empty"')) {
+  errors.push("App.tsx must replace empty employee-number placeholders with a non-demo disconnected label.");
+}
+
 const emptyModelSource = viewModelSource.split("export const getPreviewSession")[0] ?? "";
 if (emptyModelSource.includes('"session.roleLabel"')) {
   errors.push("createEmptyPlatformViewModel must not use the demo session role label.");

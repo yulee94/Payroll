@@ -106,6 +106,15 @@
       }
     },
     {
+      "key": "shell.employeeNumber.empty",
+      "values": {
+        "ko-KR": "사번 미연동",
+        "en-US": "Employee number not connected",
+        "zh-Hans-CN": "员工编号未连接",
+        "ja-JP": "社員番号未接続"
+      }
+    },
+    {
       "key": "shell.companyLogo",
       "values": {
         "ko-KR": "Bitween 회사 로고",
@@ -148,6 +157,15 @@
         "en-US": "Role not connected",
         "zh-Hans-CN": "角色未连接",
         "ja-JP": "ロール未接続"
+      }
+    },
+    {
+      "key": "session.emptyCompanyCodeLabel",
+      "values": {
+        "ko-KR": "법인코드 미연동",
+        "en-US": "Company code not connected",
+        "zh-Hans-CN": "公司代码未连接",
+        "ja-JP": "法人コード未接続"
       }
     },
     {

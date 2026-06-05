@@ -29,7 +29,10 @@ export default function App() {
   const navigationItems = viewModel.launcher.navigation;
   const sidebarTheme = useMemo(() => getSidebarTheme(sidebarThemeId, locale), [locale, sidebarThemeId]);
   const session = viewModel.session;
-  const sessionLabel = `${session.tenantName} / ${session.roleLabel} / ${session.companyCodeLabel}`;
+  const companyCodeLabel = session.companyCodeLabel === "-" ? t(locale, "session.emptyCompanyCodeLabel") : session.companyCodeLabel;
+  const employeeNumberLabel =
+    session.employeeNumber === "-" ? t(locale, "shell.employeeNumber.empty") : t(locale, "shell.employeeNumber", { number: session.employeeNumber });
+  const sessionLabel = `${session.tenantName} / ${session.roleLabel} / ${companyCodeLabel}`;
 
   const select = (id: PlatformId) => {
     if (!authenticated && id !== "home") {
@@ -67,7 +70,7 @@ export default function App() {
       <StatusBar style="dark" />
       <AppShell
         active={active}
-        employeeNumberLabel={t(locale, "shell.employeeNumber", { number: session.employeeNumber })}
+        employeeNumberLabel={employeeNumberLabel}
         items={navigationItems}
         locale={locale}
         logoutLabel={t(locale, "shell.logout")}
