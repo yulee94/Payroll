@@ -754,7 +754,7 @@ function renderModule(id) {
 }
 
 function sectionHead(eyebrow, title, desc, action = "") {
-  return `<div class="section-head"><div class="section-title">${eyebrow ? `<span class="eyebrow">${eyebrow}</span>` : ""}<h2>${title}</h2>${desc ? `<p>${desc}</p>` : ""}</div>${action}</div>`;
+  return `<div class="section-head"><div class="section-title">${eyebrow ? `<span class="eyebrow">${eyebrow}</span>` : ""}<h2>${title}</h2></div>${action}</div>`;
 }
 
 function i18nSettingsPanel() {

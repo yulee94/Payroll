@@ -97,13 +97,12 @@ type SectionHeaderProps = {
   readonly description?: string;
 };
 
-export function SectionHeader({ action, description, eyebrow, title }: SectionHeaderProps) {
+export function SectionHeader({ action, eyebrow, title }: SectionHeaderProps) {
   return (
     <View style={styles.sectionHeader}>
       <View style={styles.sectionTitle}>
         {eyebrow ? <Label size="sm" muted>{eyebrow}</Label> : null}
         <Label size="lg" weight="bold">{title}</Label>
-        {description ? <Label muted>{description}</Label> : null}
       </View>
       {action ? <View style={styles.sectionAction}>{action}</View> : null}
     </View>
