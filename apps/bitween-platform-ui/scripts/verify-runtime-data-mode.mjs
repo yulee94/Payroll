@@ -124,8 +124,16 @@ if (!previewAppSource.includes("cossActualFilePanel")) {
   errors.push("preview/app.js demo payroll preview must mirror the imported Amkor file summary panel.");
 }
 
-if (!screensSource.includes("mailboxDefinitions") || !previewAppSource.includes("mailboxDefs")) {
+if (!screensSource.includes("mailboxMessageDefinitions") || !previewAppSource.includes("mailboxMessageDefs")) {
   errors.push("Home preview must replace duplicate schedule content with a mailbox panel.");
+}
+
+if (!screensSource.includes("mailboxFolderIds") || !previewAppSource.includes("mailboxFolderIds")) {
+  errors.push("Home mailbox must expose the required mail folders.");
+}
+
+if (!screensSource.includes("setRecalledMailIds") || !previewAppSource.includes("data-recall-mail")) {
+  errors.push("Home mailbox must support recalling sent mail in preview.");
 }
 
 if (!screensSource.includes("calendarMonthDays") || !previewAppSource.includes("calendarMonthDays")) {

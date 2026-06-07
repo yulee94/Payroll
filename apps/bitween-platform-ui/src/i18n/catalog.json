@@ -7448,6 +7448,222 @@
         "zh-Hans-CN": "Sun",
         "ja-JP": "Sun"
       }
+    },
+    {
+      "key": "screens.mailbox.folders.all",
+      "values": {
+        "ko-KR": "전체 메일",
+        "en-US": "All mail",
+        "zh-Hans-CN": "All mail",
+        "ja-JP": "All mail"
+      }
+    },
+    {
+      "key": "screens.mailbox.folders.unread",
+      "values": {
+        "ko-KR": "안읽은메일",
+        "en-US": "Unread",
+        "zh-Hans-CN": "Unread",
+        "ja-JP": "Unread"
+      }
+    },
+    {
+      "key": "screens.mailbox.folders.inbox",
+      "values": {
+        "ko-KR": "받은메일",
+        "en-US": "Inbox",
+        "zh-Hans-CN": "Inbox",
+        "ja-JP": "Inbox"
+      }
+    },
+    {
+      "key": "screens.mailbox.folders.sent",
+      "values": {
+        "ko-KR": "보낸메일",
+        "en-US": "Sent",
+        "zh-Hans-CN": "Sent",
+        "ja-JP": "Sent"
+      }
+    },
+    {
+      "key": "screens.mailbox.folders.drafts",
+      "values": {
+        "ko-KR": "임시보관",
+        "en-US": "Drafts",
+        "zh-Hans-CN": "Drafts",
+        "ja-JP": "Drafts"
+      }
+    },
+    {
+      "key": "screens.mailbox.folders.trash",
+      "values": {
+        "ko-KR": "삭제메일",
+        "en-US": "Trash",
+        "zh-Hans-CN": "Trash",
+        "ja-JP": "Trash"
+      }
+    },
+    {
+      "key": "screens.mailbox.folders.spam",
+      "values": {
+        "ko-KR": "스팸메일",
+        "en-US": "Spam",
+        "zh-Hans-CN": "Spam",
+        "ja-JP": "Spam"
+      }
+    },
+    {
+      "key": "screens.mailbox.actions.recall",
+      "values": {
+        "ko-KR": "회수",
+        "en-US": "Recall",
+        "zh-Hans-CN": "Recall",
+        "ja-JP": "Recall"
+      }
+    },
+    {
+      "key": "screens.mailbox.recalled.badge",
+      "values": {
+        "ko-KR": "회수됨",
+        "en-US": "Recalled",
+        "zh-Hans-CN": "Recalled",
+        "ja-JP": "Recalled"
+      }
+    },
+    {
+      "key": "screens.mailbox.recalled.detail",
+      "values": {
+        "ko-KR": "수신자 열람 전 회수 처리된 메일입니다.",
+        "en-US": "This message was recalled before recipient review.",
+        "zh-Hans-CN": "This message was recalled before recipient review.",
+        "ja-JP": "This message was recalled before recipient review."
+      }
+    },
+    {
+      "key": "screens.mailbox.items.amkor-sent.badge",
+      "values": {
+        "ko-KR": "발송",
+        "en-US": "Sent",
+        "zh-Hans-CN": "Sent",
+        "ja-JP": "Sent"
+      }
+    },
+    {
+      "key": "screens.mailbox.items.amkor-sent.title",
+      "values": {
+        "ko-KR": "앰코 5월 급여 검토 요청 발송",
+        "en-US": "Sent Amkor May payroll review request",
+        "zh-Hans-CN": "Sent Amkor May payroll review request",
+        "ja-JP": "Sent Amkor May payroll review request"
+      }
+    },
+    {
+      "key": "screens.mailbox.items.amkor-sent.detail",
+      "values": {
+        "ko-KR": "급여 담당자에게 발송된 검토 요청입니다. 필요 시 회수할 수 있습니다.",
+        "en-US": "Review request sent to payroll owner. It can be recalled if needed.",
+        "zh-Hans-CN": "Review request sent to payroll owner. It can be recalled if needed.",
+        "ja-JP": "Review request sent to payroll owner. It can be recalled if needed."
+      }
+    },
+    {
+      "key": "screens.mailbox.items.draft-edi.badge",
+      "values": {
+        "ko-KR": "임시",
+        "en-US": "Draft",
+        "zh-Hans-CN": "Draft",
+        "ja-JP": "Draft"
+      }
+    },
+    {
+      "key": "screens.mailbox.items.draft-edi.title",
+      "values": {
+        "ko-KR": "EDI API 연동 안내 초안",
+        "en-US": "EDI API integration notice draft",
+        "zh-Hans-CN": "EDI API integration notice draft",
+        "ja-JP": "EDI API integration notice draft"
+      }
+    },
+    {
+      "key": "screens.mailbox.items.draft-edi.detail",
+      "values": {
+        "ko-KR": "국민건강·국민연금 EDI 연결 절차 안내 초안입니다.",
+        "en-US": "Draft notice for NHIS and NPS EDI connection steps.",
+        "zh-Hans-CN": "Draft notice for NHIS and NPS EDI connection steps.",
+        "ja-JP": "Draft notice for NHIS and NPS EDI connection steps."
+      }
+    },
+    {
+      "key": "screens.mailbox.items.trash-old.badge",
+      "values": {
+        "ko-KR": "삭제",
+        "en-US": "Deleted",
+        "zh-Hans-CN": "Deleted",
+        "ja-JP": "Deleted"
+      }
+    },
+    {
+      "key": "screens.mailbox.items.trash-old.title",
+      "values": {
+        "ko-KR": "이전 테스트 메일 삭제됨",
+        "en-US": "Previous test mail deleted",
+        "zh-Hans-CN": "Previous test mail deleted",
+        "ja-JP": "Previous test mail deleted"
+      }
+    },
+    {
+      "key": "screens.mailbox.items.trash-old.detail",
+      "values": {
+        "ko-KR": "preview 검토용으로 삭제메일함에 남아있는 항목입니다.",
+        "en-US": "A preview review item remaining in trash.",
+        "zh-Hans-CN": "A preview review item remaining in trash.",
+        "ja-JP": "A preview review item remaining in trash."
+      }
+    },
+    {
+      "key": "screens.mailbox.items.spam-alert.badge",
+      "values": {
+        "ko-KR": "스팸",
+        "en-US": "Spam",
+        "zh-Hans-CN": "Spam",
+        "ja-JP": "Spam"
+      }
+    },
+    {
+      "key": "screens.mailbox.items.spam-alert.title",
+      "values": {
+        "ko-KR": "외부 미확인 급여 링크 차단",
+        "en-US": "Blocked unverified external payroll link",
+        "zh-Hans-CN": "Blocked unverified external payroll link",
+        "ja-JP": "Blocked unverified external payroll link"
+      }
+    },
+    {
+      "key": "screens.mailbox.items.spam-alert.detail",
+      "values": {
+        "ko-KR": "확인되지 않은 외부 링크 메일은 스팸메일함에서 분리 표시합니다.",
+        "en-US": "Unverified external link mail is separated into spam.",
+        "zh-Hans-CN": "Unverified external link mail is separated into spam.",
+        "ja-JP": "Unverified external link mail is separated into spam."
+      }
+    },
+    {
+      "key": "preview.toast.mailboxFilterSelected",
+      "values": {
+        "ko-KR": "{filter}을(를) 열었습니다.",
+        "en-US": "Opened {filter}.",
+        "zh-Hans-CN": "Opened {filter}.",
+        "ja-JP": "Opened {filter}."
+      }
+    },
+    {
+      "key": "preview.toast.mailRecalled",
+      "values": {
+        "ko-KR": "메일을 회수했습니다.",
+        "en-US": "Mail recalled.",
+        "zh-Hans-CN": "Mail recalled.",
+        "ja-JP": "Mail recalled."
+      }
     }
   ],
   "languageDisplayNames": [

@@ -98,11 +98,15 @@ const cossExecutiveCompareDefinitions = [
   { id: "gap", tone: "neutral" }
 ] as const satisfies readonly ToneDefinition[];
 
-const mailboxDefinitions = [
-  { id: "coss-files", tone: "ready" },
-  { id: "payroll-review", tone: "attention" },
-  { id: "edi-api", tone: "neutral" }
-] as const satisfies readonly ToneDefinition[];
+const mailboxFolderIds = ["all", "unread", "inbox", "sent", "drafts", "trash", "spam"] as const;
+const mailboxMessageDefinitions = [
+  { id: "coss-files", folder: "inbox", tone: "ready", unread: true, recallable: false },
+  { id: "payroll-review", folder: "inbox", tone: "attention", unread: true, recallable: false },
+  { id: "amkor-sent", folder: "sent", tone: "neutral", unread: false, recallable: true },
+  { id: "draft-edi", folder: "drafts", tone: "neutral", unread: false, recallable: false },
+  { id: "trash-old", folder: "trash", tone: "blocked", unread: false, recallable: false },
+  { id: "spam-alert", folder: "spam", tone: "blocked", unread: true, recallable: false }
+] as const;
 
 const calendarWeekdayIds = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 const calendarMonthDays = Array.from({ length: 30 }, (_, index) => index + 1);
@@ -573,6 +577,14 @@ function PayrollIntegrationPanel({
 }
 
 function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonly CalendarEvent[]; readonly locale: SupportedLocale; readonly todos: readonly TodoItem[] }) {
+  const [mailboxFilter, setMailboxFilter] = useState<(typeof mailboxFolderIds)[number]>("all");
+  const [recalledMailIds, setRecalledMailIds] = useState<readonly string[]>([]);
+  const mailboxMessages = mailboxMessageDefinitions.filter((item) => {
+    if (mailboxFilter === "all") return true;
+    if (mailboxFilter === "unread") return item.unread;
+    return item.folder === mailboxFilter;
+  });
+
   return (
     <View style={styles.homePlannerGrid}>
       <Card style={styles.homePlannerCard}>
@@ -610,16 +622,35 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
       </Card>
       <Card style={styles.homePlannerCard}>
         <SectionHeader title={tScreen(locale, "mailbox.title")} description={tScreen(locale, "mailbox.description")} />
-        <View style={styles.plannerList}>
-          {mailboxDefinitions.map((item) => (
-            <View key={item.id} style={styles.plannerItem}>
-              <Badge tone={item.tone}>{tScreen(locale, `mailbox.items.${item.id}.badge`)}</Badge>
-              <View style={styles.plannerCopy}>
-                <Label weight="bold">{tScreen(locale, `mailbox.items.${item.id}.title`)}</Label>
-                <Label size="sm" muted>{tScreen(locale, `mailbox.items.${item.id}.detail`)}</Label>
-              </View>
-            </View>
+        <View style={styles.mailboxTabs}>
+          {mailboxFolderIds.map((id) => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ selected: mailboxFilter === id }}
+              key={id}
+              onPress={() => setMailboxFilter(id)}
+              style={({ pressed }) => [styles.mailboxTab, mailboxFilter === id && styles.mailboxTabActive, pressed && styles.buttonPressed]}
+            >
+              <Text style={[styles.mailboxTabText, mailboxFilter === id && styles.mailboxTabTextActive]}>{tScreen(locale, `mailbox.folders.${id}`)}</Text>
+            </Pressable>
           ))}
+        </View>
+        <View style={styles.plannerList}>
+          {mailboxMessages.map((item) => {
+            const recalled = recalledMailIds.includes(item.id);
+            return (
+              <View key={item.id} style={[styles.mailItem, item.unread && styles.mailItemUnread, recalled && styles.mailItemRecalled]}>
+                <Badge tone={recalled ? "ready" : item.tone}>{recalled ? tScreen(locale, "mailbox.recalled.badge") : tScreen(locale, `mailbox.items.${item.id}.badge`)}</Badge>
+                <View style={styles.plannerCopy}>
+                  <Label weight="bold">{tScreen(locale, `mailbox.items.${item.id}.title`)}</Label>
+                  <Label size="sm" muted>{recalled ? tScreen(locale, "mailbox.recalled.detail") : tScreen(locale, `mailbox.items.${item.id}.detail`)}</Label>
+                </View>
+                {item.recallable && !recalled ? (
+                  <ActionButton onPress={() => setRecalledMailIds((current) => [...current, item.id])} variant="ghost">{tScreen(locale, "mailbox.actions.recall")}</ActionButton>
+                ) : null}
+              </View>
+            );
+          })}
         </View>
       </Card>
       <Card style={styles.homePlannerCardWide}>
@@ -1580,6 +1611,52 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.md
+  },
+  mailItem: {
+    alignItems: "flex-start",
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.md,
+    padding: spacing.md
+  },
+  mailItemRecalled: {
+    opacity: 0.72
+  },
+  mailItemUnread: {
+    backgroundColor: colors.input,
+    borderLeftColor: colors.accent,
+    borderLeftWidth: 4
+  },
+  mailboxTab: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    minHeight: 32,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs
+  },
+  mailboxTabActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent
+  },
+  mailboxTabs: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs
+  },
+  mailboxTabText: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+    lineHeight: 16
+  },
+  mailboxTabTextActive: {
+    color: colors.card
   },
   plannerCopy: {
     flex: 1,

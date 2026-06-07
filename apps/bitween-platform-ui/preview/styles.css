@@ -684,6 +684,60 @@ button {
   gap: 8px;
 }
 
+.mailbox-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.mailbox-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mailbox-tab {
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  min-height: 32px;
+  padding: 6px 8px;
+}
+
+.mailbox-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--card);
+}
+
+.mail-item {
+  align-items: start;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 12px;
+}
+
+.mail-item.unread {
+  background: var(--input);
+  border-left: 4px solid var(--accent);
+}
+
+.mail-item.recalled {
+  opacity: 0.72;
+}
+
+.mail-item div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
 .planner-item {
   align-items: start;
   background: var(--bg);

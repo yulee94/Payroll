@@ -92,11 +92,15 @@ const cossExecutiveCompareDefs = [
   ["gap", "neutral"]
 ].map(([id, tone]) => ({ id, tone }));
 
-const mailboxDefs = [
-  ["coss-files", "ready"],
-  ["payroll-review", "attention"],
-  ["edi-api", "neutral"]
-].map(([id, tone]) => ({ id, tone }));
+const mailboxFolderIds = ["all", "unread", "inbox", "sent", "drafts", "trash", "spam"];
+const mailboxMessageDefs = [
+  { id: "coss-files", folder: "inbox", tone: "ready", unread: true, recallable: false },
+  { id: "payroll-review", folder: "inbox", tone: "attention", unread: true, recallable: false },
+  { id: "amkor-sent", folder: "sent", tone: "neutral", unread: false, recallable: true },
+  { id: "draft-edi", folder: "drafts", tone: "neutral", unread: false, recallable: false },
+  { id: "trash-old", folder: "trash", tone: "blocked", unread: false, recallable: false },
+  { id: "spam-alert", folder: "spam", tone: "blocked", unread: true, recallable: false }
+];
 
 const calendarWeekdayIds = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 const calendarMonthDays = Array.from({ length: 30 }, (_, index) => index + 1);
@@ -268,6 +272,8 @@ const state = {
   companyCode: "",
   filter: "all",
   loginFeedbackKey: "",
+  mailboxFilter: "all",
+  recalledMailIds: [],
   password: "",
   selectedPayrollCardKey: "",
   selectedPayrollStepKey: "",
@@ -595,9 +601,7 @@ function renderHome() {
       </div>
       <div class="card planner-card">
         ${sectionHead("", t("screens.mailbox.title"), t("screens.mailbox.description"))}
-        <div class="planner-list">${mailboxDefs.map((item) => `
-          <div class="planner-item">${badge(t(`screens.mailbox.items.${item.id}.badge`), item.tone)}<div><strong>${t(`screens.mailbox.items.${item.id}.title`)}</strong><span class="helper">${t(`screens.mailbox.items.${item.id}.detail`)}</span></div></div>
-        `).join("")}</div>
+        ${mailboxPanel()}
       </div>
     </section>
     <section class="planner-grid todo-grid">
@@ -609,6 +613,28 @@ function renderHome() {
       </div>
     </section>
   `;
+}
+
+function mailboxPanel() {
+  const messages = mailboxMessageDefs.filter((item) => {
+    if (state.mailboxFilter === "all") return true;
+    if (state.mailboxFilter === "unread") return item.unread;
+    return item.folder === state.mailboxFilter;
+  });
+  return `<div class="mailbox-panel">
+    <div class="mailbox-tabs">${mailboxFolderIds.map((id) => `<button class="mailbox-tab ${state.mailboxFilter === id ? "active" : ""}" data-mailbox-filter="${id}">${t(`screens.mailbox.folders.${id}`)}</button>`).join("")}</div>
+    <div class="planner-list">${messages.map((item) => {
+      const recalled = state.recalledMailIds.includes(item.id);
+      return `<div class="mail-item ${item.unread ? "unread" : ""} ${recalled ? "recalled" : ""}">
+        ${badge(recalled ? t("screens.mailbox.recalled.badge") : t(`screens.mailbox.items.${item.id}.badge`), recalled ? "ready" : item.tone)}
+        <div>
+          <strong>${t(`screens.mailbox.items.${item.id}.title`)}</strong>
+          <span class="helper">${recalled ? t("screens.mailbox.recalled.detail") : t(`screens.mailbox.items.${item.id}.detail`)}</span>
+        </div>
+        ${item.recallable && !recalled ? `<button class="btn ghost compact-btn" data-recall-mail="${item.id}">${t("screens.mailbox.actions.recall")}</button>` : ""}
+      </div>`;
+    }).join("")}</div>
+  </div>`;
 }
 
 function queueDetail(item) {
@@ -1049,6 +1075,23 @@ function bindEvents() {
       state.selectedRowKey = el.dataset.rowKey;
       render();
       toast(t("preview.toast.workDetailOpened"));
+    });
+  });
+
+  document.querySelectorAll("[data-mailbox-filter]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.mailboxFilter = el.dataset.mailboxFilter || "all";
+      render();
+      toast(t("preview.toast.mailboxFilterSelected", { filter: t(`screens.mailbox.folders.${state.mailboxFilter}`) }));
+    });
+  });
+
+  document.querySelectorAll("[data-recall-mail]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const id = el.dataset.recallMail;
+      if (id && !state.recalledMailIds.includes(id)) state.recalledMailIds = [...state.recalledMailIds, id];
+      render();
+      toast(t("preview.toast.mailRecalled"));
     });
   });
 
