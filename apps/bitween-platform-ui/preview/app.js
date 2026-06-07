@@ -73,6 +73,12 @@ const cossPreviewFileDefs = [
 
 const cossMonthlyFileIds = ["jan", "feb", "mar", "apr", "may"];
 
+const cossPreviewGuardDefs = [
+  ["no-personal-data", "ready"],
+  ["no-real-amounts", "ready"],
+  ["edi-not-connected", "attention"]
+].map(([id, tone]) => ({ id, tone }));
+
 const cossStatutoryBasisDefs = [
   ["income-tax", "attention"],
   ["national-pension", "attention"],
@@ -649,6 +655,16 @@ function cossPreviewFilePanel() {
       </article>
     `).join("")}</div>
     <div class="notice">${badge(t("screens.payroll.cossPreview.notice.badge"), "attention")}<span class="helper">${t("screens.payroll.cossPreview.notice.description")}</span></div>
+    <div class="detail-panel">
+      ${sectionHead("", t("screens.payroll.cossPreview.guard.title"), t("screens.payroll.cossPreview.guard.description"))}
+      <div class="detail-grid">${cossPreviewGuardDefs.map((item) => `
+        <article class="detail-item">
+          ${badge(t(`screens.payroll.cossPreview.guard.${item.id}.badge`), item.tone)}
+          <strong>${t(`screens.payroll.cossPreview.guard.${item.id}.title`)}</strong>
+          <span class="helper">${t(`screens.payroll.cossPreview.guard.${item.id}.detail`)}</span>
+        </article>
+      `).join("")}</div>
+    </div>
     <div class="detail-panel">
       ${sectionHead("", t("screens.payroll.cossPreview.monthly.title"), t("screens.payroll.cossPreview.monthly.description"))}
       <div class="detail-grid">${cossMonthlyFileIds.map((id) => `

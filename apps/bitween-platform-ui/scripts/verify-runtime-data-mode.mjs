@@ -98,6 +98,14 @@ if (!previewAppSource.includes("cossMonthlyFileIds")) {
   errors.push("preview/app.js demo payroll preview must mirror the monthly COSS file intake checklist.");
 }
 
+if (!screensSource.includes("cossPreviewGuardDefinitions")) {
+  errors.push("screens.tsx demo payroll preview must expose the COSS preview data guard.");
+}
+
+if (!previewAppSource.includes("cossPreviewGuardDefs")) {
+  errors.push("preview/app.js demo payroll preview must mirror the COSS preview data guard.");
+}
+
 if (!appSource.includes('"session.emptyCompanyCodeLabel"')) {
   errors.push("App.tsx must replace empty company-code placeholders with a non-demo disconnected label.");
 }

@@ -92,6 +92,12 @@ const cossPreviewFileDefinitions = [
 
 const cossMonthlyFileDefinitions = ["jan", "feb", "mar", "apr", "may"] as const;
 
+const cossPreviewGuardDefinitions = [
+  { id: "no-personal-data", tone: "ready" },
+  { id: "no-real-amounts", tone: "ready" },
+  { id: "edi-not-connected", tone: "attention" }
+] as const satisfies readonly ToneDefinition[];
+
 const cossStatutoryBasisDefinitions = [
   { id: "income-tax", tone: "attention" },
   { id: "national-pension", tone: "attention" },
@@ -463,6 +469,21 @@ function CossPreviewFilePanel({ locale }: { readonly locale: SupportedLocale }) 
       <View style={styles.inlineNotice}>
         <Badge tone="attention">{tScreen(locale, "payroll.cossPreview.notice.badge")}</Badge>
         <Label size="sm" muted>{tScreen(locale, "payroll.cossPreview.notice.description")}</Label>
+      </View>
+      <View style={styles.detailPanel}>
+        <SectionHeader
+          title={tScreen(locale, "payroll.cossPreview.guard.title")}
+          description={tScreen(locale, "payroll.cossPreview.guard.description")}
+        />
+        <View style={styles.detailGrid}>
+          {cossPreviewGuardDefinitions.map((item) => (
+            <View key={item.id} style={styles.detailItem}>
+              <Badge tone={item.tone}>{tScreen(locale, `payroll.cossPreview.guard.${item.id}.badge`)}</Badge>
+              <Label weight="bold">{tScreen(locale, `payroll.cossPreview.guard.${item.id}.title`)}</Label>
+              <Label size="sm" muted>{tScreen(locale, `payroll.cossPreview.guard.${item.id}.detail`)}</Label>
+            </View>
+          ))}
+        </View>
       </View>
       <View style={styles.detailPanel}>
         <SectionHeader

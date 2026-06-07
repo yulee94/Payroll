@@ -6471,7 +6471,7 @@
     {
       "key": "screens.payroll.cossPreview.eyebrow",
       "values": {
-        "ko-KR": "COSS file scope",
+        "ko-KR": "COSS 파일 범위",
         "en-US": "COSS file scope",
         "zh-Hans-CN": "COSS file scope",
         "ja-JP": "COSS file scope"
@@ -6480,7 +6480,7 @@
     {
       "key": "screens.payroll.cossPreview.title",
       "values": {
-        "ko-KR": "Amkor Korea Jan-May payroll run prep",
+        "ko-KR": "한국앰코 1-5월 급여 산출 준비",
         "en-US": "Amkor Korea Jan-May payroll run prep",
         "zh-Hans-CN": "Amkor Korea Jan-May payroll run prep",
         "ja-JP": "Amkor Korea Jan-May payroll run prep"
@@ -6489,7 +6489,7 @@
     {
       "key": "screens.payroll.cossPreview.description",
       "values": {
-        "ko-KR": "Preview reflects only the January-May payroll ledgers, billing files, and May worker roster requested for review.",
+        "ko-KR": "Preview에는 요청된 1-5월 급여대장, 청구서, 5월 기준 근로자명부 범위만 표시합니다.",
         "en-US": "Preview reflects only the January-May payroll ledgers, billing files, and May worker roster requested for review.",
         "zh-Hans-CN": "Preview reflects only the January-May payroll ledgers, billing files, and May worker roster requested for review.",
         "ja-JP": "Preview reflects only the January-May payroll ledgers, billing files, and May worker roster requested for review."
@@ -6498,7 +6498,7 @@
     {
       "key": "screens.payroll.cossPreview.files.payroll-ledgers.label",
       "values": {
-        "ko-KR": "Payroll ledgers",
+        "ko-KR": "급여대장",
         "en-US": "Payroll ledgers",
         "zh-Hans-CN": "Payroll ledgers",
         "ja-JP": "Payroll ledgers"
@@ -6507,7 +6507,7 @@
     {
       "key": "screens.payroll.cossPreview.files.payroll-ledgers.value",
       "values": {
-        "ko-KR": "5 months",
+        "ko-KR": "5개월",
         "en-US": "5 months",
         "zh-Hans-CN": "5 months",
         "ja-JP": "5 months"
@@ -6516,7 +6516,7 @@
     {
       "key": "screens.payroll.cossPreview.files.payroll-ledgers.detail",
       "values": {
-        "ko-KR": "Detected monthly payroll ledger structures from January through May 2026.",
+        "ko-KR": "2026년 1월부터 5월까지 월별 급여대장 구조를 산출 입력 범위로 인식했습니다.",
         "en-US": "Detected monthly payroll ledger structures from January through May 2026.",
         "zh-Hans-CN": "Detected monthly payroll ledger structures from January through May 2026.",
         "ja-JP": "Detected monthly payroll ledger structures from January through May 2026."
@@ -6525,7 +6525,7 @@
     {
       "key": "screens.payroll.cossPreview.files.billing-files.label",
       "values": {
-        "ko-KR": "Billing files",
+        "ko-KR": "도급비청구서",
         "en-US": "Billing files",
         "zh-Hans-CN": "Billing files",
         "ja-JP": "Billing files"
@@ -6534,7 +6534,7 @@
     {
       "key": "screens.payroll.cossPreview.files.billing-files.value",
       "values": {
-        "ko-KR": "5 files",
+        "ko-KR": "5건",
         "en-US": "5 files",
         "zh-Hans-CN": "5 files",
         "ja-JP": "5 files"
@@ -6543,7 +6543,7 @@
     {
       "key": "screens.payroll.cossPreview.files.billing-files.detail",
       "values": {
-        "ko-KR": "Separates billing and attendance sheets for statutory insurance comparison.",
+        "ko-KR": "청구내역과 근태 시트를 법정 보험 비교 대상으로 분리합니다.",
         "en-US": "Separates billing and attendance sheets for statutory insurance comparison.",
         "zh-Hans-CN": "Separates billing and attendance sheets for statutory insurance comparison.",
         "ja-JP": "Separates billing and attendance sheets for statutory insurance comparison."
@@ -6552,7 +6552,7 @@
     {
       "key": "screens.payroll.cossPreview.files.worker-roster.label",
       "values": {
-        "ko-KR": "Worker roster",
+        "ko-KR": "근로자명부",
         "en-US": "Worker roster",
         "zh-Hans-CN": "Worker roster",
         "ja-JP": "Worker roster"
@@ -6561,7 +6561,7 @@
     {
       "key": "screens.payroll.cossPreview.files.worker-roster.value",
       "values": {
-        "ko-KR": "May baseline",
+        "ko-KR": "5월 기준",
         "en-US": "May baseline",
         "zh-Hans-CN": "May baseline",
         "ja-JP": "May baseline"
@@ -6570,7 +6570,7 @@
     {
       "key": "screens.payroll.cossPreview.files.worker-roster.detail",
       "values": {
-        "ko-KR": "Prepares hire date, termination date, and insurance-status mapping from the May roster.",
+        "ko-KR": "5월 기준 명부에서 입사일, 퇴사일, 보험 상태 매핑을 준비합니다.",
         "en-US": "Prepares hire date, termination date, and insurance-status mapping from the May roster.",
         "zh-Hans-CN": "Prepares hire date, termination date, and insurance-status mapping from the May roster.",
         "ja-JP": "Prepares hire date, termination date, and insurance-status mapping from the May roster."
@@ -6588,7 +6588,7 @@
     {
       "key": "screens.payroll.cossPreview.files.edi-pending.value",
       "values": {
-        "ko-KR": "Pending",
+        "ko-KR": "대기",
         "en-US": "Pending",
         "zh-Hans-CN": "Pending",
         "ja-JP": "Pending"
@@ -6597,7 +6597,7 @@
     {
       "key": "screens.payroll.cossPreview.files.edi-pending.detail",
       "values": {
-        "ko-KR": "Shows official-rate cross-checks until NHIS EDI and NPS EDI API integration is connected.",
+        "ko-KR": "국민건강 EDI와 국민연금 EDI API 연결 전까지 공식 기준 검산 상태로 표시합니다.",
         "en-US": "Shows official-rate cross-checks until NHIS EDI and NPS EDI API integration is connected.",
         "zh-Hans-CN": "Shows official-rate cross-checks until NHIS EDI and NPS EDI API integration is connected.",
         "ja-JP": "Shows official-rate cross-checks until NHIS EDI and NPS EDI API integration is connected."
@@ -6615,7 +6615,7 @@
     {
       "key": "screens.payroll.cossPreview.notice.description",
       "values": {
-        "ko-KR": "The preview does not store personal data or real amounts from the files; it only mirrors the approved file scope with dummy status.",
+        "ko-KR": "Preview에는 파일의 개인정보와 실제 금액을 저장하지 않고, 승인된 파일 범위만 dummy 상태로 표시합니다.",
         "en-US": "The preview does not store personal data or real amounts from the files; it only mirrors the approved file scope with dummy status.",
         "zh-Hans-CN": "The preview does not store personal data or real amounts from the files; it only mirrors the approved file scope with dummy status.",
         "ja-JP": "The preview does not store personal data or real amounts from the files; it only mirrors the approved file scope with dummy status."
@@ -6624,7 +6624,7 @@
     {
       "key": "screens.payroll.cossPreview.statutory.title",
       "values": {
-        "ko-KR": "Statutory deduction basis",
+        "ko-KR": "법정 공제 기준",
         "en-US": "Statutory deduction basis",
         "zh-Hans-CN": "Statutory deduction basis",
         "ja-JP": "Statutory deduction basis"
@@ -6633,7 +6633,7 @@
     {
       "key": "screens.payroll.cossPreview.statutory.description",
       "values": {
-        "ko-KR": "Preview tracks the required legal deduction sources without storing final calculated amounts until official EDI/API checks are connected.",
+        "ko-KR": "공식 EDI/API 확인이 연결되기 전까지 최종 산출 금액은 저장하지 않고 필요한 법정 공제 기준만 추적합니다.",
         "en-US": "Preview tracks the required legal deduction sources without storing final calculated amounts until official EDI/API checks are connected.",
         "zh-Hans-CN": "Preview tracks the required legal deduction sources without storing final calculated amounts until official EDI/API checks are connected.",
         "ja-JP": "Preview tracks the required legal deduction sources without storing final calculated amounts until official EDI/API checks are connected."
@@ -6651,7 +6651,7 @@
     {
       "key": "screens.payroll.cossPreview.statutory.income-tax.title",
       "values": {
-        "ko-KR": "Earned income withholding",
+        "ko-KR": "근로소득 원천징수",
         "en-US": "Earned income withholding",
         "zh-Hans-CN": "Earned income withholding",
         "ja-JP": "Earned income withholding"
@@ -6660,7 +6660,7 @@
     {
       "key": "screens.payroll.cossPreview.statutory.income-tax.detail",
       "values": {
-        "ko-KR": "Use the National Tax Service simplified withholding table as the source for income tax and local income tax checks.",
+        "ko-KR": "국세청 근로소득 간이세액표를 소득세와 지방소득세 확인 기준으로 사용합니다.",
         "en-US": "Use the National Tax Service simplified withholding table as the source for income tax and local income tax checks.",
         "zh-Hans-CN": "Use the National Tax Service simplified withholding table as the source for income tax and local income tax checks.",
         "ja-JP": "Use the National Tax Service simplified withholding table as the source for income tax and local income tax checks."
@@ -6678,7 +6678,7 @@
     {
       "key": "screens.payroll.cossPreview.statutory.national-pension.title",
       "values": {
-        "ko-KR": "National pension",
+        "ko-KR": "국민연금",
         "en-US": "National pension",
         "zh-Hans-CN": "National pension",
         "ja-JP": "National pension"
@@ -6687,7 +6687,7 @@
     {
       "key": "screens.payroll.cossPreview.statutory.national-pension.detail",
       "values": {
-        "ko-KR": "Map monthly standard income and contribution eligibility, then replace preview estimates with NPS EDI/API results.",
+        "ko-KR": "기준소득월액과 가입 대상 여부를 매핑한 뒤 국민연금 EDI/API 결과로 preview 값을 대체합니다.",
         "en-US": "Map monthly standard income and contribution eligibility, then replace preview estimates with NPS EDI/API results.",
         "zh-Hans-CN": "Map monthly standard income and contribution eligibility, then replace preview estimates with NPS EDI/API results.",
         "ja-JP": "Map monthly standard income and contribution eligibility, then replace preview estimates with NPS EDI/API results."
@@ -6705,7 +6705,7 @@
     {
       "key": "screens.payroll.cossPreview.statutory.health-insurance.title",
       "values": {
-        "ko-KR": "Health and long-term care",
+        "ko-KR": "건강보험 및 장기요양",
         "en-US": "Health and long-term care",
         "zh-Hans-CN": "Health and long-term care",
         "ja-JP": "Health and long-term care"
@@ -6714,7 +6714,7 @@
     {
       "key": "screens.payroll.cossPreview.statutory.health-insurance.detail",
       "values": {
-        "ko-KR": "Map remuneration basis and long-term care linkage, then confirm final deductions through NHIS EDI/API.",
+        "ko-KR": "보수월액 기준과 장기요양 연계를 매핑한 뒤 국민건강 EDI/API로 최종 공제를 확인합니다.",
         "en-US": "Map remuneration basis and long-term care linkage, then confirm final deductions through NHIS EDI/API.",
         "zh-Hans-CN": "Map remuneration basis and long-term care linkage, then confirm final deductions through NHIS EDI/API.",
         "ja-JP": "Map remuneration basis and long-term care linkage, then confirm final deductions through NHIS EDI/API."
@@ -6732,7 +6732,7 @@
     {
       "key": "screens.payroll.cossPreview.statutory.employment-insurance.title",
       "values": {
-        "ko-KR": "Employment and industrial accident",
+        "ko-KR": "고용보험 및 산재보험",
         "en-US": "Employment and industrial accident",
         "zh-Hans-CN": "Employment and industrial accident",
         "ja-JP": "Employment and industrial accident"
@@ -6741,7 +6741,7 @@
     {
       "key": "screens.payroll.cossPreview.statutory.employment-insurance.detail",
       "values": {
-        "ko-KR": "Track worker-paid employment insurance separately from employer-paid industrial accident insurance and industry rates.",
+        "ko-KR": "근로자 부담 고용보험과 사업주 부담 산재보험 및 업종 요율을 분리해 추적합니다.",
         "en-US": "Track worker-paid employment insurance separately from employer-paid industrial accident insurance and industry rates.",
         "zh-Hans-CN": "Track worker-paid employment insurance separately from employer-paid industrial accident insurance and industry rates.",
         "ja-JP": "Track worker-paid employment insurance separately from employer-paid industrial accident insurance and industry rates."
@@ -6750,7 +6750,7 @@
     {
       "key": "screens.payroll.cossPreview.monthly.title",
       "values": {
-        "ko-KR": "Monthly intake checklist",
+        "ko-KR": "월별 파일 수집 현황",
         "en-US": "Monthly intake checklist",
         "zh-Hans-CN": "Monthly intake checklist",
         "ja-JP": "Monthly intake checklist"
@@ -6759,7 +6759,7 @@
     {
       "key": "screens.payroll.cossPreview.monthly.description",
       "values": {
-        "ko-KR": "Each month keeps one payroll ledger and one billing file in the preview scope; the May worker roster is the latest roster baseline.",
+        "ko-KR": "각 월은 급여대장 1개와 청구서 1개를 preview 범위로 유지하며, 5월 근로자명부를 최신 명부 기준으로 사용합니다.",
         "en-US": "Each month keeps one payroll ledger and one billing file in the preview scope; the May worker roster is the latest roster baseline.",
         "zh-Hans-CN": "Each month keeps one payroll ledger and one billing file in the preview scope; the May worker roster is the latest roster baseline.",
         "ja-JP": "Each month keeps one payroll ledger and one billing file in the preview scope; the May worker roster is the latest roster baseline."
@@ -6777,7 +6777,7 @@
     {
       "key": "screens.payroll.cossPreview.monthly.jan.title",
       "values": {
-        "ko-KR": "January files detected",
+        "ko-KR": "1월 파일 확인",
         "en-US": "January files detected",
         "zh-Hans-CN": "January files detected",
         "ja-JP": "January files detected"
@@ -6786,7 +6786,7 @@
     {
       "key": "screens.payroll.cossPreview.monthly.jan.detail",
       "values": {
-        "ko-KR": "1 payroll ledger and 1 billing file are in scope for January.",
+        "ko-KR": "1월 급여대장 1개와 청구서 1개가 범위에 포함됩니다.",
         "en-US": "1 payroll ledger and 1 billing file are in scope for January.",
         "zh-Hans-CN": "1 payroll ledger and 1 billing file are in scope for January.",
         "ja-JP": "1 payroll ledger and 1 billing file are in scope for January."
@@ -6804,7 +6804,7 @@
     {
       "key": "screens.payroll.cossPreview.monthly.feb.title",
       "values": {
-        "ko-KR": "February files detected",
+        "ko-KR": "2월 파일 확인",
         "en-US": "February files detected",
         "zh-Hans-CN": "February files detected",
         "ja-JP": "February files detected"
@@ -6813,7 +6813,7 @@
     {
       "key": "screens.payroll.cossPreview.monthly.feb.detail",
       "values": {
-        "ko-KR": "1 payroll ledger and 1 billing file are in scope for February.",
+        "ko-KR": "2월 급여대장 1개와 청구서 1개가 범위에 포함됩니다.",
         "en-US": "1 payroll ledger and 1 billing file are in scope for February.",
         "zh-Hans-CN": "1 payroll ledger and 1 billing file are in scope for February.",
         "ja-JP": "1 payroll ledger and 1 billing file are in scope for February."
@@ -6831,7 +6831,7 @@
     {
       "key": "screens.payroll.cossPreview.monthly.mar.title",
       "values": {
-        "ko-KR": "March files detected",
+        "ko-KR": "3월 파일 확인",
         "en-US": "March files detected",
         "zh-Hans-CN": "March files detected",
         "ja-JP": "March files detected"
@@ -6840,7 +6840,7 @@
     {
       "key": "screens.payroll.cossPreview.monthly.mar.detail",
       "values": {
-        "ko-KR": "1 payroll ledger and 1 billing file are in scope for March.",
+        "ko-KR": "3월 급여대장 1개와 청구서 1개가 범위에 포함됩니다.",
         "en-US": "1 payroll ledger and 1 billing file are in scope for March.",
         "zh-Hans-CN": "1 payroll ledger and 1 billing file are in scope for March.",
         "ja-JP": "1 payroll ledger and 1 billing file are in scope for March."
@@ -6858,7 +6858,7 @@
     {
       "key": "screens.payroll.cossPreview.monthly.apr.title",
       "values": {
-        "ko-KR": "April files detected",
+        "ko-KR": "4월 파일 확인",
         "en-US": "April files detected",
         "zh-Hans-CN": "April files detected",
         "ja-JP": "April files detected"
@@ -6867,7 +6867,7 @@
     {
       "key": "screens.payroll.cossPreview.monthly.apr.detail",
       "values": {
-        "ko-KR": "1 billing file and the differently named Amkor April payroll ledger are in scope.",
+        "ko-KR": "4월 청구서 1개와 파일명이 다른 한국앰코 4월 급여대장이 범위에 포함됩니다.",
         "en-US": "1 billing file and the differently named Amkor April payroll ledger are in scope.",
         "zh-Hans-CN": "1 billing file and the differently named Amkor April payroll ledger are in scope.",
         "ja-JP": "1 billing file and the differently named Amkor April payroll ledger are in scope."
@@ -6885,7 +6885,7 @@
     {
       "key": "screens.payroll.cossPreview.monthly.may.title",
       "values": {
-        "ko-KR": "May files and roster detected",
+        "ko-KR": "5월 파일 및 명부 확인",
         "en-US": "May files and roster detected",
         "zh-Hans-CN": "May files and roster detected",
         "ja-JP": "May files and roster detected"
@@ -6894,10 +6894,109 @@
     {
       "key": "screens.payroll.cossPreview.monthly.may.detail",
       "values": {
-        "ko-KR": "1 payroll ledger, 1 billing file, and the May worker roster baseline are in scope.",
+        "ko-KR": "5월 급여대장 1개, 청구서 1개, 5월 기준 근로자명부가 범위에 포함됩니다.",
         "en-US": "1 payroll ledger, 1 billing file, and the May worker roster baseline are in scope.",
         "zh-Hans-CN": "1 payroll ledger, 1 billing file, and the May worker roster baseline are in scope.",
         "ja-JP": "1 payroll ledger, 1 billing file, and the May worker roster baseline are in scope."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.guard.title",
+      "values": {
+        "ko-KR": "Preview 데이터 보호",
+        "en-US": "Preview data guard",
+        "zh-Hans-CN": "Preview data guard",
+        "ja-JP": "Preview data guard"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.guard.description",
+      "values": {
+        "ko-KR": "이 데모 화면은 원본 엑셀 행 데이터가 아니라 승인된 범위와 작업 상태만 표시합니다.",
+        "en-US": "This demo surface shows only approved scope and workflow status, not source workbook records.",
+        "zh-Hans-CN": "This demo surface shows only approved scope and workflow status, not source workbook records.",
+        "ja-JP": "This demo surface shows only approved scope and workflow status, not source workbook records."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.guard.no-personal-data.badge",
+      "values": {
+        "ko-KR": "PII",
+        "en-US": "PII",
+        "zh-Hans-CN": "PII",
+        "ja-JP": "PII"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.guard.no-personal-data.title",
+      "values": {
+        "ko-KR": "개인정보 비저장",
+        "en-US": "Personal records not stored",
+        "zh-Hans-CN": "Personal records not stored",
+        "ja-JP": "Personal records not stored"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.guard.no-personal-data.detail",
+      "values": {
+        "ko-KR": "성명, 주민등록번호, 계좌번호, 명부 행 값은 커밋되는 preview 밖에 둡니다.",
+        "en-US": "Names, resident identifiers, bank accounts, and roster row values stay outside the committed preview.",
+        "zh-Hans-CN": "Names, resident identifiers, bank accounts, and roster row values stay outside the committed preview.",
+        "ja-JP": "Names, resident identifiers, bank accounts, and roster row values stay outside the committed preview."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.guard.no-real-amounts.badge",
+      "values": {
+        "ko-KR": "Amount",
+        "en-US": "Amount",
+        "zh-Hans-CN": "Amount",
+        "ja-JP": "Amount"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.guard.no-real-amounts.title",
+      "values": {
+        "ko-KR": "실제 급여 금액 미표시",
+        "en-US": "Real payroll amounts not shown",
+        "zh-Hans-CN": "Real payroll amounts not shown",
+        "ja-JP": "Real payroll amounts not shown"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.guard.no-real-amounts.detail",
+      "values": {
+        "ko-KR": "Preview는 dummy 상태만 사용하며 원본 엑셀 총액이나 직원별 금액을 노출하지 않습니다.",
+        "en-US": "The preview uses dummy statuses only and does not publish source workbook totals or employee-level amounts.",
+        "zh-Hans-CN": "The preview uses dummy statuses only and does not publish source workbook totals or employee-level amounts.",
+        "ja-JP": "The preview uses dummy statuses only and does not publish source workbook totals or employee-level amounts."
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.guard.edi-not-connected.badge",
+      "values": {
+        "ko-KR": "EDI",
+        "en-US": "EDI",
+        "zh-Hans-CN": "EDI",
+        "ja-JP": "EDI"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.guard.edi-not-connected.title",
+      "values": {
+        "ko-KR": "공식 EDI 확인 대기",
+        "en-US": "Official EDI checks pending",
+        "zh-Hans-CN": "Official EDI checks pending",
+        "ja-JP": "Official EDI checks pending"
+      }
+    },
+    {
+      "key": "screens.payroll.cossPreview.guard.edi-not-connected.detail",
+      "values": {
+        "ko-KR": "국민건강/NPS EDI API 결과는 인증 정보와 backend adapter 연결 전까지 대기 상태로 표시합니다.",
+        "en-US": "NHIS and NPS EDI/API results are represented as pending until credentials and backend adapters are connected.",
+        "zh-Hans-CN": "NHIS and NPS EDI/API results are represented as pending until credentials and backend adapters are connected.",
+        "ja-JP": "NHIS and NPS EDI/API results are represented as pending until credentials and backend adapters are connected."
       }
     }
   ],
