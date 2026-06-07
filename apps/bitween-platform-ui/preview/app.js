@@ -621,8 +621,13 @@ function mailboxPanel() {
     if (state.mailboxFilter === "unread") return item.unread;
     return item.folder === state.mailboxFilter;
   });
+  const folderCount = (id) => {
+    if (id === "all") return mailboxMessageDefs.length;
+    if (id === "unread") return mailboxMessageDefs.filter((item) => item.unread).length;
+    return mailboxMessageDefs.filter((item) => item.folder === id).length;
+  };
   return `<div class="mailbox-panel">
-    <div class="mailbox-tabs">${mailboxFolderIds.map((id) => `<button class="mailbox-tab ${state.mailboxFilter === id ? "active" : ""}" data-mailbox-filter="${id}">${t(`screens.mailbox.folders.${id}`)}</button>`).join("")}</div>
+    <div class="mailbox-tabs">${mailboxFolderIds.map((id) => `<button class="mailbox-tab ${state.mailboxFilter === id ? "active" : ""}" data-mailbox-filter="${id}"><span>${t(`screens.mailbox.folders.${id}`)}</span><strong>${folderCount(id)}</strong></button>`).join("")}</div>
     <div class="planner-list">${messages.map((item) => {
       const recalled = state.recalledMailIds.includes(item.id);
       return `<div class="mail-item ${item.unread ? "unread" : ""} ${recalled ? "recalled" : ""}">

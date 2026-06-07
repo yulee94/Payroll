@@ -584,6 +584,11 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
     if (mailboxFilter === "unread") return item.unread;
     return item.folder === mailboxFilter;
   });
+  const mailboxFolderCount = (id: (typeof mailboxFolderIds)[number]) => {
+    if (id === "all") return mailboxMessageDefinitions.length;
+    if (id === "unread") return mailboxMessageDefinitions.filter((item) => item.unread).length;
+    return mailboxMessageDefinitions.filter((item) => item.folder === id).length;
+  };
 
   return (
     <View style={styles.homePlannerGrid}>
@@ -632,6 +637,7 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
               style={({ pressed }) => [styles.mailboxTab, mailboxFilter === id && styles.mailboxTabActive, pressed && styles.buttonPressed]}
             >
               <Text style={[styles.mailboxTabText, mailboxFilter === id && styles.mailboxTabTextActive]}>{tScreen(locale, `mailbox.folders.${id}`)}</Text>
+              <Text style={[styles.mailboxTabCount, mailboxFilter === id && styles.mailboxTabCountActive]}>{mailboxFolderCount(id)}</Text>
             </Pressable>
           ))}
         </View>
@@ -1632,10 +1638,13 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4
   },
   mailboxTab: {
+    alignItems: "center",
     backgroundColor: colors.input,
     borderColor: colors.border,
     borderRadius: radius.md,
     borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.xs,
     minHeight: 32,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs
@@ -1654,6 +1663,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800",
     lineHeight: 16
+  },
+  mailboxTabCount: {
+    backgroundColor: "rgba(102, 112, 133, 0.12)",
+    borderRadius: 999,
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "800",
+    lineHeight: 14,
+    minWidth: 18,
+    paddingHorizontal: 5,
+    textAlign: "center"
+  },
+  mailboxTabCountActive: {
+    backgroundColor: "rgba(255, 255, 255, 0.22)",
+    color: colors.card
   },
   mailboxTabTextActive: {
     color: colors.card

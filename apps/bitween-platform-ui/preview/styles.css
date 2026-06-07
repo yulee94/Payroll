@@ -696,20 +696,38 @@ button {
 }
 
 .mailbox-tab {
+  align-items: center;
   background: var(--input);
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--muted);
+  display: inline-flex;
   font-size: 12px;
   font-weight: 850;
+  gap: 6px;
   min-height: 32px;
   padding: 6px 8px;
+}
+
+.mailbox-tab strong {
+  align-items: center;
+  background: rgba(102, 112, 133, 0.12);
+  border-radius: 999px;
+  display: inline-flex;
+  height: 18px;
+  justify-content: center;
+  min-width: 18px;
+  padding: 0 5px;
 }
 
 .mailbox-tab.active {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--card);
+}
+
+.mailbox-tab.active strong {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .mail-item {
