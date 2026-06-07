@@ -98,6 +98,29 @@ const cossExecutiveCompareDefinitions = [
   { id: "gap", tone: "neutral" }
 ] as const satisfies readonly ToneDefinition[];
 
+const mailboxDefinitions = [
+  { id: "coss-files", tone: "ready" },
+  { id: "payroll-review", tone: "attention" },
+  { id: "edi-api", tone: "neutral" }
+] as const satisfies readonly ToneDefinition[];
+
+const cossActualMonthlyRows = [
+  { month: 1, payrollWorkers: 25, payrollWorkdays: 375, payrollOt: 536, billingWorkers: 26, billingWorkdays: 379, billingOtHours: 679 },
+  { month: 2, payrollWorkers: 27, payrollWorkdays: 770, payrollOt: 1017, billingWorkers: 27, billingWorkdays: 837, billingOtHours: 97 },
+  { month: 3, payrollWorkers: 26, payrollWorkdays: 693, payrollOt: 811, billingWorkers: 26, billingWorkdays: 728, billingOtHours: 22 },
+  { month: 4, payrollWorkers: 26, payrollWorkdays: 806, payrollOt: 1360, billingWorkers: 26, billingWorkdays: 806, billingOtHours: 27 },
+  { month: 5, payrollWorkers: 27, payrollWorkdays: 767, payrollOt: 1184, billingWorkers: 27, billingWorkdays: 810, billingOtHours: 12 }
+] as const;
+
+const cossRosterActual = {
+  allowanceTotal: 950000,
+  healthMapped: 27,
+  maxHourly: 10990,
+  minHourly: 10510,
+  pensionMapped: 24,
+  workers: 27
+} as const;
+
 const cossPreviewGuardDefinitions = [
   { id: "no-personal-data", tone: "ready" },
   { id: "no-real-amounts", tone: "ready" },
@@ -315,6 +338,7 @@ export function PayrollScreen({ data, demoMode, locale, onSelect }: PayrollScree
       <PayrollReadiness cards={readinessCards} locale={locale} onSelect={onSelect} selectedId={selectedReadiness?.id} onSelectCard={(card) => setSelectedReadinessId(card.id)} />
       {selectedReadiness ? <PayrollReadinessDetail card={selectedReadiness} locale={locale} /> : null}
       {demoMode ? <CossPreviewFilePanel locale={locale} /> : null}
+      {demoMode ? <CossActualFilePanel locale={locale} /> : null}
       {demoMode ? <PayrollExecutiveComparePanel locale={locale} /> : null}
       <PayrollIntegrationPanel demoMode={demoMode} locale={locale} onSelect={onSelect} rows={data.integrationRows} />
       <Card>
@@ -358,6 +382,54 @@ export function PayrollScreen({ data, demoMode, locale, onSelect }: PayrollScree
         </View>
       </Card>
     </View>
+  );
+}
+
+function formatNumber(value: number) {
+  return value.toLocaleString("ko-KR");
+}
+
+function CossActualFilePanel({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <Card>
+      <SectionHeader
+        eyebrow={tScreen(locale, "payroll.cossActual.eyebrow")}
+        title={tScreen(locale, "payroll.cossActual.title")}
+        description={tScreen(locale, "payroll.cossActual.description")}
+      />
+      <View style={styles.integrationGrid}>
+        <View style={[styles.integrationCard, { borderTopColor: toneColor("ready") }]}>
+          <Label size="sm" muted>{tScreen(locale, "payroll.cossActual.files.label")}</Label>
+          <Text style={[styles.integrationValue, { color: toneColor("ready") }]}>{tScreen(locale, "payroll.cossActual.files.value")}</Text>
+          <Label size="sm">{tScreen(locale, "payroll.cossActual.files.detail")}</Label>
+        </View>
+        <View style={[styles.integrationCard, { borderTopColor: toneColor("attention") }]}>
+          <Label size="sm" muted>{tScreen(locale, "payroll.cossActual.roster.label")}</Label>
+          <Text style={[styles.integrationValue, { color: toneColor("attention") }]}>{tScreen(locale, "payroll.cossActual.roster.value", { workers: cossRosterActual.workers })}</Text>
+          <Label size="sm">{tScreen(locale, "payroll.cossActual.roster.detail", { pension: cossRosterActual.pensionMapped, health: cossRosterActual.healthMapped })}</Label>
+        </View>
+        <View style={[styles.integrationCard, { borderTopColor: toneColor("neutral") }]}>
+          <Label size="sm" muted>{tScreen(locale, "payroll.cossActual.hourly.label")}</Label>
+          <Text style={[styles.integrationValue, { color: toneColor("neutral") }]}>
+            {tScreen(locale, "payroll.cossActual.hourly.value", { min: formatNumber(cossRosterActual.minHourly), max: formatNumber(cossRosterActual.maxHourly) })}
+          </Text>
+          <Label size="sm">{tScreen(locale, "payroll.cossActual.hourly.detail", { allowance: formatNumber(cossRosterActual.allowanceTotal) })}</Label>
+        </View>
+      </View>
+      <View style={styles.actualTable}>
+        {cossActualMonthlyRows.map((row) => (
+          <View key={row.month} style={styles.actualRow}>
+            <Label weight="bold">{tScreen(locale, "payroll.cossActual.monthLabel", { month: row.month })}</Label>
+            <Label size="sm">{tScreen(locale, "payroll.cossActual.payrollSummary", { workers: row.payrollWorkers, workdays: formatNumber(row.payrollWorkdays), ot: formatNumber(row.payrollOt) })}</Label>
+            <Label size="sm" muted>{tScreen(locale, "payroll.cossActual.billingSummary", { workers: row.billingWorkers, workdays: formatNumber(row.billingWorkdays), ot: formatNumber(row.billingOtHours) })}</Label>
+          </View>
+        ))}
+      </View>
+      <View style={styles.inlineNotice}>
+        <Badge tone="attention">{tScreen(locale, "payroll.cossActual.notice.badge")}</Badge>
+        <Label size="sm" muted>{tScreen(locale, "payroll.cossActual.notice.detail")}</Label>
+      </View>
+    </Card>
   );
 }
 
@@ -522,6 +594,20 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
         </View>
       </Card>
       <Card style={styles.homePlannerCard}>
+        <SectionHeader title={tScreen(locale, "mailbox.title")} description={tScreen(locale, "mailbox.description")} />
+        <View style={styles.plannerList}>
+          {mailboxDefinitions.map((item) => (
+            <View key={item.id} style={styles.plannerItem}>
+              <Badge tone={item.tone}>{tScreen(locale, `mailbox.items.${item.id}.badge`)}</Badge>
+              <View style={styles.plannerCopy}>
+                <Label weight="bold">{tScreen(locale, `mailbox.items.${item.id}.title`)}</Label>
+                <Label size="sm" muted>{tScreen(locale, `mailbox.items.${item.id}.detail`)}</Label>
+              </View>
+            </View>
+          ))}
+        </View>
+      </Card>
+      <Card style={styles.homePlannerCardWide}>
         <SectionHeader title={tScreen(locale, "todo.title")} description={tScreen(locale, "todo.description")} />
         <View style={styles.plannerList}>
           {todos.length > 0 ? (
@@ -1253,6 +1339,21 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     lineHeight: 18
   },
+  actualRow: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexBasis: 260,
+    flexGrow: 1,
+    gap: spacing.xs,
+    padding: spacing.md
+  },
+  actualTable: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
   detailGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -1367,6 +1468,10 @@ const styles = StyleSheet.create({
   },
   homePlannerCard: {
     flexBasis: 320,
+    flexGrow: 1
+  },
+  homePlannerCardWide: {
+    flexBasis: 640,
     flexGrow: 1
   },
   homePlannerGrid: {

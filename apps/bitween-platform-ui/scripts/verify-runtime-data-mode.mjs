@@ -116,6 +116,18 @@ if (!previewAppSource.includes("payrollExecutiveComparePanel")) {
   errors.push("preview/app.js demo payroll preview must mirror the executive billing/payroll comparison panel.");
 }
 
+if (!screensSource.includes("CossActualFilePanel")) {
+  errors.push("screens.tsx demo payroll preview must expose the imported Amkor file summary panel.");
+}
+
+if (!previewAppSource.includes("cossActualFilePanel")) {
+  errors.push("preview/app.js demo payroll preview must mirror the imported Amkor file summary panel.");
+}
+
+if (!screensSource.includes("mailboxDefinitions") || !previewAppSource.includes("mailboxDefs")) {
+  errors.push("Home preview must replace duplicate schedule content with a mailbox panel.");
+}
+
 if (!screensSource.includes('"payroll.actions.openHrRoster"') || !screensSource.includes('"payroll.actions.siteRules"')) {
   errors.push("screens.tsx payroll actions must include HR roster and workplace-rule entry points.");
 }

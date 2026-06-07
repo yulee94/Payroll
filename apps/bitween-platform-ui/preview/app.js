@@ -92,6 +92,29 @@ const cossExecutiveCompareDefs = [
   ["gap", "neutral"]
 ].map(([id, tone]) => ({ id, tone }));
 
+const mailboxDefs = [
+  ["coss-files", "ready"],
+  ["payroll-review", "attention"],
+  ["edi-api", "neutral"]
+].map(([id, tone]) => ({ id, tone }));
+
+const cossActualMonthlyRows = [
+  { month: 1, payrollWorkers: 25, payrollWorkdays: 375, payrollOt: 536, billingWorkers: 26, billingWorkdays: 379, billingOtHours: 679 },
+  { month: 2, payrollWorkers: 27, payrollWorkdays: 770, payrollOt: 1017, billingWorkers: 27, billingWorkdays: 837, billingOtHours: 97 },
+  { month: 3, payrollWorkers: 26, payrollWorkdays: 693, payrollOt: 811, billingWorkers: 26, billingWorkdays: 728, billingOtHours: 22 },
+  { month: 4, payrollWorkers: 26, payrollWorkdays: 806, payrollOt: 1360, billingWorkers: 26, billingWorkdays: 806, billingOtHours: 27 },
+  { month: 5, payrollWorkers: 27, payrollWorkdays: 767, payrollOt: 1184, billingWorkers: 27, billingWorkdays: 810, billingOtHours: 12 }
+];
+
+const cossRosterActual = {
+  allowanceTotal: 950000,
+  healthMapped: 27,
+  maxHourly: 10990,
+  minHourly: 10510,
+  pensionMapped: 24,
+  workers: 27
+};
+
 const rowGroups = {
   payrollSettings: [
     ["payroll-setting-1", "neutral", "settings"],
@@ -562,6 +585,14 @@ function renderHome() {
         `).join("")}</div>
       </div>
       <div class="card planner-card">
+        ${sectionHead("", t("screens.mailbox.title"), t("screens.mailbox.description"))}
+        <div class="planner-list">${mailboxDefs.map((item) => `
+          <div class="planner-item">${badge(t(`screens.mailbox.items.${item.id}.badge`), item.tone)}<div><strong>${t(`screens.mailbox.items.${item.id}.title`)}</strong><span class="helper">${t(`screens.mailbox.items.${item.id}.detail`)}</span></div></div>
+        `).join("")}</div>
+      </div>
+    </section>
+    <section class="planner-grid todo-grid">
+      <div class="card planner-card">
         ${sectionHead("", t("screens.todo.title"), t("screens.todo.description"))}
         <div class="planner-list">${todayTodos().map((item) => `
           <div class="planner-item todo-item ${item.done ? "done" : ""}">${badge(item.timeLabel, item.tone)}<div><strong>${item.title}</strong><span class="helper">${item.owner}</span></div></div>
@@ -601,6 +632,7 @@ function renderPayroll() {
       ${selectedReadiness ? payrollReadinessDetail(selectedReadiness) : ""}
     </section>
     ${cossPreviewFilePanel()}
+    ${cossActualFilePanel()}
     ${payrollExecutiveComparePanel()}
     ${payrollIntegrationPanel()}
     <section class="card">
@@ -625,6 +657,42 @@ function renderPayroll() {
       ${table(localizedRows("preview"))}
     </section>
   `;
+}
+
+function formatNumber(value) {
+  return Number(value).toLocaleString("ko-KR");
+}
+
+function cossActualFilePanel() {
+  const rows = cossActualMonthlyRows.map((row) => `
+    <div class="actual-row">
+      <strong>${t("screens.payroll.cossActual.monthLabel", { month: row.month })}</strong>
+      <span>${t("screens.payroll.cossActual.payrollSummary", { workers: row.payrollWorkers, workdays: formatNumber(row.payrollWorkdays), ot: formatNumber(row.payrollOt) })}</span>
+      <span>${t("screens.payroll.cossActual.billingSummary", { workers: row.billingWorkers, workdays: formatNumber(row.billingWorkdays), ot: formatNumber(row.billingOtHours) })}</span>
+    </div>
+  `).join("");
+  return `<section class="card">
+    ${sectionHead(t("screens.payroll.cossActual.eyebrow"), t("screens.payroll.cossActual.title"), t("screens.payroll.cossActual.description"))}
+    <div class="integration-grid">
+      <article class="integration-card" style="border-top-color:${toneColor("ready")}">
+        <span class="helper">${t("screens.payroll.cossActual.files.label")}</span>
+        <strong class="metric-value" style="color:${toneColor("ready")}">${t("screens.payroll.cossActual.files.value")}</strong>
+        <span>${t("screens.payroll.cossActual.files.detail")}</span>
+      </article>
+      <article class="integration-card" style="border-top-color:${toneColor("attention")}">
+        <span class="helper">${t("screens.payroll.cossActual.roster.label")}</span>
+        <strong class="metric-value" style="color:${toneColor("attention")}">${t("screens.payroll.cossActual.roster.value", { workers: cossRosterActual.workers })}</strong>
+        <span>${t("screens.payroll.cossActual.roster.detail", { pension: cossRosterActual.pensionMapped, health: cossRosterActual.healthMapped })}</span>
+      </article>
+      <article class="integration-card" style="border-top-color:${toneColor("neutral")}">
+        <span class="helper">${t("screens.payroll.cossActual.hourly.label")}</span>
+        <strong class="metric-value" style="color:${toneColor("neutral")}">${t("screens.payroll.cossActual.hourly.value", { min: formatNumber(cossRosterActual.minHourly), max: formatNumber(cossRosterActual.maxHourly) })}</strong>
+        <span>${t("screens.payroll.cossActual.hourly.detail", { allowance: formatNumber(cossRosterActual.allowanceTotal) })}</span>
+      </article>
+    </div>
+    <div class="actual-table">${rows}</div>
+    <div class="notice">${badge(t("screens.payroll.cossActual.notice.badge"), "attention")}<span class="helper">${t("screens.payroll.cossActual.notice.detail")}</span></div>
+  </section>`;
 }
 
 function payrollExecutiveComparePanel() {

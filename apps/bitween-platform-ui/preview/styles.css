@@ -585,6 +585,32 @@ button {
   align-content: start;
 }
 
+.todo-grid {
+  grid-template-columns: minmax(280px, 1fr);
+}
+
+.actual-table {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  overflow: hidden;
+}
+
+.actual-row {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 90px minmax(220px, 1fr) minmax(220px, 1fr);
+  padding: 12px;
+}
+
+.actual-row:nth-child(odd) {
+  background: var(--input);
+}
+
+.actual-row + .actual-row {
+  border-top: 1px solid var(--border);
+}
+
 .calendar-day {
   align-items: center;
   background: var(--accent-soft);
