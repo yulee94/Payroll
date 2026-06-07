@@ -136,6 +136,10 @@ if (!/\.nav-button\s*\{[\s\S]*?height:\s*46px;[\s\S]*?width:\s*100%;[\s\S]*?\}/.
   errors.push("preview/styles.css sidebar nav buttons must keep a fixed size across inactive and active states.");
 }
 
+if (!/\.nav\s*\{[\s\S]*?align-content:\s*start;[\s\S]*?grid-auto-rows:\s*46px;[\s\S]*?\}/.test(previewStylesSource)) {
+  errors.push("preview/styles.css sidebar nav container must not distribute extra vertical space between items.");
+}
+
 if (/function renderHome\(\)[\s\S]*?screens\.launcher\.shortcuts\.title[\s\S]*?function queueDetail/.test(previewAppSource)) {
   errors.push("preview/app.js platform home must not render platform shortcuts.");
 }

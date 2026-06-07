@@ -376,8 +376,10 @@ button {
 }
 
 .nav {
+  align-content: start;
   display: grid;
   gap: 8px;
+  grid-auto-rows: 46px;
   overflow: auto;
   scrollbar-width: none;
 }
