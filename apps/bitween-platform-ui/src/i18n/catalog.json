@@ -4831,6 +4831,132 @@
       }
     },
     {
+      "key": "screens.payroll.actions.openHrRoster",
+      "values": {
+        "ko-KR": "HR 명부 확인",
+        "en-US": "Open HR roster",
+        "zh-Hans-CN": "Open HR roster",
+        "ja-JP": "Open HR roster"
+      }
+    },
+    {
+      "key": "screens.payroll.actions.siteRules",
+      "values": {
+        "ko-KR": "사업장 기준 설정",
+        "en-US": "Site rules",
+        "zh-Hans-CN": "Site rules",
+        "ja-JP": "Site rules"
+      }
+    },
+    {
+      "key": "screens.payroll.executiveCompare.eyebrow",
+      "values": {
+        "ko-KR": "임원 검토",
+        "en-US": "Executive review",
+        "zh-Hans-CN": "Executive review",
+        "ja-JP": "Executive review"
+      }
+    },
+    {
+      "key": "screens.payroll.executiveCompare.title",
+      "values": {
+        "ko-KR": "월별 청구·급여 비교분석",
+        "en-US": "Monthly billing and payroll comparison",
+        "zh-Hans-CN": "Monthly billing and payroll comparison",
+        "ja-JP": "Monthly billing and payroll comparison"
+      }
+    },
+    {
+      "key": "screens.payroll.executiveCompare.description",
+      "values": {
+        "ko-KR": "전월 대비 청구 금액과 급여 증감을 기안 전 표 구조로 검토합니다.",
+        "en-US": "Review month-over-month invoice and payroll changes before drafting approvals.",
+        "zh-Hans-CN": "Review month-over-month invoice and payroll changes before drafting approvals.",
+        "ja-JP": "Review month-over-month invoice and payroll changes before drafting approvals."
+      }
+    },
+    {
+      "key": "screens.payroll.executiveCompare.billing.badge",
+      "values": {
+        "ko-KR": "청구",
+        "en-US": "Billing",
+        "zh-Hans-CN": "Billing",
+        "ja-JP": "Billing"
+      }
+    },
+    {
+      "key": "screens.payroll.executiveCompare.billing.title",
+      "values": {
+        "ko-KR": "청구 증감",
+        "en-US": "Billing change",
+        "zh-Hans-CN": "Billing change",
+        "ja-JP": "Billing change"
+      }
+    },
+    {
+      "key": "screens.payroll.executiveCompare.billing.detail",
+      "values": {
+        "ko-KR": "청구서 기준 전월 대비 증감률과 사유를 표시할 영역입니다.",
+        "en-US": "Shows month-over-month invoice changes and reasons.",
+        "zh-Hans-CN": "Shows month-over-month invoice changes and reasons.",
+        "ja-JP": "Shows month-over-month invoice changes and reasons."
+      }
+    },
+    {
+      "key": "screens.payroll.executiveCompare.payroll.badge",
+      "values": {
+        "ko-KR": "급여",
+        "en-US": "Payroll",
+        "zh-Hans-CN": "Payroll",
+        "ja-JP": "Payroll"
+      }
+    },
+    {
+      "key": "screens.payroll.executiveCompare.payroll.title",
+      "values": {
+        "ko-KR": "급여 증감",
+        "en-US": "Payroll change",
+        "zh-Hans-CN": "Payroll change",
+        "ja-JP": "Payroll change"
+      }
+    },
+    {
+      "key": "screens.payroll.executiveCompare.payroll.detail",
+      "values": {
+        "ko-KR": "급여대장 기준 당월 증감과 주요 수당 변동을 비교합니다.",
+        "en-US": "Compares current-month payroll changes and allowance movement.",
+        "zh-Hans-CN": "Compares current-month payroll changes and allowance movement.",
+        "ja-JP": "Compares current-month payroll changes and allowance movement."
+      }
+    },
+    {
+      "key": "screens.payroll.executiveCompare.gap.badge",
+      "values": {
+        "ko-KR": "차이",
+        "en-US": "Gap",
+        "zh-Hans-CN": "Gap",
+        "ja-JP": "Gap"
+      }
+    },
+    {
+      "key": "screens.payroll.executiveCompare.gap.title",
+      "values": {
+        "ko-KR": "청구 대비 급여 차이",
+        "en-US": "Billing to payroll gap",
+        "zh-Hans-CN": "Billing to payroll gap",
+        "ja-JP": "Billing to payroll gap"
+      }
+    },
+    {
+      "key": "screens.payroll.executiveCompare.gap.detail",
+      "values": {
+        "ko-KR": "청구 금액 대비 급여 집행 차이를 임원 검토용으로 요약합니다.",
+        "en-US": "Summarizes the invoice-to-payroll difference for executive review.",
+        "zh-Hans-CN": "Summarizes the invoice-to-payroll difference for executive review.",
+        "ja-JP": "Summarizes the invoice-to-payroll difference for executive review."
+      }
+    },
+    {
       "key": "screens.payroll.integration.title",
       "values": {
         "ko-KR": "급여 연동 준비 점검",

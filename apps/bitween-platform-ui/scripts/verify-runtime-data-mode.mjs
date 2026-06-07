@@ -106,6 +106,30 @@ if (!previewAppSource.includes("cossPreviewGuardDefs")) {
   errors.push("preview/app.js demo payroll preview must mirror the COSS preview data guard.");
 }
 
+if (!screensSource.includes("PayrollExecutiveComparePanel")) {
+  errors.push("screens.tsx demo payroll preview must expose the executive billing/payroll comparison panel.");
+}
+
+if (!previewAppSource.includes("payrollExecutiveComparePanel")) {
+  errors.push("preview/app.js demo payroll preview must mirror the executive billing/payroll comparison panel.");
+}
+
+if (!screensSource.includes('"payroll.actions.openHrRoster"') || !screensSource.includes('"payroll.actions.siteRules"')) {
+  errors.push("screens.tsx payroll actions must include HR roster and workplace-rule entry points.");
+}
+
+if (!previewAppSource.includes('"screens.payroll.actions.openHrRoster"') || !previewAppSource.includes('"screens.payroll.actions.siteRules"')) {
+  errors.push("preview/app.js payroll actions must include HR roster and workplace-rule entry points.");
+}
+
+if (!previewAppSource.includes("${themePanel()}")) {
+  errors.push("preview/app.js must move theme controls into the top action area.");
+}
+
+if (/function renderHome\(\)[\s\S]*?screens\.launcher\.shortcuts\.title[\s\S]*?function queueDetail/.test(previewAppSource)) {
+  errors.push("preview/app.js platform home must not render platform shortcuts.");
+}
+
 if (!appSource.includes('"session.emptyCompanyCodeLabel"')) {
   errors.push("App.tsx must replace empty company-code placeholders with a non-demo disconnected label.");
 }

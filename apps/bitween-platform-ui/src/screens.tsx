@@ -92,6 +92,12 @@ const cossPreviewFileDefinitions = [
 
 const cossMonthlyFileDefinitions = ["jan", "feb", "mar", "apr", "may"] as const;
 
+const cossExecutiveCompareDefinitions = [
+  { id: "billing", tone: "attention" },
+  { id: "payroll", tone: "attention" },
+  { id: "gap", tone: "neutral" }
+] as const satisfies readonly ToneDefinition[];
+
 const cossPreviewGuardDefinitions = [
   { id: "no-personal-data", tone: "ready" },
   { id: "no-real-amounts", tone: "ready" },
@@ -280,110 +286,13 @@ export function LoginScreen({ demoMode, locale, onLocaleChange, onSelect }: Logi
   );
 }
 
-export function LauncherScreen({ data, locale, onSelect, payroll }: LauncherScreenProps) {
-  const navigationItems = data.navigation;
-  const platformMetrics = data.metrics;
-  const workQueue = data.workQueue;
+export function LauncherScreen({ data, locale }: LauncherScreenProps) {
   const calendarEvents = data.calendarEvents;
   const todayTodos = data.todayTodos;
-  const payrollSettingsRows = payroll.settingsRows;
-  const previewRows = payroll.previewRows;
-  const launcherItems = useMemo(() => navigationItems.filter((item) => item.id !== "home"), [navigationItems]);
-  const [selectedQueueId, setSelectedQueueId] = useState<string | undefined>(workQueue[0]?.id);
-  const selectedQueue = workQueue.find((item) => item.id === selectedQueueId) ?? workQueue[0];
-
-  useEffect(() => {
-    setSelectedQueueId(workQueue[0]?.id);
-  }, [workQueue]);
 
   return (
     <View style={styles.stack}>
-      <Card>
-        <SectionHeader
-          title={tScreen(locale, "launcher.platformStatus.title")}
-          description={tScreen(locale, "launcher.platformStatus.description")}
-          action={<ActionButton onPress={() => onSelect("payroll")} variant="secondary">{tScreen(locale, "launcher.platformStatus.action")}</ActionButton>}
-        />
-        {platformMetrics.length > 0 ? (
-          <MetricGrid items={platformMetrics} />
-        ) : (
-          <EmptyState title={tScreen(locale, "empty.platformMetrics.title")} description={tScreen(locale, "empty.platformMetrics.description")} />
-        )}
-      </Card>
-
       <CalendarTodoPanel events={calendarEvents} locale={locale} todos={todayTodos} />
-
-      <Card>
-        <SectionHeader title={tScreen(locale, "launcher.workQueue.title")} description={tScreen(locale, "launcher.workQueue.description")} />
-        {workQueue.length > 0 ? (
-          <View style={styles.queueGrid}>
-            {workQueue.map((item) => (
-              <Pressable
-                accessibilityRole="button"
-                key={item.id}
-                onPress={() => setSelectedQueueId(item.id)}
-                style={({ pressed }) => [
-                  styles.queueItem,
-                  selectedQueueId === item.id && styles.queueItemSelected,
-                  pressed && styles.buttonPressed
-                ]}
-              >
-                <View style={styles.queueHeader}>
-                  <Badge tone={item.tone}>{item.status}</Badge>
-                  <Label size="sm" muted>{item.due}</Label>
-                </View>
-                <Label weight="bold">{item.title}</Label>
-                <Label size="sm" muted>{tScreen(locale, "launcher.workQueue.metaOwner", { meta: item.meta, owner: item.owner })}</Label>
-              </Pressable>
-            ))}
-          </View>
-        ) : (
-          <EmptyState title={tScreen(locale, "empty.workQueue.title")} description={tScreen(locale, "empty.workQueue.description")} />
-        )}
-        {selectedQueue ? <WorkQueueDetailPanel item={selectedQueue} locale={locale} onSelect={onSelect} /> : null}
-      </Card>
-
-      <Card>
-        <SectionHeader title={tScreen(locale, "launcher.shortcuts.title")} description={tScreen(locale, "launcher.shortcuts.description")} />
-        <View style={styles.launcherGrid}>
-          {launcherItems.map((item) => (
-            <View key={item.id} style={[styles.launcherCard, { borderTopColor: item.accent }]}>
-              <Label size="sm" muted>{item.eyebrow}</Label>
-              <Label weight="bold">{item.label}</Label>
-              <Label size="sm" muted>{item.description}</Label>
-              <ActionButton onPress={() => onSelect(item.id)} variant="ghost">{tScreen(locale, "actions.open")}</ActionButton>
-            </View>
-          ))}
-        </View>
-      </Card>
-      <Card>
-        <SectionHeader
-          eyebrow={tScreen(locale, "launcher.settingsSummary.eyebrow")}
-          title={tScreen(locale, "launcher.settingsSummary.title")}
-          description={tScreen(locale, "launcher.settingsSummary.description")}
-          action={<ActionButton onPress={() => onSelect("settings")} variant="secondary">{tScreen(locale, "launcher.settingsSummary.action")}</ActionButton>}
-        />
-        <DataTable
-          emptyDescription={tScreen(locale, "empty.payrollSettings.description")}
-          emptyTitle={tScreen(locale, "empty.payrollSettings.title")}
-          locale={locale}
-          rows={payrollSettingsRows}
-        />
-      </Card>
-      <Card>
-        <SectionHeader
-          eyebrow={tScreen(locale, "launcher.previewArchive.eyebrow")}
-          title={tScreen(locale, "launcher.previewArchive.title")}
-          description={tScreen(locale, "launcher.previewArchive.description")}
-          action={<ActionButton onPress={() => onSelect("archive")} variant="secondary">{tScreen(locale, "launcher.previewArchive.action")}</ActionButton>}
-        />
-        <DataTable
-          emptyDescription={tScreen(locale, "empty.archivePreview.description")}
-          emptyTitle={tScreen(locale, "empty.archivePreview.title")}
-          locale={locale}
-          rows={previewRows}
-        />
-      </Card>
     </View>
   );
 }
@@ -406,6 +315,7 @@ export function PayrollScreen({ data, demoMode, locale, onSelect }: PayrollScree
       <PayrollReadiness cards={readinessCards} locale={locale} onSelect={onSelect} selectedId={selectedReadiness?.id} onSelectCard={(card) => setSelectedReadinessId(card.id)} />
       {selectedReadiness ? <PayrollReadinessDetail card={selectedReadiness} locale={locale} /> : null}
       {demoMode ? <CossPreviewFilePanel locale={locale} /> : null}
+      {demoMode ? <PayrollExecutiveComparePanel locale={locale} /> : null}
       <PayrollIntegrationPanel demoMode={demoMode} locale={locale} onSelect={onSelect} rows={data.integrationRows} />
       <Card>
         <SectionHeader
@@ -441,11 +351,34 @@ export function PayrollScreen({ data, demoMode, locale, onSelect }: PayrollScree
         {selectedStep ? <PayrollStepDetail locale={locale} step={selectedStep} /> : null}
         <View style={styles.actionRow}>
           <ActionButton onPress={() => onSelect("payroll")}>{tScreen(locale, "payroll.actions.keepPayroll")}</ActionButton>
+          <ActionButton onPress={() => onSelect("hr")} variant="secondary">{tScreen(locale, "payroll.actions.openHrRoster")}</ActionButton>
+          <ActionButton onPress={() => onSelect("settings")} variant="secondary">{tScreen(locale, "payroll.actions.siteRules")}</ActionButton>
           <ActionButton onPress={() => onSelect("archive")} variant="secondary">{tScreen(locale, "payroll.actions.monthlyArchive")}</ActionButton>
           <ActionButton onPress={() => onSelect("ai")} variant="ghost">{tScreen(locale, "payroll.actions.prepareAiReview")}</ActionButton>
         </View>
       </Card>
     </View>
+  );
+}
+
+function PayrollExecutiveComparePanel({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <Card>
+      <SectionHeader
+        eyebrow={tScreen(locale, "payroll.executiveCompare.eyebrow")}
+        title={tScreen(locale, "payroll.executiveCompare.title")}
+        description={tScreen(locale, "payroll.executiveCompare.description")}
+      />
+      <View style={styles.detailGrid}>
+        {cossExecutiveCompareDefinitions.map((item) => (
+          <View key={item.id} style={styles.detailItem}>
+            <Badge tone={item.tone}>{tScreen(locale, `payroll.executiveCompare.${item.id}.badge`)}</Badge>
+            <Label weight="bold">{tScreen(locale, `payroll.executiveCompare.${item.id}.title`)}</Label>
+            <Label size="sm" muted>{tScreen(locale, `payroll.executiveCompare.${item.id}.detail`)}</Label>
+          </View>
+        ))}
+      </View>
+    </Card>
   );
 }
 

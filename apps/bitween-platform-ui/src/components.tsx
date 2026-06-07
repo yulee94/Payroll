@@ -244,13 +244,10 @@ type SidebarProps = {
   readonly activeId: NavigationItem["id"];
   readonly locale: SupportedLocale;
   readonly onSelect: (id: NavigationItem["id"]) => void;
-  readonly onThemeChange: (id: SidebarThemeId) => void;
   readonly theme: SidebarTheme;
 };
 
-export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeChange, theme }: SidebarProps) {
-  const sidebarThemes = getSidebarThemes(locale);
-
+export function Sidebar({ activeId, compact, items, locale, onSelect, theme }: SidebarProps) {
   return (
     <View style={[styles.sidebar, { backgroundColor: theme.sidebar }, compact && styles.sidebarCompact]}>
       <View style={[styles.brandBlock, compact && styles.brandBlockCompact]}>
@@ -260,34 +257,6 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
             <Label size="lg" weight="bold">Bitween</Label>
             <Label size="sm" muted>{t(locale, "shell.brandSubtitle")}</Label>
           </View>
-        </View>
-      </View>
-      <View style={[styles.themePanel, compact && styles.themePanelCompact]}>
-        <Label size="sm" weight="bold">{t(locale, "shell.themePanel.title")}</Label>
-        <View style={styles.themeChips}>
-          {sidebarThemes.map((item) => {
-            const selected = item.id === theme.id;
-            return (
-              <Pressable
-                accessibilityLabel={`${item.label}. ${item.description}`}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                key={item.id}
-                onPress={() => onThemeChange(item.id)}
-                style={({ pressed }) => [
-                  styles.themeChip,
-                  selected && { backgroundColor: theme.activeBackground, borderColor: theme.activeText },
-                  pressed && styles.buttonPressed
-                ]}
-              >
-                <View style={[styles.themeSwatch, { backgroundColor: item.swatchStart, borderColor: item.swatchEnd }]}>
-                  <View style={[styles.themeSwatchInset, { backgroundColor: item.swatchEnd }]} />
-                </View>
-                <Text style={[styles.themeChipText, selected && { color: theme.activeText }]}>{item.label}</Text>
-                {selected ? <View style={[styles.themeSelectedMark, { backgroundColor: theme.activeText }]} /> : null}
-              </Pressable>
-            );
-          })}
         </View>
       </View>
       <ScrollView
@@ -315,6 +284,49 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
           );
         })}
       </ScrollView>
+    </View>
+  );
+}
+
+function ThemePanel({
+  locale,
+  onThemeChange,
+  theme
+}: {
+  readonly locale: SupportedLocale;
+  readonly onThemeChange: (id: SidebarThemeId) => void;
+  readonly theme: SidebarTheme;
+}) {
+  const sidebarThemes = getSidebarThemes(locale);
+
+  return (
+    <View style={styles.themePanel}>
+      <Label size="sm" weight="bold">{t(locale, "shell.themePanel.title")}</Label>
+      <View style={styles.themeChips}>
+        {sidebarThemes.map((item) => {
+          const selected = item.id === theme.id;
+          return (
+            <Pressable
+              accessibilityLabel={`${item.label}. ${item.description}`}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              key={item.id}
+              onPress={() => onThemeChange(item.id)}
+              style={({ pressed }) => [
+                styles.themeChip,
+                selected && { backgroundColor: theme.activeBackground, borderColor: theme.activeText },
+                pressed && styles.buttonPressed
+              ]}
+            >
+              <View style={[styles.themeSwatch, { backgroundColor: item.swatchStart, borderColor: item.swatchEnd }]}>
+                <View style={[styles.themeSwatchInset, { backgroundColor: item.swatchEnd }]} />
+              </View>
+              <Text style={[styles.themeChipText, selected && { color: theme.activeText }]}>{item.label}</Text>
+              {selected ? <View style={[styles.themeSelectedMark, { backgroundColor: theme.activeText }]} /> : null}
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -356,7 +368,6 @@ export function AppShell({
         items={items}
         locale={locale}
         onSelect={onSelect}
-        onThemeChange={onThemeChange}
         theme={sidebarTheme}
       />
       <View style={styles.main}>
@@ -368,6 +379,7 @@ export function AppShell({
             {sessionLabel ? <Badge tone="neutral">{sessionLabel}</Badge> : null}
             {employeeNumberLabel ? <Badge tone="neutral">{employeeNumberLabel}</Badge> : null}
             {onLogout ? <ActionButton onPress={onLogout} variant="ghost">{logoutLabel}</ActionButton> : null}
+            <ThemePanel locale={locale} onThemeChange={onThemeChange} theme={sidebarTheme} />
           </View>
         </View>
         <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]}>{children}</ScrollView>
@@ -559,13 +571,17 @@ const styles = StyleSheet.create({
     color: colors.muted
   },
   navItem: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
     borderLeftColor: "transparent",
     borderLeftWidth: 4,
+    borderWidth: 1,
     borderRadius: radius.md,
     gap: 2,
     marginBottom: spacing.sm,
+    minHeight: 46,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md
+    paddingVertical: spacing.sm
   },
   navItemCompact: {
     marginBottom: 0,
@@ -648,9 +664,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     gap: spacing.sm,
-    minHeight: 34,
+    minHeight: 32,
     paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm
+    paddingVertical: spacing.xs
   },
   themeChips: {
     flexDirection: "row",
@@ -676,11 +692,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     gap: spacing.sm,
-    marginBottom: spacing.lg,
+    minWidth: 260,
     padding: spacing.sm
-  },
-  themePanelCompact: {
-    marginBottom: spacing.md
   },
   themeSwatch: {
     borderRadius: 999,

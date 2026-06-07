@@ -215,7 +215,7 @@ button {
   --nav-active-text: var(--accent);
   --nav-hover-bg: rgba(255, 255, 255, 0.54);
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: 236px minmax(0, 1fr);
   min-height: 100vh;
 }
 
@@ -251,9 +251,9 @@ button {
   background: var(--sidebar);
   border-right: 1px solid var(--border);
   display: grid;
-  grid-template-rows: auto auto 1fr;
-  gap: 16px;
-  padding: 18px;
+  grid-template-rows: auto 1fr;
+  gap: 14px;
+  padding: 16px;
 }
 
 .brand-block {
@@ -292,6 +292,10 @@ button {
   padding: 10px;
 }
 
+.top-theme-panel {
+  min-width: 260px;
+}
+
 .sidebar-options-title {
   color: var(--muted);
   font-size: 12px;
@@ -303,6 +307,10 @@ button {
   gap: 6px;
 }
 
+.top-theme-panel .sidebar-theme-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .sidebar-theme-chip {
   align-items: center;
   background: transparent;
@@ -312,8 +320,8 @@ button {
   display: grid;
   gap: 8px;
   grid-template-columns: 18px minmax(0, 1fr) 7px;
-  min-height: 34px;
-  padding: 7px;
+  min-height: 32px;
+  padding: 6px;
   text-align: left;
 }
 
@@ -379,14 +387,15 @@ button {
 }
 
 .nav-button {
-  background: transparent;
-  border: 0;
+  background: var(--input);
+  border: 1px solid var(--border);
   border-left: 4px solid transparent;
   border-radius: 6px;
   color: var(--text);
   display: grid;
   gap: 3px;
-  padding: 12px;
+  min-height: 46px;
+  padding: 10px;
   text-align: left;
 }
 

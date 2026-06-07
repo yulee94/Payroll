@@ -86,6 +86,12 @@ const cossStatutoryBasisDefs = [
   ["employment-insurance", "neutral"]
 ].map(([id, tone]) => ({ id, tone }));
 
+const cossExecutiveCompareDefs = [
+  ["billing", "attention"],
+  ["payroll", "attention"],
+  ["gap", "neutral"]
+].map(([id, tone]) => ({ id, tone }));
+
 const rowGroups = {
   payrollSettings: [
     ["payroll-setting-1", "neutral", "settings"],
@@ -483,23 +489,6 @@ function renderShell() {
           <img class="company-logo" src="${companyLogoUri}" alt="${t("shell.companyLogo")}" />
           <div><strong>Bitween</strong><span>${t("shell.brandSubtitle")}</span></div>
         </div>
-        <div class="sidebar-options" aria-label="${t("shell.themePanel.aria")}">
-          <span class="sidebar-options-title">${t("shell.themePanel.title")}</span>
-          <div class="sidebar-theme-grid">
-            ${sidebarThemes().map((theme) => `
-              <button
-                class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}"
-                data-sidebar-theme="${theme.id}"
-                aria-label="${escapeText(`${theme.label}. ${theme.description}`)}"
-                aria-pressed="${state.sidebarTheme === theme.id ? "true" : "false"}"
-                title="${escapeText(theme.description)}"
-              >
-                <span class="sidebar-swatch sidebar-swatch-${theme.id}"></span>
-                <strong>${theme.label}</strong>
-              </button>
-            `).join("")}
-          </div>
-        </div>
         <nav class="nav" aria-label="${t("shell.navigation.aria")}">
             ${items.map((item) => `
             <button class="nav-button ${item.id === active.id ? "active" : ""}" data-target="${item.id}" aria-current="${item.id === active.id ? "page" : "false"}" style="${item.id === active.id ? `border-left-color:${item.accent}` : ""}">
@@ -516,6 +505,7 @@ function renderShell() {
           <div class="top-actions">
             ${badge(sessionLabel, "neutral")}
             ${badge(t("shell.employeeNumber", { number: employeeNumber }), "neutral")}
+            ${themePanel()}
             <button class="btn ghost compact-btn" data-logout="true">${t("shell.logout")}</button>
           </div>
         </header>
@@ -533,6 +523,26 @@ function renderShell() {
   `;
 }
 
+function themePanel() {
+  return `<div class="sidebar-options top-theme-panel" aria-label="${t("shell.themePanel.aria")}">
+    <span class="sidebar-options-title">${t("shell.themePanel.title")}</span>
+    <div class="sidebar-theme-grid">
+      ${sidebarThemes().map((theme) => `
+        <button
+          class="sidebar-theme-chip ${state.sidebarTheme === theme.id ? "active" : ""}"
+          data-sidebar-theme="${theme.id}"
+          aria-label="${escapeText(`${theme.label}. ${theme.description}`)}"
+          aria-pressed="${state.sidebarTheme === theme.id ? "true" : "false"}"
+          title="${escapeText(theme.description)}"
+        >
+          <span class="sidebar-swatch sidebar-swatch-${theme.id}"></span>
+          <strong>${theme.label}</strong>
+        </button>
+      `).join("")}
+    </div>
+  </div>`;
+}
+
 function renderScreen(id) {
   if (id === "home") return renderHome();
   if (id === "payroll") return renderPayroll();
@@ -540,15 +550,7 @@ function renderScreen(id) {
 }
 
 function renderHome() {
-  const queueItems = workQueue();
-  const selectedQueue = queueItems.find((row) => row.id === state.selectedQueueKey) || queueItems[0];
-  const items = navigationItems();
-
   return html`
-    <section class="card">
-      ${sectionHead("", t("screens.launcher.platformStatus.title"), t("screens.launcher.platformStatus.description"), button(t("screens.launcher.platformStatus.action"), "payroll", "secondary"))}
-      ${metrics(platformMetrics())}
-    </section>
     <section class="planner-grid">
       <div class="card planner-card">
         ${sectionHead("", t("screens.calendar.title"), t("screens.calendar.description"))}
@@ -563,28 +565,6 @@ function renderHome() {
           <div class="planner-item todo-item ${item.done ? "done" : ""}">${badge(item.timeLabel, item.tone)}<div><strong>${item.title}</strong><span class="helper">${item.owner}</span></div></div>
         `).join("")}</div>
       </div>
-    </section>
-    <section class="card">
-      ${sectionHead("", t("screens.launcher.workQueue.title"), t("screens.launcher.workQueue.description"))}
-      <div class="queue-grid">${queueItems.map((item) => `
-        <button class="queue-card select-card ${state.selectedQueueKey === item.id ? "selected" : ""}" data-queue-key="${item.id}">
-          <div class="queue-head">${badge(item.status, item.tone)}<span class="helper">${item.due}</span></div>
-          <strong>${item.title}</strong>
-          <span class="helper">${t("screens.launcher.workQueue.metaOwner", { meta: item.meta, owner: item.owner })}</span>
-        </button>
-      `).join("")}</div>
-      ${selectedQueue ? queueDetail(selectedQueue) : ""}
-    </section>
-    <section class="card">
-      ${sectionHead("", t("screens.launcher.shortcuts.title"), t("screens.launcher.shortcuts.description"))}
-      <div class="launcher-grid">${items.filter((item) => item.id !== "home").map((item) => `
-        <article class="launcher-card" style="border-top-color:${item.accent}">
-          <span class="eyebrow">${item.eyebrow}</span>
-          <strong>${item.label}</strong>
-          <span class="helper">${item.description}</span>
-          ${button(t("screens.actions.open"), item.id, "ghost")}
-        </article>
-      `).join("")}</div>
     </section>
   `;
 }
@@ -619,6 +599,7 @@ function renderPayroll() {
       ${selectedReadiness ? payrollReadinessDetail(selectedReadiness) : ""}
     </section>
     ${cossPreviewFilePanel()}
+    ${payrollExecutiveComparePanel()}
     ${payrollIntegrationPanel()}
     <section class="card">
       ${sectionHead(t("screens.payroll.flow.eyebrow"), t("screens.payroll.flow.title"), t("screens.payroll.flow.description"), button(t("screens.payroll.flow.action"), "settings", "secondary"))}
@@ -631,7 +612,7 @@ function renderPayroll() {
         </button>
       `).join("")}</div>
       ${selectedStep ? payrollStepDetail(selectedStep) : ""}
-      <div class="action-row">${button(t("screens.payroll.actions.keepPayroll"), "payroll", "primary")}${button(t("screens.payroll.actions.monthlyArchive"), "archive")}${button(t("screens.payroll.actions.prepareAiReview"), "ai", "ghost")}</div>
+      <div class="action-row">${button(t("screens.payroll.actions.keepPayroll"), "payroll", "primary")}${button(t("screens.payroll.actions.openHrRoster"), "hr")}${button(t("screens.payroll.actions.siteRules"), "settings")}${button(t("screens.payroll.actions.monthlyArchive"), "archive")}${button(t("screens.payroll.actions.prepareAiReview"), "ai", "ghost")}</div>
     </section>
     <section class="card">
       ${sectionHead(t("screens.launcher.settingsSummary.eyebrow"), t("screens.launcher.settingsSummary.title"), t("screens.launcher.settingsSummary.description"), button(t("screens.launcher.settingsSummary.action"), "settings", "secondary"))}
@@ -642,6 +623,19 @@ function renderPayroll() {
       ${table(localizedRows("preview"))}
     </section>
   `;
+}
+
+function payrollExecutiveComparePanel() {
+  return `<section class="card">
+    ${sectionHead(t("screens.payroll.executiveCompare.eyebrow"), t("screens.payroll.executiveCompare.title"), t("screens.payroll.executiveCompare.description"))}
+    <div class="detail-grid">${cossExecutiveCompareDefs.map((item) => `
+      <article class="detail-item">
+        ${badge(t(`screens.payroll.executiveCompare.${item.id}.badge`), item.tone)}
+        <strong>${t(`screens.payroll.executiveCompare.${item.id}.title`)}</strong>
+        <span class="helper">${t(`screens.payroll.executiveCompare.${item.id}.detail`)}</span>
+      </article>
+    `).join("")}</div>
+  </section>`;
 }
 
 function cossPreviewFilePanel() {
