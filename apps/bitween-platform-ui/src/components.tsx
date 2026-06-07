@@ -579,6 +579,7 @@ const styles = StyleSheet.create({
     color: colors.muted
   },
   navItem: {
+    alignItems: "center",
     backgroundColor: colors.input,
     borderColor: colors.border,
     borderLeftColor: "transparent",
@@ -586,8 +587,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: radius.md,
     gap: 2,
+    height: 46,
     marginBottom: spacing.sm,
-    minHeight: 46,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm
   },
@@ -598,7 +599,8 @@ const styles = StyleSheet.create({
   navLabel: {
     color: colors.text,
     fontSize: 15,
-    fontWeight: "700"
+    fontWeight: "700",
+    lineHeight: 18
   },
   navStrip: {
     gap: spacing.sm

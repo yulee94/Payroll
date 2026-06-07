@@ -7,12 +7,14 @@ const appPath = join(__dirname, "..", "App.tsx");
 const packagePath = join(__dirname, "..", "package.json");
 const previewAppPath = join(__dirname, "..", "preview", "app.js");
 const previewServerPath = join(__dirname, "..", "preview", "server.js");
+const previewStylesPath = join(__dirname, "..", "preview", "styles.css");
 const screensPath = join(__dirname, "..", "src", "screens.tsx");
 const viewModelPath = join(__dirname, "..", "src", "viewModel.ts");
 const appSource = readFileSync(appPath, "utf8");
 const packageSource = readFileSync(packagePath, "utf8");
 const previewAppSource = readFileSync(previewAppPath, "utf8");
 const previewServerSource = readFileSync(previewServerPath, "utf8");
+const previewStylesSource = readFileSync(previewStylesPath, "utf8");
 const screensSource = readFileSync(screensPath, "utf8");
 const viewModelSource = readFileSync(viewModelPath, "utf8");
 const packageJson = JSON.parse(packageSource);
@@ -128,6 +130,10 @@ if (!previewAppSource.includes("${themePanel()}")) {
 
 if (!previewAppSource.includes('class="top-action-row"') || !previewAppSource.includes("top-theme-panel")) {
   errors.push("preview/app.js top actions must keep logout controls above the theme panel.");
+}
+
+if (!/\.nav-button\s*\{[\s\S]*?height:\s*46px;[\s\S]*?width:\s*100%;[\s\S]*?\}/.test(previewStylesSource)) {
+  errors.push("preview/styles.css sidebar nav buttons must keep a fixed size across inactive and active states.");
 }
 
 if (/function renderHome\(\)[\s\S]*?screens\.launcher\.shortcuts\.title[\s\S]*?function queueDetail/.test(previewAppSource)) {
