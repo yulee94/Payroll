@@ -503,10 +503,12 @@ function renderShell() {
             <h1>${active.label}</h1>
           </div>
           <div class="top-actions">
-            ${badge(sessionLabel, "neutral")}
-            ${badge(t("shell.employeeNumber", { number: employeeNumber }), "neutral")}
+            <div class="top-action-row">
+              ${badge(sessionLabel, "neutral")}
+              ${badge(t("shell.employeeNumber", { number: employeeNumber }), "neutral")}
+              <button class="btn ghost compact-btn" data-logout="true">${t("shell.logout")}</button>
+            </div>
             ${themePanel()}
-            <button class="btn ghost compact-btn" data-logout="true">${t("shell.logout")}</button>
           </div>
         </header>
         <div class="demo-mode-banner" role="status" aria-label="${escapeText(demoModeLabel)}">

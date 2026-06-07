@@ -126,6 +126,10 @@ if (!previewAppSource.includes("${themePanel()}")) {
   errors.push("preview/app.js must move theme controls into the top action area.");
 }
 
+if (!previewAppSource.includes('class="top-action-row"') || !previewAppSource.includes("top-theme-panel")) {
+  errors.push("preview/app.js top actions must keep logout controls above the theme panel.");
+}
+
 if (/function renderHome\(\)[\s\S]*?screens\.launcher\.shortcuts\.title[\s\S]*?function queueDetail/.test(previewAppSource)) {
   errors.push("preview/app.js platform home must not render platform shortcuts.");
 }

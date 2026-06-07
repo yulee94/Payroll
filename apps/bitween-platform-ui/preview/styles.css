@@ -435,6 +435,14 @@ button {
 }
 
 .top-actions {
+  align-items: end;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.top-action-row {
   align-items: center;
   display: flex;
   flex-wrap: wrap;

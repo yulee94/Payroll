@@ -376,9 +376,11 @@ export function AppShell({
             <Label size="xl" weight="bold">{active.label}</Label>
           </View>
           <View style={styles.headerActions}>
-            {sessionLabel ? <Badge tone="neutral">{sessionLabel}</Badge> : null}
-            {employeeNumberLabel ? <Badge tone="neutral">{employeeNumberLabel}</Badge> : null}
-            {onLogout ? <ActionButton onPress={onLogout} variant="ghost">{logoutLabel}</ActionButton> : null}
+            <View style={styles.headerActionRow}>
+              {sessionLabel ? <Badge tone="neutral">{sessionLabel}</Badge> : null}
+              {employeeNumberLabel ? <Badge tone="neutral">{employeeNumberLabel}</Badge> : null}
+              {onLogout ? <ActionButton onPress={onLogout} variant="ghost">{logoutLabel}</ActionButton> : null}
+            </View>
             <ThemePanel locale={locale} onThemeChange={onThemeChange} theme={sidebarTheme} />
           </View>
         </View>
@@ -522,6 +524,12 @@ const styles = StyleSheet.create({
     padding: spacing.xl
   },
   headerActions: {
+    alignItems: "flex-end",
+    flexDirection: "column",
+    gap: spacing.sm,
+    justifyContent: "flex-end"
+  },
+  headerActionRow: {
     alignItems: "center",
     flexDirection: "row",
     flexWrap: "wrap",
@@ -646,8 +654,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.sidebar,
     borderRightColor: colors.border,
     borderRightWidth: 1,
-    padding: spacing.lg,
-    width: 280
+    padding: spacing.md,
+    width: 236
   },
   sidebarCompact: {
     borderBottomColor: colors.border,
