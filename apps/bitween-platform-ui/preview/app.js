@@ -98,8 +98,9 @@ const mailboxDefs = [
   ["edi-api", "neutral"]
 ].map(([id, tone]) => ({ id, tone }));
 
-const calendarWeekdayIds = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+const calendarWeekdayIds = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 const calendarMonthDays = Array.from({ length: 30 }, (_, index) => index + 1);
+const calendarMonthCells = [null, ...calendarMonthDays];
 const calendarToday = 8;
 
 const cossActualMonthlyRows = [
@@ -586,7 +587,7 @@ function renderHome() {
         <div class="calendar-day"><span>2026.06</span><strong>${String(calendarToday).padStart(2, "0")}</strong><em>${t("screens.calendar.weekday")}</em></div>
         <div class="month-calendar" aria-label="${t("screens.calendar.monthGrid.aria")}">
           ${calendarWeekdayIds.map((id) => `<span class="month-weekday">${t(`screens.calendar.weekdays.${id}`)}</span>`).join("")}
-          ${calendarMonthDays.map((day) => `<span class="month-day ${day === calendarToday ? "today" : ""}">${day}</span>`).join("")}
+          ${calendarMonthCells.map((day) => day === null ? `<span class="month-day empty" aria-hidden="true"></span>` : `<span class="month-day ${day === calendarToday ? "today" : ""}">${day}</span>`).join("")}
         </div>
         <div class="planner-list">${calendarEvents().map((event) => `
           <div class="planner-item">${badge(event.time, event.tone)}<div><strong>${event.title}</strong><span class="helper">${event.date}</span></div></div>

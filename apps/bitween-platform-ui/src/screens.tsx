@@ -104,8 +104,9 @@ const mailboxDefinitions = [
   { id: "edi-api", tone: "neutral" }
 ] as const satisfies readonly ToneDefinition[];
 
-const calendarWeekdayIds = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+const calendarWeekdayIds = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 const calendarMonthDays = Array.from({ length: 30 }, (_, index) => index + 1);
+const calendarMonthCells = [undefined, ...calendarMonthDays] as const;
 const calendarToday = 8;
 
 const cossActualMonthlyRows = [
@@ -585,9 +586,9 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
           {calendarWeekdayIds.map((id) => (
             <Text key={id} style={styles.monthWeekday}>{tScreen(locale, `calendar.weekdays.${id}`)}</Text>
           ))}
-          {calendarMonthDays.map((day) => (
-            <View key={day} style={[styles.monthDay, day === calendarToday && styles.monthDayToday]}>
-              <Text style={[styles.monthDayText, day === calendarToday && styles.monthDayTextToday]}>{day}</Text>
+          {calendarMonthCells.map((day, index) => (
+            <View key={day ?? `empty-${index}`} style={[styles.monthDay, day === undefined && styles.monthDayEmpty, day === calendarToday && styles.monthDayToday]}>
+              {day === undefined ? null : <Text style={[styles.monthDayText, day === calendarToday && styles.monthDayTextToday]}>{day}</Text>}
             </View>
           ))}
         </View>
@@ -1377,6 +1378,10 @@ const styles = StyleSheet.create({
   },
   monthDayTextToday: {
     color: colors.card
+  },
+  monthDayEmpty: {
+    backgroundColor: "transparent",
+    borderColor: "transparent"
   },
   monthDayToday: {
     backgroundColor: colors.accent,

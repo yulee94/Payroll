@@ -668,6 +668,11 @@ button {
   border: 1px solid var(--border);
 }
 
+.month-day.empty {
+  background: transparent;
+  border-color: transparent;
+}
+
 .month-day.today {
   background: var(--accent);
   border-color: var(--accent);
