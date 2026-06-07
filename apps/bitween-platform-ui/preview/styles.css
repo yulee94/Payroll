@@ -641,6 +641,39 @@ button {
   font-weight: 750;
 }
 
+.month-calendar {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.month-weekday,
+.month-day {
+  align-items: center;
+  border-radius: 6px;
+  display: flex;
+  font-size: 12px;
+  font-weight: 800;
+  height: 30px;
+  justify-content: center;
+  min-width: 0;
+}
+
+.month-weekday {
+  color: var(--muted);
+}
+
+.month-day {
+  background: var(--input);
+  border: 1px solid var(--border);
+}
+
+.month-day.today {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--card);
+}
+
 .planner-list {
   display: grid;
   gap: 8px;

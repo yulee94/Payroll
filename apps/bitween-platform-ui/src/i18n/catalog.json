@@ -4653,10 +4653,10 @@
     {
       "key": "screens.calendar.weekday",
       "values": {
-        "ko-KR": "목요일",
-        "en-US": "Thursday",
-        "zh-Hans-CN": "星期四",
-        "ja-JP": "木曜日"
+        "ko-KR": "월요일",
+        "en-US": "Monday",
+        "zh-Hans-CN": "Monday",
+        "ja-JP": "Monday"
       }
     },
     {
@@ -7375,6 +7375,78 @@
         "en-US": "Invoice totals will be finalized after formula review; preview currently focuses on workers, workdays, overtime, and insurance mapping.",
         "zh-Hans-CN": "Invoice totals will be finalized after formula review; preview currently focuses on workers, workdays, overtime, and insurance mapping.",
         "ja-JP": "Invoice totals will be finalized after formula review; preview currently focuses on workers, workdays, overtime, and insurance mapping."
+      }
+    },
+    {
+      "key": "screens.calendar.monthGrid.aria",
+      "values": {
+        "ko-KR": "2026년 6월 달력",
+        "en-US": "June 2026 calendar",
+        "zh-Hans-CN": "June 2026 calendar",
+        "ja-JP": "June 2026 calendar"
+      }
+    },
+    {
+      "key": "screens.calendar.weekdays.mon",
+      "values": {
+        "ko-KR": "월",
+        "en-US": "Mon",
+        "zh-Hans-CN": "Mon",
+        "ja-JP": "Mon"
+      }
+    },
+    {
+      "key": "screens.calendar.weekdays.tue",
+      "values": {
+        "ko-KR": "화",
+        "en-US": "Tue",
+        "zh-Hans-CN": "Tue",
+        "ja-JP": "Tue"
+      }
+    },
+    {
+      "key": "screens.calendar.weekdays.wed",
+      "values": {
+        "ko-KR": "수",
+        "en-US": "Wed",
+        "zh-Hans-CN": "Wed",
+        "ja-JP": "Wed"
+      }
+    },
+    {
+      "key": "screens.calendar.weekdays.thu",
+      "values": {
+        "ko-KR": "목",
+        "en-US": "Thu",
+        "zh-Hans-CN": "Thu",
+        "ja-JP": "Thu"
+      }
+    },
+    {
+      "key": "screens.calendar.weekdays.fri",
+      "values": {
+        "ko-KR": "금",
+        "en-US": "Fri",
+        "zh-Hans-CN": "Fri",
+        "ja-JP": "Fri"
+      }
+    },
+    {
+      "key": "screens.calendar.weekdays.sat",
+      "values": {
+        "ko-KR": "토",
+        "en-US": "Sat",
+        "zh-Hans-CN": "Sat",
+        "ja-JP": "Sat"
+      }
+    },
+    {
+      "key": "screens.calendar.weekdays.sun",
+      "values": {
+        "ko-KR": "일",
+        "en-US": "Sun",
+        "zh-Hans-CN": "Sun",
+        "ja-JP": "Sun"
       }
     }
   ],

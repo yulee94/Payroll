@@ -98,6 +98,10 @@ const mailboxDefs = [
   ["edi-api", "neutral"]
 ].map(([id, tone]) => ({ id, tone }));
 
+const calendarWeekdayIds = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+const calendarMonthDays = Array.from({ length: 30 }, (_, index) => index + 1);
+const calendarToday = 8;
+
 const cossActualMonthlyRows = [
   { month: 1, payrollWorkers: 25, payrollWorkdays: 375, payrollOt: 536, billingWorkers: 26, billingWorkdays: 379, billingOtHours: 679 },
   { month: 2, payrollWorkers: 27, payrollWorkdays: 770, payrollOt: 1017, billingWorkers: 27, billingWorkdays: 837, billingOtHours: 97 },
@@ -579,7 +583,11 @@ function renderHome() {
     <section class="planner-grid">
       <div class="card planner-card">
         ${sectionHead("", t("screens.calendar.title"), t("screens.calendar.description"))}
-        <div class="calendar-day"><span>2026.06</span><strong>04</strong><em>${t("screens.calendar.weekday")}</em></div>
+        <div class="calendar-day"><span>2026.06</span><strong>${String(calendarToday).padStart(2, "0")}</strong><em>${t("screens.calendar.weekday")}</em></div>
+        <div class="month-calendar" aria-label="${t("screens.calendar.monthGrid.aria")}">
+          ${calendarWeekdayIds.map((id) => `<span class="month-weekday">${t(`screens.calendar.weekdays.${id}`)}</span>`).join("")}
+          ${calendarMonthDays.map((day) => `<span class="month-day ${day === calendarToday ? "today" : ""}">${day}</span>`).join("")}
+        </div>
         <div class="planner-list">${calendarEvents().map((event) => `
           <div class="planner-item">${badge(event.time, event.tone)}<div><strong>${event.title}</strong><span class="helper">${event.date}</span></div></div>
         `).join("")}</div>

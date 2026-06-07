@@ -104,6 +104,10 @@ const mailboxDefinitions = [
   { id: "edi-api", tone: "neutral" }
 ] as const satisfies readonly ToneDefinition[];
 
+const calendarWeekdayIds = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+const calendarMonthDays = Array.from({ length: 30 }, (_, index) => index + 1);
+const calendarToday = 8;
+
 const cossActualMonthlyRows = [
   { month: 1, payrollWorkers: 25, payrollWorkdays: 375, payrollOt: 536, billingWorkers: 26, billingWorkdays: 379, billingOtHours: 679 },
   { month: 2, payrollWorkers: 27, payrollWorkdays: 770, payrollOt: 1017, billingWorkers: 27, billingWorkdays: 837, billingOtHours: 97 },
@@ -574,8 +578,18 @@ function CalendarTodoPanel({ events, locale, todos }: { readonly events: readonl
         <SectionHeader title={tScreen(locale, "calendar.title")} description={tScreen(locale, "calendar.description")} />
         <View style={styles.calendarDay}>
           <Text style={styles.calendarMonth}>2026.06</Text>
-          <Text style={styles.calendarDate}>04</Text>
+          <Text style={styles.calendarDate}>{String(calendarToday).padStart(2, "0")}</Text>
           <Label size="sm" muted>{tScreen(locale, "calendar.weekday")}</Label>
+        </View>
+        <View accessibilityLabel={tScreen(locale, "calendar.monthGrid.aria")} style={styles.monthCalendar}>
+          {calendarWeekdayIds.map((id) => (
+            <Text key={id} style={styles.monthWeekday}>{tScreen(locale, `calendar.weekdays.${id}`)}</Text>
+          ))}
+          {calendarMonthDays.map((day) => (
+            <View key={day} style={[styles.monthDay, day === calendarToday && styles.monthDayToday]}>
+              <Text style={[styles.monthDayText, day === calendarToday && styles.monthDayTextToday]}>{day}</Text>
+            </View>
+          ))}
         </View>
         <View style={styles.plannerList}>
           {events.length > 0 ? (
@@ -1338,6 +1352,44 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800",
     lineHeight: 18
+  },
+  monthCalendar: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6
+  },
+  monthDay: {
+    alignItems: "center",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexBasis: 34,
+    flexGrow: 1,
+    height: 30,
+    justifyContent: "center"
+  },
+  monthDayText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "800",
+    lineHeight: 16
+  },
+  monthDayTextToday: {
+    color: colors.card
+  },
+  monthDayToday: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent
+  },
+  monthWeekday: {
+    color: colors.muted,
+    flexBasis: 34,
+    flexGrow: 1,
+    fontSize: 12,
+    fontWeight: "800",
+    lineHeight: 16,
+    textAlign: "center"
   },
   actualRow: {
     backgroundColor: colors.input,

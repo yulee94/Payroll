@@ -128,6 +128,10 @@ if (!screensSource.includes("mailboxDefinitions") || !previewAppSource.includes(
   errors.push("Home preview must replace duplicate schedule content with a mailbox panel.");
 }
 
+if (!screensSource.includes("calendarMonthDays") || !previewAppSource.includes("calendarMonthDays")) {
+  errors.push("Home calendar must render a month grid, not only a single date card.");
+}
+
 if (!screensSource.includes('"payroll.actions.openHrRoster"') || !screensSource.includes('"payroll.actions.siteRules"')) {
   errors.push("screens.tsx payroll actions must include HR roster and workplace-rule entry points.");
 }
