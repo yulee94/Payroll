@@ -21,6 +21,7 @@ NAV_ITEM_ICONS: dict[str, str] = {
     "settings": "⚙",
     "hr": "人",
     "hr_roster": "人",
+    "hr_documents": "▤",
     "hr_leave": "◷",
     "hr_attendance": "◴",
     "hr_contracts": "□",

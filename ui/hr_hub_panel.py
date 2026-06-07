@@ -62,7 +62,7 @@ class HrHubPanel(tk.Frame):
             txt,
             text=(
                 "근로자 명부, 연차·휴가, 근태, 근로계약, 증명서, 노무·징계, 입·퇴사 절차·알림, "
-                "정관·인사규정·법정 의무 문서함, 건강검진 대상 조회·결과지 제출, "
+                "직원별 문서관리·만료 알림, 정관·인사규정·법정 의무 문서함, 건강검진 대상 조회·결과지 제출, "
                 "그룹 공유 채용공고·인재풀, Bitween 신호등(법인 간 채용 참고) "
                 "(4대보험 취득/상실·퇴직금 등 법정 체크리스트)"
             ),
@@ -128,6 +128,29 @@ class HrHubPanel(tk.Frame):
             on_saved=self._on_roster_saved,
         )
         self.roster_panel.pack(fill=tk.BOTH, expand=True)
+
+        from core.hr.employee_documents import service as doc_svc
+
+        doc_spec = ModuleHubSpec(
+            platform_id="hr_documents",
+            title="개인별 HR 문서관리",
+            accent="#0D9488",
+            reference="",
+            tab_ids=doc_svc.TAB_IDS,
+            tab_labels=doc_svc.TAB_LABELS,
+            kpi_fn=doc_svc.dashboard_kpis,
+            list_fn=doc_svc.list_records,
+            columns_fn=doc_svc.tab_columns,
+            form_fn=doc_svc.form_fields,
+            add_fn=doc_svc.add_record,
+            hide_header=True,
+            hide_tabs=False,
+        )
+        self._documents_host = tk.Frame(self._content, bg=COLORS["bg"])
+        self._documents_host.grid_rowconfigure(0, weight=1)
+        self._documents_host.grid_columnconfigure(0, weight=1)
+        self.documents_panel = ModuleHubPanel(self._documents_host, doc_spec)
+        self.documents_panel.grid(row=0, column=0, sticky="nsew")
 
         spec = ModuleHubSpec(
             platform_id="hr",
@@ -201,6 +224,7 @@ class HrHubPanel(tk.Frame):
                 btn.configure(bg=COLORS["card"], fg=COLORS["text"], font=(FONT, 10))
 
         self._roster_host.grid_remove()
+        self._documents_host.grid_remove()
         self._records_host.grid_remove()
         self._onboarding_host.grid_remove()
         self._recruitment_host.grid_remove()
@@ -211,6 +235,9 @@ class HrHubPanel(tk.Frame):
 
         if tab_id == "roster":
             self._roster_host.grid(row=0, column=0, sticky="nsew")
+        elif tab_id == "documents":
+            self._documents_host.grid(row=0, column=0, sticky="nsew")
+            self.documents_panel.refresh()
         elif tab_id == "onboarding":
             self._onboarding_host.grid(row=0, column=0, sticky="nsew")
             self.onboarding_panel.refresh()
@@ -242,6 +269,8 @@ class HrHubPanel(tk.Frame):
         hr_svc.ensure_seed()
         if self._active_tab == "roster":
             self.roster_panel.reload(force=False)
+        elif self._active_tab == "documents":
+            self.documents_panel.refresh()
         elif self._active_tab == "onboarding":
             self.onboarding_panel.refresh()
         elif self._active_tab == "recruitment":
@@ -259,6 +288,9 @@ class HrHubPanel(tk.Frame):
 
     def _on_add(self) -> None:
         if self._active_tab == "roster":
+            return
+        if self._active_tab == "documents":
+            self.documents_panel._on_add()
             return
         if self._active_tab == "onboarding":
             self.onboarding_panel.add_case_dialog()

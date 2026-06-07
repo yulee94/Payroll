@@ -12,7 +12,7 @@ from typing import Any, Callable
 
 from core.paths import app_data_dir
 
-_lock = threading.Lock()
+_lock = threading.RLock()
 # (module, tenant_id) -> (mtime_ns, cached dict snapshot)
 _db_cache: dict[tuple[str, str], tuple[int, dict[str, Any]]] = {}
 

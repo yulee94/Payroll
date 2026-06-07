@@ -13,6 +13,9 @@ from typing import Any, Literal
 EventType = Literal["clock_in", "clock_out"]
 BiometricKind = Literal["fingerprint", "face", "none"]
 VerificationStatus = Literal["pending", "verified", "rejected"]
+ConsentKind = Literal["location", "biometric", "payroll", "notifications", "privacy"]
+GeofenceTransition = Literal["enter", "exit", "heartbeat"]
+AlertStatus = Literal["open", "acknowledged", "resolved"]
 
 
 def _haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -67,7 +70,11 @@ class EmployeeDevice:
     id: str
     employee_name: str
     device_uid: str
+    user_id: str = ""
     platform: str = "android"
+    push_token: str = ""
+    app_version: str = ""
+    os_version: str = ""
     registered_at: str = ""
     last_seen_at: str = ""
     active: bool = True
@@ -81,7 +88,11 @@ class EmployeeDevice:
             id=str(raw.get("id") or ""),
             employee_name=str(raw.get("employee_name") or ""),
             device_uid=str(raw.get("device_uid") or ""),
+            user_id=str(raw.get("user_id") or ""),
             platform=str(raw.get("platform") or "android"),
+            push_token=str(raw.get("push_token") or ""),
+            app_version=str(raw.get("app_version") or ""),
+            os_version=str(raw.get("os_version") or ""),
             registered_at=str(raw.get("registered_at") or ""),
             last_seen_at=str(raw.get("last_seen_at") or ""),
             active=bool(raw.get("active", True)),
@@ -131,16 +142,21 @@ class AttendanceEvent:
     event_at: str
     latitude: float
     longitude: float
+    user_id: str = ""
     device_id: str = ""
+    accuracy_m: float = 0.0
     biometric_kind: BiometricKind = "none"
     biometric_ref: str = ""
     geofence_ok: bool = False
     biometric_ok: bool = False
+    approved_absence_window_id: str = ""
+    violation_alert_id: str = ""
     status: VerificationStatus = "pending"
     work_minutes: int = 0
     note: str = ""
     synced_hr: bool = False
     synced_payroll: bool = False
+    created_at: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -164,16 +180,150 @@ class AttendanceEvent:
             event_at=str(raw.get("event_at") or ""),
             latitude=float(raw.get("latitude") or 0),
             longitude=float(raw.get("longitude") or 0),
+            user_id=str(raw.get("user_id") or ""),
             device_id=str(raw.get("device_id") or ""),
+            accuracy_m=float(raw.get("accuracy_m") or 0),
             biometric_kind=bk,  # type: ignore[arg-type]
             biometric_ref=str(raw.get("biometric_ref") or ""),
             geofence_ok=bool(raw.get("geofence_ok")),
             biometric_ok=bool(raw.get("biometric_ok")),
+            approved_absence_window_id=str(raw.get("approved_absence_window_id") or ""),
+            violation_alert_id=str(raw.get("violation_alert_id") or ""),
             status=st,  # type: ignore[arg-type]
             work_minutes=int(raw.get("work_minutes") or 0),
             note=str(raw.get("note") or ""),
             synced_hr=bool(raw.get("synced_hr")),
             synced_payroll=bool(raw.get("synced_payroll")),
+            created_at=str(raw.get("created_at") or ""),
+        )
+
+
+@dataclass
+class MobileConsentRecord:
+    """Worker consent captured before mobile attendance/payroll use."""
+
+    id: str
+    user_id: str
+    employee_name: str
+    consent_kind: ConsentKind
+    granted: bool
+    granted_at: str
+    locale: str = "ko-KR"
+    policy_version: str = "2026-06-04"
+    device_id: str = ""
+    revoked_at: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, raw: dict[str, Any]) -> MobileConsentRecord:
+        kind = str(raw.get("consent_kind") or raw.get("kind") or "privacy")
+        if kind not in ("location", "biometric", "payroll", "notifications", "privacy"):
+            kind = "privacy"
+        return cls(
+            id=str(raw.get("id") or ""),
+            user_id=str(raw.get("user_id") or ""),
+            employee_name=str(raw.get("employee_name") or ""),
+            consent_kind=kind,  # type: ignore[arg-type]
+            granted=bool(raw.get("granted")),
+            granted_at=str(raw.get("granted_at") or ""),
+            locale=str(raw.get("locale") or "ko-KR"),
+            policy_version=str(raw.get("policy_version") or "2026-06-04"),
+            device_id=str(raw.get("device_id") or ""),
+            revoked_at=str(raw.get("revoked_at") or ""),
+        )
+
+
+@dataclass
+class AuthorizedAbsenceWindow:
+    """Approved workflow window that permits leaving the geofenced work area."""
+
+    id: str
+    employee_name: str
+    start_at: str
+    end_at: str
+    request_type: str
+    document_id: str = ""
+    site_name: str = ""
+    approved_by: str = ""
+    approved_at: str = ""
+    active: bool = True
+    note: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, raw: dict[str, Any]) -> AuthorizedAbsenceWindow:
+        return cls(
+            id=str(raw.get("id") or ""),
+            employee_name=str(raw.get("employee_name") or ""),
+            start_at=str(raw.get("start_at") or ""),
+            end_at=str(raw.get("end_at") or ""),
+            request_type=str(raw.get("request_type") or ""),
+            document_id=str(raw.get("document_id") or ""),
+            site_name=str(raw.get("site_name") or ""),
+            approved_by=str(raw.get("approved_by") or ""),
+            approved_at=str(raw.get("approved_at") or ""),
+            active=bool(raw.get("active", True)),
+            note=str(raw.get("note") or ""),
+        )
+
+
+@dataclass
+class GeofenceAlert:
+    """Unauthorized work-area exit warning/manager alert."""
+
+    id: str
+    employee_name: str
+    site_name: str
+    transition: GeofenceTransition
+    detected_at: str
+    latitude: float
+    longitude: float
+    status: AlertStatus = "open"
+    user_id: str = ""
+    device_id: str = ""
+    manager_user_id: str = ""
+    department_id: str = ""
+    worker_warning_sent: bool = False
+    manager_alert_sent: bool = False
+    acknowledged_by: str = ""
+    acknowledged_at: str = ""
+    resolved_at: str = ""
+    note: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, raw: dict[str, Any]) -> GeofenceAlert:
+        transition = str(raw.get("transition") or "exit")
+        if transition not in ("enter", "exit", "heartbeat"):
+            transition = "exit"
+        status = str(raw.get("status") or "open")
+        if status not in ("open", "acknowledged", "resolved"):
+            status = "open"
+        return cls(
+            id=str(raw.get("id") or ""),
+            employee_name=str(raw.get("employee_name") or ""),
+            site_name=str(raw.get("site_name") or ""),
+            transition=transition,  # type: ignore[arg-type]
+            detected_at=str(raw.get("detected_at") or ""),
+            latitude=float(raw.get("latitude") or 0),
+            longitude=float(raw.get("longitude") or 0),
+            status=status,  # type: ignore[arg-type]
+            user_id=str(raw.get("user_id") or ""),
+            device_id=str(raw.get("device_id") or ""),
+            manager_user_id=str(raw.get("manager_user_id") or ""),
+            department_id=str(raw.get("department_id") or ""),
+            worker_warning_sent=bool(raw.get("worker_warning_sent")),
+            manager_alert_sent=bool(raw.get("manager_alert_sent")),
+            acknowledged_by=str(raw.get("acknowledged_by") or ""),
+            acknowledged_at=str(raw.get("acknowledged_at") or ""),
+            resolved_at=str(raw.get("resolved_at") or ""),
+            note=str(raw.get("note") or ""),
         )
 
 

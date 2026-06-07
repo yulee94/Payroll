@@ -1244,7 +1244,7 @@ class PayrollDashboard(tk.Tk):
             ),
             "hr": (
                 "인사 · 노무",
-                "직원 명부, 연차·휴가, 근태, 근로계약, 증명서, 노무·징계, 입·퇴사 (Bitween HR MVP).",
+                "직원 명부, 개인별 문서관리·만료 알림, 연차·휴가, 근태, 근로계약, 증명서, 노무·징계, 입·퇴사 (Bitween HR MVP).",
             ),
             "recruitment": (
                 "채용 · 마당",

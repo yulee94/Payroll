@@ -11,7 +11,6 @@ from typing import Any
 
 from core.mobile.models import AttendanceEvent, BiometricEnrollmentRef, SiteGeofence
 from core.mobile import store
-from core.hr import service as hr_svc
 
 
 def verify_geofence(event: AttendanceEvent, geofence: SiteGeofence | None) -> bool:
@@ -26,6 +25,10 @@ def verify_biometric(
 ) -> bool:
     if event.biometric_kind == "none":
         return False
+    # Device-only biometric mode: mobile OS performs Face ID/Touch ID/fingerprint
+    # and Bitween stores only an attestation reference, never a biometric template.
+    if event.biometric_ok and str(event.biometric_ref or "").startswith("device://local-auth/"):
+        return True
     for ref in enrollments:
         if not ref.active:
             continue
@@ -82,6 +85,7 @@ def push_verified_to_hr(event: AttendanceEvent, *, tenant_id: str | None) -> dic
     """검증된 이벤트를 HR 근태 탭에 미러 (수동 근태와 병행)."""
     if event.status != "verified" or event.synced_hr:
         return None
+    from core.hr import service as hr_svc
 
     hr_type = "출근" if event.event_type == "clock_in" else "퇴근"
     day = event.event_at[:10]

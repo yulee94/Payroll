@@ -33,10 +33,20 @@ _EMPTY: dict[str, Any] = {
 # UI 탭 (명부는 EmployeeRosterPanel 별도)
 RECORD_TAB_IDS = ("leave", "attendance", "contracts", "certificates", "labor", "onboarding")
 
-ALL_TAB_IDS = ("roster", *RECORD_TAB_IDS, "recruitment", "severance", "signal", "compliance_docs", "health_checkup")
+ALL_TAB_IDS = (
+    "roster",
+    "documents",
+    *RECORD_TAB_IDS,
+    "recruitment",
+    "severance",
+    "signal",
+    "compliance_docs",
+    "health_checkup",
+)
 
 TAB_LABELS = {
     "roster": "직원 명부",
+    "documents": "문서관리",
     "leave": "연차 · 휴가",
     "attendance": "근태",
     "contracts": "근로계약",
