@@ -15,6 +15,33 @@ export type ReadinessTone = "ready" | "attention" | "blocked" | "neutral";
 
 export type SidebarThemeId = "steel" | "graphite" | "teal" | "navy";
 
+export type PreviewAccountId =
+  | "fieldWorker"
+  | "fieldManager"
+  | "operationsAdmin"
+  | "executive"
+  | "leadership"
+  | "superAdmin";
+
+export type PreviewAccount = {
+  readonly id: PreviewAccountId;
+  readonly label: string;
+  readonly description: string;
+  readonly companyCode: string;
+  readonly companyCodeLabel: string;
+  readonly defaultRoute: PlatformId;
+  readonly developerMode: boolean;
+  readonly displayName: string;
+  readonly employeeNumber: string;
+  readonly modeLabel: string;
+  readonly navigationIds: readonly PlatformId[];
+  readonly password: string;
+  readonly roleLabel: string;
+  readonly tenantName: string;
+  readonly tone: ReadinessTone;
+  readonly userId: string;
+};
+
 export type SidebarTheme = {
   readonly id: SidebarThemeId;
   readonly label: string;

@@ -332,10 +332,12 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
 
 type ShellProps = PropsWithChildren<{
   readonly active: NavigationItem;
+  readonly developerMode?: boolean;
   readonly employeeNumberLabel?: string;
   readonly items: readonly NavigationItem[];
   readonly locale: SupportedLocale;
   readonly logoutLabel: string;
+  readonly modeLabel?: string;
   readonly onLogout?: () => void;
   readonly onSelect: (id: NavigationItem["id"]) => void;
   readonly onThemeChange: (id: SidebarThemeId) => void;
@@ -346,10 +348,12 @@ type ShellProps = PropsWithChildren<{
 export function AppShell({
   active,
   children,
+  developerMode = false,
   employeeNumberLabel,
   items,
   locale,
   logoutLabel,
+  modeLabel,
   onLogout,
   onSelect,
   onThemeChange,
@@ -379,6 +383,7 @@ export function AppShell({
           </View>
           <View style={styles.headerActions}>
             {sessionLabel ? <Badge tone="neutral">{sessionLabel}</Badge> : null}
+            {modeLabel ? <Badge tone={developerMode ? "attention" : "neutral"}>{modeLabel}</Badge> : null}
             {employeeNumberLabel ? <Badge tone="neutral">{employeeNumberLabel}</Badge> : null}
             {onLogout ? <ActionButton onPress={onLogout} variant="ghost">{logoutLabel}</ActionButton> : null}
           </View>
@@ -673,6 +678,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.sidebar,
     borderRightColor: colors.border,
     borderRightWidth: 1,
+    flexBasis: 280,
+    flexGrow: 0,
+    flexShrink: 0,
+    maxWidth: 280,
+    minWidth: 280,
     padding: spacing.lg,
     width: 280
   },
@@ -680,6 +690,9 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
     borderBottomWidth: 1,
     borderRightWidth: 0,
+    flexBasis: "auto",
+    maxWidth: "100%",
+    minWidth: 0,
     padding: spacing.md,
     width: "100%"
   },

@@ -27,15 +27,30 @@ import {
 } from "./data";
 import { getLanguageOptions, t, type SupportedLocale } from "./i18n";
 import { colors, radius, spacing, toneColor } from "./theme";
-import type { CalendarEvent, ModuleRow, NavigationItem, PayrollStep, PlatformId, ReadinessCard, ReadinessTone, TodoItem, WorkQueueItem } from "./types";
+import type {
+  CalendarEvent,
+  ModuleRow,
+  NavigationItem,
+  PayrollStep,
+  PlatformId,
+  PreviewAccount,
+  PreviewAccountId,
+  ReadinessCard,
+  ReadinessTone,
+  TodoItem,
+  WorkQueueItem
+} from "./types";
 
 type ScreenProps = {
   readonly active: NavigationItem;
+  readonly items?: readonly NavigationItem[];
   readonly locale: SupportedLocale;
   readonly onSelect: (id: PlatformId) => void;
 };
 
 type LoginScreenProps = Pick<ScreenProps, "locale" | "onSelect"> & {
+  readonly accounts: readonly PreviewAccount[];
+  readonly onLogin: (id: PreviewAccountId) => void;
   readonly onLocaleChange: (locale: SupportedLocale) => void;
 };
 
@@ -46,18 +61,6 @@ type LocalizedScreenProps = ScreenProps & {
 type ModuleId = Exclude<PlatformId, "home" | "payroll">;
 type ToneDefinition = { readonly id: string; readonly tone: ReadinessTone };
 type TargetToneDefinition = ToneDefinition & { readonly target: PlatformId };
-
-const demoAccount = {
-  companyCode: "0000",
-  password: "admin",
-  userId: "admin"
-} as const;
-
-const demoCredentialCards = [
-  { id: "company", value: demoAccount.companyCode },
-  { id: "user", value: demoAccount.userId },
-  { id: "password", value: demoAccount.password }
-] as const;
 
 const heroStatusIds = ["roleMenu", "workflowStatus", "dataProtection"] as const;
 
@@ -157,7 +160,13 @@ function isModuleId(id: PlatformId): id is ModuleId {
   return id !== "home" && id !== "payroll";
 }
 
-export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenProps) {
+export function LoginScreen({ accounts, locale, onLocaleChange, onLogin }: LoginScreenProps) {
+  const fallbackAccount = accounts[0];
+  if (!fallbackAccount) {
+    throw new Error("No preview accounts configured");
+  }
+  const [selectedAccountId, setSelectedAccountId] = useState<PreviewAccountId>(fallbackAccount.id);
+  const selectedAccount = accounts.find((account) => account.id === selectedAccountId) ?? fallbackAccount;
   const [companyCode, setCompanyCode] = useState("");
   const [feedbackKey, setFeedbackKey] = useState<string | undefined>();
   const [password, setPassword] = useState("");
@@ -165,31 +174,53 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
   const [userId, setUserId] = useState("");
   const canSubmit = companyCode.trim().length > 0 && userId.trim().length > 0 && password.trim().length > 0;
   const languageOptions = useMemo(() => getLanguageOptions(locale), [locale]);
-  const demoParams = demoAccount;
+  const credentialCards = useMemo(
+    () => [
+      { id: "company", value: selectedAccount.companyCode },
+      { id: "user", value: selectedAccount.userId },
+      { id: "password", value: selectedAccount.password }
+    ] as const,
+    [selectedAccount.companyCode, selectedAccount.password, selectedAccount.userId],
+  );
+  const loginParams = {
+    companyCode: selectedAccount.companyCode,
+    password: selectedAccount.password,
+    userId: selectedAccount.userId
+  };
+
+  const fillAccount = (account: PreviewAccount) => {
+    setSelectedAccountId(account.id);
+    setCompanyCode(account.companyCode);
+    setUserId(account.userId);
+    setPassword(account.password);
+    setFeedbackKey(undefined);
+  };
 
   const handleLogin = () => {
     if (!canSubmit) {
       setFeedbackKey("login.feedback.missingDemo");
       return;
     }
-    if (
-      companyCode.trim() !== demoAccount.companyCode ||
-      userId.trim() !== demoAccount.userId ||
-      password.trim() !== demoAccount.password
-    ) {
+    const matchedAccount = accounts.find(
+      (account) =>
+        companyCode.trim() === account.companyCode &&
+        userId.trim() === account.userId &&
+        password.trim() === account.password,
+    );
+    if (!matchedAccount) {
       setFeedbackKey("login.feedback.invalidDemo");
       return;
     }
     setFeedbackKey(undefined);
-    onSelect("home");
+    onLogin(matchedAccount.id);
   };
 
   const handleDemoLogin = () => {
-    setCompanyCode(demoAccount.companyCode);
-    setUserId(demoAccount.userId);
-    setPassword(demoAccount.password);
+    setCompanyCode(selectedAccount.companyCode);
+    setUserId(selectedAccount.userId);
+    setPassword(selectedAccount.password);
     setFeedbackKey(undefined);
-    onSelect("home");
+    onLogin(selectedAccount.id);
   };
 
   return (
@@ -221,7 +252,7 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
             <Label size="sm" muted>{tScreen(locale, "login.demo.panel.helper")}</Label>
           </View>
           <View style={styles.loginCredentialGrid}>
-            {demoCredentialCards.map((item) => (
+            {credentialCards.map((item) => (
               <View key={item.id} style={styles.loginCredentialItem}>
                 <Label size="sm" muted>{tScreen(locale, `login.demo.credentials.${item.id}.label`)}</Label>
                 <Label weight="bold">{item.value}</Label>
@@ -230,6 +261,43 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
             ))}
           </View>
           <Label size="sm" muted>{tScreen(locale, "login.demo.panel.disclaimer")}</Label>
+        </View>
+        <View style={styles.rolePanel}>
+          <SectionHeader
+            eyebrow={tScreen(locale, "login.rolePanel.eyebrow")}
+            title={tScreen(locale, "login.rolePanel.title")}
+            description={tScreen(locale, "login.rolePanel.description")}
+          />
+          <View style={styles.roleGrid}>
+            {accounts.map((account) => {
+              const selected = account.id === selectedAccount.id;
+              return (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  key={account.id}
+                  onPress={() => fillAccount(account)}
+                  style={({ pressed }) => [
+                    styles.roleCard,
+                    { borderTopColor: toneColor(account.tone) },
+                    selected && styles.roleCardSelected,
+                    pressed && styles.buttonPressed
+                  ]}
+                >
+                  <View style={styles.roleCardHeader}>
+                    <Badge tone={account.developerMode ? "attention" : account.tone}>{account.modeLabel}</Badge>
+                    <Label size="sm" muted>{account.employeeNumber}</Label>
+                  </View>
+                  <Label weight="bold">{account.label}</Label>
+                  <Label size="sm" muted>{account.description}</Label>
+                  <View style={styles.roleCredentialLine}>
+                    <Label size="sm" weight="bold">{account.userId}</Label>
+                    <Label size="sm" muted>{account.companyCode}</Label>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
         <View style={styles.languageGrid}>
           {languageOptions.map((option) => {
@@ -250,12 +318,12 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">{tScreen(locale, "login.form.companyCode")}</Label>
           <TextInput
-            accessibilityHint={tScreen(locale, "login.form.companyCodeHint", demoParams)}
+            accessibilityHint={tScreen(locale, "login.form.companyCodeHint", loginParams)}
             accessibilityLabel={tScreen(locale, "login.form.companyCode")}
             autoCapitalize="characters"
             autoComplete="organization"
             onChangeText={setCompanyCode}
-            placeholder={demoAccount.companyCode}
+            placeholder={selectedAccount.companyCode}
             placeholderTextColor={colors.muted}
             returnKeyType="next"
             style={styles.input}
@@ -265,12 +333,12 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">{tScreen(locale, "login.form.userId")}</Label>
           <TextInput
-            accessibilityHint={tScreen(locale, "login.form.userIdHint", demoParams)}
+            accessibilityHint={tScreen(locale, "login.form.userIdHint", loginParams)}
             accessibilityLabel={tScreen(locale, "login.form.userId")}
             autoCapitalize="none"
             autoComplete="username"
             onChangeText={setUserId}
-            placeholder={demoAccount.userId}
+            placeholder={selectedAccount.userId}
             placeholderTextColor={colors.muted}
             returnKeyType="next"
             style={styles.input}
@@ -280,11 +348,11 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         <View style={styles.formGroup}>
           <Label size="sm" weight="bold">{tScreen(locale, "login.form.password")}</Label>
           <TextInput
-            accessibilityHint={tScreen(locale, "login.form.passwordHint", demoParams)}
+            accessibilityHint={tScreen(locale, "login.form.passwordHint", loginParams)}
             accessibilityLabel={tScreen(locale, "login.form.password")}
             autoComplete="password"
             onChangeText={setPassword}
-            placeholder={demoAccount.password}
+            placeholder={selectedAccount.password}
             placeholderTextColor={colors.muted}
             returnKeyType="done"
             secureTextEntry={!passwordVisible}
@@ -298,18 +366,18 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
         {feedbackKey ? (
           <View style={styles.inlineNotice}>
             <Badge tone="attention">{tScreen(locale, "login.feedback.badge")}</Badge>
-            <Label size="sm" muted>{tScreen(locale, feedbackKey, demoParams)}</Label>
+            <Label size="sm" muted>{tScreen(locale, feedbackKey, loginParams)}</Label>
           </View>
         ) : null}
         <View style={styles.loginActions}>
           <ActionButton
-            accessibilityLabel={tScreen(locale, canSubmit ? "login.actions.enterHomeAccessibility" : "login.actions.loginAccessibility", demoParams)}
+            accessibilityLabel={tScreen(locale, canSubmit ? "login.actions.enterHomeAccessibility" : "login.actions.loginAccessibility", loginParams)}
             onPress={handleLogin}
           >
             {tScreen(locale, canSubmit ? "login.actions.enterHome" : "login.actions.login")}
           </ActionButton>
           <ActionButton
-            accessibilityLabel={tScreen(locale, "login.actions.demoAccessibility", demoParams)}
+            accessibilityLabel={tScreen(locale, "login.actions.demoAccessibility", loginParams)}
             onPress={handleDemoLogin}
             variant="secondary"
           >
@@ -321,8 +389,8 @@ export function LoginScreen({ locale, onLocaleChange, onSelect }: LoginScreenPro
   );
 }
 
-export function LauncherScreen({ locale, onSelect }: ScreenProps) {
-  const navigationItems = useMemo(() => getNavigationItems(locale), [locale]);
+export function LauncherScreen({ items, locale, onSelect }: ScreenProps) {
+  const navigationItems = useMemo(() => items ?? getNavigationItems(locale), [items, locale]);
   const platformMetrics = useMemo(() => getPlatformMetrics(locale), [locale]);
   const workQueue = useMemo(() => getWorkQueue(locale), [locale]);
   const calendarEvents = useMemo(() => getCalendarEvents(locale), [locale]);
@@ -583,6 +651,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
   const dashboard = moduleDashboards[active.id];
   const defaultFilter = dashboard.filters[0] ?? tScreen(locale, "filters.all");
   const [activeFilter, setActiveFilter] = useState<string>(defaultFilter);
+  const [attendancePhoneVisible, setAttendancePhoneVisible] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedRowId, setSelectedRowId] = useState<string | undefined>(dashboard.rows[0]?.id);
   const languageOptions = useMemo(() => getLanguageOptions(locale), [locale]);
@@ -602,6 +671,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
 
   useEffect(() => {
     setActiveFilter(defaultFilter);
+    setAttendancePhoneVisible(false);
     setSearch("");
     setSelectedRowId(dashboard.rows[0]?.id);
   }, [active.id, dashboard.rows, defaultFilter]);
@@ -618,6 +688,13 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
   const selectRow = (row: ModuleRow) => {
     setSelectedRowId(row.id);
   };
+  const runModuleAction = (target: PlatformId) => {
+    if (active.id === "attendance" && target === "attendance") {
+      setAttendancePhoneVisible(true);
+      return;
+    }
+    onSelect(target);
+  };
   const resetListFilters = () => {
     setActiveFilter(defaultFilter);
     setSearch("");
@@ -629,12 +706,18 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
       <Card>
         <SectionHeader
           title={dashboard.title}
-          action={<ActionButton onPress={() => onSelect(dashboard.primaryAction.target)}>{dashboard.primaryAction.label}</ActionButton>}
+          action={<ActionButton onPress={() => runModuleAction(dashboard.primaryAction.target)}>{dashboard.primaryAction.label}</ActionButton>}
         />
         <MetricGrid items={dashboard.metrics} />
       </Card>
 
-      {active.id === "attendance" ? <AttendancePhonePanel locale={locale} /> : null}
+      {active.id === "attendance" ? (
+        attendancePhoneVisible ? (
+          <AttendancePhonePanel locale={locale} />
+        ) : (
+          <AttendanceAppPrompt locale={locale} onOpen={() => setAttendancePhoneVisible(true)} />
+        )
+      ) : null}
       {active.id === "workflow" ? <WorkflowApprovalPanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "recruit" ? <RecruitPlacementPanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "hr" ? <HrPeoplePanel locale={locale} onSelect={onSelect} /> : null}
@@ -735,7 +818,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
         {[dashboard.primaryAction, dashboard.secondaryAction].map((action) => (
           <Card key={action.label} compact style={styles.actionPanelCard}>
             <Label weight="bold">{action.label}</Label>
-            <ActionButton onPress={() => onSelect(action.target)} variant="ghost">{tScreen(locale, "actions.move")}</ActionButton>
+            <ActionButton onPress={() => runModuleAction(action.target)} variant="ghost">{tScreen(locale, "actions.move")}</ActionButton>
           </Card>
         ))}
       </View>
@@ -1163,6 +1246,22 @@ function TravelWorklogPanel({ locale }: Pick<ScreenProps, "locale">) {
           <Label weight="bold">{tScreen(locale, "travel.review.completed.value")}</Label>
           <Label size="sm" muted>{tScreen(locale, "travel.review.completed.detail")}</Label>
         </View>
+      </View>
+    </Card>
+  );
+}
+
+function AttendanceAppPrompt({ locale, onOpen }: Pick<ScreenProps, "locale"> & { readonly onOpen: () => void }) {
+  return (
+    <Card>
+      <SectionHeader
+        title={tScreen(locale, "attendance.appPrompt.title")}
+        description={tScreen(locale, "attendance.appPrompt.description")}
+        action={<ActionButton onPress={onOpen}>{tScreen(locale, "attendance.appPrompt.action")}</ActionButton>}
+      />
+      <View style={styles.inlineNotice}>
+        <Badge tone="neutral">{tScreen(locale, "attendance.appPrompt.badge")}</Badge>
+        <Label size="sm" muted>{tScreen(locale, "attendance.appPrompt.notice")}</Label>
       </View>
     </Card>
   );
@@ -1977,6 +2076,48 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     gap: spacing.sm,
+    padding: spacing.md
+  },
+  roleCard: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderTopWidth: 4,
+    borderWidth: 1,
+    flexBasis: 190,
+    flexGrow: 1,
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  roleCardHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
+  },
+  roleCardSelected: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent
+  },
+  roleCredentialLine: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
+  },
+  roleGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  rolePanel: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.md,
     padding: spacing.md
   },
   searchGroup: {
