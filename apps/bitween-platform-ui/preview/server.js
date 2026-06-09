@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const root = __dirname;
-const port = Number(process.env.PORT || process.argv[2] || 4173);
+const port = Number(process.env.PORT || process.argv[2] || 4174);
 const clients = new Set();
 const types = {
   ".css": "text/css; charset=utf-8",
