@@ -305,6 +305,7 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
         horizontal={compact}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
+        style={[styles.navScroll, compact && styles.navScrollCompact]}
         contentContainerStyle={compact ? styles.navStrip : undefined}
       >
         {items.map((item) => {
@@ -360,11 +361,12 @@ export function AppShell({
   sessionLabel,
   sidebarTheme
 }: ShellProps) {
-  const { width } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
   const compact = width < 980;
+  const stableShellHeight = Math.max(720, height);
 
   return (
-    <View style={[styles.shell, compact && styles.shellCompact]}>
+    <View style={[styles.shell, !compact && { height: stableShellHeight }, compact && styles.shellCompact]}>
       <Sidebar
         activeId={active.id}
         compact={compact}
@@ -612,11 +614,13 @@ const styles = StyleSheet.create({
     color: colors.muted
   },
   navItem: {
+    alignItems: "flex-start",
     borderLeftColor: "transparent",
     borderLeftWidth: 4,
     borderRadius: radius.md,
     gap: 2,
     marginBottom: spacing.sm,
+    minHeight: 45,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md
   },
@@ -631,6 +635,15 @@ const styles = StyleSheet.create({
   },
   navStrip: {
     gap: spacing.sm
+  },
+  navScroll: {
+    flex: 1,
+    minHeight: 0
+  },
+  navScrollCompact: {
+    flexGrow: 0,
+    flexShrink: 0,
+    minHeight: "auto"
   },
   rowCard: {
     backgroundColor: colors.input,
@@ -682,6 +695,7 @@ const styles = StyleSheet.create({
     minHeight: 0
   },
   sidebar: {
+    alignSelf: "stretch",
     backgroundColor: colors.sidebar,
     borderRightColor: colors.border,
     borderRightWidth: 1,

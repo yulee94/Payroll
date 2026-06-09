@@ -376,14 +376,18 @@ input:focus-visible {
 }
 
 .sidebar {
+  align-self: stretch;
   background: var(--sidebar);
   border-right: 1px solid var(--border);
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto minmax(0, 1fr);
   gap: 16px;
+  height: 100vh;
+  max-height: 100vh;
   max-width: 280px;
+  min-height: 100vh;
   min-width: 280px;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 18px;
   width: 280px;
 }
@@ -530,9 +534,11 @@ input:focus-visible {
 }
 
 .nav {
+  align-content: start;
   display: grid;
   gap: 8px;
-  overflow: auto;
+  min-height: 0;
+  overflow-y: auto;
   scrollbar-width: none;
 }
 
@@ -541,6 +547,7 @@ input:focus-visible {
 }
 
 .nav-button {
+  align-content: center;
   background: transparent;
   border: 0;
   border-left: 4px solid transparent;
@@ -548,6 +555,7 @@ input:focus-visible {
   color: var(--text);
   display: grid;
   gap: 3px;
+  min-height: 45px;
   padding: 12px;
   text-align: left;
 }
@@ -1627,14 +1635,19 @@ button.planner-item {
   .sidebar {
     border-bottom: 1px solid var(--border);
     border-right: 0;
+    height: auto;
+    max-height: none;
     max-width: none;
+    min-height: 0;
     min-width: 0;
+    overflow: visible;
     width: 100%;
   }
 
   .nav {
     display: flex;
     overflow-x: auto;
+    overflow-y: hidden;
   }
 
   .nav-button {
