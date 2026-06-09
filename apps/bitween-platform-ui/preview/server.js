@@ -96,5 +96,5 @@ for (const filePath of [
 }
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Bitween live preview running at http://127.0.0.1:${port}`);
+  console.log(`Bitween demo-only preview running at http://127.0.0.1:${port}`);
 });
