@@ -1,4 +1,4 @@
-import { defaultLocale, t, type SupportedLocale } from "./i18n";
+import { defaultLocale, type SupportedLocale } from "./i18n";
 import type {
   CalendarEvent,
   MetricItem,
@@ -7,6 +7,8 @@ import type {
   NavigationItem,
   PayrollStep,
   PlatformId,
+  PreviewAccount,
+  PreviewAccountId,
   ReadinessCard,
   TodoItem,
   WorkQueueItem
@@ -15,6 +17,7 @@ import {
   getCalendarEvents,
   getModuleDashboards,
   getNavigationItems,
+  getPreviewAccounts,
   getPayrollSettingsRows,
   getPayrollSteps,
   getPlatformMetrics,
@@ -28,8 +31,10 @@ export type NonEmptyNavigation = readonly [NavigationItem, ...NavigationItem[]];
 
 export type SessionViewModel = {
   readonly companyCodeLabel: string;
+  readonly developerMode: boolean;
   readonly displayName: string;
   readonly employeeNumber: string;
+  readonly modeLabel: string;
   readonly roleLabel: string;
   readonly tenantName: string;
 };
@@ -60,15 +65,38 @@ export type PlatformViewModelAdapter = {
   readonly load: (locale: SupportedLocale) => Promise<PlatformViewModel> | PlatformViewModel;
 };
 
-export const getPreviewSession = (locale: SupportedLocale): SessionViewModel => ({
-  companyCodeLabel: "0000",
-  displayName: "admin",
-  employeeNumber: "BW-0001",
-  roleLabel: t(locale, "session.roleLabel"),
-  tenantName: "Bitween Demo"
-});
+export const getPreviewAccountById = (
+  locale: SupportedLocale,
+  accountId: PreviewAccountId | undefined,
+): PreviewAccount => {
+  const accounts = getPreviewAccounts(locale);
+  const fallback = accounts[0];
+  if (!fallback) {
+    throw new Error("No preview accounts configured");
+  }
+  return accounts.find((account) => account.id === accountId) ?? fallback;
+};
 
-export const getPreviewPlatformViewModel = (locale: SupportedLocale): PlatformViewModel => ({
+export const getPreviewSession = (
+  locale: SupportedLocale,
+  accountId?: PreviewAccountId,
+): SessionViewModel => {
+  const account = getPreviewAccountById(locale, accountId);
+  return {
+    companyCodeLabel: account.companyCodeLabel,
+    developerMode: account.developerMode,
+    displayName: account.displayName,
+    employeeNumber: account.employeeNumber,
+    modeLabel: account.modeLabel,
+    roleLabel: account.roleLabel,
+    tenantName: account.tenantName
+  };
+};
+
+export const getPreviewPlatformViewModel = (
+  locale: SupportedLocale,
+  accountId?: PreviewAccountId,
+): PlatformViewModel => ({
   launcher: {
     calendarEvents: getCalendarEvents(locale),
     metrics: getPlatformMetrics(locale),
@@ -83,7 +111,7 @@ export const getPreviewPlatformViewModel = (locale: SupportedLocale): PlatformVi
     settingsRows: getPayrollSettingsRows(locale),
     steps: getPayrollSteps(locale)
   },
-  session: getPreviewSession(locale)
+  session: getPreviewSession(locale, accountId)
 });
 
 export const previewPlatformViewModel: PlatformViewModel = getPreviewPlatformViewModel(defaultLocale);

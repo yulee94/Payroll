@@ -305,6 +305,7 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
         horizontal={compact}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
+        style={[styles.navScroll, compact && styles.navScrollCompact]}
         contentContainerStyle={compact ? styles.navStrip : undefined}
       >
         {items.map((item) => {
@@ -332,10 +333,12 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
 
 type ShellProps = PropsWithChildren<{
   readonly active: NavigationItem;
+  readonly developerMode?: boolean;
   readonly employeeNumberLabel?: string;
   readonly items: readonly NavigationItem[];
   readonly locale: SupportedLocale;
   readonly logoutLabel: string;
+  readonly modeLabel?: string;
   readonly onLogout?: () => void;
   readonly onSelect: (id: NavigationItem["id"]) => void;
   readonly onThemeChange: (id: SidebarThemeId) => void;
@@ -346,21 +349,24 @@ type ShellProps = PropsWithChildren<{
 export function AppShell({
   active,
   children,
+  developerMode = false,
   employeeNumberLabel,
   items,
   locale,
   logoutLabel,
+  modeLabel,
   onLogout,
   onSelect,
   onThemeChange,
   sessionLabel,
   sidebarTheme
 }: ShellProps) {
-  const { width } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
   const compact = width < 980;
+  const stableShellHeight = Math.max(720, height);
 
   return (
-    <View style={[styles.shell, compact && styles.shellCompact]}>
+    <View style={[styles.shell, !compact && { height: stableShellHeight }, compact && styles.shellCompact]}>
       <Sidebar
         activeId={active.id}
         compact={compact}
@@ -379,6 +385,7 @@ export function AppShell({
           </View>
           <View style={styles.headerActions}>
             {sessionLabel ? <Badge tone="neutral">{sessionLabel}</Badge> : null}
+            {modeLabel ? <Badge tone={developerMode ? "attention" : "neutral"}>{modeLabel}</Badge> : null}
             {employeeNumberLabel ? <Badge tone="neutral">{employeeNumberLabel}</Badge> : null}
             {onLogout ? <ActionButton onPress={onLogout} variant="ghost">{logoutLabel}</ActionButton> : null}
           </View>
@@ -477,6 +484,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     gap: spacing.md,
+    minWidth: 0,
     padding: spacing.lg
   },
   cardCompact: {
@@ -484,13 +492,15 @@ const styles = StyleSheet.create({
   },
   content: {
     gap: spacing.lg,
+    minWidth: 0,
     padding: spacing.xl
   },
   contentCompact: {
     padding: spacing.md
   },
   contentScroll: {
-    flex: 1
+    flex: 1,
+    minWidth: 0
   },
   emptyMark: {
     color: colors.muted,
@@ -569,7 +579,10 @@ const styles = StyleSheet.create({
   },
   main: {
     backgroundColor: colors.bg,
-    flex: 1
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    overflow: "hidden"
   },
   logoImage: {
     borderRadius: radius.lg,
@@ -601,11 +614,13 @@ const styles = StyleSheet.create({
     color: colors.muted
   },
   navItem: {
+    alignItems: "flex-start",
     borderLeftColor: "transparent",
     borderLeftWidth: 4,
     borderRadius: radius.md,
     gap: 2,
     marginBottom: spacing.sm,
+    minHeight: 45,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md
   },
@@ -620,6 +635,15 @@ const styles = StyleSheet.create({
   },
   navStrip: {
     gap: spacing.sm
+  },
+  navScroll: {
+    flex: 1,
+    minHeight: 0
+  },
+  navScrollCompact: {
+    flexGrow: 0,
+    flexShrink: 0,
+    minHeight: "auto"
   },
   rowCard: {
     backgroundColor: colors.input,
@@ -663,16 +687,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
     flex: 1,
     flexDirection: "row",
-    minHeight: 720
+    minHeight: 720,
+    overflow: "hidden"
   },
   shellCompact: {
     flexDirection: "column",
     minHeight: 0
   },
   sidebar: {
+    alignSelf: "stretch",
     backgroundColor: colors.sidebar,
     borderRightColor: colors.border,
     borderRightWidth: 1,
+    flexBasis: 280,
+    flexGrow: 0,
+    flexShrink: 0,
+    maxWidth: 280,
+    minWidth: 280,
+    overflow: "hidden",
     padding: spacing.lg,
     width: 280
   },
@@ -680,6 +712,9 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
     borderBottomWidth: 1,
     borderRightWidth: 0,
+    flexBasis: "auto",
+    maxWidth: "100%",
+    minWidth: 0,
     padding: spacing.md,
     width: "100%"
   },
@@ -782,6 +817,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radius.lg,
     borderWidth: 1,
+    minWidth: 0,
     overflow: "hidden"
   },
   tableCell: {
@@ -799,6 +835,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentSoft,
     flexDirection: "row",
     gap: spacing.md,
+    minWidth: 0,
     padding: spacing.md
   },
   tableHeading: {
@@ -812,6 +849,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     flexDirection: "row",
     gap: spacing.md,
+    minWidth: 0,
     padding: spacing.md
   },
   tableRowSelected: {

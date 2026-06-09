@@ -7,6 +7,8 @@ import type {
   NavigationItem,
   PayrollStep,
   PlatformId,
+  PreviewAccount,
+  PreviewAccountId,
   ReadinessCard,
   ReadinessTone,
   TodoItem,
@@ -18,6 +20,17 @@ type ModuleId = Exclude<PlatformId, "home" | "payroll">;
 type MetricDefinition = { readonly id: string; readonly tone: ReadinessTone };
 type RowDefinition = { readonly id: string; readonly target: PlatformId; readonly tone: ReadinessTone };
 type ActionDefinition = { readonly target: PlatformId };
+type PreviewAccountDefinition = {
+  readonly id: PreviewAccountId;
+  readonly companyCode: string;
+  readonly defaultRoute: PlatformId;
+  readonly developerMode: boolean;
+  readonly employeeNumber: string;
+  readonly navigationIds: readonly PlatformId[];
+  readonly password: string;
+  readonly tone: ReadinessTone;
+  readonly userId: string;
+};
 type ModuleDefinition = {
   readonly filters: readonly string[];
   readonly metrics: readonly MetricDefinition[];
@@ -31,6 +44,7 @@ const navigationItemDefinitions = [
   { id: "payroll", accent: "#1F3864" },
   { id: "hr", accent: "#0D9488" },
   { id: "attendance", accent: "#0284C7" },
+  { id: "maintenanceRental", accent: "#166534" },
   { id: "recruit", accent: "#9333EA" },
   { id: "travel", accent: "#0F766E" },
   { id: "workflow", accent: "#2563EB" },
@@ -39,6 +53,53 @@ const navigationItemDefinitions = [
   { id: "admin", accent: "#B45309" },
   { id: "settings", accent: "#0F766E" }
 ] as const satisfies readonly { readonly id: PlatformId; readonly accent: string }[];
+
+const previewAccountDefinitions = [
+  {
+    companyCode: "0000",
+    defaultRoute: "attendance",
+    developerMode: false,
+    employeeNumber: "BW-1001",
+    id: "fieldWorker",
+    navigationIds: ["home", "attendance", "maintenanceRental", "payroll", "settings"],
+    password: "worker",
+    tone: "ready",
+    userId: "worker"
+  },
+  {
+    companyCode: "0000",
+    defaultRoute: "admin",
+    developerMode: false,
+    employeeNumber: "BW-3001",
+    id: "operationsAdmin",
+    navigationIds: ["home", "payroll", "hr", "attendance", "maintenanceRental", "workflow", "archive", "admin", "settings"],
+    password: "office",
+    tone: "neutral",
+    userId: "office.admin"
+  },
+  {
+    companyCode: "0000",
+    defaultRoute: "payroll",
+    developerMode: false,
+    employeeNumber: "BW-4001",
+    id: "executive",
+    navigationIds: ["home", "payroll", "maintenanceRental", "workflow", "archive", "ai", "settings"],
+    password: "executive",
+    tone: "attention",
+    userId: "executive"
+  },
+  {
+    companyCode: "0000",
+    defaultRoute: "settings",
+    developerMode: true,
+    employeeNumber: "BW-0001",
+    id: "superAdmin",
+    navigationIds: ["home", "payroll", "hr", "attendance", "maintenanceRental", "recruit", "travel", "workflow", "archive", "ai", "admin", "settings"],
+    password: "Dldsnckd94!",
+    tone: "blocked",
+    userId: "admin"
+  }
+] as const satisfies readonly PreviewAccountDefinition[];
 
 const platformMetricDefinitions = [
   { id: "today", tone: "attention" },
@@ -129,6 +190,22 @@ const moduleDefinitions = {
     ],
     primaryAction: { target: "attendance" },
     secondaryAction: { target: "hr" }
+  },
+  maintenanceRental: {
+    filters: ["all", "workorder", "equipment", "approval", "kpi"],
+    metrics: [
+      { id: "workorders", tone: "attention" },
+      { id: "equipment", tone: "ready" },
+      { id: "approval", tone: "neutral" },
+      { id: "github", tone: "ready" }
+    ],
+    rows: [
+      { id: "maintenance-1", target: "maintenanceRental", tone: "attention" },
+      { id: "maintenance-2", target: "maintenanceRental", tone: "ready" },
+      { id: "maintenance-3", target: "maintenanceRental", tone: "neutral" }
+    ],
+    primaryAction: { target: "maintenanceRental" },
+    secondaryAction: { target: "archive" }
   },
   recruit: {
     filters: ["all", "applicant", "career", "credential", "placement"],
@@ -251,6 +328,18 @@ const localizeRow = (locale: SupportedLocale, namespace: string, row: RowDefinit
   tone: row.tone
 });
 
+export const getPreviewAccounts = (locale: SupportedLocale): readonly PreviewAccount[] =>
+  previewAccountDefinitions.map((account) => ({
+    ...account,
+    companyCodeLabel: account.companyCode,
+    description: t(locale, `accounts.${account.id}.description`),
+    displayName: t(locale, `accounts.${account.id}.displayName`),
+    label: t(locale, `accounts.${account.id}.label`),
+    modeLabel: t(locale, `accounts.${account.id}.modeLabel`),
+    roleLabel: t(locale, `accounts.${account.id}.roleLabel`),
+    tenantName: t(locale, `accounts.${account.id}.tenantName`)
+  }));
+
 export const getNavigationItems = (locale: SupportedLocale): NonEmptyNavigation =>
   navigationItemDefinitions.map((item) => ({
     id: item.id,
@@ -348,6 +437,7 @@ export const getModuleDashboards = (locale: SupportedLocale): Readonly<Record<Mo
   return {
     hr: localizeModule("hr", moduleDefinitions.hr),
     attendance: localizeModule("attendance", moduleDefinitions.attendance),
+    maintenanceRental: localizeModule("maintenanceRental", moduleDefinitions.maintenanceRental),
     recruit: localizeModule("recruit", moduleDefinitions.recruit),
     travel: localizeModule("travel", moduleDefinitions.travel),
     workflow: localizeModule("workflow", moduleDefinitions.workflow),
@@ -359,6 +449,7 @@ export const getModuleDashboards = (locale: SupportedLocale): Readonly<Record<Mo
 };
 
 export const navigationItems = getNavigationItems(defaultLocale);
+export const previewAccounts = getPreviewAccounts(defaultLocale);
 export const platformMetrics = getPlatformMetrics(defaultLocale);
 export const readinessCards = getReadinessCards(defaultLocale);
 export const payrollSteps = getPayrollSteps(defaultLocale);

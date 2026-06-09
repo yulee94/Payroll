@@ -1,0 +1,45 @@
+{
+  "status": "template_replace_before_submission",
+  "distribution_recommendation": "직원용 앱은 비공개 배포(TestFlight, Play Internal/Closed Testing, MDM)를 우선 사용하고, 고객용 앱은 App Store/Google Play 공개 출시로 전환합니다.",
+  "test_account": {
+    "tenant_id": "review-tenant",
+    "username": "review.worker",
+    "password": "ReviewOnly-ChangeBeforeRelease!",
+    "mfa_otp": "123456",
+    "role": "직원"
+  },
+  "test_branch_data": {
+    "company_id": "review-company",
+    "branch_id": "branch-review-001",
+    "branch_name": "심사용 테스트 사업장",
+    "contains": ["출퇴근", "급여 요약", "근태 신청", "푸시 알림"]
+  },
+  "required_urls": {
+    "privacy_policy_url": "https://bitween.example/privacy",
+    "terms_url": "https://bitween.example/terms"
+  },
+  "support_contact": "support@bitween.example",
+  "app_description": "Bitween Worker는 현장 직원용 출퇴근, 근태 신청, 급여 조회, 업무 알림 모바일 앱입니다.",
+  "assets": {
+    "app_icon": "assets/icon.png",
+    "splash": "assets/splash.png",
+    "ios_screenshots": "review-assets/screenshots/ios",
+    "android_screenshots": "review-assets/screenshots/android"
+  },
+  "permission_usage_reasons": {
+    "location": "출퇴근 위치 확인과 근무시간 중 사업장 지오펜스 판정을 위해 사용합니다.",
+    "notifications": "작업 배정, 승인 요청, 공지, 장애, 입고/출고, 예약, 결제/정산 알림 수신을 위해 사용합니다.",
+    "biometrics": "출퇴근 승인과 급여정보 열람 보호를 위해 기기 생체인증 결과만 사용합니다.",
+    "camera": "현재 직원용 앱은 카메라 권한을 요청하지 않습니다.",
+    "photos": "현재 직원용 앱은 사진 권한을 요청하지 않습니다."
+  },
+  "review_blockers_to_check": [
+    "심사용 로그인 계정 제공",
+    "테스트 사업장 데이터 제공",
+    "개인정보 처리방침 URL 제공",
+    "권한 요청 사유 명확화",
+    "앱 실행 후 빈 화면 없음",
+    "심사자가 핵심 기능 확인 가능",
+    "결제 정책 위반 기능 없음"
+  ]
+}

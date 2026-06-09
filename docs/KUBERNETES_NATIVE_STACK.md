@@ -6,6 +6,26 @@ Accepted direction as of 2026-06-04.
 
 Bitween production must run as a Kubernetes-native stack. Local compatibility runners and Python adapters are not production services; they exist only to preserve behavior until Rust services and TypeScript client surfaces have parity.
 
+
+## Preferred launch architecture
+
+The current launch recommendation is:
+
+| Area | Recommendation | Notes |
+| --- | --- | --- |
+| Server region | AWS Seoul or NAVER Cloud Korea | Keep one Korea-region central cloud first, with nationwide branches connecting over HTTPS/VPN/Zero Trust. |
+| Backend | Docker-based API server | Keep API, Admin web, batch/worker containers separated. |
+| Runtime operation | Managed Container first, Kubernetes as scale-up path | Use ECS Fargate/NCP managed container or similar for MVP; move to Kubernetes/EKS/NKS when service count and team capacity justify it. |
+| Database | PostgreSQL Multi-AZ | Automatic backups, encryption, connection restrictions, read replica when reporting load grows. |
+| Files | S3/Object Storage | Store uploaded HR, invoice, attendance, and report objects outside the DB. |
+| Security | WAF + VPN/Zero Trust + MFA + audit logs | Admin pages require MFA and/or IP restriction; DB must not be publicly exposed. |
+| Deployment | GitHub/GitLab CI/CD + Terraform | Git push → tests → image build → staging → approval → zero-downtime production deploy. |
+| Mobile | React Native employee app | Flutter remains acceptable, but this repo now carries the React Native worker app scaffold. |
+| Push | FCM + APNs | Device-token records are stored by `user_id`, `branch_id`, `device_id`, `platform`, version, and activity time. |
+| Release | Employee app private first | Use TestFlight, Play Internal/Closed Testing, MDM, or private distribution before any customer public release. |
+
+This staged approach does not change the long-term Kubernetes-native target. It keeps the MVP operable for a small team while preserving a clean migration path to Kubernetes when scale demands it.
+
 ## Source-backed Kubernetes basis
 
 This document is based on current official Kubernetes documentation for:
@@ -47,7 +67,18 @@ This document is based on current official Kubernetes documentation for:
 - Production persistence is a database/object-storage layer behind Rust services. Local JSON stores are compatibility fixtures only.
 - Migrations are explicit Jobs with rollback/restore instructions and audit logs.
 
-## API routing
+## API surfaces and routing
+
+Production API traffic is separated first by gateway/API surface, then by
+versioned resource paths. The React Native employee app must not share the web
+admin API surface.
+
+| Surface | Gateway/service target | Exposure | Version rule |
+| --- | --- | --- | --- |
+| Web Admin API | `admin-api.bitween.example` | Admin web only, MFA/IP controls | `/api/admin/v1/*` |
+| Mobile App API | `mobile-api.bitween.example` | iOS/Android employee app, token + device binding | `/api/v{n}/*`, e.g. `/api/v1/login`, `/api/v1/branches`, `/api/v1/tasks`, `/api/v2/tasks` |
+| Public Customer API | `public-api.bitween.example` | External customer/partner integrations, rate-limited | `/api/public/v1/*` |
+| Internal Admin API | `internal-api.bitween.local` | Private subnet operations/batch/security only | `/api/internal/v1/*` |
 
 Planned service routes:
 
@@ -59,7 +90,8 @@ Planned service routes:
 | `/api/payroll/v1/readiness` | Rust payroll/readiness API | Tenant/site readiness cards for frontend dashboards. |
 | `/api/workflow/v1/*` | Rust workflow API | Documents, inbox, forms, execution tasks, trip lifecycle. |
 | `/api/kpi/v1/*` | Rust KPI API | Individual and manager performance records. |
-| `/api/mobile/v1/*` | Rust mobile API | Device auth, attendance events, profile, leave, payroll preview. |
+| `/api/v1/*` on Mobile App API | Rust mobile API | Device auth, attendance events, branch list, tasks, profile, leave, payroll preview. |
+| `/api/v2/tasks` on Mobile App API | Rust mobile API | Versioned task payload evolution without breaking existing app releases. |
 | `/api/ai/v1/*` | Rust policy gateway + provider adapter | AI requests with tenant/user safety policy and secret isolation. |
 
 ## Rollout model

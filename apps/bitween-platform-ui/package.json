@@ -11,8 +11,11 @@
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
     "check:strict-config": "node scripts/check-strict-config.js",
-    "preview": "node preview/server.js",
+    "demo": "node scripts/run-demo-preview.mjs 4174",
+    "preview": "node preview/server.js 4174",
+    "preview:4174": "node preview/server.js 4174",
     "export:web": "expo export --platform web",
+    "verify:data-mode": "node scripts/verify-runtime-data-mode.mjs",
     "verify:i18n": "node scripts/verify-i18n-catalog.mjs"
   },
   "dependencies": {

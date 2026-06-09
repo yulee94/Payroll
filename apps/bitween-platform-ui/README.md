@@ -38,6 +38,7 @@ The package is aligned to Expo SDK 54, which targets React Native 0.81, React 19
 ```powershell
 npm install
 npm run check:strict-config
+npm run verify:data-mode
 npm run verify:i18n
 npm run typecheck
 npm run export:web
@@ -49,10 +50,10 @@ npm run web
 Dependency-free UI preview:
 
 ```powershell
-node preview/server.js
+npm run preview
 ```
 
-Then open `http://127.0.0.1:4173/` in a browser. This preview mirrors the current screen structure and interactions without requiring Expo dependencies; it reads the same catalog array through `/catalog.json`.
+Then open `http://127.0.0.1:4174/` in a browser. This preview mirrors the current screen structure and interactions without requiring Expo dependencies; it reads the same catalog array through `/catalog.json`.
 
 ## View Model Boundary
 
@@ -67,7 +68,7 @@ Production delivery should package this frontend as a containerized workload ser
 - Confirm `npm run verify:i18n` passes before adding user-facing copy.
 - Confirm login renders without authenticated navigation.
 - Confirm login button moves to the platform launcher.
-- Confirm navigation switches between payroll, HR, workflow, archive, AI, admin, and settings.
+- Confirm navigation switches between payroll, HR, attendance, 정비/렌탈, workflow, archive, AI, admin, and settings.
 - Confirm payroll readiness cards and payroll workflow cards wrap without text clipping.
 - Confirm payroll setting summary and file preview/archive rows are visible on the payroll screen.
 - Confirm module tables show as table rows on wide screens and card rows on narrow screens.

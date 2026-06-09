@@ -17,6 +17,8 @@ from core.mobile.models import (
     EmployeeDevice,
     GeofenceAlert,
     MobileConsentRecord,
+    MobileOfflineSyncRecord,
+    MobilePushNotification,
     PeriodWorkSummary,
     SiteGeofence,
 )
@@ -36,6 +38,8 @@ _EMPTY: dict[str, Any] = {
     "consents": [],
     "authorized_absence_windows": [],
     "geofence_alerts": [],
+    "push_notifications": [],
+    "offline_sync_requests": [],
     "seeded": False,
 }
 
@@ -236,7 +240,9 @@ def upsert_device(device: EmployeeDevice, tenant_id: str | None = None) -> Emplo
             device.id = _new_id()
         if not device.registered_at:
             device.registered_at = _now_iso()
-        device.last_seen_at = _now_iso()
+        now = _now_iso()
+        device.last_seen_at = now
+        device.last_active_at = now
         replaced = False
         for i, raw in enumerate(rows):
             existing = EmployeeDevice.from_dict(raw)
@@ -253,6 +259,26 @@ def upsert_device(device: EmployeeDevice, tenant_id: str | None = None) -> Emplo
         return device
 
     return mutate_db(mut, tenant_id)
+
+
+def list_devices(
+    *,
+    tenant_id: str | None = None,
+    user_id: str = "",
+    branch_id: str = "",
+    active_only: bool = True,
+) -> list[EmployeeDevice]:
+    out: list[EmployeeDevice] = []
+    for raw in load_db(tenant_id).get("employee_devices") or []:
+        dev = EmployeeDevice.from_dict(raw)
+        if active_only and not dev.active:
+            continue
+        if user_id and dev.user_id != user_id:
+            continue
+        if branch_id and dev.branch_id != branch_id:
+            continue
+        out.append(dev)
+    return out
 
 
 def find_device(
@@ -272,6 +298,91 @@ def find_device(
         if emp and dev.employee_name != emp:
             continue
         return dev
+    return None
+
+
+def append_push_notification(
+    notification: MobilePushNotification,
+    tenant_id: str | None = None,
+) -> MobilePushNotification:
+    def mut(db: dict[str, Any]) -> MobilePushNotification:
+        if not notification.id:
+            notification.id = _new_id()
+        if not notification.created_at:
+            notification.created_at = _now_iso()
+        db.setdefault("push_notifications", []).append(notification.to_dict())
+        return notification
+
+    return mutate_db(mut, tenant_id)
+
+
+def list_push_notifications(
+    *,
+    tenant_id: str | None = None,
+    user_id: str = "",
+    branch_id: str = "",
+    status: str = "",
+) -> list[MobilePushNotification]:
+    out: list[MobilePushNotification] = []
+    for raw in load_db(tenant_id).get("push_notifications") or []:
+        notification = MobilePushNotification.from_dict(raw)
+        if user_id and notification.user_id != user_id:
+            continue
+        if branch_id and notification.branch_id != branch_id:
+            continue
+        if status and notification.status != status:
+            continue
+        out.append(notification)
+    return sorted(out, key=lambda n: n.created_at, reverse=True)
+
+
+def append_offline_sync_record(
+    record: MobileOfflineSyncRecord,
+    tenant_id: str | None = None,
+) -> MobileOfflineSyncRecord:
+    def mut(db: dict[str, Any]) -> MobileOfflineSyncRecord:
+        if not record.id:
+            record.id = _new_id()
+        if not record.received_at:
+            record.received_at = _now_iso()
+        db.setdefault("offline_sync_requests", []).append(record.to_dict())
+        return record
+
+    return mutate_db(mut, tenant_id)
+
+
+def list_offline_sync_records(
+    *,
+    tenant_id: str | None = None,
+    user_id: str = "",
+    device_id: str = "",
+) -> list[MobileOfflineSyncRecord]:
+    out: list[MobileOfflineSyncRecord] = []
+    for raw in load_db(tenant_id).get("offline_sync_requests") or []:
+        rec = MobileOfflineSyncRecord.from_dict(raw)
+        if user_id and rec.user_id != user_id:
+            continue
+        if device_id and rec.device_id != device_id:
+            continue
+        out.append(rec)
+    return out
+
+
+def find_duplicate_offline_sync_record(
+    *,
+    tenant_id: str | None = None,
+    device_id: str,
+    request_id: str = "",
+    sync_id: str = "",
+    payload_hash: str = "",
+) -> MobileOfflineSyncRecord | None:
+    for rec in list_offline_sync_records(tenant_id=tenant_id, device_id=device_id):
+        if request_id and rec.request_id == request_id:
+            return rec
+        if sync_id and rec.sync_id == sync_id:
+            return rec
+        if payload_hash and rec.payload_hash == payload_hash:
+            return rec
     return None
 
 

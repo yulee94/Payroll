@@ -1,0 +1,63 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
+      },
+      "env": {
+        "APP_ENV": "development",
+        "DEV_API_URL": "https://dev.mobile-api.bitween.example",
+        "STAGING_API_URL": "https://staging.mobile-api.bitween.example",
+        "PROD_API_URL": "https://mobile-api.bitween.example"
+      }
+    },
+    "staging": {
+      "distribution": "internal",
+      "channel": "staging",
+      "env": {
+        "APP_ENV": "staging",
+        "DEV_API_URL": "https://dev.mobile-api.bitween.example",
+        "STAGING_API_URL": "https://staging.mobile-api.bitween.example",
+        "PROD_API_URL": "https://mobile-api.bitween.example"
+      }
+    },
+    "production": {
+      "distribution": "store",
+      "channel": "production",
+      "autoIncrement": true,
+      "env": {
+        "APP_ENV": "production",
+        "DEV_API_URL": "https://dev.mobile-api.bitween.example",
+        "STAGING_API_URL": "https://staging.mobile-api.bitween.example",
+        "PROD_API_URL": "https://mobile-api.bitween.example"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "track": "internal"
+      },
+      "ios": {
+        "ascAppId": "replace-before-submit"
+      }
+    },
+    "staging": {
+      "ios": {
+        "ascAppId": "replace-before-submit"
+      },
+      "android": {
+        "track": "internal"
+      }
+    }
+  }
+}

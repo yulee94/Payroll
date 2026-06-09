@@ -4167,19 +4167,19 @@
     {
       "key": "screens.login.feedback.missingDemo",
       "values": {
-        "ko-KR": "demo 계정은 법인코드 {companyCode}, 아이디 {userId}, 비밀번호 {password}입니다.",
-        "en-US": "The demo account is company code {companyCode}, user ID {userId}, password {password}.",
-        "zh-Hans-CN": "演示账号为法人代码 {companyCode}、用户ID {userId}、密码 {password}。",
-        "ja-JP": "demoアカウントは法人コード {companyCode}、ID {userId}、パスワード {password} です。"
+        "ko-KR": "선택한 미리보기 계정은 법인코드 {companyCode}, 아이디 {userId}, 비밀번호 {password}입니다.",
+        "en-US": "The selected preview account uses company code {companyCode}, ID {userId}, and password {password}.",
+        "zh-Hans-CN": "所选预览账号使用法人代码 {companyCode}、账号 {userId}、密码 {password}。",
+        "ja-JP": "選択したプレビューアカウントは法人コード {companyCode}、ID {userId}、パスワード {password} です。"
       }
     },
     {
       "key": "screens.login.feedback.invalidDemo",
       "values": {
-        "ko-KR": "demo 계정 정보가 일치하지 않습니다. 법인코드 {companyCode}, 아이디 {userId}, 비밀번호 {password}로 입력하세요.",
-        "en-US": "The demo account does not match. Enter company code {companyCode}, user ID {userId}, and password {password}.",
-        "zh-Hans-CN": "演示账号信息不匹配。请输入法人代码 {companyCode}、用户ID {userId}、密码 {password}。",
-        "ja-JP": "demoアカウント情報が一致しません。法人コード {companyCode}、ID {userId}、パスワード {password} を入力してください。"
+        "ko-KR": "미리보기 계정 정보가 일치하지 않습니다. 계정 카드를 선택하거나 법인코드 {companyCode}, 아이디 {userId}, 비밀번호 {password}를 입력하세요.",
+        "en-US": "The preview account details do not match. Select an account card or enter company code {companyCode}, ID {userId}, and password {password}.",
+        "zh-Hans-CN": "预览账号信息不一致。请选择账号卡片，或输入法人代码 {companyCode}、账号 {userId}、密码 {password}。",
+        "ja-JP": "プレビューアカウント情報が一致しません。アカウントカードを選択するか、法人コード {companyCode}、ID {userId}、パスワード {password} を入力してください。"
       }
     },
     {
@@ -4203,19 +4203,19 @@
     {
       "key": "screens.login.actions.demo",
       "values": {
-        "ko-KR": "Demo 계정으로 접속",
-        "en-US": "Use demo account",
-        "zh-Hans-CN": "使用演示账号",
-        "ja-JP": "Demoアカウントで接続"
+        "ko-KR": "선택 계정으로 접속",
+        "en-US": "Sign in as selected account",
+        "zh-Hans-CN": "以所选账号登录",
+        "ja-JP": "選択したアカウントでログイン"
       }
     },
     {
       "key": "screens.login.demo.badge",
       "values": {
-        "ko-KR": "Demo 계정",
-        "en-US": "Demo account",
-        "zh-Hans-CN": "演示账号",
-        "ja-JP": "Demoアカウント"
+        "ko-KR": "미리보기 계정",
+        "en-US": "Preview account",
+        "zh-Hans-CN": "预览账号",
+        "ja-JP": "プレビューアカウント"
       }
     },
     {
@@ -4230,19 +4230,19 @@
     {
       "key": "screens.login.demo.panel.helper",
       "values": {
-        "ko-KR": "테스트 접속 정보로 플랫폼 흐름을 바로 확인합니다.",
-        "en-US": "Use these test credentials to review the platform flow immediately.",
-        "zh-Hans-CN": "使用这些测试登录信息即可立即查看平台流程。",
-        "ja-JP": "このテスト用ログイン情報で、すぐにプラットフォームの流れを確認できます。"
+        "ko-KR": "역할별 접속 정보로 실제 사용 화면을 바로 확인합니다.",
+        "en-US": "Use role-based credentials to review the actual working view.",
+        "zh-Hans-CN": "使用按角色划分的登录信息，直接查看实际工作界面。",
+        "ja-JP": "役割別のログイン情報で実際の業務画面をすぐ確認します。"
       }
     },
     {
       "key": "screens.login.demo.panel.disclaimer",
       "values": {
         "ko-KR": "실제 직원 명부, 급여 파일, 운영 설정과 분리된 frontend 미리보기 계정입니다.",
-        "en-US": "This frontend preview account is separated from real employee rosters, payroll files, and operating settings.",
-        "zh-Hans-CN": "此前端预览账号与真实员工名册、工资文件和运营设置相互隔离。",
-        "ja-JP": "実際の社員名簿、給与ファイル、運用設定とは分離された frontend プレビュー用アカウントです。"
+        "en-US": "These frontend preview accounts are separated from real rosters, payroll files, and operations settings.",
+        "zh-Hans-CN": "这些前端预览账号与真实员工名册、工资文件和运营设置相互隔离。",
+        "ja-JP": "これらは実際の社員名簿、給与ファイル、運用設定とは分離されたフロントエンドプレビュー用アカウントです。"
       }
     },
     {
@@ -4275,10 +4275,10 @@
     {
       "key": "screens.login.demo.credentials.user.helper",
       "values": {
-        "ko-KR": "관리자 권한 화면 확인",
-        "en-US": "Review administrator screens",
-        "zh-Hans-CN": "查看管理员权限页面",
-        "ja-JP": "管理者権限画面を確認"
+        "ko-KR": "선택 역할 화면 확인",
+        "en-US": "Review the selected role view",
+        "zh-Hans-CN": "查看所选角色界面",
+        "ja-JP": "選択した役割の画面確認"
       }
     },
     {
@@ -6237,10 +6237,10 @@
     {
       "key": "preview.toast.demoLogin",
       "values": {
-        "ko-KR": "Demo 계정으로 접속했습니다.",
-        "en-US": "Signed in with the demo account.",
-        "zh-Hans-CN": "已使用演示账号登录。",
-        "ja-JP": "デモアカウントでログインしました。"
+        "ko-KR": "선택한 미리보기 계정으로 접속했습니다.",
+        "en-US": "Signed in with the selected preview account.",
+        "zh-Hans-CN": "已使用所选预览账号登录。",
+        "ja-JP": "選択したプレビューアカウントでログインしました。"
       }
     },
     {
@@ -6462,10 +6462,10 @@
     {
       "key": "screens.login.actions.enterHomeAccessibility",
       "values": {
-        "ko-KR": "입력한 demo 계정으로 플랫폼 홈 이동",
-        "en-US": "Go to the platform home with the entered demo account",
-        "zh-Hans-CN": "使用已输入的演示账号进入平台首页",
-        "ja-JP": "入力したデモアカウントでプラットフォームホームへ移動"
+        "ko-KR": "입력한 미리보기 계정으로 플랫폼 이동",
+        "en-US": "Open the platform with the entered preview account",
+        "zh-Hans-CN": "使用输入的预览账号进入平台",
+        "ja-JP": "入力したプレビューアカウントでプラットフォームへ移動"
       }
     },
     {
@@ -6480,37 +6480,37 @@
     {
       "key": "screens.login.actions.demoAccessibility",
       "values": {
-        "ko-KR": "법인코드 {companyCode}, 아이디 {userId}, 비밀번호 {password} demo 계정으로 접속",
-        "en-US": "Sign in with demo account company code {companyCode}, user ID {userId}, and password {password}",
-        "zh-Hans-CN": "使用公司代码 {companyCode}、用户 ID {userId}、密码 {password} 的演示账号登录",
-        "ja-JP": "法人コード {companyCode}、ID {userId}、パスワード {password} のデモアカウントでログイン"
+        "ko-KR": "법인코드 {companyCode}, 아이디 {userId}, 비밀번호 {password} 미리보기 계정으로 접속",
+        "en-US": "Sign in with preview account company code {companyCode}, ID {userId}, and password {password}",
+        "zh-Hans-CN": "使用预览账号法人代码 {companyCode}、账号 {userId}、密码 {password} 登录",
+        "ja-JP": "法人コード {companyCode}、ID {userId}、パスワード {password} のプレビューアカウントでログイン"
       }
     },
     {
       "key": "screens.login.form.companyCodeHint",
       "values": {
-        "ko-KR": "Demo 계정은 법인코드 {companyCode}을 사용합니다.",
-        "en-US": "The demo account uses company code {companyCode}.",
-        "zh-Hans-CN": "演示账号使用公司代码 {companyCode}。",
-        "ja-JP": "デモアカウントは法人コード {companyCode} を使用します。"
+        "ko-KR": "선택 계정은 법인코드 {companyCode}을 사용합니다.",
+        "en-US": "The selected account uses company code {companyCode}.",
+        "zh-Hans-CN": "所选账号使用法人代码 {companyCode}。",
+        "ja-JP": "選択したアカウントは法人コード {companyCode} を使用します。"
       }
     },
     {
       "key": "screens.login.form.userIdHint",
       "values": {
-        "ko-KR": "Demo 계정은 아이디 {userId}을 사용합니다.",
-        "en-US": "The demo account uses user ID {userId}.",
-        "zh-Hans-CN": "演示账号使用用户 ID {userId}。",
-        "ja-JP": "デモアカウントはID {userId} を使用します。"
+        "ko-KR": "선택 계정은 아이디 {userId}을 사용합니다.",
+        "en-US": "The selected account uses ID {userId}.",
+        "zh-Hans-CN": "所选账号使用账号 {userId}。",
+        "ja-JP": "選択したアカウントはID {userId}を使用します。"
       }
     },
     {
       "key": "screens.login.form.passwordHint",
       "values": {
-        "ko-KR": "Demo 계정은 비밀번호 {password}을 사용합니다.",
-        "en-US": "The demo account uses password {password}.",
-        "zh-Hans-CN": "演示账号使用密码 {password}。",
-        "ja-JP": "デモアカウントはパスワード {password} を使用します。"
+        "ko-KR": "선택 계정은 비밀번호 {password}을 사용합니다.",
+        "en-US": "The selected account uses password {password}.",
+        "zh-Hans-CN": "所选账号使用密码 {password}。",
+        "ja-JP": "選択したアカウントはパスワード {password} を使用します。"
       }
     },
     {
@@ -7384,6 +7384,978 @@
         "en-US": "Hide password",
         "zh-Hans-CN": "隐藏密码",
         "ja-JP": "パスワードを隠す"
+      }
+    },
+    {
+      "key": "screens.login.rolePanel.eyebrow",
+      "values": {
+        "ko-KR": "Role preview",
+        "en-US": "Role preview",
+        "zh-Hans-CN": "角色预览",
+        "ja-JP": "役割プレビュー"
+      }
+    },
+    {
+      "key": "screens.login.rolePanel.title",
+      "values": {
+        "ko-KR": "역할별 로그인 옵션",
+        "en-US": "Role-based sign-in options",
+        "zh-Hans-CN": "按角色登录选项",
+        "ja-JP": "役割別ログインオプション"
+      }
+    },
+    {
+      "key": "screens.login.rolePanel.description",
+      "values": {
+        "ko-KR": "현장사원, 관리자, 임원, 최고관리자 4개 모드가 실제로 보게 될 메뉴와 시작 화면을 선택합니다.",
+        "en-US": "Choose the menu scope and landing screen for the four preview modes: field employee, administrator, executive, and super administrator.",
+        "zh-Hans-CN": "选择现场员工、管理员、高管和最高管理员四种预览模式实际看到的菜单范围和起始页面。",
+        "ja-JP": "現場社員、管理者、役員、最高管理者の4つのプレビューモードで実際に見るメニュー範囲と開始画面を選択します。"
+      }
+    },
+    {
+      "key": "accounts.fieldWorker.label",
+      "values": {
+        "ko-KR": "현장사원",
+        "en-US": "Field employee",
+        "zh-Hans-CN": "现场员工",
+        "ja-JP": "現場社員"
+      }
+    },
+    {
+      "key": "accounts.fieldWorker.description",
+      "values": {
+        "ko-KR": "현장사원이 휴대폰 앱 형태로 출퇴근과 내 급여를 확인하는 화면입니다.",
+        "en-US": "Field employee view for checking attendance and own payroll in a phone-app layout.",
+        "zh-Hans-CN": "现场员工以手机应用形式查看出退勤和个人工资的界面。",
+        "ja-JP": "現場社員が携帯アプリ形式で出退勤と自分の給与を確認する画面です。"
+      }
+    },
+    {
+      "key": "accounts.fieldWorker.roleLabel",
+      "values": {
+        "ko-KR": "현장사원",
+        "en-US": "Field employee",
+        "zh-Hans-CN": "现场员工",
+        "ja-JP": "現場社員"
+      }
+    },
+    {
+      "key": "accounts.fieldWorker.modeLabel",
+      "values": {
+        "ko-KR": "현장사원 모드",
+        "en-US": "Field employee mode",
+        "zh-Hans-CN": "现场员工模式",
+        "ja-JP": "現場社員モード"
+      }
+    },
+    {
+      "key": "accounts.fieldWorker.displayName",
+      "values": {
+        "ko-KR": "김현장",
+        "en-US": "Kim Field",
+        "zh-Hans-CN": "金现场",
+        "ja-JP": "キム現場"
+      }
+    },
+    {
+      "key": "accounts.fieldWorker.tenantName",
+      "values": {
+        "ko-KR": "Bitween 현장",
+        "en-US": "Bitween Field",
+        "zh-Hans-CN": "Bitween 现场",
+        "ja-JP": "Bitween 現場"
+      }
+    },
+    {
+      "key": "accounts.fieldManager.label",
+      "values": {
+        "ko-KR": "현장관리자",
+        "en-US": "Site manager",
+        "zh-Hans-CN": "现场管理员",
+        "ja-JP": "現場管理者"
+      }
+    },
+    {
+      "key": "accounts.fieldManager.description",
+      "values": {
+        "ko-KR": "출퇴근 현황, 직원 상태, 전자결재 확인을 묶은 현장 관리자 화면입니다.",
+        "en-US": "Site manager view for attendance status, people checks, and approvals.",
+        "zh-Hans-CN": "整合出退勤状态、员工状态和电子审批的现场管理员界面。",
+        "ja-JP": "出退勤状況、従業員状態、電子承認をまとめた現場管理者画面です。"
+      }
+    },
+    {
+      "key": "accounts.fieldManager.roleLabel",
+      "values": {
+        "ko-KR": "현장관리자",
+        "en-US": "Site manager",
+        "zh-Hans-CN": "现场管理员",
+        "ja-JP": "現場管理者"
+      }
+    },
+    {
+      "key": "accounts.fieldManager.modeLabel",
+      "values": {
+        "ko-KR": "현장관리 모드",
+        "en-US": "Site management mode",
+        "zh-Hans-CN": "现场管理模式",
+        "ja-JP": "現場管理モード"
+      }
+    },
+    {
+      "key": "accounts.fieldManager.displayName",
+      "values": {
+        "ko-KR": "박관리",
+        "en-US": "Park Manager",
+        "zh-Hans-CN": "朴管理",
+        "ja-JP": "パク管理"
+      }
+    },
+    {
+      "key": "accounts.fieldManager.tenantName",
+      "values": {
+        "ko-KR": "Bitween 현장",
+        "en-US": "Bitween Field",
+        "zh-Hans-CN": "Bitween 现场",
+        "ja-JP": "Bitween 現場"
+      }
+    },
+    {
+      "key": "accounts.operationsAdmin.label",
+      "values": {
+        "ko-KR": "관리자",
+        "en-US": "Administrator",
+        "zh-Hans-CN": "管理员",
+        "ja-JP": "管理者"
+      }
+    },
+    {
+      "key": "accounts.operationsAdmin.description",
+      "values": {
+        "ko-KR": "급여, 인사, 출퇴근, 결재, 자료함을 운영하는 사무 관리자 화면입니다.",
+        "en-US": "Office administrator view for payroll, HR, attendance, approvals, and archive operations.",
+        "zh-Hans-CN": "运营工资、人事、出退勤、审批和资料库的办公室管理员界面。",
+        "ja-JP": "給与、人事、出退勤、承認、資料庫を運用する事務管理者画面です。"
+      }
+    },
+    {
+      "key": "accounts.operationsAdmin.roleLabel",
+      "values": {
+        "ko-KR": "관리자",
+        "en-US": "Administrator",
+        "zh-Hans-CN": "管理员",
+        "ja-JP": "管理者"
+      }
+    },
+    {
+      "key": "accounts.operationsAdmin.modeLabel",
+      "values": {
+        "ko-KR": "운영관리 모드",
+        "en-US": "Operations admin mode",
+        "zh-Hans-CN": "运营管理模式",
+        "ja-JP": "運用管理モード"
+      }
+    },
+    {
+      "key": "accounts.operationsAdmin.displayName",
+      "values": {
+        "ko-KR": "이관리",
+        "en-US": "Lee Admin",
+        "zh-Hans-CN": "李管理",
+        "ja-JP": "イ管理"
+      }
+    },
+    {
+      "key": "accounts.operationsAdmin.tenantName",
+      "values": {
+        "ko-KR": "Bitween 운영",
+        "en-US": "Bitween Operations",
+        "zh-Hans-CN": "Bitween 运营",
+        "ja-JP": "Bitween 運用"
+      }
+    },
+    {
+      "key": "accounts.executive.label",
+      "values": {
+        "ko-KR": "임원",
+        "en-US": "Executive",
+        "zh-Hans-CN": "高管",
+        "ja-JP": "役員"
+      }
+    },
+    {
+      "key": "accounts.executive.description",
+      "values": {
+        "ko-KR": "급여 마감, 결재 대기, 주요 자료를 빠르게 보는 임원 화면입니다.",
+        "en-US": "Executive view for payroll close, pending approvals, and key documents.",
+        "zh-Hans-CN": "快速查看工资结算、待审批和关键资料的高管界面。",
+        "ja-JP": "給与締め、承認待ち、主要資料を素早く見る役員画面です。"
+      }
+    },
+    {
+      "key": "accounts.executive.roleLabel",
+      "values": {
+        "ko-KR": "임원",
+        "en-US": "Executive",
+        "zh-Hans-CN": "高管",
+        "ja-JP": "役員"
+      }
+    },
+    {
+      "key": "accounts.executive.modeLabel",
+      "values": {
+        "ko-KR": "임원 검토 모드",
+        "en-US": "Executive review mode",
+        "zh-Hans-CN": "高管审阅模式",
+        "ja-JP": "役員レビュー モード"
+      }
+    },
+    {
+      "key": "accounts.executive.displayName",
+      "values": {
+        "ko-KR": "최임원",
+        "en-US": "Choi Executive",
+        "zh-Hans-CN": "崔高管",
+        "ja-JP": "チェ役員"
+      }
+    },
+    {
+      "key": "accounts.executive.tenantName",
+      "values": {
+        "ko-KR": "Bitween 임원",
+        "en-US": "Bitween Executive",
+        "zh-Hans-CN": "Bitween 高管",
+        "ja-JP": "Bitween 役員"
+      }
+    },
+    {
+      "key": "accounts.leadership.label",
+      "values": {
+        "ko-KR": "경영진",
+        "en-US": "Leadership",
+        "zh-Hans-CN": "经营层",
+        "ja-JP": "経営陣"
+      }
+    },
+    {
+      "key": "accounts.leadership.description",
+      "values": {
+        "ko-KR": "전사 지표, 급여 리스크, 권한·자료 상태를 요약하는 경영진 화면입니다.",
+        "en-US": "Leadership view summarizing company metrics, payroll risk, permissions, and archive status.",
+        "zh-Hans-CN": "汇总公司指标、工资风险、权限和资料状态的经营层界面。",
+        "ja-JP": "全社指標、給与リスク、権限・資料状態を要約する経営陣画面です。"
+      }
+    },
+    {
+      "key": "accounts.leadership.roleLabel",
+      "values": {
+        "ko-KR": "경영진",
+        "en-US": "Leadership",
+        "zh-Hans-CN": "经营层",
+        "ja-JP": "経営陣"
+      }
+    },
+    {
+      "key": "accounts.leadership.modeLabel",
+      "values": {
+        "ko-KR": "경영 대시보드 모드",
+        "en-US": "Leadership dashboard mode",
+        "zh-Hans-CN": "经营仪表盘模式",
+        "ja-JP": "経営ダッシュボード モード"
+      }
+    },
+    {
+      "key": "accounts.leadership.displayName",
+      "values": {
+        "ko-KR": "정경영",
+        "en-US": "Jung Leadership",
+        "zh-Hans-CN": "郑经营",
+        "ja-JP": "チョン経営"
+      }
+    },
+    {
+      "key": "accounts.leadership.tenantName",
+      "values": {
+        "ko-KR": "Bitween 경영",
+        "en-US": "Bitween Leadership",
+        "zh-Hans-CN": "Bitween 经营",
+        "ja-JP": "Bitween 経営"
+      }
+    },
+    {
+      "key": "accounts.superAdmin.label",
+      "values": {
+        "ko-KR": "최고관리자",
+        "en-US": "Super administrator",
+        "zh-Hans-CN": "最高管理员",
+        "ja-JP": "最高管理者"
+      }
+    },
+    {
+      "key": "accounts.superAdmin.description",
+      "values": {
+        "ko-KR": "모든 메뉴와 설정을 열어 개발자 모드까지 확인하는 최고관리자 화면입니다.",
+        "en-US": "Super administrator view with all menus, settings, and developer mode enabled.",
+        "zh-Hans-CN": "打开所有菜单和设置，并启用开发者模式的最高管理员界面。",
+        "ja-JP": "すべてのメニューと設定を開き、開発者モードまで確認する最高管理者画面です。"
+      }
+    },
+    {
+      "key": "accounts.superAdmin.roleLabel",
+      "values": {
+        "ko-KR": "최고관리자",
+        "en-US": "Super administrator",
+        "zh-Hans-CN": "最高管理员",
+        "ja-JP": "最高管理者"
+      }
+    },
+    {
+      "key": "accounts.superAdmin.modeLabel",
+      "values": {
+        "ko-KR": "개발자 모드",
+        "en-US": "Developer mode",
+        "zh-Hans-CN": "开发者模式",
+        "ja-JP": "開発者モード"
+      }
+    },
+    {
+      "key": "accounts.superAdmin.displayName",
+      "values": {
+        "ko-KR": "최고관리자",
+        "en-US": "Super Admin",
+        "zh-Hans-CN": "最高管理员",
+        "ja-JP": "最高管理者"
+      }
+    },
+    {
+      "key": "accounts.superAdmin.tenantName",
+      "values": {
+        "ko-KR": "Bitween 개발",
+        "en-US": "Bitween Development",
+        "zh-Hans-CN": "Bitween 开发",
+        "ja-JP": "Bitween 開発"
+      }
+    },
+    {
+      "key": "screens.attendance.appPrompt.title",
+      "values": {
+        "ko-KR": "휴대폰 출퇴근 앱 미리보기",
+        "en-US": "Mobile attendance app preview",
+        "zh-Hans-CN": "手机出退勤应用预览",
+        "ja-JP": "携帯出退勤アプリのプレビュー"
+      }
+    },
+    {
+      "key": "screens.attendance.appPrompt.description",
+      "values": {
+        "ko-KR": "현장사원이 보는 휴대폰 앱 화면을 이 탭 안에서 바로 확인합니다. 버튼을 누르면 앱 프레임으로 이동합니다.",
+        "en-US": "Review the phone app screen field employees see directly inside this tab. Press the button to jump to the app frame.",
+        "zh-Hans-CN": "在此标签页中直接查看现场员工看到的手机应用界面。点击按钮可跳转到应用框。",
+        "ja-JP": "現場社員が見る携帯アプリ画面をこのタブ内ですぐ確認できます。ボタンを押すとアプリ枠へ移動します。"
+      }
+    },
+    {
+      "key": "screens.attendance.appPrompt.action",
+      "values": {
+        "ko-KR": "출퇴근 앱 보기",
+        "en-US": "Open attendance app",
+        "zh-Hans-CN": "打开出退勤应用",
+        "ja-JP": "出退勤アプリを開く"
+      }
+    },
+    {
+      "key": "screens.attendance.appPrompt.badge",
+      "values": {
+        "ko-KR": "Mobile preview",
+        "en-US": "Mobile preview",
+        "zh-Hans-CN": "移动预览",
+        "ja-JP": "モバイルプレビュー"
+      }
+    },
+    {
+      "key": "screens.attendance.appPrompt.notice",
+      "values": {
+        "ko-KR": "GPS·QR 확인, 출근/퇴근 버튼, 최근 기록을 실제 앱 형태로 보여줍니다.",
+        "en-US": "Shows GPS/QR verification, check-in/out buttons, and recent records in the app layout.",
+        "zh-Hans-CN": "以应用布局显示 GPS/二维码确认、上班/下班按钮和最近记录。",
+        "ja-JP": "GPS・QR確認、出勤/退勤ボタン、最近の記録をアプリ形式で表示します。"
+      }
+    },
+    {
+      "key": "preview.toast.attendanceAppOpened",
+      "values": {
+        "ko-KR": "휴대폰 출퇴근 앱 화면을 열었습니다.",
+        "en-US": "Opened the mobile attendance app screen.",
+        "zh-Hans-CN": "已打开手机出退勤应用界面。",
+        "ja-JP": "携帯出退勤アプリ画面を開きました。"
+      }
+    },
+    {
+      "key": "navigation.maintenanceRental.label",
+      "values": {
+        "ko-KR": "정비/렌탈",
+        "en-US": "Maintenance/Rental",
+        "zh-Hans-CN": "维修/租赁",
+        "ja-JP": "整備/レンタル"
+      }
+    },
+    {
+      "key": "navigation.maintenanceRental.eyebrow",
+      "values": {
+        "ko-KR": "Maintenance",
+        "en-US": "Maintenance",
+        "zh-Hans-CN": "维修",
+        "ja-JP": "整備"
+      }
+    },
+    {
+      "key": "navigation.maintenanceRental.description",
+      "values": {
+        "ko-KR": "장비 렌탈 운영, 정비 접수, 배정, 승인과 KPI 시스템으로 이동합니다.",
+        "en-US": "Open equipment rental operations, maintenance intake, assignment, approval, and KPI workflows.",
+        "zh-Hans-CN": "打开设备租赁运营、维修接收、分配、审批和 KPI 流程。",
+        "ja-JP": "機器レンタル運営、整備受付、割当、承認、KPI ワークフローを開きます。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.title",
+      "values": {
+        "ko-KR": "정비/렌탈 운영 브릿지",
+        "en-US": "Maintenance/Rental operations bridge",
+        "zh-Hans-CN": "维修/租赁运营桥接",
+        "ja-JP": "整備/レンタル運営ブリッジ"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.subtitle",
+      "values": {
+        "ko-KR": "Bitween 기준 헤더에서 외부 정비 렌탈 운영 시스템으로 연결합니다.",
+        "en-US": "Connect from the Bitween header to the external maintenance rental operations system.",
+        "zh-Hans-CN": "从 Bitween 标准页眉连接到外部维修租赁运营系统。",
+        "ja-JP": "Bitween 基準ヘッダーから外部の整備レンタル運営システムへ接続します。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.filters.all",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.filters.workorder",
+      "values": {
+        "ko-KR": "정비건",
+        "en-US": "Work orders",
+        "zh-Hans-CN": "维修单",
+        "ja-JP": "整備件"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.filters.equipment",
+      "values": {
+        "ko-KR": "장비",
+        "en-US": "Equipment",
+        "zh-Hans-CN": "设备",
+        "ja-JP": "機器"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.filters.approval",
+      "values": {
+        "ko-KR": "승인",
+        "en-US": "Approval",
+        "zh-Hans-CN": "审批",
+        "ja-JP": "承認"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.filters.kpi",
+      "values": {
+        "ko-KR": "KPI",
+        "en-US": "KPI",
+        "zh-Hans-CN": "KPI",
+        "ja-JP": "KPI"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.workorders.label",
+      "values": {
+        "ko-KR": "미결 정비건",
+        "en-US": "Open work orders",
+        "zh-Hans-CN": "未结维修单",
+        "ja-JP": "未完了整備件"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.workorders.value",
+      "values": {
+        "ko-KR": "운영 시스템",
+        "en-US": "Operations app",
+        "zh-Hans-CN": "运营系统",
+        "ja-JP": "運営システム"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.workorders.helper",
+      "values": {
+        "ko-KR": "접수, 배정, 작업보고는 연결된 정비/렌탈 시스템에서 처리합니다.",
+        "en-US": "Intake, assignment, and work reports stay in the linked maintenance/rental system.",
+        "zh-Hans-CN": "接收、分配和工作报告在连接的维修/租赁系统中处理。",
+        "ja-JP": "受付、割当、作業報告は接続先の整備/レンタルシステムで処理します。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.equipment.label",
+      "values": {
+        "ko-KR": "장비 자산",
+        "en-US": "Equipment assets",
+        "zh-Hans-CN": "设备资产",
+        "ja-JP": "機器資産"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.equipment.value",
+      "values": {
+        "ko-KR": "GitHub 연동",
+        "en-US": "GitHub linked",
+        "zh-Hans-CN": "已连接 GitHub",
+        "ja-JP": "GitHub 連携"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.equipment.helper",
+      "values": {
+        "ko-KR": "저장소 업데이트를 따라 외부 시스템이 독립적으로 개선됩니다.",
+        "en-US": "External updates follow the connected repository independently.",
+        "zh-Hans-CN": "外部系统随连接的仓库独立更新。",
+        "ja-JP": "外部システムは接続リポジトリの更新に従い独立して改善されます。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.approval.label",
+      "values": {
+        "ko-KR": "승인 흐름",
+        "en-US": "Approval flow",
+        "zh-Hans-CN": "审批流程",
+        "ja-JP": "承認フロー"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.approval.value",
+      "values": {
+        "ko-KR": "관리자/임원",
+        "en-US": "Admin/Executive",
+        "zh-Hans-CN": "管理员/高管",
+        "ja-JP": "管理者/役員"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.approval.helper",
+      "values": {
+        "ko-KR": "정비 완료 승인과 KPI 보고는 정비 시스템 권한을 따릅니다.",
+        "en-US": "Completion approvals and KPI reports follow maintenance-system permissions.",
+        "zh-Hans-CN": "完成审批和 KPI 报告遵循维修系统权限。",
+        "ja-JP": "完了承認と KPI レポートは整備システム権限に従います。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.github.label",
+      "values": {
+        "ko-KR": "소스 기준",
+        "en-US": "Source of truth",
+        "zh-Hans-CN": "源代码基准",
+        "ja-JP": "ソース基準"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.github.value",
+      "values": {
+        "ko-KR": "maintenance_system",
+        "en-US": "maintenance_system",
+        "zh-Hans-CN": "maintenance_system",
+        "ja-JP": "maintenance_system"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.github.helper",
+      "values": {
+        "ko-KR": "Bitween은 코드를 복사하지 않고 외부 시스템으로 이동합니다.",
+        "en-US": "Bitween links out instead of copying the external code.",
+        "zh-Hans-CN": "Bitween 不复制外部代码，而是跳转连接。",
+        "ja-JP": "Bitween は外部コードをコピーせずリンクで移動します。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-1.category",
+      "values": {
+        "ko-KR": "정비 접수/배정",
+        "en-US": "Maintenance intake/assignment",
+        "zh-Hans-CN": "维修接收/分配",
+        "ja-JP": "整備受付/割当"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-1.status",
+      "values": {
+        "ko-KR": "외부 시스템 처리",
+        "en-US": "Handled externally",
+        "zh-Hans-CN": "外部系统处理",
+        "ja-JP": "外部システム処理"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-1.owner",
+      "values": {
+        "ko-KR": "정비/렌탈 운영",
+        "en-US": "Maintenance/Rental ops",
+        "zh-Hans-CN": "维修/租赁运营",
+        "ja-JP": "整備/レンタル運営"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-1.nextStep",
+      "values": {
+        "ko-KR": "정비/렌탈 탭의 열기 버튼으로 이동",
+        "en-US": "Use the open button in this tab",
+        "zh-Hans-CN": "使用该标签中的打开按钮",
+        "ja-JP": "このタブの開くボタンで移動"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-2.category",
+      "values": {
+        "ko-KR": "장비 이력/KPI",
+        "en-US": "Equipment history/KPI",
+        "zh-Hans-CN": "设备历史/KPI",
+        "ja-JP": "機器履歴/KPI"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-2.status",
+      "values": {
+        "ko-KR": "저장소 기준 유지",
+        "en-US": "Repository-driven",
+        "zh-Hans-CN": "仓库驱动",
+        "ja-JP": "リポジトリ基準"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-2.owner",
+      "values": {
+        "ko-KR": "maintenance_system",
+        "en-US": "maintenance_system",
+        "zh-Hans-CN": "maintenance_system",
+        "ja-JP": "maintenance_system"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-2.nextStep",
+      "values": {
+        "ko-KR": "외부 저장소 업데이트를 그대로 사용",
+        "en-US": "Use external repository updates as-is",
+        "zh-Hans-CN": "直接使用外部仓库更新",
+        "ja-JP": "外部リポジトリ更新をそのまま使用"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-3.category",
+      "values": {
+        "ko-KR": "Bitween 연동 경계",
+        "en-US": "Bitween integration boundary",
+        "zh-Hans-CN": "Bitween 集成边界",
+        "ja-JP": "Bitween 連携境界"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-3.status",
+      "values": {
+        "ko-KR": "급여 원본 분리",
+        "en-US": "Payroll data separated",
+        "zh-Hans-CN": "薪资原始数据分离",
+        "ja-JP": "給与原本を分離"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-3.owner",
+      "values": {
+        "ko-KR": "플랫폼 아키텍처",
+        "en-US": "Platform architecture",
+        "zh-Hans-CN": "平台架构",
+        "ja-JP": "プラットフォーム設計"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-3.nextStep",
+      "values": {
+        "ko-KR": "작업시간 export는 승인 후 Bitween 급여 검토로 연결",
+        "en-US": "Approved labor exports feed Bitween payroll review",
+        "zh-Hans-CN": "批准后的工时导出进入 Bitween 薪资审核",
+        "ja-JP": "承認済み作業時間 export は Bitween 給与レビューへ連携"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.primaryAction.label",
+      "values": {
+        "ko-KR": "정비/렌탈 시스템 열기",
+        "en-US": "Open maintenance/rental system",
+        "zh-Hans-CN": "打开维修/租赁系统",
+        "ja-JP": "整備/レンタルシステムを開く"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.primaryAction.description",
+      "values": {
+        "ko-KR": "연결된 GitHub/배포 시스템으로 이동합니다.",
+        "en-US": "Move to the linked GitHub or deployed system.",
+        "zh-Hans-CN": "跳转到连接的 GitHub 或部署系统。",
+        "ja-JP": "接続済み GitHub またはデプロイ先へ移動します。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.secondaryAction.label",
+      "values": {
+        "ko-KR": "자료 보관함 확인",
+        "en-US": "Review archive",
+        "zh-Hans-CN": "查看资料库",
+        "ja-JP": "資料保管庫を確認"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.secondaryAction.description",
+      "values": {
+        "ko-KR": "정비 관련 보고서와 export 자료 보관 흐름을 확인합니다.",
+        "en-US": "Review storage flows for maintenance reports and exports.",
+        "zh-Hans-CN": "查看维修报告和导出资料的保管流程。",
+        "ja-JP": "整備レポートと export 資料の保管フローを確認します。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.emptyTitle",
+      "values": {
+        "ko-KR": "정비/렌탈 항목이 없습니다.",
+        "en-US": "No maintenance/rental items.",
+        "zh-Hans-CN": "没有维修/租赁项目。",
+        "ja-JP": "整備/レンタル項目がありません。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.emptyDescription",
+      "values": {
+        "ko-KR": "외부 시스템을 열면 최신 정비/렌탈 업무를 확인할 수 있습니다.",
+        "en-US": "Open the external system to see the latest maintenance/rental work.",
+        "zh-Hans-CN": "打开外部系统即可查看最新维修/租赁工作。",
+        "ja-JP": "外部システムを開くと最新の整備/レンタル業務を確認できます。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.eyebrow",
+      "values": {
+        "ko-KR": "Bitween 외부 모듈",
+        "en-US": "Bitween external module",
+        "zh-Hans-CN": "Bitween 外部模块",
+        "ja-JP": "Bitween 外部モジュール"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.title",
+      "values": {
+        "ko-KR": "정비/렌탈 운영 시스템",
+        "en-US": "Maintenance/Rental operations system",
+        "zh-Hans-CN": "维修/租赁运营系统",
+        "ja-JP": "整備/レンタル運営システム"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.description",
+      "values": {
+        "ko-KR": "Bitween 플랫폼 기준의 헤드 배너에서 장비 렌탈 운영, 정비 접수, 배정, 승인, KPI 시스템으로 이동합니다.",
+        "en-US": "From the Bitween header, open equipment rental operations, maintenance intake, assignment, approval, and KPI workflows.",
+        "zh-Hans-CN": "从 Bitween 标准头部进入设备租赁运营、维修接收、分配、审批和 KPI 系统。",
+        "ja-JP": "Bitween 基準ヘッドバナーから機器レンタル運営、整備受付、割当、承認、KPI システムへ移動します。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.actions.open",
+      "values": {
+        "ko-KR": "정비/렌탈 시스템 열기",
+        "en-US": "Open system",
+        "zh-Hans-CN": "打开系统",
+        "ja-JP": "システムを開く"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.actions.github",
+      "values": {
+        "ko-KR": "GitHub 저장소 보기",
+        "en-US": "View GitHub repository",
+        "zh-Hans-CN": "查看 GitHub 仓库",
+        "ja-JP": "GitHub リポジトリを見る"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.source.label",
+      "values": {
+        "ko-KR": "연동 소스",
+        "en-US": "Linked source",
+        "zh-Hans-CN": "连接源",
+        "ja-JP": "連携ソース"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.source.value",
+      "values": {
+        "ko-KR": "GitHub",
+        "en-US": "GitHub",
+        "zh-Hans-CN": "GitHub",
+        "ja-JP": "GitHub"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.source.detail",
+      "values": {
+        "ko-KR": "https://github.com/yulee94/maintenance_system 저장소를 기준으로 연결합니다.",
+        "en-US": "Linked against https://github.com/yulee94/maintenance_system.",
+        "zh-Hans-CN": "基于 https://github.com/yulee94/maintenance_system 仓库连接。",
+        "ja-JP": "https://github.com/yulee94/maintenance_system リポジトリを基準に接続します。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.brand.label",
+      "values": {
+        "ko-KR": "Bitween UI 기준",
+        "en-US": "Bitween UI standard",
+        "zh-Hans-CN": "Bitween UI 标准",
+        "ja-JP": "Bitween UI 基準"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.brand.value",
+      "values": {
+        "ko-KR": "헤드 배너 유지",
+        "en-US": "Header retained",
+        "zh-Hans-CN": "保持头部横幅",
+        "ja-JP": "ヘッドバナー維持"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.brand.detail",
+      "values": {
+        "ko-KR": "타이틀과 진입 화면은 Bitween 플랫폼 톤으로 표시합니다.",
+        "en-US": "Titles and entry surfaces use the Bitween platform tone.",
+        "zh-Hans-CN": "标题和入口界面使用 Bitween 平台风格。",
+        "ja-JP": "タイトルと入口画面は Bitween プラットフォームのトーンで表示します。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.sync.label",
+      "values": {
+        "ko-KR": "업데이트 방식",
+        "en-US": "Update method",
+        "zh-Hans-CN": "更新方式",
+        "ja-JP": "更新方式"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.sync.value",
+      "values": {
+        "ko-KR": "외부 브릿지",
+        "en-US": "External bridge",
+        "zh-Hans-CN": "外部桥接",
+        "ja-JP": "外部ブリッジ"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.sync.detail",
+      "values": {
+        "ko-KR": "정비 시스템 코드를 복사하지 않아 저장소 업데이트가 별도로 반영됩니다.",
+        "en-US": "The maintenance code is not copied, so repository updates remain independent.",
+        "zh-Hans-CN": "不复制维修系统代码，因此仓库更新可独立反映。",
+        "ja-JP": "整備システムのコードをコピーしないため、リポジトリ更新が独立して反映されます。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.flow.badge",
+      "values": {
+        "ko-KR": "운영 흐름",
+        "en-US": "Ops flow",
+        "zh-Hans-CN": "运营流程",
+        "ja-JP": "運営フロー"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.flow.title",
+      "values": {
+        "ko-KR": "접수 → 배정 → 작업보고 → 승인 → KPI",
+        "en-US": "Intake → Assignment → Report → Approval → KPI",
+        "zh-Hans-CN": "接收 → 分配 → 工作报告 → 审批 → KPI",
+        "ja-JP": "受付 → 割当 → 作業報告 → 承認 → KPI"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.flow.detail",
+      "values": {
+        "ko-KR": "정비/렌탈 시스템의 기존 업무 흐름을 그대로 사용하고 Bitween은 진입점과 권한 경계를 관리합니다.",
+        "en-US": "Keep the existing maintenance/rental workflow while Bitween manages the entry point and boundaries.",
+        "zh-Hans-CN": "保留维修/租赁系统现有流程，由 Bitween 管理入口和边界。",
+        "ja-JP": "整備/レンタルシステムの既存業務フローを維持し、Bitween は入口と境界を管理します。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.bitween.badge",
+      "values": {
+        "ko-KR": "연동 경계",
+        "en-US": "Boundary",
+        "zh-Hans-CN": "边界",
+        "ja-JP": "境界"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.bitween.title",
+      "values": {
+        "ko-KR": "급여/근태 원본은 Bitween에 유지",
+        "en-US": "Payroll/attendance source remains in Bitween",
+        "zh-Hans-CN": "薪资/考勤源数据保留在 Bitween",
+        "ja-JP": "給与/勤怠の原本は Bitween に維持"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.bitween.detail",
+      "values": {
+        "ko-KR": "승인된 정비 작업시간만 추후 급여 검토 후보로 export하도록 분리합니다.",
+        "en-US": "Only approved maintenance labor time should export later as payroll-review candidates.",
+        "zh-Hans-CN": "仅将批准后的维修工时作为薪资审核候选导出。",
+        "ja-JP": "承認済み整備作業時間のみ将来の給与レビュー候補として export します。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.notice.badge",
+      "values": {
+        "ko-KR": "자동 연동 기준",
+        "en-US": "Auto-link standard",
+        "zh-Hans-CN": "自动连接标准",
+        "ja-JP": "自動連携基準"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.notice.detail",
+      "values": {
+        "ko-KR": "Bitween은 외부 시스템 URL/저장소를 참조하므로 maintenance_system이 업데이트되어도 이 탭은 같은 진입점으로 최신 시스템을 엽니다.",
+        "en-US": "Bitween references the external URL/repository, so this tab opens the latest system through the same entry point after maintenance_system updates.",
+        "zh-Hans-CN": "Bitween 引用外部 URL/仓库，因此 maintenance_system 更新后该标签仍通过同一入口打开最新系统。",
+        "ja-JP": "Bitween は外部 URL/リポジトリを参照するため、maintenance_system 更新後もこのタブは同じ入口から最新システムを開きます。"
+      }
+    },
+    {
+      "key": "preview.toast.externalOpened",
+      "values": {
+        "ko-KR": "외부 정비/렌탈 시스템을 새 창으로 열었습니다.",
+        "en-US": "Opened the external maintenance/rental system in a new window.",
+        "zh-Hans-CN": "已在新窗口打开外部维修/租赁系统。",
+        "ja-JP": "外部の整備/レンタルシステムを新しいウィンドウで開きました。"
       }
     }
   ],

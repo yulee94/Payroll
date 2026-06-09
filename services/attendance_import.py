@@ -9,6 +9,7 @@ attendance, and mixed payroll inputs can share the same downstream engine.
 from __future__ import annotations
 
 import csv
+import re
 from dataclasses import dataclass
 from datetime import datetime, time
 from pathlib import Path
@@ -19,22 +20,108 @@ from services.payroll_policy_store import resolve_payroll_operation_policy
 from utils import safe_number
 
 HEADER_ALIASES: dict[str, tuple[str, ...]] = {
-    "name": ("성명", "이름", "사원명", "직원명", "근로자명", "name", "employee"),
-    "dept": ("부서", "소속", "팀", "dept", "department"),
-    "workplace": ("사업장", "근무지", "현장", "site", "workplace"),
-    "date": ("일자", "날짜", "근무일", "date"),
-    "clock_in": ("출근", "출근시간", "입실", "clockin", "clock_in", "start"),
-    "clock_out": ("퇴근", "퇴근시간", "퇴실", "clockout", "clock_out", "end"),
-    "work_hours": ("근무시간", "실근로", "실근로시간", "총근무", "workhours", "hours"),
+    "name": ("성명", "이름", "사원명", "직원명", "근로자명", "직원성명", "근무자", "name", "employee"),
+    "dept": ("부서", "소속", "팀", "근무부서", "dept", "department"),
+    "workplace": ("사업장", "근무지", "현장", "현장명", "site", "workplace"),
+    "date": ("일자", "날짜", "근무일", "근태일자", "date"),
+    "clock_in": ("출근", "출근시간", "출근시각", "입실", "clockin", "clock_in", "start"),
+    "clock_out": ("퇴근", "퇴근시간", "퇴근시각", "퇴실", "clockout", "clock_out", "end"),
+    "work_hours": ("근무시간", "실근로", "실근로시간", "총근무", "총근로시간", "workhours", "hours"),
     "break_minutes": ("휴게", "휴게시간", "휴게분", "break", "breakminutes"),
     "late_minutes": ("지각", "지각시간", "지각분", "late", "lateminutes"),
     "early_leave_minutes": ("조퇴", "조퇴시간", "조퇴분", "지조외", "earlyleave"),
-    "overtime_hours": ("연장", "연장시간", "ot", "overtime"),
-    "night_hours": ("야간", "심야", "night"),
-    "special_hours": ("특근", "휴일근로", "special", "holidaywork"),
-    "leave_days": ("연차", "휴가", "leave"),
-    "unpaid_days": ("결근", "무급", "무급일", "absence", "unpaid"),
+    "overtime_hours": ("연장", "연장시간", "연장근로", "잔업", "ot", "overtime"),
+    "night_hours": ("야간", "야간시간", "심야", "심야시간", "night"),
+    "special_hours": ("특근", "특근시간", "휴일", "휴일근로", "special", "holidaywork"),
+    "leave_days": ("연차", "연차일수", "휴가", "휴가일수", "leave"),
+    "unpaid_days": ("결근", "결근일수", "무급", "무급일", "absence", "unpaid"),
 }
+
+DEFAULT_SYMBOL_WORK_HOURS = 8.0
+HALF_DAY_WORK_HOURS = 4.0
+
+WORK_DAY_MARKERS = {
+    "●",
+    "○",
+    "◎",
+    "◉",
+    "■",
+    "□",
+    "✓",
+    "✔",
+    "o",
+    "ok",
+    "출",
+    "근",
+    "출근",
+    "정상",
+    "근무",
+}
+HALF_WORK_DAY_MARKERS = {
+    "◐",
+    "◑",
+    "△",
+    "▲",
+    "반근",
+    "반일",
+    "반근무",
+}
+LEAVE_DAY_MARKERS = {
+    "연",
+    "연차",
+    "월차",
+    "휴가",
+    "유급",
+    "유급휴가",
+}
+HALF_LEAVE_DAY_MARKERS = {
+    "반",
+    "반차",
+    "오전반차",
+    "오후반차",
+    "반휴",
+    "반휴가",
+}
+UNPAID_DAY_MARKERS = {
+    "결",
+    "결근",
+    "무",
+    "무급",
+    "무단",
+    "무단결근",
+    "x",
+    "×",
+    "✕",
+    "✖",
+}
+HALF_UNPAID_DAY_MARKERS = {
+    "◔",
+    "반결",
+    "반결근",
+    "반무",
+    "반무급",
+    "무급반",
+}
+BLANK_ATTENDANCE_MARKERS = {
+    "-",
+    "–",
+    "—",
+    "·",
+    ".",
+    "휴",
+    "휴무",
+    "휴일",
+    "공휴",
+    "공휴일",
+    "비번",
+    "off",
+}
+
+_DAY_HEADER_RE = re.compile(r"^0?(\d{1,2})(?:일|day)?(?:\([^)]*\))?$", re.IGNORECASE)
+_DATE_DAY_HEADER_RE = re.compile(
+    r"^(?:(?:\d{4}년)?\d{1,2}월|(?:\d{4}[-/.])?\d{1,2}[-/.])0?(\d{1,2})일?(?:\([^)]*\))?$",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -47,6 +134,14 @@ class AttendanceImportResult:
     @property
     def count(self) -> int:
         return len(self.invoice_rows)
+
+
+@dataclass(frozen=True)
+class AttendanceMarkerParts:
+    work_hours: float = 0.0
+    leave_days: float = 0.0
+    unpaid_days: float = 0.0
+    marked: bool = False
 
 
 def _compact(text: Any) -> str:
@@ -62,6 +157,42 @@ def _canonical_header(text: Any) -> str | None:
             if c == _compact(alias) or _compact(alias) in c:
                 return key
     return None
+
+
+def _parse_day_header(value: Any) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.day
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if float(value).is_integer():
+            day = int(value)
+            return day if 1 <= day <= 31 else None
+        return None
+    text = str(value or "").strip()
+    if not text:
+        return None
+    compact = _compact(text)
+    if compact.endswith(".0"):
+        compact = compact[:-2]
+    match = _DAY_HEADER_RE.match(compact)
+    if not match:
+        match = _DATE_DAY_HEADER_RE.match(compact)
+    if not match:
+        return None
+    day = int(match.group(1))
+    return day if 1 <= day <= 31 else None
+
+
+def _calendar_day_columns(header_row: list[Any], mapping: dict[str, int]) -> list[int]:
+    mapped = set(mapping.values())
+    cols: list[int] = []
+    for col, value in enumerate(header_row):
+        if col in mapped:
+            continue
+        if _parse_day_header(value) is not None:
+            cols.append(col)
+    return cols
 
 
 def _read_csv_rows(path: Path) -> list[list[Any]]:
@@ -96,7 +227,7 @@ def _read_table_rows(path: Path) -> list[list[Any]]:
 
 
 def _find_header(rows: list[list[Any]]) -> tuple[int, dict[str, int]]:
-    best: tuple[int, dict[str, int]] | None = None
+    best: tuple[int, int, dict[str, int]] | None = None
     for idx, row in enumerate(rows[:12]):
         mapping: dict[str, int] = {}
         for col, value in enumerate(row):
@@ -104,11 +235,13 @@ def _find_header(rows: list[list[Any]]) -> tuple[int, dict[str, int]]:
             if key and key not in mapping:
                 mapping[key] = col
         score = len(mapping)
-        if "name" in mapping and score >= 2:
-            if best is None or score > len(best[1]):
-                best = (idx, mapping)
+        day_cols = _calendar_day_columns(row, mapping)
+        if "name" in mapping and (score >= 2 or day_cols):
+            rank = score * 10 + min(len(day_cols), 31)
+            if best is None or rank > best[1]:
+                best = (idx, rank, mapping)
     if best:
-        return best
+        return best[0], best[2]
     raise ValueError("근태 파일에서 성명/출퇴근 헤더를 찾지 못했습니다.")
 
 
@@ -176,6 +309,110 @@ def _number_as_hours(value: Any) -> float:
     return n
 
 
+def _marker_key(value: Any) -> str:
+    return _compact(value).replace(" ", "")
+
+
+def _marker_attendance_parts(value: Any) -> AttendanceMarkerParts:
+    if _is_blank(value):
+        return AttendanceMarkerParts()
+    key = _marker_key(value)
+    if not key or key in BLANK_ATTENDANCE_MARKERS:
+        return AttendanceMarkerParts()
+    if key in WORK_DAY_MARKERS:
+        return AttendanceMarkerParts(work_hours=DEFAULT_SYMBOL_WORK_HOURS, marked=True)
+    if key in HALF_WORK_DAY_MARKERS:
+        return AttendanceMarkerParts(work_hours=HALF_DAY_WORK_HOURS, marked=True)
+    if key in HALF_LEAVE_DAY_MARKERS:
+        return AttendanceMarkerParts(
+            work_hours=HALF_DAY_WORK_HOURS,
+            leave_days=0.5,
+            marked=True,
+        )
+    if key in LEAVE_DAY_MARKERS:
+        return AttendanceMarkerParts(leave_days=1.0, marked=True)
+    if key in HALF_UNPAID_DAY_MARKERS:
+        return AttendanceMarkerParts(
+            work_hours=HALF_DAY_WORK_HOURS,
+            unpaid_days=0.5,
+            marked=True,
+        )
+    if key in UNPAID_DAY_MARKERS:
+        return AttendanceMarkerParts(unpaid_days=1.0, marked=True)
+    return AttendanceMarkerParts()
+
+
+def _work_hours_from_value(value: Any) -> float:
+    hours = _number_as_hours(value)
+    if hours > 0:
+        return hours
+    return _marker_attendance_parts(value).work_hours
+
+
+def _days_from_value(value: Any, *, field: str) -> float:
+    if _is_blank(value):
+        return 0.0
+    days = safe_number(value, 0.0)
+    if days > 0:
+        return days
+    key = _marker_key(value)
+    if field == "leave":
+        if key in HALF_LEAVE_DAY_MARKERS:
+            return 0.5
+        if key in LEAVE_DAY_MARKERS:
+            return 1.0
+    elif field == "unpaid":
+        if key in HALF_UNPAID_DAY_MARKERS:
+            return 0.5
+        if key in UNPAID_DAY_MARKERS:
+            return 1.0
+    if key in WORK_DAY_MARKERS:
+        return 1.0
+    if key in HALF_WORK_DAY_MARKERS:
+        return 0.5
+    return 0.0
+
+
+def _calendar_marker_totals(row: list[Any], day_cols: list[int]) -> AttendanceMarkerParts:
+    work_hours = 0.0
+    leave_days = 0.0
+    unpaid_days = 0.0
+    marked_days = 0
+    for col in day_cols:
+        if col >= len(row):
+            continue
+        value = row[col]
+        hours = _number_as_hours(value)
+        if hours > 0:
+            work_hours += hours
+            marked_days += 1
+            continue
+        parts = _marker_attendance_parts(value)
+        if not parts.marked:
+            continue
+        work_hours += parts.work_hours
+        leave_days += parts.leave_days
+        unpaid_days += parts.unpaid_days
+        marked_days += 1
+    return AttendanceMarkerParts(
+        work_hours=work_hours,
+        leave_days=leave_days,
+        unpaid_days=unpaid_days,
+        marked=marked_days > 0,
+    )
+
+
+def _calendar_marked_days(row: list[Any], day_cols: list[int]) -> int:
+    count = 0
+    for col in day_cols:
+        if col >= len(row):
+            continue
+        value = row[col]
+        if _number_as_hours(value) > 0 or _marker_attendance_parts(value).marked:
+            count += 1
+    return count
+
+
 def _minutes_as_hours(value: Any) -> float:
     if _is_blank(value):
         return 0.0
@@ -196,19 +433,32 @@ def _round_hours(hours: float, rounding_minutes: int) -> float:
 def _iter_record_rows(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
     rows = _read_table_rows(path)
     header_idx, mapping = _find_header(rows)
+    day_cols = _calendar_day_columns(rows[header_idx], mapping)
     out: list[dict[str, Any]] = []
     warnings: list[str] = []
     for source_row_no, row in enumerate(rows[header_idx + 1 :], header_idx + 2):
         name = str(_value(row, mapping, "name") or "").strip()
         if not name or name in ("합계", "소계", "계"):
             continue
-        work_hours = _number_as_hours(_value(row, mapping, "work_hours"))
+        marker_totals = _calendar_marker_totals(row, day_cols)
+        marked_days = _calendar_marked_days(row, day_cols)
+        work_hours = _work_hours_from_value(_value(row, mapping, "work_hours"))
         if work_hours <= 0:
             work_hours = _hours_from_clock(
                 _value(row, mapping, "clock_in"),
                 _value(row, mapping, "clock_out"),
                 _value(row, mapping, "break_minutes"),
             )
+        if marker_totals.marked and work_hours <= 0:
+            work_hours = marker_totals.work_hours
+        explicit_leave_days = _days_from_value(
+            _value(row, mapping, "leave_days"),
+            field="leave",
+        )
+        explicit_unpaid_days = _days_from_value(
+            _value(row, mapping, "unpaid_days"),
+            field="unpaid",
+        )
         record = {
             "source_row": source_row_no,
             "name": name,
@@ -222,8 +472,13 @@ def _iter_record_rows(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
             "overtime_hours": _number_as_hours(_value(row, mapping, "overtime_hours")),
             "night_hours": _number_as_hours(_value(row, mapping, "night_hours")),
             "special_hours": _number_as_hours(_value(row, mapping, "special_hours")),
-            "leave_days": safe_number(_value(row, mapping, "leave_days"), 0.0),
-            "unpaid_days": safe_number(_value(row, mapping, "unpaid_days"), 0.0),
+            "leave_days": explicit_leave_days
+            if explicit_leave_days > 0
+            else marker_totals.leave_days,
+            "unpaid_days": explicit_unpaid_days
+            if explicit_unpaid_days > 0
+            else marker_totals.unpaid_days,
+            "_attendance_days": marked_days or 1,
         }
         if record["work_hours"] <= 0 and record["leave_days"] <= 0 and record["unpaid_days"] <= 0:
             warnings.append(f"{source_row_no}행 {name}: 근무시간/휴가/결근 값이 없어 제외했습니다.")
@@ -274,7 +529,7 @@ def _aggregate_records(
         item["special_hours"] += rec.get("special_hours", 0.0)
         item["leave_days"] += rec.get("leave_days", 0.0)
         item["unpaid_days"] += rec.get("unpaid_days", 0.0)
-        item["_attendance_days"] += 1
+        item["_attendance_days"] += max(1, int(rec.get("_attendance_days") or 1))
 
     rows: list[dict[str, Any]] = []
     for item in grouped.values():

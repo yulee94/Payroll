@@ -5,23 +5,52 @@ const tones = {
   neutral: "tone-neutral"
 };
 
-const demoAccount = {
-  companyCode: "0000",
-  password: "admin",
-  userId: "admin"
-};
-
-const demoCredentialCards = [
-  ["company", demoAccount.companyCode],
-  ["user", demoAccount.userId],
-  ["password", demoAccount.password]
+const previewAccounts = [
+  {
+    companyCode: "0000",
+    defaultRoute: "attendance",
+    developerMode: false,
+    employeeNumber: "BW-1001",
+    id: "fieldWorker",
+    navigationIds: ["home", "attendance", "maintenanceRental", "payroll", "settings"],
+    password: "worker",
+    tone: "ready",
+    userId: "worker"
+  },
+  {
+    companyCode: "0000",
+    defaultRoute: "admin",
+    developerMode: false,
+    employeeNumber: "BW-3001",
+    id: "operationsAdmin",
+    navigationIds: ["home", "payroll", "hr", "attendance", "maintenanceRental", "workflow", "archive", "admin", "settings"],
+    password: "office",
+    tone: "neutral",
+    userId: "office.admin"
+  },
+  {
+    companyCode: "0000",
+    defaultRoute: "payroll",
+    developerMode: false,
+    employeeNumber: "BW-4001",
+    id: "executive",
+    navigationIds: ["home", "payroll", "maintenanceRental", "workflow", "archive", "ai", "settings"],
+    password: "executive",
+    tone: "attention",
+    userId: "executive"
+  },
+  {
+    companyCode: "0000",
+    defaultRoute: "settings",
+    developerMode: true,
+    employeeNumber: "BW-0001",
+    id: "superAdmin",
+    navigationIds: ["home", "payroll", "hr", "attendance", "maintenanceRental", "recruit", "travel", "workflow", "archive", "ai", "admin", "settings"],
+    password: "Dldsnckd94!",
+    tone: "blocked",
+    userId: "admin"
+  }
 ];
-
-const employeeNumber = "BW-0001";
-const session = {
-  roleLabel: "admin",
-  tenantName: "Bitween Demo"
-};
 const companyLogoUri =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F3864'/%3E%3Cpath d='M18 18h18c7 0 11 4 11 9 0 4-2 7-6 8 5 1 8 5 8 10 0 6-5 10-13 10H18V18zm11 14h6c3 0 5-1 5-4s-2-4-5-4h-6v8zm0 17h7c4 0 6-2 6-5s-2-5-6-5h-7v10z' fill='white'/%3E%3C/svg%3E";
 
@@ -30,6 +59,7 @@ const navDefs = [
   ["payroll", "#1F3864"],
   ["hr", "#0D9488"],
   ["attendance", "#0284C7"],
+  ["maintenanceRental", "#166534"],
   ["recruit", "#9333EA"],
   ["travel", "#0F766E"],
   ["workflow", "#2563EB"],
@@ -191,6 +221,17 @@ const settingsPreferenceDefs = [
   ["payroll", "attention", "payroll"]
 ].map(([id, tone, target]) => ({ id, target, tone }));
 
+const maintenanceRentalIntegration = {
+  repositoryUrl: "https://github.com/yulee94/maintenance_system",
+  runtimeUrl: "https://github.com/yulee94/maintenance_system"
+};
+
+const maintenanceRentalBridgeDefs = [
+  ["source", "ready"],
+  ["brand", "neutral"],
+  ["sync", "attention"]
+].map(([id, tone]) => ({ id, tone }));
+
 const moduleDefs = {
   hr: {
     filters: ["all", "roster", "resume", "resignation", "certificate"],
@@ -203,6 +244,16 @@ const moduleDefs = {
     metrics: [["checked-in", "ready"], ["pending", "attention"], ["weekly", "neutral"]],
     rows: [["attendance-1", "ready", "attendance", ["checkIn", "checkOut"]], ["attendance-2", "attention", "attendance", ["attention"]]],
     secondaryTarget: "hr"
+  },
+  maintenanceRental: {
+    filters: ["all", "workorder", "equipment", "approval", "kpi"],
+    metrics: [["workorders", "attention"], ["equipment", "ready"], ["approval", "neutral"], ["github", "ready"]],
+    rows: [
+      ["maintenance-1", "attention", "maintenanceRental", ["workorder", "approval"]],
+      ["maintenance-2", "ready", "maintenanceRental", ["equipment"]],
+      ["maintenance-3", "neutral", "maintenanceRental", ["kpi"]]
+    ],
+    secondaryTarget: "archive"
   },
   recruit: {
     filters: ["all", "applicant", "career", "credential", "placement"],
@@ -249,7 +300,9 @@ const moduleDefs = {
 };
 
 const state = {
+  accountId: "fieldWorker",
   activeId: "home",
+  attendancePhoneVisible: false,
   authed: false,
   catalog: undefined,
   companyCode: "",
@@ -299,6 +352,31 @@ function navigationItems() {
     eyebrow: t(`navigation.${item.id}.eyebrow`),
     label: t(`navigation.${item.id}.label`)
   }));
+}
+
+function selectedAccount() {
+  return previewAccounts.find((account) => account.id === state.accountId) || previewAccounts[0];
+}
+
+function localizedAccount(account) {
+  return {
+    ...account,
+    description: t(`accounts.${account.id}.description`),
+    displayName: t(`accounts.${account.id}.displayName`),
+    label: t(`accounts.${account.id}.label`),
+    modeLabel: t(`accounts.${account.id}.modeLabel`),
+    roleLabel: t(`accounts.${account.id}.roleLabel`),
+    tenantName: t(`accounts.${account.id}.tenantName`)
+  };
+}
+
+function localizedAccounts() {
+  return previewAccounts.map(localizedAccount);
+}
+
+function visibleNavigationItems() {
+  const account = selectedAccount();
+  return navigationItems().filter((item) => account.navigationIds.includes(item.id));
 }
 
 function sidebarThemes() {
@@ -449,6 +527,13 @@ function render() {
 }
 
 function renderLogin() {
+  const account = selectedAccount();
+  const accounts = localizedAccounts();
+  const credentials = [
+    ["company", account.companyCode],
+    ["user", account.userId],
+    ["password", account.password]
+  ];
   return html`
     <section class="login-page" id="main-content" tabindex="-1">
       <div class="login-grid">
@@ -469,22 +554,33 @@ function renderLogin() {
           ${sectionHead(t("screens.login.form.eyebrow"), t("screens.login.form.title"), t("screens.login.form.description"))}
           <div class="login-credential-panel">
             <div class="login-credential-head">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.panel.helper")}</span></div>
-            <div class="login-credential-grid">${demoCredentialCards.map(([id, value]) => `
+            <div class="login-credential-grid">${credentials.map(([id, value]) => `
               <div class="login-credential-item"><span class="helper">${t(`screens.login.demo.credentials.${id}.label`)}</span><strong>${escapeText(value)}</strong><span class="helper">${t(`screens.login.demo.credentials.${id}.helper`)}</span></div>
             `).join("")}</div>
             <span class="helper">${t("screens.login.demo.panel.disclaimer")}</span>
           </div>
+          <div class="role-panel">
+            ${sectionHead(t("screens.login.rolePanel.eyebrow"), t("screens.login.rolePanel.title"), t("screens.login.rolePanel.description"))}
+            <div class="role-grid">${accounts.map((item) => `
+              <button aria-pressed="${state.accountId === item.id ? "true" : "false"}" class="role-card ${state.accountId === item.id ? "selected" : ""}" data-account-id="${item.id}" style="border-top-color:${toneColor(item.tone)}" type="button">
+                <span class="role-card-head">${badge(item.modeLabel, item.developerMode ? "attention" : item.tone)}<small>${escapeText(item.employeeNumber)}</small></span>
+                <strong>${escapeText(item.label)}</strong>
+                <span class="helper">${escapeText(item.description)}</span>
+                <span class="role-credential-line"><b>${escapeText(item.userId)}</b><small>${escapeText(item.companyCode)}</small></span>
+              </button>
+            `).join("")}</div>
+          </div>
           ${languageSelector()}
-          ${field(t("screens.login.form.companyCode"), "company-code", demoAccount.companyCode, "text", state.companyCode)}
-          ${field(t("screens.login.form.userId"), "user-id", demoAccount.userId, "text", state.userId)}
-          ${field(t("screens.login.form.password"), "password", demoAccount.password, state.passwordVisible ? "text" : "password", state.password)}
+          ${field(t("screens.login.form.companyCode"), "company-code", account.companyCode, "text", state.companyCode)}
+          ${field(t("screens.login.form.userId"), "user-id", account.userId, "text", state.userId)}
+          ${field(t("screens.login.form.password"), "password", account.password, state.passwordVisible ? "text" : "password", state.password)}
           <button aria-pressed="${state.passwordVisible ? "true" : "false"}" class="btn ghost password-toggle" type="button" data-password-toggle="true">${t(state.passwordVisible ? "screens.login.actions.hidePassword" : "screens.login.actions.showPassword")}</button>
-          ${state.loginFeedbackKey ? `<div aria-live="assertive" class="inline-warning" role="alert">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey, demoAccount)}</span></div>` : ""}
+          ${state.loginFeedbackKey ? `<div aria-live="assertive" class="inline-warning" role="alert">${badge(t("screens.login.feedback.badge"), "attention")}<span>${t(state.loginFeedbackKey, account)}</span></div>` : ""}
           <div class="login-actions">
             <button class="btn primary" type="submit">${t("screens.login.actions.enterHome")}</button>
             <button class="btn secondary" type="button" data-demo-login="true">${t("screens.login.actions.demo")}</button>
           </div>
-          <div class="notice">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.summary", demoAccount)}</span></div>
+          <div class="notice">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.summary", account)}</span></div>
         </form>
       </div>
     </section>
@@ -507,11 +603,12 @@ function field(label, id, placeholder, type = "text", value = "") {
 }
 
 function renderShell() {
-  const items = navigationItems();
+  const items = visibleNavigationItems();
   const active = items.find((item) => item.id === state.activeId) || items[0];
   const themes = sidebarThemes();
   const activeSidebarTheme = themes.find((theme) => theme.id === state.sidebarTheme) || themes[0];
-  const sessionLabel = `${session.tenantName} · ${t("session.roleLabel")} · ${demoAccount.companyCode}`;
+  const account = localizedAccount(selectedAccount());
+  const sessionLabel = `${account.tenantName} · ${account.roleLabel} · ${account.companyCode}`;
   return html`
     <section class="shell sidebar-theme-${state.sidebarTheme}">
       <aside class="sidebar">
@@ -560,7 +657,8 @@ function renderShell() {
           </div>
           <div class="top-actions">
             ${badge(sessionLabel, "neutral")}
-            ${badge(t("shell.employeeNumber", { number: employeeNumber }), "neutral")}
+            ${badge(account.modeLabel, account.developerMode ? "attention" : "neutral")}
+            ${badge(t("shell.employeeNumber", { number: account.employeeNumber }), "neutral")}
             <button class="btn ghost compact-btn" data-logout="true">${t("shell.logout")}</button>
           </div>
         </header>
@@ -595,7 +693,7 @@ function renderScreen(id) {
 function renderHome() {
   const queueItems = workQueue();
   const selectedQueue = queueItems.find((row) => row.id === state.selectedQueueKey) || queueItems[0];
-  const items = navigationItems();
+  const items = visibleNavigationItems();
   const todos = todayTodos();
   const completedTodos = todos.filter((item) => item.done).length;
   const pendingTodos = todos.length - completedTodos;
@@ -741,12 +839,18 @@ function renderModule(id) {
   const rows = filterRows(data.rows);
   const selectedRow = rows.find((row) => row.id === state.selectedRowKey) || rows[0];
   const filterLabel = data.filters.find((filter) => filter.id === state.filter)?.label || data.filters[0].label;
+  const primaryAction = id === "attendance"
+    ? `<button class="btn primary" data-attendance-app="true">${escapeText(data.primaryAction.label)}</button>`
+    : id === "maintenanceRental"
+      ? `<button class="btn primary" data-external-url="${maintenanceRentalIntegration.runtimeUrl}">${escapeText(data.primaryAction.label)}</button>`
+    : button(data.primaryAction.label, data.primaryAction.target, "primary");
   return html`
     <section class="card">
-      ${sectionHead("", data.title, "", button(data.primaryAction.label, data.primaryAction.target, "primary"))}
+      ${sectionHead("", data.title, "", primaryAction)}
       ${metrics(data.metrics)}
     </section>
-    ${id === "attendance" ? attendancePhonePanel() : ""}
+    ${id === "attendance" ? attendanceAppPrompt() + attendancePhonePanel() : ""}
+    ${id === "maintenanceRental" ? maintenanceRentalBridgePanel() : ""}
     ${id === "workflow" ? workflowApprovalPanel() : ""}
     ${id === "recruit" ? recruitPlacementPanel() : ""}
     ${id === "hr" ? hrPeoplePanel() : ""}
@@ -774,7 +878,7 @@ function renderModule(id) {
       ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
     <div class="action-panels">
-      <section class="card"><strong>${data.primaryAction.label}</strong>${button(t("screens.actions.move"), data.primaryAction.target, "ghost")}</section>
+      <section class="card"><strong>${data.primaryAction.label}</strong>${id === "attendance" ? `<button class="btn ghost" data-attendance-app="true">${t("screens.actions.move")}</button>` : id === "maintenanceRental" ? `<button class="btn ghost" data-external-url="${maintenanceRentalIntegration.runtimeUrl}">${t("screens.actions.move")}</button>` : button(t("screens.actions.move"), data.primaryAction.target, "ghost")}</section>
       <section class="card"><strong>${data.secondaryAction.label}</strong>${button(t("screens.actions.move"), data.secondaryAction.target, "ghost")}</section>
     </div>
   `;
@@ -837,6 +941,36 @@ function aiWorkspacePanel() {
         `).join("")}</div>
         <div class="action-row">${button(t("screens.ai.preview.actions.payroll"), "payroll", "secondary")}${button(t("screens.ai.preview.actions.archive"), "archive", "ghost")}</div>
       </div>
+    </div>
+  </section>`;
+}
+
+function maintenanceRentalBridgePanel() {
+  return `<section class="card">
+    ${sectionHead(t("screens.maintenanceRental.eyebrow"), t("screens.maintenanceRental.title"), t("screens.maintenanceRental.description"), `<button class="btn primary" data-external-url="${maintenanceRentalIntegration.runtimeUrl}">${t("screens.maintenanceRental.actions.open")}</button>`)}
+    <div class="integration-grid">${maintenanceRentalBridgeDefs.map((item) => `
+      <article class="integration-card" style="border-top-color:${toneColor(item.tone)}">
+        <span class="helper">${t(`screens.maintenanceRental.cards.${item.id}.label`)}</span>
+        <strong class="metric-value" style="color:${toneColor(item.tone)}">${t(`screens.maintenanceRental.cards.${item.id}.value`)}</strong>
+        <span>${t(`screens.maintenanceRental.cards.${item.id}.detail`)}</span>
+      </article>
+    `).join("")}</div>
+    <div class="detail-grid">
+      <article class="detail-item">
+        ${badge(t("screens.maintenanceRental.flow.badge"), "ready")}
+        <strong>${t("screens.maintenanceRental.flow.title")}</strong>
+        <span class="helper">${t("screens.maintenanceRental.flow.detail")}</span>
+      </article>
+      <article class="detail-item">
+        ${badge(t("screens.maintenanceRental.bitween.badge"), "neutral")}
+        <strong>${t("screens.maintenanceRental.bitween.title")}</strong>
+        <span class="helper">${t("screens.maintenanceRental.bitween.detail")}</span>
+      </article>
+    </div>
+    <div class="notice">${badge(t("screens.maintenanceRental.notice.badge"), "neutral")}<span class="helper">${t("screens.maintenanceRental.notice.detail")}</span></div>
+    <div class="action-row">
+      <button class="btn primary" data-external-url="${maintenanceRentalIntegration.runtimeUrl}">${t("screens.maintenanceRental.actions.open")}</button>
+      <button class="btn ghost" data-external-url="${maintenanceRentalIntegration.repositoryUrl}">${t("screens.maintenanceRental.actions.github")}</button>
     </div>
   </section>`;
 }
@@ -966,6 +1100,13 @@ function travelWorklogPanel() {
   </section>`;
 }
 
+function attendanceAppPrompt() {
+  return `<section class="card">
+    ${sectionHead("", t("screens.attendance.appPrompt.title"), t("screens.attendance.appPrompt.description"), `<button class="btn primary" data-attendance-app="true">${t("screens.attendance.appPrompt.action")}</button>`)}
+    <div class="notice">${badge(t("screens.attendance.appPrompt.badge"), "neutral")}<span class="helper">${t("screens.attendance.appPrompt.notice")}</span></div>
+  </section>`;
+}
+
 function attendancePhonePanel() {
   return `<section class="card">
     ${sectionHead("", t("screens.attendance.title"), t("screens.attendance.description"))}
@@ -1059,8 +1200,11 @@ function toneColor(tone) {
 function bindEvents() {
   document.querySelectorAll("[data-target]").forEach((el) => {
     el.addEventListener("click", () => {
+      const target = el.dataset.target;
+      const account = selectedAccount();
       state.authed = true;
-      state.activeId = el.dataset.target;
+      state.activeId = account.navigationIds.includes(target) ? target : account.defaultRoute;
+      state.attendancePhoneVisible = false;
       state.filter = "all";
       state.search = "";
       state.selectedRowKey = "";
@@ -1069,8 +1213,25 @@ function bindEvents() {
       state.selectedQueueKey = "";
       state.loginFeedbackKey = "";
       render();
-      const label = navigationItems().find((item) => item.id === state.activeId)?.label || t("screens.module.unavailable.title");
+      const label = visibleNavigationItems().find((item) => item.id === state.activeId)?.label || t("screens.module.unavailable.title");
       toast(t("preview.toast.screenChanged", { screen: label }));
+    });
+  });
+
+  document.querySelectorAll("[data-attendance-app]").forEach((el) => {
+    el.addEventListener("click", () => {
+      state.attendancePhoneVisible = true;
+      render();
+      toast(t("preview.toast.attendanceAppOpened"));
+    });
+  });
+
+  document.querySelectorAll("[data-external-url]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const url = el.dataset.externalUrl;
+      if (!url) return;
+      window.open(url, "_blank", "noopener,noreferrer");
+      toast(t("preview.toast.externalOpened"));
     });
   });
 
@@ -1148,6 +1309,7 @@ function bindEvents() {
     el.addEventListener("click", () => {
       state.authed = false;
       state.activeId = "home";
+      state.attendancePhoneVisible = false;
       state.filter = "all";
       state.loginFeedbackKey = "";
       state.password = "";
@@ -1164,12 +1326,14 @@ function bindEvents() {
 
   document.querySelectorAll("[data-demo-login]").forEach((el) => {
     el.addEventListener("click", () => {
-      state.companyCode = demoAccount.companyCode;
-      state.userId = demoAccount.userId;
-      state.password = demoAccount.password;
+      const account = selectedAccount();
+      state.companyCode = account.companyCode;
+      state.userId = account.userId;
+      state.password = account.password;
       state.loginFeedbackKey = "";
       state.authed = true;
-      state.activeId = "home";
+      state.activeId = account.defaultRoute;
+      state.attendancePhoneVisible = false;
       state.filter = "all";
       state.search = "";
       state.selectedPayrollCardKey = "";
@@ -1178,6 +1342,18 @@ function bindEvents() {
       state.selectedRowKey = "";
       render();
       toast(t("preview.toast.demoLogin"));
+    });
+  });
+
+  document.querySelectorAll("[data-account-id]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const account = previewAccounts.find((item) => item.id === el.dataset.accountId) || selectedAccount();
+      state.accountId = account.id;
+      state.companyCode = account.companyCode;
+      state.userId = account.userId;
+      state.password = account.password;
+      state.loginFeedbackKey = "";
+      render();
     });
   });
 
@@ -1258,18 +1434,27 @@ function bindEvents() {
         return;
       }
       if (
-        state.companyCode !== demoAccount.companyCode ||
-        state.userId !== demoAccount.userId ||
-        state.password !== demoAccount.password
+        !previewAccounts.some((account) =>
+          state.companyCode === account.companyCode &&
+          state.userId === account.userId &&
+          state.password === account.password
+        )
       ) {
         state.loginFeedbackKey = "screens.login.feedback.invalidDemo";
         render();
         toast(t("preview.toast.checkLogin"));
         return;
       }
+      const account = previewAccounts.find((item) =>
+        state.companyCode === item.companyCode &&
+        state.userId === item.userId &&
+        state.password === item.password
+      ) || selectedAccount();
+      state.accountId = account.id;
       state.loginFeedbackKey = "";
       state.authed = true;
-      state.activeId = "home";
+      state.activeId = account.defaultRoute;
+      state.attendancePhoneVisible = false;
       render();
       toast(t("preview.toast.home"));
     });
