@@ -322,7 +322,7 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
                 active && { backgroundColor: theme.activeBackground, borderLeftColor: item.accent }
               ]}
             >
-              <Text style={[styles.navLabel, active && { color: theme.activeText }]}>{item.label}</Text>
+              <Text numberOfLines={1} style={[styles.navLabel, active && { color: theme.activeText }]}>{item.label}</Text>
             </Pressable>
           );
         })}
@@ -619,19 +619,28 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderRadius: radius.md,
     gap: 2,
+    height: 46,
+    justifyContent: "center",
     marginBottom: spacing.sm,
-    minHeight: 45,
+    maxHeight: 46,
+    minHeight: 46,
+    overflow: "hidden",
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md
+    paddingVertical: 0
   },
   navItemCompact: {
+    flexBasis: 128,
+    height: 46,
     marginBottom: 0,
+    maxHeight: 46,
+    minHeight: 46,
     minWidth: 128
   },
   navLabel: {
     color: colors.text,
     fontSize: 15,
-    fontWeight: "700"
+    fontWeight: "700",
+    lineHeight: 19
   },
   navStrip: {
     gap: spacing.sm

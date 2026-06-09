@@ -8357,6 +8357,222 @@
         "zh-Hans-CN": "已在新窗口打开外部维修/租赁系统。",
         "ja-JP": "外部の整備/レンタルシステムを新しいウィンドウで開きました。"
       }
+    },
+    {
+      "key": "screens.launcher.devicePreview.eyebrow",
+      "values": {
+        "ko-KR": "동시 프리뷰",
+        "en-US": "Side-by-side preview",
+        "zh-Hans-CN": "同步预览",
+        "ja-JP": "同時プレビュー"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.title",
+      "values": {
+        "ko-KR": "웹 전용 화면과 휴대폰 앱 화면을 함께 보기",
+        "en-US": "Review the web-only screen and phone app together",
+        "zh-Hans-CN": "同时查看网页专用界面和手机应用界面",
+        "ja-JP": "Web専用画面と携帯アプリ画面を同時確認"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.description",
+      "values": {
+        "ko-KR": "현장사원, 관리자, 임원, 최고관리자가 보는 웹 콘솔과 모바일 출퇴근 앱 프레임을 한 화면에서 비교합니다.",
+        "en-US": "Compare the web console and mobile attendance app frame for field workers, managers, executives, and super admins in one screen.",
+        "zh-Hans-CN": "在一个画面中比较现场员工、管理员、高管和最高管理员看到的网页控制台与移动出退勤应用框架。",
+        "ja-JP": "現場社員、管理者、役員、最高管理者が見るWebコンソールとモバイル出退勤アプリ枠を1画面で比較します。"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.actions.web",
+      "values": {
+        "ko-KR": "웹 프리뷰 유지",
+        "en-US": "Keep web preview",
+        "zh-Hans-CN": "保留网页预览",
+        "ja-JP": "Webプレビューを維持"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.actions.mobile",
+      "values": {
+        "ko-KR": "휴대폰 전용 보기",
+        "en-US": "Open phone-only view",
+        "zh-Hans-CN": "打开手机专用视图",
+        "ja-JP": "携帯専用表示を開く"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.status.ready",
+      "values": {
+        "ko-KR": "정상",
+        "en-US": "Ready",
+        "zh-Hans-CN": "正常",
+        "ja-JP": "正常"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.status.review",
+      "values": {
+        "ko-KR": "검토",
+        "en-US": "Review",
+        "zh-Hans-CN": "审核",
+        "ja-JP": "確認"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.web.aria",
+      "values": {
+        "ko-KR": "웹 전용 관리자 프리뷰",
+        "en-US": "Web-only admin preview",
+        "zh-Hans-CN": "网页专用管理员预览",
+        "ja-JP": "Web専用管理者プレビュー"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.web.label",
+      "values": {
+        "ko-KR": "웹 전용",
+        "en-US": "Web only",
+        "zh-Hans-CN": "网页专用",
+        "ja-JP": "Web専用"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.web.title",
+      "values": {
+        "ko-KR": "관리자 웹 콘솔",
+        "en-US": "Admin web console",
+        "zh-Hans-CN": "管理员网页控制台",
+        "ja-JP": "管理者Webコンソール"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.web.badge",
+      "values": {
+        "ko-KR": "PC·태블릿",
+        "en-US": "PC · tablet",
+        "zh-Hans-CN": "PC·平板",
+        "ja-JP": "PC・タブレット"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.web.contentTitle",
+      "values": {
+        "ko-KR": "사업장 운영 대시보드",
+        "en-US": "Branch operations dashboard",
+        "zh-Hans-CN": "网点运营仪表板",
+        "ja-JP": "拠点運営ダッシュボード"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.web.contentCopy",
+      "values": {
+        "ko-KR": "권한별 메뉴, 승인, 급여, 정비/렌탈 현황을 웹 레이아웃에서 확인합니다.",
+        "en-US": "Check role-based menus, approvals, payroll, and maintenance/rental status in a web layout.",
+        "zh-Hans-CN": "在网页布局中确认按权限显示的菜单、审批、工资和维修/租赁状态。",
+        "ja-JP": "権限別メニュー、承認、給与、整備/レンタル状況をWebレイアウトで確認します。"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.web.kpi.login",
+      "values": {
+        "ko-KR": "로그인",
+        "en-US": "Login",
+        "zh-Hans-CN": "登录",
+        "ja-JP": "ログイン"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.web.kpi.branch",
+      "values": {
+        "ko-KR": "사업장",
+        "en-US": "Branches",
+        "zh-Hans-CN": "网点",
+        "ja-JP": "拠点"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.web.kpi.tasks",
+      "values": {
+        "ko-KR": "업무",
+        "en-US": "Tasks",
+        "zh-Hans-CN": "任务",
+        "ja-JP": "業務"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.web.rows.payroll",
+      "values": {
+        "ko-KR": "급여·근태 검수",
+        "en-US": "Payroll and attendance review",
+        "zh-Hans-CN": "工资与考勤复核",
+        "ja-JP": "給与・勤怠確認"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.web.rows.approval",
+      "values": {
+        "ko-KR": "승인 요청 대기",
+        "en-US": "Approval requests pending",
+        "zh-Hans-CN": "审批请求待处理",
+        "ja-JP": "承認依頼待ち"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.mobile.aria",
+      "values": {
+        "ko-KR": "휴대폰 전용 앱 프리뷰",
+        "en-US": "Phone-only app preview",
+        "zh-Hans-CN": "手机专用应用预览",
+        "ja-JP": "携帯専用アプリプレビュー"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.mobile.label",
+      "values": {
+        "ko-KR": "휴대폰 전용",
+        "en-US": "Phone only",
+        "zh-Hans-CN": "手机专用",
+        "ja-JP": "携帯専用"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.mobile.title",
+      "values": {
+        "ko-KR": "현장사원 앱",
+        "en-US": "Field worker app",
+        "zh-Hans-CN": "现场员工应用",
+        "ja-JP": "現場社員アプリ"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.mobile.badge",
+      "values": {
+        "ko-KR": "iOS·Android",
+        "en-US": "iOS · Android",
+        "zh-Hans-CN": "iOS·Android",
+        "ja-JP": "iOS・Android"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.mobile.noticeTitle",
+      "values": {
+        "ko-KR": "모바일 API 분리 준비",
+        "en-US": "Mobile API split ready",
+        "zh-Hans-CN": "已准备移动 API 分离",
+        "ja-JP": "モバイルAPI分離準備"
+      }
+    },
+    {
+      "key": "screens.launcher.devicePreview.mobile.noticeCopy",
+      "values": {
+        "ko-KR": "기기 등록, 토큰 인증, 푸시, 오프라인 동기화가 들어갈 앱 전용 화면입니다.",
+        "en-US": "This app-only screen is prepared for device registration, token auth, push, and offline sync.",
+        "zh-Hans-CN": "这是为设备注册、令牌认证、推送和离线同步准备的应用专用画面。",
+        "ja-JP": "端末登録、トークン認証、プッシュ、オフライン同期を入れるアプリ専用画面です。"
+      }
     }
   ],
   "languageDisplayNames": [

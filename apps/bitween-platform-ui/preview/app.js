@@ -734,6 +734,7 @@ function renderHome() {
       `).join("")}</div>
       ${selectedQueue ? queueDetail(selectedQueue) : ""}
     </section>
+    ${devicePreviewPanel(items)}
     <section class="card">
       ${sectionHead("", t("screens.launcher.shortcuts.title"), t("screens.launcher.shortcuts.description"))}
       <div class="launcher-grid">${items.filter((item) => item.id !== "home").map((item) => `
@@ -746,6 +747,63 @@ function renderHome() {
       `).join("")}</div>
     </section>
   `;
+}
+
+function devicePreviewPanel(items) {
+  const account = localizedAccount(selectedAccount());
+  const navItems = items.slice(0, 5);
+  return `<section class="card device-preview-card">
+    ${sectionHead(
+      t("screens.launcher.devicePreview.eyebrow"),
+      t("screens.launcher.devicePreview.title"),
+      t("screens.launcher.devicePreview.description"),
+      `<div class="action-row">${button(t("screens.launcher.devicePreview.actions.web"), "home", "secondary")}${button(t("screens.launcher.devicePreview.actions.mobile"), "attendance", "ghost")}</div>`
+    )}
+    <div class="device-preview-grid">
+      <article class="web-preview-frame" aria-label="${t("screens.launcher.devicePreview.web.aria")}">
+        <div class="device-preview-head">
+          <div><span class="helper">${t("screens.launcher.devicePreview.web.label")}</span><strong>${t("screens.launcher.devicePreview.web.title")}</strong></div>
+          ${badge(t("screens.launcher.devicePreview.web.badge"), "ready")}
+        </div>
+        <div class="browser-bar" aria-hidden="true">
+          <span class="browser-dot"></span><span class="browser-dot"></span><span class="browser-dot"></span>
+          <span class="browser-address">https://bitween.example/admin</span>
+        </div>
+        <div class="web-preview-shell">
+          <div class="web-preview-sidebar">
+            <strong>Bitween</strong>
+            ${navItems.map((item, index) => `<span class="web-preview-nav-item ${index === 0 ? "active" : ""}">${escapeText(item.label)}</span>`).join("")}
+          </div>
+          <div class="web-preview-main">
+            <div>${badge(account.roleLabel, account.developerMode ? "attention" : "neutral")}<span class="helper"> ${escapeText(account.tenantName)}</span></div>
+            <strong>${t("screens.launcher.devicePreview.web.contentTitle")}</strong>
+            <span class="helper">${t("screens.launcher.devicePreview.web.contentCopy")}</span>
+            <div class="web-preview-kpis">
+              <div class="web-preview-kpi"><span class="helper">${t("screens.launcher.devicePreview.web.kpi.login")}</span><strong>OK</strong></div>
+              <div class="web-preview-kpi"><span class="helper">${t("screens.launcher.devicePreview.web.kpi.branch")}</span><strong>3</strong></div>
+              <div class="web-preview-kpi"><span class="helper">${t("screens.launcher.devicePreview.web.kpi.tasks")}</span><strong>12</strong></div>
+            </div>
+            <div class="web-preview-list">
+              <div class="web-preview-row"><strong>${t("screens.launcher.devicePreview.web.rows.payroll")}</strong>${badge(t("screens.launcher.devicePreview.status.ready"), "ready")}</div>
+              <div class="web-preview-row"><strong>${t("screens.launcher.devicePreview.web.rows.approval")}</strong>${badge(t("screens.launcher.devicePreview.status.review"), "attention")}</div>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article class="mobile-preview-frame" aria-label="${t("screens.launcher.devicePreview.mobile.aria")}">
+        <div class="device-preview-head">
+          <div><span class="helper">${t("screens.launcher.devicePreview.mobile.label")}</span><strong>${t("screens.launcher.devicePreview.mobile.title")}</strong></div>
+          ${badge(t("screens.launcher.devicePreview.mobile.badge"), "neutral")}
+        </div>
+        <div class="phone-frame preview-phone">
+          <div class="phone-head"><span class="helper">${t("screens.attendance.phone.todayStatus")}</span>${badge(t("screens.attendance.phone.checkedIn"), "ready")}</div>
+          <div class="phone-clock"><strong>09:02</strong><span class="helper">${t("screens.attendance.phone.location")}</span></div>
+          <div class="punch-actions"><button class="punch primary">${t("screens.attendance.phone.checkIn")}</button><button class="punch secondary">${t("screens.attendance.phone.checkOut")}</button></div>
+          <div class="location-notice"><strong>${t("screens.launcher.devicePreview.mobile.noticeTitle")}</strong><span class="helper">${t("screens.launcher.devicePreview.mobile.noticeCopy")}</span></div>
+        </div>
+      </article>
+    </div>
+  </section>`;
 }
 
 function queueDetail(item) {
