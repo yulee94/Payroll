@@ -82,9 +82,9 @@ input:focus-visible {
   align-items: stretch;
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(320px, 1.2fr) minmax(320px, 0.8fr);
+  grid-template-columns: minmax(280px, 0.85fr) minmax(340px, 0.95fr) minmax(280px, 0.8fr);
   margin: 0 auto;
-  max-width: 1120px;
+  max-width: 1440px;
   width: 100%;
 }
 
@@ -159,6 +159,11 @@ input:focus-visible {
 
 .login-card {
   align-content: center;
+}
+
+.login-phone-card {
+  align-content: start;
+  gap: 16px;
 }
 
 .login-credential-panel {
@@ -332,6 +337,70 @@ input:focus-visible {
   gap: 8px;
   line-height: 1.45;
   padding: 10px 12px;
+}
+
+.landing-mode-summary {
+  align-items: start;
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 12px;
+}
+
+.landing-mode-summary div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.landing-phone-frame {
+  align-self: start;
+  justify-self: center;
+  max-width: 330px;
+  width: 100%;
+}
+
+.landing-phone-menu {
+  display: grid;
+  gap: 8px;
+}
+
+.landing-phone-menu-item {
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-left: 4px solid transparent;
+  border-radius: 8px;
+  color: var(--text);
+  display: grid;
+  gap: 3px;
+  min-height: 54px;
+  padding: 10px 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.landing-phone-menu-item.active,
+.landing-phone-menu-item:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  border-left-color: var(--accent);
+}
+
+.landing-phone-menu-item span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.landing-phone-menu-item strong {
+  font-size: 14px;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shell {
@@ -1804,6 +1873,17 @@ button.planner-item {
 .toast.show {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+@media (max-width: 1180px) {
+  .login-grid {
+    grid-template-columns: minmax(320px, 1fr) minmax(280px, 0.85fr);
+  }
+
+  .login-hero {
+    grid-column: 1 / -1;
+    min-height: 260px;
+  }
 }
 
 @media (max-width: 980px) {

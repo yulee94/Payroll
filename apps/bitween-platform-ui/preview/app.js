@@ -529,6 +529,9 @@ function render() {
 function renderLogin() {
   const account = selectedAccount();
   const accounts = localizedAccounts();
+  const rolePreviewItems = navigationItems()
+    .filter((item) => account.navigationIds.includes(item.id) && item.id !== "home")
+    .slice(0, 4);
   const credentials = [
     ["company", account.companyCode],
     ["user", account.userId],
@@ -582,6 +585,22 @@ function renderLogin() {
           </div>
           <div class="notice">${badge(t("screens.login.demo.badge"), "neutral")}<span class="helper">${t("screens.login.demo.summary", account)}</span></div>
         </form>
+        <aside class="card login-phone-card" aria-label="${t("screens.login.phonePreview.aria")}">
+          ${sectionHead(t("screens.login.phonePreview.eyebrow"), t("screens.login.phonePreview.title"), t("screens.login.phonePreview.description"))}
+          <div class="landing-mode-summary">
+            ${badge(account.modeLabel, account.developerMode ? "attention" : account.tone)}
+            <div><strong>${escapeText(account.label)}</strong><span class="helper">${escapeText(account.description)}</span></div>
+          </div>
+          <div class="phone-frame landing-phone-frame">
+            <div class="phone-head"><span class="helper">${t("screens.login.phonePreview.selectedMode")}</span>${badge(account.roleLabel, account.developerMode ? "attention" : "ready")}</div>
+            <div class="phone-clock"><strong>09:02</strong><span class="helper">${t("screens.attendance.phone.location")}</span></div>
+            <div class="landing-phone-menu">
+              ${rolePreviewItems.map((item, index) => `<button class="landing-phone-menu-item ${index === 0 ? "active" : ""}" data-target="${item.id}"><span>${escapeText(item.eyebrow)}</span><strong>${escapeText(item.label)}</strong></button>`).join("")}
+            </div>
+            <div class="punch-actions"><button class="punch primary">${t("screens.attendance.phone.checkIn")}</button><button class="punch secondary">${t("screens.attendance.phone.checkOut")}</button></div>
+            <div class="location-notice"><strong>${t("screens.login.phonePreview.noticeTitle")}</strong><span class="helper">${t("screens.login.phonePreview.noticeCopy")}</span></div>
+          </div>
+        </aside>
       </div>
     </section>
   `;
