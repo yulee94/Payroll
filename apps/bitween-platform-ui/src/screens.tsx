@@ -455,6 +455,8 @@ export function LauncherScreen({ items, locale, onSelect }: ScreenProps) {
         {selectedQueue ? <WorkQueueDetailPanel item={selectedQueue} locale={locale} onSelect={onSelect} /> : null}
       </Card>
 
+      <DevicePreviewPanel items={navigationItems} locale={locale} onSelect={onSelect} />
+
       <Card>
         <SectionHeader title={tScreen(locale, "launcher.shortcuts.title")} description={tScreen(locale, "launcher.shortcuts.description")} />
         <View style={styles.launcherGrid}>
@@ -487,6 +489,114 @@ export function LauncherScreen({ items, locale, onSelect }: ScreenProps) {
         <DataTable locale={locale} rows={previewRows} />
       </Card>
     </View>
+  );
+}
+
+function DevicePreviewPanel({ items, locale, onSelect }: Pick<ScreenProps, "items" | "locale" | "onSelect">) {
+  const navigationItems = (items ?? getNavigationItems(locale)).slice(0, 5);
+
+  return (
+    <Card>
+      <SectionHeader
+        eyebrow={tScreen(locale, "launcher.devicePreview.eyebrow")}
+        title={tScreen(locale, "launcher.devicePreview.title")}
+        description={tScreen(locale, "launcher.devicePreview.description")}
+        action={(
+          <View style={styles.actionRow}>
+            <ActionButton onPress={() => onSelect("home")} variant="secondary">{tScreen(locale, "launcher.devicePreview.actions.web")}</ActionButton>
+            <ActionButton onPress={() => onSelect("attendance")} variant="ghost">{tScreen(locale, "launcher.devicePreview.actions.mobile")}</ActionButton>
+          </View>
+        )}
+      />
+      <View style={styles.devicePreviewGrid}>
+        <View accessibilityLabel={tScreen(locale, "launcher.devicePreview.web.aria")} style={styles.webPreviewFrame}>
+          <View style={styles.devicePreviewHeader}>
+            <View style={styles.stackXs}>
+              <Label size="sm" muted>{tScreen(locale, "launcher.devicePreview.web.label")}</Label>
+              <Label weight="bold">{tScreen(locale, "launcher.devicePreview.web.title")}</Label>
+            </View>
+            <Badge tone="ready">{tScreen(locale, "launcher.devicePreview.web.badge")}</Badge>
+          </View>
+          <View style={styles.browserBar}>
+            <View style={styles.browserDot} />
+            <View style={styles.browserDot} />
+            <View style={styles.browserDot} />
+            <View style={styles.browserAddress}>
+              <Label size="sm" muted>https://bitween.example/admin</Label>
+            </View>
+          </View>
+          <View style={styles.webPreviewShell}>
+            <View style={styles.webPreviewSidebar}>
+              <Label weight="bold">Bitween</Label>
+              {navigationItems.map((item, index) => (
+                <View key={item.id} style={[styles.webPreviewNavItem, index === 0 && styles.webPreviewNavItemActive]}>
+                  <Text numberOfLines={1} style={[styles.webPreviewNavText, index === 0 && styles.webPreviewNavTextActive]}>{item.label}</Text>
+                </View>
+              ))}
+            </View>
+            <View style={styles.webPreviewMain}>
+              <Label weight="bold">{tScreen(locale, "launcher.devicePreview.web.contentTitle")}</Label>
+              <Label size="sm" muted>{tScreen(locale, "launcher.devicePreview.web.contentCopy")}</Label>
+              <View style={styles.webPreviewKpis}>
+                <View style={styles.webPreviewKpi}>
+                  <Label size="sm" muted>{tScreen(locale, "launcher.devicePreview.web.kpi.login")}</Label>
+                  <Text style={styles.webPreviewKpiValue}>OK</Text>
+                </View>
+                <View style={styles.webPreviewKpi}>
+                  <Label size="sm" muted>{tScreen(locale, "launcher.devicePreview.web.kpi.branch")}</Label>
+                  <Text style={styles.webPreviewKpiValue}>3</Text>
+                </View>
+                <View style={styles.webPreviewKpi}>
+                  <Label size="sm" muted>{tScreen(locale, "launcher.devicePreview.web.kpi.tasks")}</Label>
+                  <Text style={styles.webPreviewKpiValue}>12</Text>
+                </View>
+              </View>
+              <View style={styles.webPreviewList}>
+                <View style={styles.webPreviewRow}>
+                  <Label weight="bold">{tScreen(locale, "launcher.devicePreview.web.rows.payroll")}</Label>
+                  <Badge tone="ready">{tScreen(locale, "launcher.devicePreview.status.ready")}</Badge>
+                </View>
+                <View style={styles.webPreviewRow}>
+                  <Label weight="bold">{tScreen(locale, "launcher.devicePreview.web.rows.approval")}</Label>
+                  <Badge tone="attention">{tScreen(locale, "launcher.devicePreview.status.review")}</Badge>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View accessibilityLabel={tScreen(locale, "launcher.devicePreview.mobile.aria")} style={styles.mobilePreviewFrame}>
+          <View style={styles.devicePreviewHeader}>
+            <View style={styles.stackXs}>
+              <Label size="sm" muted>{tScreen(locale, "launcher.devicePreview.mobile.label")}</Label>
+              <Label weight="bold">{tScreen(locale, "launcher.devicePreview.mobile.title")}</Label>
+            </View>
+            <Badge tone="neutral">{tScreen(locale, "launcher.devicePreview.mobile.badge")}</Badge>
+          </View>
+          <View style={[styles.phoneFrame, styles.devicePreviewPhone]}>
+            <View style={styles.phoneHeader}>
+              <Label size="sm" muted>{tScreen(locale, "attendance.phone.todayStatus")}</Label>
+              <Badge tone="ready">{tScreen(locale, "attendance.phone.checkedIn")}</Badge>
+            </View>
+            <View style={styles.phoneClock}>
+              <Text style={styles.phoneTime}>09:02</Text>
+              <Label size="sm" muted>{tScreen(locale, "attendance.phone.location")}</Label>
+            </View>
+            <View style={styles.punchActions}>
+              <Pressable accessibilityRole="button" style={({ pressed }) => [styles.punchButton, pressed && styles.buttonPressed]}>
+                <Text style={styles.punchButtonText}>{tScreen(locale, "attendance.phone.checkIn")}</Text>
+              </Pressable>
+              <Pressable accessibilityRole="button" style={({ pressed }) => [styles.punchButtonSecondary, pressed && styles.buttonPressed]}>
+                <Text style={styles.punchButtonSecondaryText}>{tScreen(locale, "attendance.phone.checkOut")}</Text>
+              </Pressable>
+            </View>
+            <View style={styles.locationNotice}>
+              <Label size="sm" weight="bold">{tScreen(locale, "launcher.devicePreview.mobile.noticeTitle")}</Label>
+              <Label size="sm" muted>{tScreen(locale, "launcher.devicePreview.mobile.noticeCopy")}</Label>
+            </View>
+          </View>
+        </View>
+      </View>
+    </Card>
   );
 }
 
@@ -1695,6 +1805,51 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     lineHeight: 18
   },
+  browserAddress: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: 999,
+    borderWidth: 1,
+    flex: 1,
+    minWidth: 0,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs
+  },
+  browserBar: {
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.sm,
+    padding: spacing.sm
+  },
+  browserDot: {
+    backgroundColor: colors.divider,
+    borderRadius: 999,
+    height: 8,
+    width: 8
+  },
+  devicePreviewGrid: {
+    alignItems: "stretch",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.lg
+  },
+  devicePreviewHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between"
+  },
+  devicePreviewPhone: {
+    alignSelf: "center",
+    flexBasis: 260,
+    maxWidth: 310,
+    width: "100%"
+  },
   detailGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -1861,6 +2016,16 @@ const styles = StyleSheet.create({
   languageOptionSelected: {
     backgroundColor: colors.accentSoft,
     borderColor: colors.accent
+  },
+  mobilePreviewFrame: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 300,
+    flexGrow: 1,
+    gap: spacing.md,
+    padding: spacing.md
   },
   settingsStatusGrid: {
     flexDirection: "row",
@@ -2260,6 +2425,107 @@ const styles = StyleSheet.create({
   },
   stack: {
     gap: spacing.lg
+  },
+  stackXs: {
+    gap: spacing.xs
+  },
+  webPreviewFrame: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexBasis: 520,
+    flexGrow: 2,
+    gap: spacing.md,
+    minWidth: 0,
+    padding: spacing.md
+  },
+  webPreviewKpi: {
+    backgroundColor: colors.bg,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexBasis: 110,
+    flexGrow: 1,
+    gap: spacing.xs,
+    minWidth: 0,
+    padding: spacing.sm
+  },
+  webPreviewKpis: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  webPreviewKpiValue: {
+    color: colors.accent,
+    fontSize: 18,
+    fontWeight: "800",
+    lineHeight: 24
+  },
+  webPreviewList: {
+    gap: spacing.sm
+  },
+  webPreviewMain: {
+    flex: 1,
+    gap: spacing.md,
+    minWidth: 0,
+    padding: spacing.md
+  },
+  webPreviewNavItem: {
+    backgroundColor: colors.input,
+    borderColor: "transparent",
+    borderLeftWidth: 3,
+    borderRadius: radius.md,
+    height: 34,
+    justifyContent: "center",
+    minWidth: 0,
+    overflow: "hidden",
+    paddingHorizontal: spacing.sm
+  },
+  webPreviewNavItemActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent
+  },
+  webPreviewNavText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 16
+  },
+  webPreviewNavTextActive: {
+    color: colors.card
+  },
+  webPreviewRow: {
+    alignItems: "center",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    justifyContent: "space-between",
+    minHeight: 42,
+    padding: spacing.sm
+  },
+  webPreviewShell: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    minHeight: 330,
+    overflow: "hidden"
+  },
+  webPreviewSidebar: {
+    backgroundColor: colors.sidebar,
+    borderRightColor: colors.border,
+    borderRightWidth: 1,
+    flexBasis: 150,
+    flexGrow: 0,
+    gap: spacing.sm,
+    padding: spacing.md
   },
   stepCard: {
     backgroundColor: colors.bg,
