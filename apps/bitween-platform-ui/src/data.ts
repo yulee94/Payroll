@@ -44,6 +44,7 @@ const navigationItemDefinitions = [
   { id: "payroll", accent: "#1F3864" },
   { id: "hr", accent: "#0D9488" },
   { id: "attendance", accent: "#0284C7" },
+  { id: "maintenanceRental", accent: "#166534" },
   { id: "recruit", accent: "#9333EA" },
   { id: "travel", accent: "#0F766E" },
   { id: "workflow", accent: "#2563EB" },
@@ -60,7 +61,7 @@ const previewAccountDefinitions = [
     developerMode: false,
     employeeNumber: "BW-1001",
     id: "fieldWorker",
-    navigationIds: ["home", "attendance", "payroll", "settings"],
+    navigationIds: ["home", "attendance", "maintenanceRental", "payroll", "settings"],
     password: "worker",
     tone: "ready",
     userId: "worker"
@@ -71,7 +72,7 @@ const previewAccountDefinitions = [
     developerMode: false,
     employeeNumber: "BW-3001",
     id: "operationsAdmin",
-    navigationIds: ["home", "payroll", "hr", "attendance", "workflow", "archive", "admin", "settings"],
+    navigationIds: ["home", "payroll", "hr", "attendance", "maintenanceRental", "workflow", "archive", "admin", "settings"],
     password: "office",
     tone: "neutral",
     userId: "office.admin"
@@ -82,7 +83,7 @@ const previewAccountDefinitions = [
     developerMode: false,
     employeeNumber: "BW-4001",
     id: "executive",
-    navigationIds: ["home", "payroll", "workflow", "archive", "ai", "settings"],
+    navigationIds: ["home", "payroll", "maintenanceRental", "workflow", "archive", "ai", "settings"],
     password: "executive",
     tone: "attention",
     userId: "executive"
@@ -93,7 +94,7 @@ const previewAccountDefinitions = [
     developerMode: true,
     employeeNumber: "BW-0001",
     id: "superAdmin",
-    navigationIds: ["home", "payroll", "hr", "attendance", "recruit", "travel", "workflow", "archive", "ai", "admin", "settings"],
+    navigationIds: ["home", "payroll", "hr", "attendance", "maintenanceRental", "recruit", "travel", "workflow", "archive", "ai", "admin", "settings"],
     password: "Dldsnckd94!",
     tone: "blocked",
     userId: "admin"
@@ -189,6 +190,22 @@ const moduleDefinitions = {
     ],
     primaryAction: { target: "attendance" },
     secondaryAction: { target: "hr" }
+  },
+  maintenanceRental: {
+    filters: ["all", "workorder", "equipment", "approval", "kpi"],
+    metrics: [
+      { id: "workorders", tone: "attention" },
+      { id: "equipment", tone: "ready" },
+      { id: "approval", tone: "neutral" },
+      { id: "github", tone: "ready" }
+    ],
+    rows: [
+      { id: "maintenance-1", target: "maintenanceRental", tone: "attention" },
+      { id: "maintenance-2", target: "maintenanceRental", tone: "ready" },
+      { id: "maintenance-3", target: "maintenanceRental", tone: "neutral" }
+    ],
+    primaryAction: { target: "maintenanceRental" },
+    secondaryAction: { target: "archive" }
   },
   recruit: {
     filters: ["all", "applicant", "career", "credential", "placement"],
@@ -420,6 +437,7 @@ export const getModuleDashboards = (locale: SupportedLocale): Readonly<Record<Mo
   return {
     hr: localizeModule("hr", moduleDefinitions.hr),
     attendance: localizeModule("attendance", moduleDefinitions.attendance),
+    maintenanceRental: localizeModule("maintenanceRental", moduleDefinitions.maintenanceRental),
     recruit: localizeModule("recruit", moduleDefinitions.recruit),
     travel: localizeModule("travel", moduleDefinitions.travel),
     workflow: localizeModule("workflow", moduleDefinitions.workflow),

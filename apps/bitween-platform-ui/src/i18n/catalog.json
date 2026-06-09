@@ -7790,6 +7790,573 @@
         "zh-Hans-CN": "已打开手机出退勤应用界面。",
         "ja-JP": "携帯出退勤アプリ画面を開きました。"
       }
+    },
+    {
+      "key": "navigation.maintenanceRental.label",
+      "values": {
+        "ko-KR": "정비/렌탈",
+        "en-US": "Maintenance/Rental",
+        "zh-Hans-CN": "维修/租赁",
+        "ja-JP": "整備/レンタル"
+      }
+    },
+    {
+      "key": "navigation.maintenanceRental.eyebrow",
+      "values": {
+        "ko-KR": "Maintenance",
+        "en-US": "Maintenance",
+        "zh-Hans-CN": "维修",
+        "ja-JP": "整備"
+      }
+    },
+    {
+      "key": "navigation.maintenanceRental.description",
+      "values": {
+        "ko-KR": "장비 렌탈 운영, 정비 접수, 배정, 승인과 KPI 시스템으로 이동합니다.",
+        "en-US": "Open equipment rental operations, maintenance intake, assignment, approval, and KPI workflows.",
+        "zh-Hans-CN": "打开设备租赁运营、维修接收、分配、审批和 KPI 流程。",
+        "ja-JP": "機器レンタル運営、整備受付、割当、承認、KPI ワークフローを開きます。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.title",
+      "values": {
+        "ko-KR": "정비/렌탈 운영 브릿지",
+        "en-US": "Maintenance/Rental operations bridge",
+        "zh-Hans-CN": "维修/租赁运营桥接",
+        "ja-JP": "整備/レンタル運営ブリッジ"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.subtitle",
+      "values": {
+        "ko-KR": "Bitween 기준 헤더에서 외부 정비 렌탈 운영 시스템으로 연결합니다.",
+        "en-US": "Connect from the Bitween header to the external maintenance rental operations system.",
+        "zh-Hans-CN": "从 Bitween 标准页眉连接到外部维修租赁运营系统。",
+        "ja-JP": "Bitween 基準ヘッダーから外部の整備レンタル運営システムへ接続します。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.filters.all",
+      "values": {
+        "ko-KR": "전체",
+        "en-US": "All",
+        "zh-Hans-CN": "全部",
+        "ja-JP": "すべて"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.filters.workorder",
+      "values": {
+        "ko-KR": "정비건",
+        "en-US": "Work orders",
+        "zh-Hans-CN": "维修单",
+        "ja-JP": "整備件"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.filters.equipment",
+      "values": {
+        "ko-KR": "장비",
+        "en-US": "Equipment",
+        "zh-Hans-CN": "设备",
+        "ja-JP": "機器"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.filters.approval",
+      "values": {
+        "ko-KR": "승인",
+        "en-US": "Approval",
+        "zh-Hans-CN": "审批",
+        "ja-JP": "承認"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.filters.kpi",
+      "values": {
+        "ko-KR": "KPI",
+        "en-US": "KPI",
+        "zh-Hans-CN": "KPI",
+        "ja-JP": "KPI"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.workorders.label",
+      "values": {
+        "ko-KR": "미결 정비건",
+        "en-US": "Open work orders",
+        "zh-Hans-CN": "未结维修单",
+        "ja-JP": "未完了整備件"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.workorders.value",
+      "values": {
+        "ko-KR": "운영 시스템",
+        "en-US": "Operations app",
+        "zh-Hans-CN": "运营系统",
+        "ja-JP": "運営システム"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.workorders.helper",
+      "values": {
+        "ko-KR": "접수, 배정, 작업보고는 연결된 정비/렌탈 시스템에서 처리합니다.",
+        "en-US": "Intake, assignment, and work reports stay in the linked maintenance/rental system.",
+        "zh-Hans-CN": "接收、分配和工作报告在连接的维修/租赁系统中处理。",
+        "ja-JP": "受付、割当、作業報告は接続先の整備/レンタルシステムで処理します。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.equipment.label",
+      "values": {
+        "ko-KR": "장비 자산",
+        "en-US": "Equipment assets",
+        "zh-Hans-CN": "设备资产",
+        "ja-JP": "機器資産"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.equipment.value",
+      "values": {
+        "ko-KR": "GitHub 연동",
+        "en-US": "GitHub linked",
+        "zh-Hans-CN": "已连接 GitHub",
+        "ja-JP": "GitHub 連携"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.equipment.helper",
+      "values": {
+        "ko-KR": "저장소 업데이트를 따라 외부 시스템이 독립적으로 개선됩니다.",
+        "en-US": "External updates follow the connected repository independently.",
+        "zh-Hans-CN": "外部系统随连接的仓库独立更新。",
+        "ja-JP": "外部システムは接続リポジトリの更新に従い独立して改善されます。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.approval.label",
+      "values": {
+        "ko-KR": "승인 흐름",
+        "en-US": "Approval flow",
+        "zh-Hans-CN": "审批流程",
+        "ja-JP": "承認フロー"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.approval.value",
+      "values": {
+        "ko-KR": "관리자/임원",
+        "en-US": "Admin/Executive",
+        "zh-Hans-CN": "管理员/高管",
+        "ja-JP": "管理者/役員"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.approval.helper",
+      "values": {
+        "ko-KR": "정비 완료 승인과 KPI 보고는 정비 시스템 권한을 따릅니다.",
+        "en-US": "Completion approvals and KPI reports follow maintenance-system permissions.",
+        "zh-Hans-CN": "完成审批和 KPI 报告遵循维修系统权限。",
+        "ja-JP": "完了承認と KPI レポートは整備システム権限に従います。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.github.label",
+      "values": {
+        "ko-KR": "소스 기준",
+        "en-US": "Source of truth",
+        "zh-Hans-CN": "源代码基准",
+        "ja-JP": "ソース基準"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.github.value",
+      "values": {
+        "ko-KR": "maintenance_system",
+        "en-US": "maintenance_system",
+        "zh-Hans-CN": "maintenance_system",
+        "ja-JP": "maintenance_system"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.metrics.github.helper",
+      "values": {
+        "ko-KR": "Bitween은 코드를 복사하지 않고 외부 시스템으로 이동합니다.",
+        "en-US": "Bitween links out instead of copying the external code.",
+        "zh-Hans-CN": "Bitween 不复制外部代码，而是跳转连接。",
+        "ja-JP": "Bitween は外部コードをコピーせずリンクで移動します。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-1.category",
+      "values": {
+        "ko-KR": "정비 접수/배정",
+        "en-US": "Maintenance intake/assignment",
+        "zh-Hans-CN": "维修接收/分配",
+        "ja-JP": "整備受付/割当"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-1.status",
+      "values": {
+        "ko-KR": "외부 시스템 처리",
+        "en-US": "Handled externally",
+        "zh-Hans-CN": "外部系统处理",
+        "ja-JP": "外部システム処理"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-1.owner",
+      "values": {
+        "ko-KR": "정비/렌탈 운영",
+        "en-US": "Maintenance/Rental ops",
+        "zh-Hans-CN": "维修/租赁运营",
+        "ja-JP": "整備/レンタル運営"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-1.nextStep",
+      "values": {
+        "ko-KR": "정비/렌탈 탭의 열기 버튼으로 이동",
+        "en-US": "Use the open button in this tab",
+        "zh-Hans-CN": "使用该标签中的打开按钮",
+        "ja-JP": "このタブの開くボタンで移動"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-2.category",
+      "values": {
+        "ko-KR": "장비 이력/KPI",
+        "en-US": "Equipment history/KPI",
+        "zh-Hans-CN": "设备历史/KPI",
+        "ja-JP": "機器履歴/KPI"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-2.status",
+      "values": {
+        "ko-KR": "저장소 기준 유지",
+        "en-US": "Repository-driven",
+        "zh-Hans-CN": "仓库驱动",
+        "ja-JP": "リポジトリ基準"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-2.owner",
+      "values": {
+        "ko-KR": "maintenance_system",
+        "en-US": "maintenance_system",
+        "zh-Hans-CN": "maintenance_system",
+        "ja-JP": "maintenance_system"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-2.nextStep",
+      "values": {
+        "ko-KR": "외부 저장소 업데이트를 그대로 사용",
+        "en-US": "Use external repository updates as-is",
+        "zh-Hans-CN": "直接使用外部仓库更新",
+        "ja-JP": "外部リポジトリ更新をそのまま使用"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-3.category",
+      "values": {
+        "ko-KR": "Bitween 연동 경계",
+        "en-US": "Bitween integration boundary",
+        "zh-Hans-CN": "Bitween 集成边界",
+        "ja-JP": "Bitween 連携境界"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-3.status",
+      "values": {
+        "ko-KR": "급여 원본 분리",
+        "en-US": "Payroll data separated",
+        "zh-Hans-CN": "薪资原始数据分离",
+        "ja-JP": "給与原本を分離"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-3.owner",
+      "values": {
+        "ko-KR": "플랫폼 아키텍처",
+        "en-US": "Platform architecture",
+        "zh-Hans-CN": "平台架构",
+        "ja-JP": "プラットフォーム設計"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.rows.maintenance-3.nextStep",
+      "values": {
+        "ko-KR": "작업시간 export는 승인 후 Bitween 급여 검토로 연결",
+        "en-US": "Approved labor exports feed Bitween payroll review",
+        "zh-Hans-CN": "批准后的工时导出进入 Bitween 薪资审核",
+        "ja-JP": "承認済み作業時間 export は Bitween 給与レビューへ連携"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.primaryAction.label",
+      "values": {
+        "ko-KR": "정비/렌탈 시스템 열기",
+        "en-US": "Open maintenance/rental system",
+        "zh-Hans-CN": "打开维修/租赁系统",
+        "ja-JP": "整備/レンタルシステムを開く"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.primaryAction.description",
+      "values": {
+        "ko-KR": "연결된 GitHub/배포 시스템으로 이동합니다.",
+        "en-US": "Move to the linked GitHub or deployed system.",
+        "zh-Hans-CN": "跳转到连接的 GitHub 或部署系统。",
+        "ja-JP": "接続済み GitHub またはデプロイ先へ移動します。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.secondaryAction.label",
+      "values": {
+        "ko-KR": "자료 보관함 확인",
+        "en-US": "Review archive",
+        "zh-Hans-CN": "查看资料库",
+        "ja-JP": "資料保管庫を確認"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.secondaryAction.description",
+      "values": {
+        "ko-KR": "정비 관련 보고서와 export 자료 보관 흐름을 확인합니다.",
+        "en-US": "Review storage flows for maintenance reports and exports.",
+        "zh-Hans-CN": "查看维修报告和导出资料的保管流程。",
+        "ja-JP": "整備レポートと export 資料の保管フローを確認します。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.emptyTitle",
+      "values": {
+        "ko-KR": "정비/렌탈 항목이 없습니다.",
+        "en-US": "No maintenance/rental items.",
+        "zh-Hans-CN": "没有维修/租赁项目。",
+        "ja-JP": "整備/レンタル項目がありません。"
+      }
+    },
+    {
+      "key": "modules.maintenanceRental.emptyDescription",
+      "values": {
+        "ko-KR": "외부 시스템을 열면 최신 정비/렌탈 업무를 확인할 수 있습니다.",
+        "en-US": "Open the external system to see the latest maintenance/rental work.",
+        "zh-Hans-CN": "打开外部系统即可查看最新维修/租赁工作。",
+        "ja-JP": "外部システムを開くと最新の整備/レンタル業務を確認できます。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.eyebrow",
+      "values": {
+        "ko-KR": "Bitween 외부 모듈",
+        "en-US": "Bitween external module",
+        "zh-Hans-CN": "Bitween 外部模块",
+        "ja-JP": "Bitween 外部モジュール"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.title",
+      "values": {
+        "ko-KR": "정비/렌탈 운영 시스템",
+        "en-US": "Maintenance/Rental operations system",
+        "zh-Hans-CN": "维修/租赁运营系统",
+        "ja-JP": "整備/レンタル運営システム"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.description",
+      "values": {
+        "ko-KR": "Bitween 플랫폼 기준의 헤드 배너에서 장비 렌탈 운영, 정비 접수, 배정, 승인, KPI 시스템으로 이동합니다.",
+        "en-US": "From the Bitween header, open equipment rental operations, maintenance intake, assignment, approval, and KPI workflows.",
+        "zh-Hans-CN": "从 Bitween 标准头部进入设备租赁运营、维修接收、分配、审批和 KPI 系统。",
+        "ja-JP": "Bitween 基準ヘッドバナーから機器レンタル運営、整備受付、割当、承認、KPI システムへ移動します。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.actions.open",
+      "values": {
+        "ko-KR": "정비/렌탈 시스템 열기",
+        "en-US": "Open system",
+        "zh-Hans-CN": "打开系统",
+        "ja-JP": "システムを開く"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.actions.github",
+      "values": {
+        "ko-KR": "GitHub 저장소 보기",
+        "en-US": "View GitHub repository",
+        "zh-Hans-CN": "查看 GitHub 仓库",
+        "ja-JP": "GitHub リポジトリを見る"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.source.label",
+      "values": {
+        "ko-KR": "연동 소스",
+        "en-US": "Linked source",
+        "zh-Hans-CN": "连接源",
+        "ja-JP": "連携ソース"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.source.value",
+      "values": {
+        "ko-KR": "GitHub",
+        "en-US": "GitHub",
+        "zh-Hans-CN": "GitHub",
+        "ja-JP": "GitHub"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.source.detail",
+      "values": {
+        "ko-KR": "https://github.com/yulee94/maintenance_system 저장소를 기준으로 연결합니다.",
+        "en-US": "Linked against https://github.com/yulee94/maintenance_system.",
+        "zh-Hans-CN": "基于 https://github.com/yulee94/maintenance_system 仓库连接。",
+        "ja-JP": "https://github.com/yulee94/maintenance_system リポジトリを基準に接続します。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.brand.label",
+      "values": {
+        "ko-KR": "Bitween UI 기준",
+        "en-US": "Bitween UI standard",
+        "zh-Hans-CN": "Bitween UI 标准",
+        "ja-JP": "Bitween UI 基準"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.brand.value",
+      "values": {
+        "ko-KR": "헤드 배너 유지",
+        "en-US": "Header retained",
+        "zh-Hans-CN": "保持头部横幅",
+        "ja-JP": "ヘッドバナー維持"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.brand.detail",
+      "values": {
+        "ko-KR": "타이틀과 진입 화면은 Bitween 플랫폼 톤으로 표시합니다.",
+        "en-US": "Titles and entry surfaces use the Bitween platform tone.",
+        "zh-Hans-CN": "标题和入口界面使用 Bitween 平台风格。",
+        "ja-JP": "タイトルと入口画面は Bitween プラットフォームのトーンで表示します。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.sync.label",
+      "values": {
+        "ko-KR": "업데이트 방식",
+        "en-US": "Update method",
+        "zh-Hans-CN": "更新方式",
+        "ja-JP": "更新方式"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.sync.value",
+      "values": {
+        "ko-KR": "외부 브릿지",
+        "en-US": "External bridge",
+        "zh-Hans-CN": "外部桥接",
+        "ja-JP": "外部ブリッジ"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.cards.sync.detail",
+      "values": {
+        "ko-KR": "정비 시스템 코드를 복사하지 않아 저장소 업데이트가 별도로 반영됩니다.",
+        "en-US": "The maintenance code is not copied, so repository updates remain independent.",
+        "zh-Hans-CN": "不复制维修系统代码，因此仓库更新可独立反映。",
+        "ja-JP": "整備システムのコードをコピーしないため、リポジトリ更新が独立して反映されます。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.flow.badge",
+      "values": {
+        "ko-KR": "운영 흐름",
+        "en-US": "Ops flow",
+        "zh-Hans-CN": "运营流程",
+        "ja-JP": "運営フロー"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.flow.title",
+      "values": {
+        "ko-KR": "접수 → 배정 → 작업보고 → 승인 → KPI",
+        "en-US": "Intake → Assignment → Report → Approval → KPI",
+        "zh-Hans-CN": "接收 → 分配 → 工作报告 → 审批 → KPI",
+        "ja-JP": "受付 → 割当 → 作業報告 → 承認 → KPI"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.flow.detail",
+      "values": {
+        "ko-KR": "정비/렌탈 시스템의 기존 업무 흐름을 그대로 사용하고 Bitween은 진입점과 권한 경계를 관리합니다.",
+        "en-US": "Keep the existing maintenance/rental workflow while Bitween manages the entry point and boundaries.",
+        "zh-Hans-CN": "保留维修/租赁系统现有流程，由 Bitween 管理入口和边界。",
+        "ja-JP": "整備/レンタルシステムの既存業務フローを維持し、Bitween は入口と境界を管理します。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.bitween.badge",
+      "values": {
+        "ko-KR": "연동 경계",
+        "en-US": "Boundary",
+        "zh-Hans-CN": "边界",
+        "ja-JP": "境界"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.bitween.title",
+      "values": {
+        "ko-KR": "급여/근태 원본은 Bitween에 유지",
+        "en-US": "Payroll/attendance source remains in Bitween",
+        "zh-Hans-CN": "薪资/考勤源数据保留在 Bitween",
+        "ja-JP": "給与/勤怠の原本は Bitween に維持"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.bitween.detail",
+      "values": {
+        "ko-KR": "승인된 정비 작업시간만 추후 급여 검토 후보로 export하도록 분리합니다.",
+        "en-US": "Only approved maintenance labor time should export later as payroll-review candidates.",
+        "zh-Hans-CN": "仅将批准后的维修工时作为薪资审核候选导出。",
+        "ja-JP": "承認済み整備作業時間のみ将来の給与レビュー候補として export します。"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.notice.badge",
+      "values": {
+        "ko-KR": "자동 연동 기준",
+        "en-US": "Auto-link standard",
+        "zh-Hans-CN": "自动连接标准",
+        "ja-JP": "自動連携基準"
+      }
+    },
+    {
+      "key": "screens.maintenanceRental.notice.detail",
+      "values": {
+        "ko-KR": "Bitween은 외부 시스템 URL/저장소를 참조하므로 maintenance_system이 업데이트되어도 이 탭은 같은 진입점으로 최신 시스템을 엽니다.",
+        "en-US": "Bitween references the external URL/repository, so this tab opens the latest system through the same entry point after maintenance_system updates.",
+        "zh-Hans-CN": "Bitween 引用外部 URL/仓库，因此 maintenance_system 更新后该标签仍通过同一入口打开最新系统。",
+        "ja-JP": "Bitween は外部 URL/リポジトリを参照するため、maintenance_system 更新後もこのタブは同じ入口から最新システムを開きます。"
+      }
+    },
+    {
+      "key": "preview.toast.externalOpened",
+      "values": {
+        "ko-KR": "외부 정비/렌탈 시스템을 새 창으로 열었습니다.",
+        "en-US": "Opened the external maintenance/rental system in a new window.",
+        "zh-Hans-CN": "已在新窗口打开外部维修/租赁系统。",
+        "ja-JP": "外部の整備/レンタルシステムを新しいウィンドウで開きました。"
+      }
     }
   ],
   "languageDisplayNames": [

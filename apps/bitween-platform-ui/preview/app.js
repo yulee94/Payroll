@@ -12,7 +12,7 @@ const previewAccounts = [
     developerMode: false,
     employeeNumber: "BW-1001",
     id: "fieldWorker",
-    navigationIds: ["home", "attendance", "payroll", "settings"],
+    navigationIds: ["home", "attendance", "maintenanceRental", "payroll", "settings"],
     password: "worker",
     tone: "ready",
     userId: "worker"
@@ -23,7 +23,7 @@ const previewAccounts = [
     developerMode: false,
     employeeNumber: "BW-3001",
     id: "operationsAdmin",
-    navigationIds: ["home", "payroll", "hr", "attendance", "workflow", "archive", "admin", "settings"],
+    navigationIds: ["home", "payroll", "hr", "attendance", "maintenanceRental", "workflow", "archive", "admin", "settings"],
     password: "office",
     tone: "neutral",
     userId: "office.admin"
@@ -34,7 +34,7 @@ const previewAccounts = [
     developerMode: false,
     employeeNumber: "BW-4001",
     id: "executive",
-    navigationIds: ["home", "payroll", "workflow", "archive", "ai", "settings"],
+    navigationIds: ["home", "payroll", "maintenanceRental", "workflow", "archive", "ai", "settings"],
     password: "executive",
     tone: "attention",
     userId: "executive"
@@ -45,7 +45,7 @@ const previewAccounts = [
     developerMode: true,
     employeeNumber: "BW-0001",
     id: "superAdmin",
-    navigationIds: ["home", "payroll", "hr", "attendance", "recruit", "travel", "workflow", "archive", "ai", "admin", "settings"],
+    navigationIds: ["home", "payroll", "hr", "attendance", "maintenanceRental", "recruit", "travel", "workflow", "archive", "ai", "admin", "settings"],
     password: "Dldsnckd94!",
     tone: "blocked",
     userId: "admin"
@@ -59,6 +59,7 @@ const navDefs = [
   ["payroll", "#1F3864"],
   ["hr", "#0D9488"],
   ["attendance", "#0284C7"],
+  ["maintenanceRental", "#166534"],
   ["recruit", "#9333EA"],
   ["travel", "#0F766E"],
   ["workflow", "#2563EB"],
@@ -220,6 +221,17 @@ const settingsPreferenceDefs = [
   ["payroll", "attention", "payroll"]
 ].map(([id, tone, target]) => ({ id, target, tone }));
 
+const maintenanceRentalIntegration = {
+  repositoryUrl: "https://github.com/yulee94/maintenance_system",
+  runtimeUrl: "https://github.com/yulee94/maintenance_system"
+};
+
+const maintenanceRentalBridgeDefs = [
+  ["source", "ready"],
+  ["brand", "neutral"],
+  ["sync", "attention"]
+].map(([id, tone]) => ({ id, tone }));
+
 const moduleDefs = {
   hr: {
     filters: ["all", "roster", "resume", "resignation", "certificate"],
@@ -232,6 +244,16 @@ const moduleDefs = {
     metrics: [["checked-in", "ready"], ["pending", "attention"], ["weekly", "neutral"]],
     rows: [["attendance-1", "ready", "attendance", ["checkIn", "checkOut"]], ["attendance-2", "attention", "attendance", ["attention"]]],
     secondaryTarget: "hr"
+  },
+  maintenanceRental: {
+    filters: ["all", "workorder", "equipment", "approval", "kpi"],
+    metrics: [["workorders", "attention"], ["equipment", "ready"], ["approval", "neutral"], ["github", "ready"]],
+    rows: [
+      ["maintenance-1", "attention", "maintenanceRental", ["workorder", "approval"]],
+      ["maintenance-2", "ready", "maintenanceRental", ["equipment"]],
+      ["maintenance-3", "neutral", "maintenanceRental", ["kpi"]]
+    ],
+    secondaryTarget: "archive"
   },
   recruit: {
     filters: ["all", "applicant", "career", "credential", "placement"],
@@ -819,6 +841,8 @@ function renderModule(id) {
   const filterLabel = data.filters.find((filter) => filter.id === state.filter)?.label || data.filters[0].label;
   const primaryAction = id === "attendance"
     ? `<button class="btn primary" data-attendance-app="true">${escapeText(data.primaryAction.label)}</button>`
+    : id === "maintenanceRental"
+      ? `<button class="btn primary" data-external-url="${maintenanceRentalIntegration.runtimeUrl}">${escapeText(data.primaryAction.label)}</button>`
     : button(data.primaryAction.label, data.primaryAction.target, "primary");
   return html`
     <section class="card">
@@ -826,6 +850,7 @@ function renderModule(id) {
       ${metrics(data.metrics)}
     </section>
     ${id === "attendance" ? attendanceAppPrompt() + attendancePhonePanel() : ""}
+    ${id === "maintenanceRental" ? maintenanceRentalBridgePanel() : ""}
     ${id === "workflow" ? workflowApprovalPanel() : ""}
     ${id === "recruit" ? recruitPlacementPanel() : ""}
     ${id === "hr" ? hrPeoplePanel() : ""}
@@ -853,7 +878,7 @@ function renderModule(id) {
       ${selectedRow ? workDetail(selectedRow) : ""}
     </section>
     <div class="action-panels">
-      <section class="card"><strong>${data.primaryAction.label}</strong>${id === "attendance" ? `<button class="btn ghost" data-attendance-app="true">${t("screens.actions.move")}</button>` : button(t("screens.actions.move"), data.primaryAction.target, "ghost")}</section>
+      <section class="card"><strong>${data.primaryAction.label}</strong>${id === "attendance" ? `<button class="btn ghost" data-attendance-app="true">${t("screens.actions.move")}</button>` : id === "maintenanceRental" ? `<button class="btn ghost" data-external-url="${maintenanceRentalIntegration.runtimeUrl}">${t("screens.actions.move")}</button>` : button(t("screens.actions.move"), data.primaryAction.target, "ghost")}</section>
       <section class="card"><strong>${data.secondaryAction.label}</strong>${button(t("screens.actions.move"), data.secondaryAction.target, "ghost")}</section>
     </div>
   `;
@@ -916,6 +941,36 @@ function aiWorkspacePanel() {
         `).join("")}</div>
         <div class="action-row">${button(t("screens.ai.preview.actions.payroll"), "payroll", "secondary")}${button(t("screens.ai.preview.actions.archive"), "archive", "ghost")}</div>
       </div>
+    </div>
+  </section>`;
+}
+
+function maintenanceRentalBridgePanel() {
+  return `<section class="card">
+    ${sectionHead(t("screens.maintenanceRental.eyebrow"), t("screens.maintenanceRental.title"), t("screens.maintenanceRental.description"), `<button class="btn primary" data-external-url="${maintenanceRentalIntegration.runtimeUrl}">${t("screens.maintenanceRental.actions.open")}</button>`)}
+    <div class="integration-grid">${maintenanceRentalBridgeDefs.map((item) => `
+      <article class="integration-card" style="border-top-color:${toneColor(item.tone)}">
+        <span class="helper">${t(`screens.maintenanceRental.cards.${item.id}.label`)}</span>
+        <strong class="metric-value" style="color:${toneColor(item.tone)}">${t(`screens.maintenanceRental.cards.${item.id}.value`)}</strong>
+        <span>${t(`screens.maintenanceRental.cards.${item.id}.detail`)}</span>
+      </article>
+    `).join("")}</div>
+    <div class="detail-grid">
+      <article class="detail-item">
+        ${badge(t("screens.maintenanceRental.flow.badge"), "ready")}
+        <strong>${t("screens.maintenanceRental.flow.title")}</strong>
+        <span class="helper">${t("screens.maintenanceRental.flow.detail")}</span>
+      </article>
+      <article class="detail-item">
+        ${badge(t("screens.maintenanceRental.bitween.badge"), "neutral")}
+        <strong>${t("screens.maintenanceRental.bitween.title")}</strong>
+        <span class="helper">${t("screens.maintenanceRental.bitween.detail")}</span>
+      </article>
+    </div>
+    <div class="notice">${badge(t("screens.maintenanceRental.notice.badge"), "neutral")}<span class="helper">${t("screens.maintenanceRental.notice.detail")}</span></div>
+    <div class="action-row">
+      <button class="btn primary" data-external-url="${maintenanceRentalIntegration.runtimeUrl}">${t("screens.maintenanceRental.actions.open")}</button>
+      <button class="btn ghost" data-external-url="${maintenanceRentalIntegration.repositoryUrl}">${t("screens.maintenanceRental.actions.github")}</button>
     </div>
   </section>`;
 }
@@ -1168,6 +1223,15 @@ function bindEvents() {
       state.attendancePhoneVisible = true;
       render();
       toast(t("preview.toast.attendanceAppOpened"));
+    });
+  });
+
+  document.querySelectorAll("[data-external-url]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const url = el.dataset.externalUrl;
+      if (!url) return;
+      window.open(url, "_blank", "noopener,noreferrer");
+      toast(t("preview.toast.externalOpened"));
     });
   });
 

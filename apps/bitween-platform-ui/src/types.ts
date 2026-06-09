@@ -3,6 +3,7 @@ export type PlatformId =
   | "payroll"
   | "hr"
   | "attendance"
+  | "maintenanceRental"
   | "recruit"
   | "travel"
   | "workflow"

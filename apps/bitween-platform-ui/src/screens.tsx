@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Linking, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import {
   ActionButton,
@@ -152,6 +152,17 @@ const settingsPreferenceDefinitions = [
   { id: "security", target: "admin", tone: "attention" },
   { id: "payroll", target: "payroll", tone: "attention" }
 ] as const satisfies readonly TargetToneDefinition[];
+
+const maintenanceRentalIntegration = {
+  repositoryUrl: "https://github.com/yulee94/maintenance_system",
+  runtimeUrl: "https://github.com/yulee94/maintenance_system"
+} as const;
+
+const maintenanceRentalBridgeDefinitions = [
+  { id: "source", tone: "ready" },
+  { id: "brand", tone: "neutral" },
+  { id: "sync", tone: "attention" }
+] as const satisfies readonly ToneDefinition[];
 
 const tScreen = (locale: SupportedLocale, key: string, params?: Readonly<Record<string, string | number>>) =>
   t(locale, `screens.${key}`, params);
@@ -721,6 +732,7 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
       {active.id === "recruit" ? <RecruitPlacementPanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "hr" ? <HrPeoplePanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "travel" ? <TravelWorklogPanel locale={locale} /> : null}
+      {active.id === "maintenanceRental" ? <MaintenanceRentalBridgePanel locale={locale} /> : null}
       {active.id === "admin" ? <AdminAccountPanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "archive" ? <ArchiveLibraryPanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "ai" ? <AiWorkspacePanel locale={locale} onSelect={onSelect} /> : null}
@@ -1122,6 +1134,55 @@ function AiWorkspacePanel({ locale, onSelect }: Pick<ScreenProps, "locale" | "on
             <ActionButton onPress={() => onSelect("archive")} variant="ghost">{tScreen(locale, "ai.preview.actions.archive")}</ActionButton>
           </View>
         </View>
+      </View>
+    </Card>
+  );
+}
+
+function MaintenanceRentalBridgePanel({ locale }: Pick<ScreenProps, "locale">) {
+  const openRuntime = () => {
+    void Linking.openURL(maintenanceRentalIntegration.runtimeUrl);
+  };
+  const openRepository = () => {
+    void Linking.openURL(maintenanceRentalIntegration.repositoryUrl);
+  };
+
+  return (
+    <Card>
+      <SectionHeader
+        eyebrow={tScreen(locale, "maintenanceRental.eyebrow")}
+        title={tScreen(locale, "maintenanceRental.title")}
+        description={tScreen(locale, "maintenanceRental.description")}
+        action={<ActionButton onPress={openRuntime} variant="primary">{tScreen(locale, "maintenanceRental.actions.open")}</ActionButton>}
+      />
+      <View style={styles.integrationGrid}>
+        {maintenanceRentalBridgeDefinitions.map((item) => (
+          <View key={item.id} style={[styles.integrationCard, { borderTopColor: toneColor(item.tone) }]}>
+            <Label size="sm" muted>{tScreen(locale, `maintenanceRental.cards.${item.id}.label`)}</Label>
+            <Text style={[styles.integrationValue, { color: toneColor(item.tone) }]}>{tScreen(locale, `maintenanceRental.cards.${item.id}.value`)}</Text>
+            <Label size="sm">{tScreen(locale, `maintenanceRental.cards.${item.id}.detail`)}</Label>
+          </View>
+        ))}
+      </View>
+      <View style={styles.detailGrid}>
+        <View style={styles.detailItem}>
+          <Badge tone="ready">{tScreen(locale, "maintenanceRental.flow.badge")}</Badge>
+          <Label weight="bold">{tScreen(locale, "maintenanceRental.flow.title")}</Label>
+          <Label size="sm" muted>{tScreen(locale, "maintenanceRental.flow.detail")}</Label>
+        </View>
+        <View style={styles.detailItem}>
+          <Badge tone="neutral">{tScreen(locale, "maintenanceRental.bitween.badge")}</Badge>
+          <Label weight="bold">{tScreen(locale, "maintenanceRental.bitween.title")}</Label>
+          <Label size="sm" muted>{tScreen(locale, "maintenanceRental.bitween.detail")}</Label>
+        </View>
+      </View>
+      <View style={styles.inlineNotice}>
+        <Badge tone="neutral">{tScreen(locale, "maintenanceRental.notice.badge")}</Badge>
+        <Label size="sm" muted>{tScreen(locale, "maintenanceRental.notice.detail")}</Label>
+      </View>
+      <View style={styles.actionRow}>
+        <ActionButton onPress={openRuntime} variant="primary">{tScreen(locale, "maintenanceRental.actions.open")}</ActionButton>
+        <ActionButton onPress={openRepository} variant="ghost">{tScreen(locale, "maintenanceRental.actions.github")}</ActionButton>
       </View>
     </Card>
   );
