@@ -1,0 +1,98 @@
+{
+  "expo": {
+    "name": "Bitween Worker",
+    "slug": "bitween-worker-mobile",
+    "scheme": "bitween-worker",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.bitween.worker",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Bitween은 출퇴근 승인과 급여정보 보호를 위해 기기 생체인증 결과만 사용합니다.",
+        "UIBackgroundModes": [
+          "location",
+          "remote-notification"
+        ],
+        "NSLocationWhenInUseUsageDescription": "출퇴근 위치 확인과 사업장 지오펜스 판정을 위해 위치정보를 사용합니다.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "근무시간 중 승인 없는 근무지 이탈 알림을 위해 백그라운드 위치정보를 사용합니다.",
+        "NSLocationAlwaysUsageDescription": "근무시간 중 승인 없는 근무지 이탈 알림을 위해 백그라운드 위치정보를 사용합니다.",
+        "NSUserTrackingUsageDescription": "Bitween은 제3자 광고 추적을 사용하지 않습니다."
+      }
+    },
+    "android": {
+      "package": "com.bitween.worker",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "POST_NOTIFICATIONS",
+        "USE_BIOMETRIC"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#0f172a",
+        "foregroundImage": "./assets/adaptive-icon.png"
+      },
+      "blockedPermissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.CAMERA"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "근무시간 중 출퇴근 및 승인 없는 근무지 이탈 확인을 위해 위치정보를 사용합니다.",
+          "locationWhenInUsePermission": "출퇴근 위치 확인을 위해 위치정보를 사용합니다.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "출퇴근 승인과 급여정보 열람 보호를 위해 Face ID를 사용합니다."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "sounds": []
+        }
+      ]
+    ],
+    "extra": {
+      "mobileApiBaseUrl": "https://dev.mobile-api.bitween.example",
+      "mobileApiVersion": "v1",
+      "eas": {
+        "projectId": "00000000-0000-0000-0000-000000000000"
+      },
+      "appEnvironment": "development",
+      "apiUrls": {
+        "development": "https://dev.mobile-api.bitween.example",
+        "staging": "https://staging.mobile-api.bitween.example",
+        "production": "https://mobile-api.bitween.example"
+      },
+      "release": {
+        "privacyPolicyUrl": "https://bitween.example/privacy",
+        "termsUrl": "https://bitween.example/terms",
+        "supportContact": "support@bitween.example",
+        "distributionDefault": "employee-private-first"
+      }
+    },
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f8fafc"
+    }
+  }
+}

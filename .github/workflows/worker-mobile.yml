@@ -1,0 +1,74 @@
+name: worker-mobile
+
+on:
+  push:
+    paths:
+      - 'apps/worker-mobile/**'
+      - 'core/api_surfaces.py'
+      - 'core/mobile/**'
+      - 'tests/test_api_surfaces.py'
+      - 'tests/test_mobile_app_api.py'
+      - 'tests/test_mobile_attendance.py'
+      - 'docs/MOBILE_WORKER_APP.md'
+      - '.github/workflows/worker-mobile.yml'
+  pull_request:
+    paths:
+      - 'apps/worker-mobile/**'
+      - 'core/api_surfaces.py'
+      - 'core/mobile/**'
+      - 'tests/test_api_surfaces.py'
+      - 'tests/test_mobile_app_api.py'
+      - 'tests/test_mobile_attendance.py'
+      - 'docs/MOBILE_WORKER_APP.md'
+      - '.github/workflows/worker-mobile.yml'
+
+jobs:
+  contract-and-app-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Mobile API contract tests
+        run: python -m unittest tests.test_api_surfaces tests.test_mobile_app_api tests.test_mobile_attendance -v
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+          cache: npm
+          cache-dependency-path: apps/worker-mobile/package-lock.json
+      - name: Install mobile dependencies
+        working-directory: apps/worker-mobile
+        run: npm ci
+      - name: Typecheck worker mobile app
+        working-directory: apps/worker-mobile
+        run: npm run typecheck
+      - name: Verify release metadata and review assets
+        working-directory: apps/worker-mobile
+        run: npm run verify:release-config
+
+  optional-eas-internal-build:
+    needs: contract-and-app-checks
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.ENABLE_EAS_INTERNAL_BUILD == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+          cache: npm
+          cache-dependency-path: apps/worker-mobile/package-lock.json
+      - name: Install mobile dependencies
+        working-directory: apps/worker-mobile
+        run: npm ci
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+      - name: Build staging apps for internal review
+        working-directory: apps/worker-mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          APP_ENV: staging
+          DEV_API_URL: ${{ vars.DEV_API_URL }}
+          STAGING_API_URL: ${{ vars.STAGING_API_URL }}
+          PROD_API_URL: ${{ vars.PROD_API_URL }}
+        run: eas build --profile staging --platform all --non-interactive
