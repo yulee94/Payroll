@@ -67,10 +67,14 @@ requireText(previewAppSource, 'data-external-url', "preview/app.js must open ext
 requireText(previewAppSource, 'devicePreviewPanel', "preview/app.js must expose the web/mobile side-by-side preview panel.");
 requireText(previewAppSource, 'web-preview-frame', "preview/app.js must render the web-only preview frame.");
 requireText(previewAppSource, 'mobile-preview-frame', "preview/app.js must render the phone-only preview frame.");
+requireText(previewAppSource, 'login-phone-card', "preview/app.js must render the landing phone app preview beside login roles.");
 requireText(screensSource, 'DevicePreviewPanel', "screens.tsx must expose the web/mobile side-by-side preview panel.");
+requireText(screensSource, 'loginPhoneCard', "screens.tsx must render the landing phone app preview beside login roles.");
 requireText(catalogSource, '"navigation.maintenanceRental.label"', "i18n catalog must include maintenance/rental navigation copy.");
 requireText(catalogSource, '"preview.toast.externalOpened"', "i18n catalog must include external-link toast copy.");
 requireText(catalogSource, '"screens.launcher.devicePreview.title"', "i18n catalog must include web/mobile side-by-side preview copy.");
+requireText(catalogSource, '"screens.login.phonePreview.title"', "i18n catalog must include landing phone app preview copy.");
+requireText(catalogSource, "일반사원", "catalog must expose the employee preview mode requested for the landing page.");
 
 rejectText(screensSource, "cossMonthlyFileDefinitions", "screens.tsx must not reintroduce the removed 1~5월 payroll intake checklist.");
 rejectText(previewAppSource, "cossMonthlyFileIds", "preview/app.js must not reintroduce the removed 1~5월 payroll intake checklist.");
@@ -81,6 +85,7 @@ requirePattern(previewStylesSource, /\.nav-button\s*\{[\s\S]*?height:\s*46px;[\s
 requirePattern(previewStylesSource, /\.nav-button strong\s*\{[\s\S]*?text-overflow:\s*ellipsis;[\s\S]*?white-space:\s*nowrap;[\s\S]*?\}/, "preview sidebar nav labels must not wrap and resize rows.");
 requirePattern(previewStylesSource, /\.nav\s*\{[\s\S]*?align-content:\s*start;[\s\S]*?grid-auto-rows:\s*46px;[\s\S]*?overflow-y:\s*auto;[\s\S]*?\}/, "preview sidebar nav must not stretch gaps between tabs.");
 requireText(previewStylesSource, ".device-preview-grid", "preview styles must include the web/mobile side-by-side preview layout.");
+requireText(previewStylesSource, ".login-phone-card", "preview styles must include the landing phone preview layout.");
 
 if (errors.length > 0) {
   console.error("runtime data mode verification failed:");

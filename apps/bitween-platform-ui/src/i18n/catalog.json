@@ -7416,37 +7416,37 @@
     {
       "key": "accounts.fieldWorker.label",
       "values": {
-        "ko-KR": "현장사원",
-        "en-US": "Field employee",
-        "zh-Hans-CN": "现场员工",
-        "ja-JP": "現場社員"
+        "ko-KR": "일반사원",
+        "en-US": "Employee",
+        "zh-Hans-CN": "普通员工",
+        "ja-JP": "一般社員"
       }
     },
     {
       "key": "accounts.fieldWorker.description",
       "values": {
-        "ko-KR": "현장사원이 휴대폰 앱 형태로 출퇴근과 내 급여를 확인하는 화면입니다.",
-        "en-US": "Field employee view for checking attendance and own payroll in a phone-app layout.",
-        "zh-Hans-CN": "现场员工以手机应用形式查看出退勤和个人工资的界面。",
-        "ja-JP": "現場社員が携帯アプリ形式で出退勤と自分の給与を確認する画面です。"
+        "ko-KR": "일반/현장 사원이 휴대폰 앱 형태로 출퇴근과 내 급여를 확인하는 화면입니다.",
+        "en-US": "A view for general and field employees to check attendance and their own payroll in the phone app layout.",
+        "zh-Hans-CN": "普通/现场员工以手机应用形式查看出退勤和个人工资的界面。",
+        "ja-JP": "一般/現場社員が携帯アプリ形式で出退勤と自分の給与を確認する画面です。"
       }
     },
     {
       "key": "accounts.fieldWorker.roleLabel",
       "values": {
-        "ko-KR": "현장사원",
-        "en-US": "Field employee",
-        "zh-Hans-CN": "现场员工",
-        "ja-JP": "現場社員"
+        "ko-KR": "일반사원",
+        "en-US": "Employee",
+        "zh-Hans-CN": "普通员工",
+        "ja-JP": "一般社員"
       }
     },
     {
       "key": "accounts.fieldWorker.modeLabel",
       "values": {
-        "ko-KR": "현장사원 모드",
-        "en-US": "Field employee mode",
-        "zh-Hans-CN": "现场员工模式",
-        "ja-JP": "現場社員モード"
+        "ko-KR": "일반사원 모드",
+        "en-US": "Employee mode",
+        "zh-Hans-CN": "普通员工模式",
+        "ja-JP": "一般社員モード"
       }
     },
     {
@@ -8572,6 +8572,69 @@
         "en-US": "This app-only screen is prepared for device registration, token auth, push, and offline sync.",
         "zh-Hans-CN": "这是为设备注册、令牌认证、推送和离线同步准备的应用专用画面。",
         "ja-JP": "端末登録、トークン認証、プッシュ、オフライン同期を入れるアプリ専用画面です。"
+      }
+    },
+    {
+      "key": "screens.login.phonePreview.aria",
+      "values": {
+        "ko-KR": "랜딩 페이지 우측 휴대폰 앱 프리뷰",
+        "en-US": "Right-side phone app preview on the landing page",
+        "zh-Hans-CN": "登录页右侧手机应用预览",
+        "ja-JP": "ランディングページ右側の携帯アプリプレビュー"
+      }
+    },
+    {
+      "key": "screens.login.phonePreview.eyebrow",
+      "values": {
+        "ko-KR": "휴대폰 앱 프리뷰",
+        "en-US": "Phone app preview",
+        "zh-Hans-CN": "手机应用预览",
+        "ja-JP": "携帯アプリプレビュー"
+      }
+    },
+    {
+      "key": "screens.login.phonePreview.title",
+      "values": {
+        "ko-KR": "선택한 모드의 모바일 화면",
+        "en-US": "Mobile screen for the selected mode",
+        "zh-Hans-CN": "所选模式的移动界面",
+        "ja-JP": "選択したモードのモバイル画面"
+      }
+    },
+    {
+      "key": "screens.login.phonePreview.description",
+      "values": {
+        "ko-KR": "관리자, 일반사원, 임원, 최고관리자 카드를 선택하면 우측 앱 프레임도 해당 권한 기준으로 바뀝니다.",
+        "en-US": "Selecting manager, employee, executive, or super admin updates the right-side app frame for that permission scope.",
+        "zh-Hans-CN": "选择管理员、普通员工、高管或最高管理员卡片后，右侧应用框也会按相应权限更新。",
+        "ja-JP": "管理者、一般社員、役員、最高管理者カードを選ぶと、右側のアプリ枠もその権限に合わせて切り替わります。"
+      }
+    },
+    {
+      "key": "screens.login.phonePreview.selectedMode",
+      "values": {
+        "ko-KR": "선택 모드",
+        "en-US": "Selected mode",
+        "zh-Hans-CN": "所选模式",
+        "ja-JP": "選択モード"
+      }
+    },
+    {
+      "key": "screens.login.phonePreview.noticeTitle",
+      "values": {
+        "ko-KR": "앱 전용 권한 미리보기",
+        "en-US": "App-specific permission preview",
+        "zh-Hans-CN": "应用专用权限预览",
+        "ja-JP": "アプリ専用権限プレビュー"
+      }
+    },
+    {
+      "key": "screens.login.phonePreview.noticeCopy",
+      "values": {
+        "ko-KR": "역할별 메뉴, 출퇴근, 푸시·오프라인 동기화 준비 화면을 랜딩에서 바로 확인합니다.",
+        "en-US": "Review role-based menus, attendance, push, and offline-sync readiness directly from the landing page.",
+        "zh-Hans-CN": "可在登录页直接确认按角色显示的菜单、出退勤、推送和离线同步准备画面。",
+        "ja-JP": "役割別メニュー、出退勤、プッシュ・オフライン同期準備画面をランディングで直接確認します。"
       }
     }
   ],

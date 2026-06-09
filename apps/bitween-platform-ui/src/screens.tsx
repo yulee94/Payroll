@@ -193,6 +193,13 @@ export function LoginScreen({ accounts, locale, onLocaleChange, onLogin }: Login
     ] as const,
     [selectedAccount.companyCode, selectedAccount.password, selectedAccount.userId],
   );
+  const phonePreviewItems = useMemo(
+    () =>
+      getNavigationItems(locale)
+        .filter((item) => selectedAccount.navigationIds.includes(item.id) && item.id !== "home")
+        .slice(0, 4),
+    [locale, selectedAccount.id, selectedAccount.navigationIds],
+  );
   const loginParams = {
     companyCode: selectedAccount.companyCode,
     password: selectedAccount.password,
@@ -394,6 +401,50 @@ export function LoginScreen({ accounts, locale, onLocaleChange, onLogin }: Login
           >
             {tScreen(locale, "login.actions.demo")}
           </ActionButton>
+        </View>
+      </Card>
+      <Card style={styles.loginPhoneCard}>
+        <SectionHeader
+          eyebrow={tScreen(locale, "login.phonePreview.eyebrow")}
+          title={tScreen(locale, "login.phonePreview.title")}
+          description={tScreen(locale, "login.phonePreview.description")}
+        />
+        <View style={styles.landingModeSummary}>
+          <Badge tone={selectedAccount.developerMode ? "attention" : selectedAccount.tone}>{selectedAccount.modeLabel}</Badge>
+          <View style={styles.landingModeCopy}>
+            <Label weight="bold">{selectedAccount.label}</Label>
+            <Label size="sm" muted>{selectedAccount.description}</Label>
+          </View>
+        </View>
+        <View style={[styles.phoneFrame, styles.loginPhoneFrame]}>
+          <View style={styles.phoneHeader}>
+            <Label size="sm" muted>{tScreen(locale, "login.phonePreview.selectedMode")}</Label>
+            <Badge tone={selectedAccount.developerMode ? "attention" : "ready"}>{selectedAccount.roleLabel}</Badge>
+          </View>
+          <View style={styles.phoneClock}>
+            <Text style={styles.phoneTime}>09:02</Text>
+            <Label size="sm" muted>{tScreen(locale, "attendance.phone.location")}</Label>
+          </View>
+          <View style={styles.loginPhoneMenu}>
+            {phonePreviewItems.map((item, index) => (
+              <View key={item.id} style={[styles.loginPhoneMenuItem, index === 0 && styles.loginPhoneMenuItemActive]}>
+                <Label size="sm" muted>{item.eyebrow}</Label>
+                <Text numberOfLines={1} style={styles.loginPhoneMenuText}>{item.label}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={styles.punchActions}>
+            <Pressable accessibilityRole="button" style={({ pressed }) => [styles.punchButton, pressed && styles.buttonPressed]}>
+              <Text style={styles.punchButtonText}>{tScreen(locale, "attendance.phone.checkIn")}</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" style={({ pressed }) => [styles.punchButtonSecondary, pressed && styles.buttonPressed]}>
+              <Text style={styles.punchButtonSecondaryText}>{tScreen(locale, "attendance.phone.checkOut")}</Text>
+            </Pressable>
+          </View>
+          <View style={styles.locationNotice}>
+            <Label size="sm" weight="bold">{tScreen(locale, "login.phonePreview.noticeTitle")}</Label>
+            <Label size="sm" muted>{tScreen(locale, "login.phonePreview.noticeCopy")}</Label>
+          </View>
         </View>
       </Card>
     </View>
@@ -2251,7 +2302,7 @@ const styles = StyleSheet.create({
   loginHero: {
     backgroundColor: colors.accent,
     borderRadius: radius.lg,
-    flexBasis: 420,
+    flexBasis: 330,
     flexGrow: 1,
     gap: spacing.xxl,
     justifyContent: "space-between",
@@ -2267,11 +2318,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.xl,
-    maxWidth: 1120,
+    maxWidth: 1440,
     width: "100%"
   },
   loginCard: {
-    flexBasis: 360,
+    flexBasis: 380,
     flexGrow: 1
   },
   loginCredentialGrid: {
@@ -2302,6 +2353,59 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: spacing.sm,
     padding: spacing.md
+  },
+  landingModeCopy: {
+    flex: 1,
+    gap: spacing.xs,
+    minWidth: 0
+  },
+  landingModeSummary: {
+    alignItems: "flex-start",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    padding: spacing.md
+  },
+  loginPhoneCard: {
+    alignContent: "flex-start",
+    flexBasis: 300,
+    flexGrow: 0.8
+  },
+  loginPhoneFrame: {
+    alignSelf: "center",
+    flexBasis: 280,
+    maxWidth: 330,
+    width: "100%"
+  },
+  loginPhoneMenu: {
+    gap: spacing.sm
+  },
+  loginPhoneMenuItem: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderLeftColor: "transparent",
+    borderLeftWidth: 4,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.xs,
+    minHeight: 54,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm
+  },
+  loginPhoneMenuItemActive: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent,
+    borderLeftColor: colors.accent
+  },
+  loginPhoneMenuText: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 18
   },
   roleCard: {
     backgroundColor: colors.card,
