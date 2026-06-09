@@ -712,11 +712,10 @@ export function ModuleScreen({ active, locale, onLocaleChange, onSelect }: Local
       </Card>
 
       {active.id === "attendance" ? (
-        attendancePhoneVisible ? (
-          <AttendancePhonePanel locale={locale} />
-        ) : (
+        <>
           <AttendanceAppPrompt locale={locale} onOpen={() => setAttendancePhoneVisible(true)} />
-        )
+          {(attendancePhoneVisible || active.id === "attendance") ? <AttendancePhonePanel locale={locale} /> : null}
+        </>
       ) : null}
       {active.id === "workflow" ? <WorkflowApprovalPanel locale={locale} onSelect={onSelect} /> : null}
       {active.id === "recruit" ? <RecruitPlacementPanel locale={locale} onSelect={onSelect} /> : null}

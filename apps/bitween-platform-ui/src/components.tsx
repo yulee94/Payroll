@@ -482,6 +482,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     gap: spacing.md,
+    minWidth: 0,
     padding: spacing.lg
   },
   cardCompact: {
@@ -489,13 +490,15 @@ const styles = StyleSheet.create({
   },
   content: {
     gap: spacing.lg,
+    minWidth: 0,
     padding: spacing.xl
   },
   contentCompact: {
     padding: spacing.md
   },
   contentScroll: {
-    flex: 1
+    flex: 1,
+    minWidth: 0
   },
   emptyMark: {
     color: colors.muted,
@@ -574,7 +577,10 @@ const styles = StyleSheet.create({
   },
   main: {
     backgroundColor: colors.bg,
-    flex: 1
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    overflow: "hidden"
   },
   logoImage: {
     borderRadius: radius.lg,
@@ -668,7 +674,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
     flex: 1,
     flexDirection: "row",
-    minHeight: 720
+    minHeight: 720,
+    overflow: "hidden"
   },
   shellCompact: {
     flexDirection: "column",
@@ -683,6 +690,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     maxWidth: 280,
     minWidth: 280,
+    overflow: "hidden",
     padding: spacing.lg,
     width: 280
   },
@@ -795,6 +803,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radius.lg,
     borderWidth: 1,
+    minWidth: 0,
     overflow: "hidden"
   },
   tableCell: {
@@ -812,6 +821,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentSoft,
     flexDirection: "row",
     gap: spacing.md,
+    minWidth: 0,
     padding: spacing.md
   },
   tableHeading: {
@@ -825,6 +835,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     flexDirection: "row",
     gap: spacing.md,
+    minWidth: 0,
     padding: spacing.md
   },
   tableRowSelected: {

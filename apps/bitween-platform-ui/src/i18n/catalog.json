@@ -7407,46 +7407,46 @@
     {
       "key": "screens.login.rolePanel.description",
       "values": {
-        "ko-KR": "현장작업자부터 최고관리자까지 각 역할이 실제로 보게 될 메뉴와 시작 화면을 선택합니다.",
-        "en-US": "Choose the menu scope and landing screen each role will actually see, from field worker to super administrator.",
-        "zh-Hans-CN": "选择从现场作业人员到最高管理员实际看到的菜单范围和起始页面。",
-        "ja-JP": "現場作業者から最高管理者まで、各役割が実際に見るメニュー範囲と開始画面を選択します。"
+        "ko-KR": "현장사원, 관리자, 임원, 최고관리자 4개 모드가 실제로 보게 될 메뉴와 시작 화면을 선택합니다.",
+        "en-US": "Choose the menu scope and landing screen for the four preview modes: field employee, administrator, executive, and super administrator.",
+        "zh-Hans-CN": "选择现场员工、管理员、高管和最高管理员四种预览模式实际看到的菜单范围和起始页面。",
+        "ja-JP": "現場社員、管理者、役員、最高管理者の4つのプレビューモードで実際に見るメニュー範囲と開始画面を選択します。"
       }
     },
     {
       "key": "accounts.fieldWorker.label",
       "values": {
-        "ko-KR": "현장작업자",
-        "en-US": "Field worker",
-        "zh-Hans-CN": "现场作业人员",
-        "ja-JP": "現場作業者"
+        "ko-KR": "현장사원",
+        "en-US": "Field employee",
+        "zh-Hans-CN": "现场员工",
+        "ja-JP": "現場社員"
       }
     },
     {
       "key": "accounts.fieldWorker.description",
       "values": {
-        "ko-KR": "출퇴근·내 급여 중심의 모바일 작업자 화면입니다.",
-        "en-US": "Mobile worker view focused on attendance and own payroll.",
-        "zh-Hans-CN": "以出退勤和个人工资为中心的移动作业人员界面。",
-        "ja-JP": "出退勤と自分の給与を中心にしたモバイル作業者画面です。"
+        "ko-KR": "현장사원이 휴대폰 앱 형태로 출퇴근과 내 급여를 확인하는 화면입니다.",
+        "en-US": "Field employee view for checking attendance and own payroll in a phone-app layout.",
+        "zh-Hans-CN": "现场员工以手机应用形式查看出退勤和个人工资的界面。",
+        "ja-JP": "現場社員が携帯アプリ形式で出退勤と自分の給与を確認する画面です。"
       }
     },
     {
       "key": "accounts.fieldWorker.roleLabel",
       "values": {
-        "ko-KR": "현장작업자",
-        "en-US": "Field worker",
-        "zh-Hans-CN": "现场作业人员",
-        "ja-JP": "現場作業者"
+        "ko-KR": "현장사원",
+        "en-US": "Field employee",
+        "zh-Hans-CN": "现场员工",
+        "ja-JP": "現場社員"
       }
     },
     {
       "key": "accounts.fieldWorker.modeLabel",
       "values": {
-        "ko-KR": "작업자 모드",
-        "en-US": "Worker mode",
-        "zh-Hans-CN": "作业人员模式",
-        "ja-JP": "作業者モード"
+        "ko-KR": "현장사원 모드",
+        "en-US": "Field employee mode",
+        "zh-Hans-CN": "现场员工模式",
+        "ja-JP": "現場社員モード"
       }
     },
     {
@@ -7749,10 +7749,10 @@
     {
       "key": "screens.attendance.appPrompt.description",
       "values": {
-        "ko-KR": "상단의 출퇴근 앱 보기 버튼을 누르면 현장 작업자가 보는 휴대폰 앱 화면을 이 탭 안에서 확인합니다.",
-        "en-US": "Press Open attendance app to review the phone app screen that field workers see inside this tab.",
-        "zh-Hans-CN": "点击“打开出退勤应用”后，可在此标签页中查看现场作业人员看到的手机应用界面。",
-        "ja-JP": "「出退勤アプリを開く」を押すと、現場作業者が見る携帯アプリ画面をこのタブ内で確認できます。"
+        "ko-KR": "현장사원이 보는 휴대폰 앱 화면을 이 탭 안에서 바로 확인합니다. 버튼을 누르면 앱 프레임으로 이동합니다.",
+        "en-US": "Review the phone app screen field employees see directly inside this tab. Press the button to jump to the app frame.",
+        "zh-Hans-CN": "在此标签页中直接查看现场员工看到的手机应用界面。点击按钮可跳转到应用框。",
+        "ja-JP": "現場社員が見る携帯アプリ画面をこのタブ内ですぐ確認できます。ボタンを押すとアプリ枠へ移動します。"
       }
     },
     {

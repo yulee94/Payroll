@@ -19,17 +19,6 @@ const previewAccounts = [
   },
   {
     companyCode: "0000",
-    defaultRoute: "attendance",
-    developerMode: false,
-    employeeNumber: "BW-2001",
-    id: "fieldManager",
-    navigationIds: ["home", "attendance", "hr", "workflow", "archive", "settings"],
-    password: "manager",
-    tone: "attention",
-    userId: "site.manager"
-  },
-  {
-    companyCode: "0000",
     defaultRoute: "admin",
     developerMode: false,
     employeeNumber: "BW-3001",
@@ -49,17 +38,6 @@ const previewAccounts = [
     password: "executive",
     tone: "attention",
     userId: "executive"
-  },
-  {
-    companyCode: "0000",
-    defaultRoute: "home",
-    developerMode: false,
-    employeeNumber: "BW-5001",
-    id: "leadership",
-    navigationIds: ["home", "payroll", "archive", "ai", "admin", "settings"],
-    password: "leadership",
-    tone: "ready",
-    userId: "leadership"
   },
   {
     companyCode: "0000",
@@ -847,7 +825,7 @@ function renderModule(id) {
       ${sectionHead("", data.title, "", primaryAction)}
       ${metrics(data.metrics)}
     </section>
-    ${id === "attendance" ? (state.attendancePhoneVisible ? attendancePhonePanel() : attendanceAppPrompt()) : ""}
+    ${id === "attendance" ? attendanceAppPrompt() + attendancePhonePanel() : ""}
     ${id === "workflow" ? workflowApprovalPanel() : ""}
     ${id === "recruit" ? recruitPlacementPanel() : ""}
     ${id === "hr" ? hrPeoplePanel() : ""}

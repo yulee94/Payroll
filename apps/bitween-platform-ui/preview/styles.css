@@ -153,6 +153,7 @@ input:focus-visible {
   border-radius: 8px;
   display: grid;
   gap: 14px;
+  min-width: 0;
   padding: 18px;
 }
 
@@ -340,8 +341,10 @@ input:focus-visible {
   display: grid;
   grid-template-columns: minmax(280px, 280px) minmax(0, 1fr);
   height: 100vh;
+  max-width: 100vw;
   min-height: 100vh;
   overflow: hidden;
+  width: 100vw;
 }
 
 .shell.sidebar-theme-steel {
@@ -378,6 +381,8 @@ input:focus-visible {
   display: grid;
   grid-template-rows: auto auto 1fr;
   gap: 16px;
+  max-width: 280px;
+  min-width: 280px;
   overflow-y: auto;
   padding: 18px;
   width: 280px;
@@ -578,6 +583,7 @@ input:focus-visible {
   grid-template-rows: auto minmax(0, 1fr) auto;
   min-height: 0;
   min-width: 0;
+  overflow: hidden;
 }
 
 .topbar {
@@ -642,8 +648,13 @@ input:focus-visible {
   display: grid;
   gap: 18px;
   min-height: 0;
+  min-width: 0;
   overflow-y: auto;
   padding: 24px;
+}
+
+.content > * {
+  min-width: 0;
 }
 
 .shell-status {
@@ -1476,6 +1487,7 @@ button.planner-item {
 .table {
   border: 1px solid var(--border);
   border-radius: 8px;
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -1485,7 +1497,7 @@ button.planner-item {
   border-top: 1px solid var(--divider);
   display: grid;
   gap: 12px;
-  grid-template-columns: 1.1fr 0.9fr 0.8fr 1.4fr;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr) minmax(0, 0.8fr) minmax(0, 1.4fr);
   padding: 12px;
 }
 
@@ -1615,6 +1627,8 @@ button.planner-item {
   .sidebar {
     border-bottom: 1px solid var(--border);
     border-right: 0;
+    max-width: none;
+    min-width: 0;
     width: 100%;
   }
 

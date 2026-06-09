@@ -17,10 +17,8 @@ export type SidebarThemeId = "steel" | "graphite" | "teal" | "navy";
 
 export type PreviewAccountId =
   | "fieldWorker"
-  | "fieldManager"
   | "operationsAdmin"
   | "executive"
-  | "leadership"
   | "superAdmin";
 
 export type PreviewAccount = {
