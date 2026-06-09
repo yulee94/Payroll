@@ -52,6 +52,7 @@ class MobileAppApiTests(unittest.TestCase):
                 "username": "worker",
                 "password": "secret1",
                 "device_uid": "ios-001",
+                "mfa_otp": "123456",
             }
         )
         self.worker_token = self.worker_login["token"]
@@ -67,7 +68,10 @@ class MobileAppApiTests(unittest.TestCase):
             {
                 "device_uid": f"{platform}-001",
                 "platform": platform,
-                "push_token": f"ExpoPushToken[{platform}]",
+                "push_token": (f"apns-{platform}-token" if platform == "ios" else f"fcm-{platform}-token"),
+                "branch_id": "branch-review-001",
+                "app_version": "0.1.0",
+                "os_version": "18.0",
             },
             tenant_id=self._tenant,
             token=self.worker_token,
@@ -110,13 +114,175 @@ class MobileAppApiTests(unittest.TestCase):
     def test_mobile_contract_declares_privacy_defaults_and_platform_endpoints(self) -> None:
         contract = app_api.mobile_api_contract()
         paths = {row["path"] for row in contract["endpoints"]}
-        self.assertIn("/mobile/v1/attendance/check", paths)
-        self.assertIn("/mobile/v1/location/geofence-event", paths)
-        self.assertIn("/mobile/v1/payroll/{period}", paths)
-        self.assertIn("/mobile/v1/hr/documents", paths)
-        self.assertIn("/mobile/v1/hr/notifications/{id}/ack", paths)
+        self.assertEqual(contract["surface"]["name"], "Mobile App API")
+        self.assertIn("Web Admin API", contract["api_surfaces"]["web_admin"]["name"])
+        self.assertIn("/api/v1/login", paths)
+        self.assertIn("/api/v1/branches", paths)
+        self.assertIn("/api/v1/tasks", paths)
+        self.assertIn("/api/v2/tasks", paths)
+        self.assertIn("/api/v1/config", paths)
+        self.assertIn("/api/v1/attendance/check", paths)
+        self.assertIn("/api/v1/location/geofence-event", paths)
+        self.assertIn("/api/v1/push/send", paths)
+        self.assertIn("/api/v1/sync/offline", paths)
+        self.assertIn("/api/v1/payroll/{period}", paths)
+        self.assertIn("/api/v1/hr/documents", paths)
+        self.assertIn("/api/v1/hr/notifications/{id}/ack", paths)
+        self.assertNotIn("/mobile/v1/attendance/check", paths)
         self.assertEqual(contract["privacy_defaults"]["biometric_storage"], "device_only_pass_fail")
         self.assertEqual(contract["privacy_defaults"]["payroll_visibility"], "own_employee_only")
+        self.assertEqual(contract["legacy_aliases"]["replacement_base_path"], "/api/v1")
+        security = contract["security"]
+        self.assertEqual(
+            security["login_flow"],
+            ["company_account_login", "otp_or_mfa", "device_registration", "branch_permission_check", "app_use"],
+        )
+        self.assertIn("plain_password", security["forbidden_local_storage"])
+        self.assertIn("resident_registration_number", security["forbidden_local_storage"])
+        self.assertIn("card_number", security["forbidden_local_storage"])
+        self.assertIn("long_lived_admin_token", security["forbidden_local_storage"])
+        self.assertIn("iOS Keychain", security["required_encrypted_storage_when_needed"])
+        self.assertIn("Android Keystore", security["required_encrypted_storage_when_needed"])
+        self.assertTrue(security["push_notifications"]["required"])
+        self.assertIn("payment_settlement", security["push_notifications"]["event_kinds"])
+        self.assertTrue(security["offline_mode"]["required"])
+        self.assertEqual(security["offline_mode"]["server_idempotency_fields"], ["request_id", "sync_id", "created_at", "device_id"])
+
+    def test_mobile_login_requires_mfa(self) -> None:
+        with self.assertRaises(PermissionError):
+            app_api.mobile_login(
+                {
+                    "tenant_id": self._tenant,
+                    "username": "worker",
+                    "password": "secret1",
+                    "device_uid": "ios-002",
+                }
+            )
+
+    def test_mobile_app_config_declares_server_version_policy(self) -> None:
+        config = app_api.get_mobile_app_config("0.0.1")
+        policy = config["version_policy"]
+
+        self.assertIn("minimum_supported_version", policy)
+        self.assertIn("latest_version", policy)
+        self.assertIn("force_update_required", policy)
+        self.assertIn("maintenance_mode", policy)
+        self.assertIn("notice_message", policy)
+        self.assertTrue(policy["force_update_required"])
+        self.assertEqual(policy["example"]["current_app_version"], "1.0.0")
+        self.assertEqual(policy["example"]["minimum_supported_version"], "1.1.0")
+        self.assertIn("test_account", config["review_metadata_required"])
+
+    def test_mobile_branches_and_versioned_tasks_are_available(self) -> None:
+        self._register_worker_device_and_consents(platform="android")
+        branches = app_api.list_mobile_branches(tenant_id=self._tenant, token=self.worker_token)
+        self.assertEqual(branches["version"], "v1")
+        self.assertTrue(branches["branches"])
+        self.assertIn("branch_id", branches["branches"][0])
+
+        app_api.mobile_check_attendance(
+            {
+                "device_uid": "android-001",
+                "site_name": "화성 정비사업장",
+                "event_type": "clock_in",
+                "event_at": "2026-06-04T09:00:00",
+                "latitude": 37.1996,
+                "longitude": 126.8310,
+                "biometric_kind": "fingerprint",
+                "biometric_ok": True,
+            },
+            tenant_id=self._tenant,
+            token=self.worker_token,
+        )
+        app_api.mobile_geofence_event(
+            {
+                "device_uid": "android-001",
+                "site_name": "화성 정비사업장",
+                "transition": "exit",
+                "detected_at": "2026-06-04T10:00:00",
+                "latitude": 37.25,
+                "longitude": 126.9,
+            },
+            tenant_id=self._tenant,
+            token=self.worker_token,
+        )
+        manager_token = app_api.mobile_login(
+            {
+                "tenant_id": self._tenant,
+                "username": "manager",
+                "password": "secret1",
+                "mfa_otp": "123456",
+            }
+        )["token"]
+
+        tasks_v1 = app_api.list_mobile_tasks_v1(tenant_id=self._tenant, token=manager_token)
+        tasks_v2 = app_api.list_mobile_tasks_v2(tenant_id=self._tenant, token=manager_token)
+        self.assertEqual(tasks_v1["version"], "v1")
+        self.assertEqual(tasks_v2["version"], "v2")
+        self.assertEqual(tasks_v1["tasks"][0]["task_type"], "geofence_alert")
+        self.assertIn("branch_id", tasks_v1["tasks"][0])
+        self.assertEqual(tasks_v2["tasks"][0]["api_version"], "v2")
+        self.assertIn("permissions", tasks_v2["tasks"][0])
+
+    def test_device_registration_persists_push_token_fields_and_push_queue(self) -> None:
+        self._register_worker_device_and_consents(platform="ios")
+        devices = store.list_devices(tenant_id=self._tenant, user_id=self.worker.user_id)
+
+        self.assertEqual(len(devices), 1)
+        device = devices[0].to_dict()
+        self.assertEqual(device["user_id"], self.worker.user_id)
+        self.assertEqual(device["branch_id"], "branch-review-001")
+        self.assertTrue(device["device_uid"])
+        self.assertEqual(device["push_token"], "apns-ios-token")
+        self.assertEqual(device["platform"], "ios")
+        self.assertEqual(device["app_version"], "0.1.0")
+        self.assertTrue(device["last_active_at"])
+
+        pushed = app_api.send_mobile_push_notification(
+            {
+                "event_kind": "work_assignment",
+                "user_id": self.worker.user_id,
+                "branch_id": "branch-review-001",
+                "title": "작업 배정",
+                "body": "신규 작업이 배정되었습니다.",
+            },
+            tenant_id=self._tenant,
+            token=self.worker_token,
+        )
+        self.assertTrue(pushed["ok"])
+        self.assertEqual(pushed["queued"], 1)
+        self.assertEqual(pushed["notifications"][0]["provider"], "APNs")
+        self.assertEqual(pushed["notifications"][0]["event_kind"], "work_assignment")
+
+    def test_offline_sync_deduplicates_same_purchase_request(self) -> None:
+        self._register_worker_device_and_consents(platform="android")
+        payload = {
+            "request_type": "purchase_request",
+            "branch_id": "branch-review-001",
+            "payload": {
+                "title": "안전장갑 구매요청",
+                "summary": "현장 안전장갑 보충",
+                "items": [{"item_name": "안전장갑", "quantity": 10, "unit_price": 5000}],
+            },
+        }
+        synced = app_api.sync_mobile_offline_requests(
+            {
+                "requests": [
+                    {"request_id": "req-1", "sync_id": "sync-1", "created_at": "2026-06-09T09:00:00Z", "device_id": "android-001", **payload},
+                    {"request_id": "req-2", "sync_id": "sync-2", "created_at": "2026-06-09T09:01:00Z", "device_id": "android-001", **payload},
+                    {"request_id": "req-3", "sync_id": "sync-3", "created_at": "2026-06-09T09:02:00Z", "device_id": "android-001", **payload},
+                ]
+            },
+            tenant_id=self._tenant,
+            token=self.worker_token,
+        )
+
+        self.assertTrue(synced["ok"])
+        self.assertEqual(synced["processed"], 1)
+        self.assertEqual(synced["duplicates"], 2)
+        self.assertFalse(synced["results"][0]["duplicate"])
+        self.assertTrue(synced["results"][1]["duplicate"])
+        self.assertEqual(len(store.list_offline_sync_records(tenant_id=self._tenant, device_id="android-001")), 1)
 
     def test_mobile_hr_document_upload_list_and_ack_notification(self) -> None:
         self._register_worker_device_and_consents(platform="ios")
@@ -181,6 +347,7 @@ class MobileAppApiTests(unittest.TestCase):
                 "tenant_id": self._tenant,
                 "username": "manager",
                 "password": "secret1",
+                "mfa_otp": "123456",
             }
         )["token"]
         listed = app_api.list_mobile_manager_alerts(

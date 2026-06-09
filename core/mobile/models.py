@@ -16,6 +16,15 @@ VerificationStatus = Literal["pending", "verified", "rejected"]
 ConsentKind = Literal["location", "biometric", "payroll", "notifications", "privacy"]
 GeofenceTransition = Literal["enter", "exit", "heartbeat"]
 AlertStatus = Literal["open", "acknowledged", "resolved"]
+PushEventKind = Literal[
+    "work_assignment",
+    "approval_request",
+    "announcement",
+    "incident",
+    "inventory_movement",
+    "reservation",
+    "payment_settlement",
+]
 
 
 def _haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -71,12 +80,14 @@ class EmployeeDevice:
     employee_name: str
     device_uid: str
     user_id: str = ""
+    branch_id: str = ""
     platform: str = "android"
     push_token: str = ""
     app_version: str = ""
     os_version: str = ""
     registered_at: str = ""
     last_seen_at: str = ""
+    last_active_at: str = ""
     active: bool = True
 
     def to_dict(self) -> dict[str, Any]:
@@ -89,12 +100,14 @@ class EmployeeDevice:
             employee_name=str(raw.get("employee_name") or ""),
             device_uid=str(raw.get("device_uid") or ""),
             user_id=str(raw.get("user_id") or ""),
+            branch_id=str(raw.get("branch_id") or ""),
             platform=str(raw.get("platform") or "android"),
             push_token=str(raw.get("push_token") or ""),
             app_version=str(raw.get("app_version") or ""),
             os_version=str(raw.get("os_version") or ""),
             registered_at=str(raw.get("registered_at") or ""),
             last_seen_at=str(raw.get("last_seen_at") or ""),
+            last_active_at=str(raw.get("last_active_at") or raw.get("last_seen_at") or ""),
             active=bool(raw.get("active", True)),
         )
 
@@ -324,6 +337,104 @@ class GeofenceAlert:
             acknowledged_at=str(raw.get("acknowledged_at") or ""),
             resolved_at=str(raw.get("resolved_at") or ""),
             note=str(raw.get("note") or ""),
+        )
+
+
+@dataclass
+class MobilePushNotification:
+    """Queued mobile push notification for FCM/APNs delivery."""
+
+    id: str
+    event_kind: PushEventKind
+    title: str
+    body: str
+    user_id: str = ""
+    branch_id: str = ""
+    device_id: str = ""
+    push_token: str = ""
+    platform: str = "android"
+    app_version: str = ""
+    provider: str = ""
+    payload: dict[str, Any] = field(default_factory=dict)
+    status: str = "queued"
+    created_at: str = ""
+    sent_at: str = ""
+    error: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, raw: dict[str, Any]) -> MobilePushNotification:
+        kind = str(raw.get("event_kind") or "announcement")
+        if kind not in (
+            "work_assignment",
+            "approval_request",
+            "announcement",
+            "incident",
+            "inventory_movement",
+            "reservation",
+            "payment_settlement",
+        ):
+            kind = "announcement"
+        platform = str(raw.get("platform") or "android")
+        if platform not in ("ios", "android"):
+            platform = "android"
+        return cls(
+            id=str(raw.get("id") or ""),
+            event_kind=kind,  # type: ignore[arg-type]
+            title=str(raw.get("title") or ""),
+            body=str(raw.get("body") or ""),
+            user_id=str(raw.get("user_id") or ""),
+            branch_id=str(raw.get("branch_id") or ""),
+            device_id=str(raw.get("device_id") or ""),
+            push_token=str(raw.get("push_token") or ""),
+            platform=platform,
+            app_version=str(raw.get("app_version") or ""),
+            provider=str(raw.get("provider") or ""),
+            payload=dict(raw.get("payload") or {}),
+            status=str(raw.get("status") or "queued"),
+            created_at=str(raw.get("created_at") or ""),
+            sent_at=str(raw.get("sent_at") or ""),
+            error=str(raw.get("error") or ""),
+        )
+
+
+@dataclass
+class MobileOfflineSyncRecord:
+    """Server-side idempotency record for one offline-created mobile request."""
+
+    id: str
+    request_id: str
+    sync_id: str
+    created_at: str
+    device_id: str
+    user_id: str = ""
+    branch_id: str = ""
+    request_type: str = ""
+    payload_hash: str = ""
+    status: str = "processed"
+    result: dict[str, Any] = field(default_factory=dict)
+    received_at: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, raw: dict[str, Any]) -> MobileOfflineSyncRecord:
+        return cls(
+            id=str(raw.get("id") or ""),
+            request_id=str(raw.get("request_id") or raw.get("requestId") or ""),
+            sync_id=str(raw.get("sync_id") or raw.get("syncId") or ""),
+            created_at=str(raw.get("created_at") or raw.get("createdAt") or ""),
+            device_id=str(raw.get("device_id") or raw.get("deviceId") or ""),
+            user_id=str(raw.get("user_id") or ""),
+            branch_id=str(raw.get("branch_id") or ""),
+            request_type=str(raw.get("request_type") or raw.get("requestType") or ""),
+            payload_hash=str(raw.get("payload_hash") or ""),
+            status=str(raw.get("status") or "processed"),
+            result=dict(raw.get("result") or {}),
+            received_at=str(raw.get("received_at") or ""),
         )
 
 

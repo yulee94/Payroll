@@ -9,36 +9,138 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import json
 import secrets
 from datetime import datetime, timezone
 from typing import Any
 
+from core.api_surfaces import api_surface_contract, build_api_path
 from core.mobile import store, sync, workflow_bridge
 from core.mobile.models import (
     AttendanceEvent,
     EmployeeDevice,
     GeofenceAlert,
     MobileConsentRecord,
+    MobileOfflineSyncRecord,
+    MobilePushNotification,
 )
 from core.roles import ROLE_ADMIN, ROLE_FINANCE, normalize_role
 from core.session_service import UserSession
 from core.user_store import authenticate_credentials, get_user
-from core.workflow.constants import DOC_TYPE_ATTENDANCE
+from core.workflow.constants import DOC_TYPE_ATTENDANCE, DOC_TYPE_GENERAL, DOC_TYPE_PURCHASE
 
+MOBILE_API_SURFACE_ID = "mobile_app"
 MOBILE_API_VERSION = "v1"
+MOBILE_API_V2_VERSION = "v2"
+MOBILE_LOGIN_FLOW = (
+    "company_account_login",
+    "otp_or_mfa",
+    "device_registration",
+    "branch_permission_check",
+    "app_use",
+)
+MOBILE_FORBIDDEN_LOCAL_STORAGE = (
+    "plain_password",
+    "resident_registration_number",
+    "card_number",
+    "plaintext_sensitive_information",
+    "long_lived_admin_token",
+)
+MOBILE_ALLOWED_ENCRYPTED_STORAGE = (
+    "iOS Keychain",
+    "Android Keystore",
+    "Secure Storage",
+)
+MOBILE_PUSH_EVENT_KINDS = {
+    "work_assignment": "작업 배정 알림",
+    "approval_request": "승인 요청 알림",
+    "announcement": "공지사항",
+    "incident": "장애 알림",
+    "inventory_movement": "입고/출고 알림",
+    "reservation": "예약 알림",
+    "payment_settlement": "결제/정산 알림",
+}
+MOBILE_OFFLINE_SYNC_FLOW = (
+    "app_local_db",
+    "offline_work_saved",
+    "internet_restored",
+    "central_server_sync",
+)
+MOBILE_OFFLINE_IDEMPOTENCY_FIELDS = ("request_id", "sync_id", "created_at", "device_id")
 REQUIRED_ATTENDANCE_CONSENTS = ("privacy", "location", "biometric", "notifications")
 REQUIRED_PAYROLL_CONSENTS = REQUIRED_ATTENDANCE_CONSENTS + ("payroll",)
 DEVICE_BIOMETRIC_REF_PREFIX = "device://local-auth/"
 
 
+def mobile_api_path(path: str, *, version: str = MOBILE_API_VERSION) -> str:
+    """Build a Mobile App API path such as /api/v1/login."""
+
+    return build_api_path(MOBILE_API_SURFACE_ID, path, version=version)
+
+
+def mobile_security_contract() -> dict[str, Any]:
+    """Security contract for React Native device login and local storage."""
+
+    return {
+        "login_flow": list(MOBILE_LOGIN_FLOW),
+        "mfa": {
+            "required": True,
+            "accepted_proof_fields": ["mfa_otp", "otp_code", "mfa_assertion", "mfa_verified"],
+            "production_methods": ["TOTP/OTP", "push MFA", "WebAuthn/passkey"],
+        },
+        "device_registration": {
+            "required_after_mfa": True,
+            "required_fields": ["user_id", "branch_id", "device_id", "push_token", "platform", "app_version", "last_active_at"],
+        },
+        "push_notifications": {
+            "required": True,
+            "token_flow": [
+                "app_install",
+                "fcm_or_apns_token_issue",
+                "server_device_token_save",
+                "business_event",
+                "push_send",
+            ],
+            "event_kinds": MOBILE_PUSH_EVENT_KINDS,
+            "server_db_fields": [
+                "user_id",
+                "branch_id",
+                "device_id",
+                "push_token",
+                "platform",
+                "app_version",
+                "last_active_at",
+            ],
+        },
+        "offline_mode": {
+            "required": True,
+            "sync_flow": list(MOBILE_OFFLINE_SYNC_FLOW),
+            "server_idempotency_fields": list(MOBILE_OFFLINE_IDEMPOTENCY_FIELDS),
+            "dedupe_rule": "device_id + request_id, device_id + sync_id, or device_id + payload_hash",
+        },
+        "branch_permission_check": {
+            "required_before_app_use": True,
+            "branch_scope_field": "branch_id",
+            "permission_fields": ["user_id", "role_id", "company_id", "branch_id", "device_id"],
+        },
+        "forbidden_local_storage": list(MOBILE_FORBIDDEN_LOCAL_STORAGE),
+        "required_encrypted_storage_when_needed": list(MOBILE_ALLOWED_ENCRYPTED_STORAGE),
+    }
+
+
 def mobile_api_contract() -> dict[str, Any]:
     """Stable contract metadata for future HTTP/Rust wrappers."""
+    surfaces = api_surface_contract()
     return {
         "version": MOBILE_API_VERSION,
+        "surface": surfaces["surfaces"][MOBILE_API_SURFACE_ID],
+        "api_surfaces": surfaces["surfaces"],
+        "security": mobile_security_contract(),
         "auth": {
             "type": "Bearer",
             "tenant_header": "X-Bitween-Tenant",
             "token_storage": "mobile_sessions.token_hash",
+            "device_binding": "device_uid",
         },
         "privacy_defaults": {
             "biometric_storage": "device_only_pass_fail",
@@ -47,26 +149,105 @@ def mobile_api_contract() -> dict[str, Any]:
             "required_consents": list(REQUIRED_PAYROLL_CONSENTS),
         },
         "endpoints": [
-            {"method": "POST", "path": "/mobile/v1/auth/login", "handler": "mobile_login"},
-            {"method": "POST", "path": "/mobile/v1/devices/register", "handler": "register_mobile_device"},
-            {"method": "POST", "path": "/mobile/v1/consents", "handler": "record_mobile_consents"},
-            {"method": "GET", "path": "/mobile/v1/me", "handler": "get_mobile_me"},
-            {"method": "GET", "path": "/mobile/v1/geofence/current", "handler": "get_current_geofence"},
-            {"method": "POST", "path": "/mobile/v1/attendance/check", "handler": "mobile_check_attendance"},
-            {"method": "POST", "path": "/mobile/v1/location/geofence-event", "handler": "mobile_geofence_event"},
-            {"method": "GET", "path": "/mobile/v1/payroll/{period}", "handler": "get_mobile_payroll_summary"},
-            {"method": "GET", "path": "/mobile/v1/hr/documents", "handler": "list_mobile_hr_documents"},
-            {"method": "POST", "path": "/mobile/v1/hr/documents", "handler": "upload_mobile_hr_document"},
-            {"method": "POST", "path": "/mobile/v1/hr/documents/{id}/permission-requests", "handler": "request_mobile_hr_document_permission"},
-            {"method": "POST", "path": "/mobile/v1/hr/documents/{id}/delete-requests", "handler": "request_mobile_hr_document_delete"},
-            {"method": "POST", "path": "/mobile/v1/hr/notifications/{id}/ack", "handler": "ack_mobile_hr_document_notification"},
-            {"method": "POST", "path": "/mobile/v1/requests", "handler": "create_mobile_attendance_request"},
-            {"method": "POST", "path": "/mobile/v1/absence-windows/sync", "handler": "sync_mobile_absence_windows"},
-            {"method": "GET", "path": "/mobile/v1/manager/alerts", "handler": "list_mobile_manager_alerts"},
-            {"method": "POST", "path": "/mobile/v1/manager/alerts/{id}/ack", "handler": "ack_mobile_alert"},
+            {"method": "GET", "path": mobile_api_path("config"), "handler": "get_mobile_app_config"},
+            {"method": "POST", "path": mobile_api_path("login"), "handler": "mobile_login"},
+            {"method": "GET", "path": mobile_api_path("branches"), "handler": "list_mobile_branches"},
+            {"method": "GET", "path": mobile_api_path("tasks"), "handler": "list_mobile_tasks_v1"},
+            {"method": "GET", "path": mobile_api_path("tasks", version=MOBILE_API_V2_VERSION), "handler": "list_mobile_tasks_v2"},
+            {"method": "POST", "path": mobile_api_path("devices/register"), "handler": "register_mobile_device"},
+            {"method": "POST", "path": mobile_api_path("consents"), "handler": "record_mobile_consents"},
+            {"method": "GET", "path": mobile_api_path("me"), "handler": "get_mobile_me"},
+            {"method": "GET", "path": mobile_api_path("geofence/current"), "handler": "get_current_geofence"},
+            {"method": "POST", "path": mobile_api_path("attendance/check"), "handler": "mobile_check_attendance"},
+            {"method": "POST", "path": mobile_api_path("location/geofence-event"), "handler": "mobile_geofence_event"},
+            {"method": "POST", "path": mobile_api_path("push/send"), "handler": "send_mobile_push_notification"},
+            {"method": "POST", "path": mobile_api_path("sync/offline"), "handler": "sync_mobile_offline_requests"},
+            {"method": "GET", "path": mobile_api_path("payroll/{period}"), "handler": "get_mobile_payroll_summary"},
+            {"method": "GET", "path": mobile_api_path("hr/documents"), "handler": "list_mobile_hr_documents"},
+            {"method": "POST", "path": mobile_api_path("hr/documents"), "handler": "upload_mobile_hr_document"},
+            {"method": "POST", "path": mobile_api_path("hr/documents/{id}/permission-requests"), "handler": "request_mobile_hr_document_permission"},
+            {"method": "POST", "path": mobile_api_path("hr/documents/{id}/delete-requests"), "handler": "request_mobile_hr_document_delete"},
+            {"method": "POST", "path": mobile_api_path("hr/notifications/{id}/ack"), "handler": "ack_mobile_hr_document_notification"},
+            {"method": "POST", "path": mobile_api_path("requests"), "handler": "create_mobile_attendance_request"},
+            {"method": "POST", "path": mobile_api_path("absence-windows/sync"), "handler": "sync_mobile_absence_windows"},
+            {"method": "GET", "path": mobile_api_path("manager/alerts"), "handler": "list_mobile_manager_alerts"},
+            {"method": "POST", "path": mobile_api_path("manager/alerts/{id}/ack"), "handler": "ack_mobile_alert"},
         ],
+        "legacy_aliases": {
+            "deprecated_base_path": "/mobile/v1",
+            "replacement_base_path": mobile_api_path("").rstrip("/"),
+            "remove_after": "Rust HTTP wrapper parity and app store migration",
+        },
     }
 
+
+
+def _payload_hash(payload: dict[str, Any], *, request_type: str) -> str:
+    stable = {
+        "request_type": request_type,
+        "payload": payload,
+    }
+    encoded = json.dumps(stable, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _version_tuple(version: str) -> tuple[int, int, int]:
+    parts = str(version or "0.0.0").strip().split(".")
+    nums: list[int] = []
+    for part in parts[:3]:
+        digits = "".join(ch for ch in part if ch.isdigit())
+        nums.append(int(digits or 0))
+    while len(nums) < 3:
+        nums.append(0)
+    return tuple(nums)  # type: ignore[return-value]
+
+
+def get_mobile_version_policy(current_version: str = "") -> dict[str, Any]:
+    """Server-controlled app version and notice policy.
+
+    The compatibility defaults allow the current 0.1.x development app, while
+    still exposing the production fields that the Rust API/config service must
+    control before launch.
+    """
+
+    minimum = "0.1.0"
+    latest = "0.1.0"
+    current = str(current_version or "").strip()
+    force_update = bool(current and _version_tuple(current) < _version_tuple(minimum))
+    return {
+        "minimum_supported_version": minimum,
+        "latest_version": latest,
+        "force_update_required": force_update,
+        "maintenance_mode": False,
+        "notice_message": "",
+        "example": {
+            "current_app_version": "1.0.0",
+            "minimum_supported_version": "1.1.0",
+            "result": "앱 실행 시 업데이트 안내",
+        },
+    }
+
+
+def get_mobile_app_config(current_version: str = "") -> dict[str, Any]:
+    """Public mobile app config endpoint payload."""
+
+    return {
+        "version": MOBILE_API_VERSION,
+        "version_policy": get_mobile_version_policy(current_version),
+        "push_notifications": mobile_security_contract()["push_notifications"],
+        "offline_mode": mobile_security_contract()["offline_mode"],
+        "review_metadata_required": [
+            "test_account",
+            "test_branch_data",
+            "privacy_policy_url",
+            "terms_url",
+            "support_contact",
+            "app_description",
+            "screenshots",
+            "app_icon",
+            "permission_usage_reasons",
+        ],
+    }
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -92,6 +273,32 @@ def _session_payload(sess: UserSession) -> dict[str, Any]:
     }
 
 
+def _verify_mfa_payload(payload: dict[str, Any]) -> str:
+    """Compatibility MFA gate.
+
+    Production should verify TOTP/push/WebAuthn with an external identity
+    provider.  The compatibility layer only verifies that an MFA proof was
+    provided so tests and future Rust DTOs can lock the login order.
+    """
+
+    if bool(payload.get("mfa_verified")):
+        return "verified_assertion"
+    assertion = str(payload.get("mfa_assertion") or payload.get("mfaAssertion") or "").strip()
+    if assertion:
+        return "mfa_assertion"
+    otp = str(
+        payload.get("mfa_otp")
+        or payload.get("mfaOtp")
+        or payload.get("otp_code")
+        or payload.get("otpCode")
+        or ""
+    ).strip()
+    digits = "".join(ch for ch in otp if ch.isdigit())
+    if len(digits) >= 6:
+        return "otp"
+    raise PermissionError("OTP 또는 MFA 인증이 필요합니다.")
+
+
 def mobile_login(payload: dict[str, Any]) -> dict[str, Any]:
     """Authenticate a Bitween account and issue a mobile bearer token."""
     rec = authenticate_credentials(
@@ -99,6 +306,7 @@ def mobile_login(payload: dict[str, Any]) -> dict[str, Any]:
         str(payload.get("password") or ""),
         preferred_tenant_id=str(payload.get("tenant_id") or payload.get("tenantId") or "") or None,
     )
+    mfa_method = _verify_mfa_payload(payload)
     sess = UserSession.from_record(rec)
     token = secrets.token_urlsafe(32)
     store.save_mobile_session(
@@ -109,6 +317,8 @@ def mobile_login(payload: dict[str, Any]) -> dict[str, Any]:
             "employee_name": rec.display_name,
             "tenant_id": rec.tenant_id,
             "device_uid": str(payload.get("device_uid") or payload.get("deviceUid") or ""),
+            "mfa_verified_at": _now_iso(),
+            "mfa_method": mfa_method,
             "created_at": _now_iso(),
             "revoked_at": "",
         },
@@ -116,6 +326,9 @@ def mobile_login(payload: dict[str, Any]) -> dict[str, Any]:
     )
     return {
         "version": MOBILE_API_VERSION,
+        "login_flow": list(MOBILE_LOGIN_FLOW),
+        "mfa_verified": True,
+        "mfa_method": mfa_method,
         "token": token,
         "token_type": "Bearer",
         "user": _session_payload(sess),
@@ -210,21 +423,80 @@ def register_mobile_device(
     platform = str(payload.get("platform") or "").strip().lower()
     if platform not in ("android", "ios"):
         raise ValueError("platform must be android or ios")
+    push_token = str(payload.get("push_token") or payload.get("pushToken") or "").strip()
+    if not push_token:
+        raise ValueError("push_token is required")
+    branch_id = str(payload.get("branch_id") or payload.get("branchId") or "").strip()
+    if not branch_id:
+        branch_id = _branch_id_for_site(tenant_id, str(payload.get("site_name") or payload.get("siteName") or ""))
     device = EmployeeDevice(
         id="",
         user_id=sess.user_id,
         employee_name=employee_name,
         device_uid=device_uid,
+        branch_id=branch_id,
         platform=platform,
-        push_token=str(payload.get("push_token") or payload.get("pushToken") or ""),
+        push_token=push_token,
         app_version=str(payload.get("app_version") or payload.get("appVersion") or ""),
         os_version=str(payload.get("os_version") or payload.get("osVersion") or ""),
         registered_at=_now_iso(),
         last_seen_at=_now_iso(),
+        last_active_at=_now_iso(),
         active=True,
     )
     saved = store.upsert_device(device, tenant_id)
     return {"ok": True, "device": saved.to_dict()}
+
+
+def send_mobile_push_notification(
+    payload: dict[str, Any],
+    *,
+    tenant_id: str,
+    token: str,
+) -> dict[str, Any]:
+    """Queue FCM/APNs push notifications for registered mobile devices."""
+
+    sess = require_mobile_session(tenant_id=tenant_id, token=token)
+    event_kind = str(payload.get("event_kind") or payload.get("eventKind") or "announcement")
+    if event_kind not in MOBILE_PUSH_EVENT_KINDS:
+        raise ValueError("지원하지 않는 푸시 알림 유형입니다.")
+    target_user_id = str(payload.get("user_id") or payload.get("userId") or sess.user_id)
+    branch_id = str(payload.get("branch_id") or payload.get("branchId") or "")
+    device_id = str(payload.get("device_id") or payload.get("deviceId") or "")
+    devices = store.list_devices(
+        tenant_id=tenant_id,
+        user_id=target_user_id,
+        branch_id=branch_id,
+        active_only=True,
+    )
+    if device_id:
+        devices = [d for d in devices if d.id == device_id or d.device_uid == device_id]
+    if not devices:
+        raise ValueError("푸시 토큰이 등록된 모바일 기기를 찾을 수 없습니다.")
+
+    title = str(payload.get("title") or MOBILE_PUSH_EVENT_KINDS[event_kind])
+    body = str(payload.get("body") or payload.get("message") or title)
+    custom_payload = payload.get("payload") if isinstance(payload.get("payload"), dict) else {}
+    queued: list[dict[str, Any]] = []
+    for device in devices:
+        notification = MobilePushNotification(
+            id="",
+            event_kind=event_kind,  # type: ignore[arg-type]
+            title=title,
+            body=body,
+            user_id=device.user_id or target_user_id,
+            branch_id=device.branch_id or branch_id,
+            device_id=device.id,
+            push_token=device.push_token,
+            platform=device.platform,
+            app_version=device.app_version,
+            provider="APNs" if device.platform == "ios" else "FCM",
+            payload=custom_payload,
+            status="queued",
+            created_at=_now_iso(),
+        )
+        queued.append(store.append_push_notification(notification, tenant_id).to_dict())
+    return {"ok": True, "queued": len(queued), "notifications": queued}
 
 
 def get_mobile_me(*, tenant_id: str, token: str) -> dict[str, Any]:
@@ -234,6 +506,122 @@ def get_mobile_me(*, tenant_id: str, token: str) -> dict[str, Any]:
         "version": MOBILE_API_VERSION,
         "user": _session_payload(sess),
         "consents": {k: v.to_dict() for k, v in latest.items()},
+    }
+
+
+def _branch_id_for_site(tenant_id: str, site_name: str) -> str:
+    key = str(site_name or "").strip()
+    for geofence in store.list_geofences(tenant_id):
+        if geofence.site_name == key:
+            return geofence.id or key
+    if not key:
+        fences = store.list_geofences(tenant_id)
+        if fences:
+            return fences[0].id or fences[0].site_name
+    return key
+
+
+def list_mobile_branches(*, tenant_id: str, token: str) -> dict[str, Any]:
+    """List branches/workplaces visible to the logged-in mobile user.
+
+    The compatibility store currently models sites as geofences.  The mobile
+    contract exposes them as ``branch_id`` rows now so the Rust/DB migration can
+    later map the same response to first-class branch records without changing
+    the React Native app.
+    """
+
+    require_mobile_session(tenant_id=tenant_id, token=token)
+    branches = [
+        {
+            "company_id": tenant_id,
+            "branch_id": geofence.id or geofence.site_name,
+            "branch_name": geofence.site_name,
+            "site_name": geofence.site_name,
+            "active": geofence.active,
+            "legal_entity": geofence.legal_entity,
+            "geofence": geofence.to_dict(),
+        }
+        for geofence in store.list_geofences(tenant_id)
+    ]
+    return {"version": MOBILE_API_VERSION, "branches": branches}
+
+
+def _mobile_task_from_alert(alert: GeofenceAlert, *, tenant_id: str, api_version: str) -> dict[str, Any]:
+    branch_id = _branch_id_for_site(tenant_id, alert.site_name)
+    base = {
+        "id": alert.id,
+        "task_type": "geofence_alert",
+        "title": f"{alert.employee_name} 근무지 이탈 확인",
+        "status": alert.status,
+        "branch_id": branch_id,
+        "site_name": alert.site_name,
+        "employee_name": alert.employee_name,
+        "detected_at": alert.detected_at,
+        "requires_action": alert.status == "open",
+    }
+    if api_version == MOBILE_API_V2_VERSION:
+        base.update(
+            {
+                "api_version": MOBILE_API_V2_VERSION,
+                "priority": "high" if alert.status == "open" else "normal",
+                "assigned_manager_user_id": alert.manager_user_id,
+                "device_id": alert.device_id,
+                "location": {"latitude": alert.latitude, "longitude": alert.longitude},
+                "permissions": {"acknowledge": alert.status == "open", "resolve": False},
+            }
+        )
+    return base
+
+
+def list_mobile_tasks_v1(
+    *,
+    tenant_id: str,
+    token: str,
+    status: str = "open",
+) -> dict[str, Any]:
+    """List action tasks for the Mobile App API v1 contract."""
+
+    sess = require_mobile_session(tenant_id=tenant_id, token=token)
+    role = normalize_role(sess.role)
+    manager_filter = "" if role in (ROLE_ADMIN, ROLE_FINANCE) else sess.user_id
+    alerts = store.list_geofence_alerts(
+        tenant_id=tenant_id,
+        status=status,
+        manager_user_id=manager_filter,
+    )
+    return {
+        "version": MOBILE_API_VERSION,
+        "tasks": [
+            _mobile_task_from_alert(alert, tenant_id=tenant_id, api_version=MOBILE_API_VERSION)
+            for alert in alerts
+        ],
+    }
+
+
+def list_mobile_tasks_v2(
+    *,
+    tenant_id: str,
+    token: str,
+    status: str = "open",
+    cursor: str = "",
+) -> dict[str, Any]:
+    """List action tasks for Mobile App API v2 with forward-compatible metadata."""
+
+    sess = require_mobile_session(tenant_id=tenant_id, token=token)
+    role = normalize_role(sess.role)
+    manager_filter = "" if role in (ROLE_ADMIN, ROLE_FINANCE) else sess.user_id
+    alerts = store.list_geofence_alerts(
+        tenant_id=tenant_id,
+        status=status,
+        manager_user_id=manager_filter,
+    )
+    return {
+        "version": MOBILE_API_V2_VERSION,
+        "tasks": [
+            _mobile_task_from_alert(alert, tenant_id=tenant_id, api_version=MOBILE_API_V2_VERSION)
+            for alert in alerts
+        ],
+        "pagination": {"cursor": cursor, "next_cursor": ""},
     }
 
 
@@ -558,6 +946,130 @@ def create_mobile_attendance_request(
         "document": submitted,
         "submitted": bool(manager_id),
         "requires_approval": True,
+    }
+
+
+def _process_offline_sync_request(
+    raw: dict[str, Any],
+    *,
+    tenant_id: str,
+    sess: UserSession,
+) -> dict[str, Any]:
+    request_id = str(raw.get("request_id") or raw.get("requestId") or "").strip()
+    sync_id = str(raw.get("sync_id") or raw.get("syncId") or "").strip()
+    created_at = str(raw.get("created_at") or raw.get("createdAt") or "").strip()
+    device_id = str(raw.get("device_id") or raw.get("deviceId") or "").strip()
+    missing = [
+        name
+        for name, value in (
+            ("request_id", request_id),
+            ("sync_id", sync_id),
+            ("created_at", created_at),
+            ("device_id", device_id),
+        )
+        if not value
+    ]
+    if missing:
+        raise ValueError("오프라인 동기화 필수값이 누락되었습니다: " + ", ".join(missing))
+
+    payload = raw.get("payload") if isinstance(raw.get("payload"), dict) else {}
+    request_type = str(raw.get("request_type") or raw.get("requestType") or payload.get("request_type") or "general").strip()
+    branch_id = str(raw.get("branch_id") or raw.get("branchId") or payload.get("branch_id") or "").strip()
+    payload_hash = _payload_hash(payload, request_type=request_type)
+    duplicate = store.find_duplicate_offline_sync_record(
+        tenant_id=tenant_id,
+        device_id=device_id,
+        request_id=request_id,
+        sync_id=sync_id,
+        payload_hash=payload_hash,
+    )
+    if duplicate is not None:
+        return {
+            "request_id": request_id,
+            "sync_id": sync_id,
+            "duplicate": True,
+            "status": duplicate.status,
+            "result": duplicate.result,
+        }
+
+    from core.workflow import service as wf_svc
+
+    title = str(payload.get("title") or payload.get("subject") or "모바일 오프라인 요청")
+    summary = str(payload.get("summary") or payload.get("reason") or title)
+    normalized_type = request_type.lower()
+    if normalized_type in ("purchase", "purchase_request", "구매요청"):
+        document_type = DOC_TYPE_PURCHASE
+    elif normalized_type in ("attendance", "attendance_request", "근태신청"):
+        document_type = DOC_TYPE_ATTENDANCE
+    else:
+        document_type = DOC_TYPE_GENERAL
+    doc = wf_svc.create_document(
+        tenant_id,
+        document_type=document_type,
+        title=title,
+        summary=summary,
+        content=str(payload.get("content") or summary),
+        site_id=branch_id or str(payload.get("site_id") or payload.get("siteId") or ""),
+        department_id=str(payload.get("department_id") or payload.get("departmentId") or ""),
+        total_amount=int(payload.get("total_amount") or payload.get("amount") or 0),
+        category=str(payload.get("category") or ""),
+        due_date=str(payload.get("due_date") or payload.get("dueDate") or ""),
+        period_start=str(payload.get("start_at") or payload.get("period_start") or ""),
+        period_end=str(payload.get("end_at") or payload.get("period_end") or ""),
+        payload={**payload, "request_id": request_id, "sync_id": sync_id, "branch_id": branch_id},
+        session=sess,
+    )
+    result = {
+        "document_id": doc["id"],
+        "document_type": doc["document_type"],
+        "status": doc["status"],
+    }
+    record = MobileOfflineSyncRecord(
+        id="",
+        request_id=request_id,
+        sync_id=sync_id,
+        created_at=created_at,
+        device_id=device_id,
+        user_id=sess.user_id,
+        branch_id=branch_id,
+        request_type=request_type,
+        payload_hash=payload_hash,
+        status="processed",
+        result=result,
+        received_at=_now_iso(),
+    )
+    store.append_offline_sync_record(record, tenant_id)
+    return {
+        "request_id": request_id,
+        "sync_id": sync_id,
+        "duplicate": False,
+        "status": "processed",
+        "result": result,
+    }
+
+
+def sync_mobile_offline_requests(
+    payload: dict[str, Any],
+    *,
+    tenant_id: str,
+    token: str,
+) -> dict[str, Any]:
+    """Sync offline-created mobile requests with server-side idempotency."""
+
+    sess = require_mobile_session(tenant_id=tenant_id, token=token)
+    requests = payload.get("requests") or payload.get("items") or []
+    if not isinstance(requests, list):
+        raise ValueError("requests must be a list")
+    results = [
+        _process_offline_sync_request(raw, tenant_id=tenant_id, sess=sess)
+        for raw in requests
+        if isinstance(raw, dict)
+    ]
+    return {
+        "ok": True,
+        "processed": sum(1 for item in results if not item["duplicate"]),
+        "duplicates": sum(1 for item in results if item["duplicate"]),
+        "results": results,
     }
 
 

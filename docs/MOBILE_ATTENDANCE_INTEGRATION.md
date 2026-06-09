@@ -74,7 +74,9 @@ Production target:
 
 - Database/object storage behind Rust repositories.
 - Tenant/legal scoping enforced at API and repository boundaries.
-- Mobile ingestion exposed through `/api/mobile/v1/*`.
+- Mobile ingestion exposed on the separated **Mobile App API** surface through
+  versioned paths such as `/api/v1/*` and future-compatible endpoints such as
+  `/api/v2/tasks`.
 
 ### Payroll without invoice upload
 
@@ -98,20 +100,23 @@ Production target:
 
 ## API overview
 
-All endpoints require `Authorization: Bearer <jwt>` and tenant/legal-entity scoping through `X-Tenant-Id` or JWT claims.
+Mobile endpoints are served by the Mobile App API surface, separate from Web Admin API, Public Customer API, and Internal Admin API. All endpoints require `Authorization: Bearer <jwt>` and tenant/legal-entity scoping through `X-Tenant-Id`, `X-Bitween-Tenant`, or JWT claims.
 
 | Method | Path | Description |
 |--------|------|------|
-| POST | `/api/mobile/v1/auth/device` | Register device and bind employee |
-| POST | `/api/mobile/v1/attendance/events` | Ingest one attendance event |
-| GET | `/api/mobile/v1/me/profile` | Profile/account/leave summary |
-| PATCH | `/api/mobile/v1/me/profile` | Update email/account fields |
-| GET | `/api/mobile/v1/me/payroll/preview?period=YYYY-MM` | Preview accumulated payroll source |
-| GET | `/api/mobile/v1/sites/geofences` | Assigned site geofence list |
-| POST | `/api/mobile/v1/biometric/enroll` | Store external biometric enrollment reference |
-| GET/POST | `/api/mobile/v1/admin/geofences` | Admin geofence CRUD |
-| POST | `/api/mobile/v1/admin/sync` | Sync pending verified events |
-| POST | `/api/mobile/v1/admin/payroll/aggregate?period=` | Aggregate month into payroll input source |
+| POST | `/api/v1/login` | Login and issue mobile bearer token |
+| GET | `/api/v1/branches` | Branch/worksite list visible to the app user |
+| GET | `/api/v1/tasks` | Current app action task list |
+| GET | `/api/v2/tasks` | Future task payload shape for app upgrades |
+| POST | `/api/v1/devices/register` | Register device and bind employee |
+| POST | `/api/v1/attendance/check` | Ingest one biometric + GPS attendance event |
+| GET | `/api/v1/me` | Profile/account/leave summary |
+| GET | `/api/v1/payroll/{period}` | Own payroll summary or current estimate |
+| GET | `/api/v1/geofence/current` | Assigned site geofence |
+| POST | `/api/v1/location/geofence-event` | Shift geofence enter/exit/heartbeat |
+| POST | `/api/v1/requests` | Attendance/leave workflow request |
+| GET | `/api/v1/manager/alerts` | Manager geofence alerts |
+| POST | `/api/v1/manager/alerts/{id}/ack` | Acknowledge manager alert |
 
 ## Roadmap
 
