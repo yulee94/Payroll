@@ -6,9 +6,7 @@ Started on 2026-06-04. This is the first production-safe slice of the full
 Rust backend transition: Buck2 can now build and test the existing Rust payroll
 API contract crate through Reindeer-managed third-party Rust dependencies.
 
-Cargo remains a compatibility/developer tool until every production backend
-slice has equivalent Buck2 targets and CI evidence. Python remains a
-characterization source only until Rust parity is proven slice by slice.
+Cargo build/check/test/clippy/run/bench are retired for product verification; Buck2 is canonical for build, check, test, and clippy evidence. Repo-owned legacy compatibility code was decommissioned in G028, so missing behavior must return through Rust/Buck2 or TypeScript contracts only.
 
 ## Source-backed basis
 
@@ -36,7 +34,7 @@ Official references checked for this implementation:
 | `third-party/rust/vendor/` | Reindeer generated | Vendored crates so Buck2 does not need crates.io network access at build time. |
 | `third-party/rust/fixups/` | Build tooling | Required Reindeer fixups for crates with build scripts or Cargo compile-time env needs. |
 | `crates/payroll-api/BUCK` | Rust backend | First verified first-party Rust `rust_library` and `rust_test` targets. |
-| `scripts/verify_rust_buck2_reindeer.sh` | Verification | Local verification entrypoint for Cargo, Reindeer generated output, and Buck2 build/test parity. |
+| `scripts/verify_rust_buck2_reindeer.sh` | Verification | Local verification entrypoint for Reindeer generated output plus Buck2 build/test and target-specific check parity. |
 
 ## Tool versions
 
@@ -54,8 +52,15 @@ reindeer --config reindeer.toml buckify
 git diff -- third-party/rust/BUCK third-party/rust/vendor third-party/rust/fixups
 buck2 build //crates/payroll-api:payroll_api
 buck2 test //crates/payroll-api:payroll_api_test
-cargo test --workspace
+buck2 build '//crates/payroll-api:payroll_api[check]'
+buck2 build //crates/payroll-api:platform_live_view
+buck2 build //crates/payroll-api:hr_employee_store //crates/payroll-api:archive_intake_store
+buck2 test //crates/payroll-api:hr_employee_store_test //crates/payroll-api:archive_intake_store_test
 ```
+
+Use explicit target-specific `[check]` / `[clippy.txt]` targets for Rust provider
+checks. Unsupported recursive provider shortcuts are blocked by the verification
+ratchet.
 
 `reindeer.toml` sets `unresolved_fixup_error = true`. If Reindeer finds a crate
 with a build script and no fixup, the transition is blocked until the build
@@ -71,15 +76,15 @@ Buck2.
 
 ## Production gates for the full Rust transition
 
-A backend slice can replace Python only when all gates are met:
+A backend slice restoring historical behavior may ship only when all gates are met:
 
-1. Existing Python behavior is locked with characterization tests.
+1. Historical behavior is locked with Rust tests, TypeScript contract checks, or documented fixtures.
 2. Rust DTOs, policy invariants, tenant/legal-entity scoping, and error codes are documented.
-3. Rust implementation has Cargo and Buck2 tests.
+3. Rust implementation has Buck2 tests.
 4. Reindeer-generated dependency rules are up to date and build without missing fixups.
 5. Kubernetes service/worker/job shape is documented before production rollout.
 6. API authorization is enforced server-side with RBAC + ABAC; frontend and Tauri surfaces are capability hints only.
-7. Python compatibility code is deleted only in a separate commit with zero-production-use evidence.
+7. Repo-owned compatibility code remains decommissioned; do not restore it without a Rust/Buck2-backed migration record.
 
 ## Next Rust backend slices
 
@@ -92,5 +97,4 @@ A backend slice can replace Python only when all gates are met:
 3. Port KPI and manager-dashboard read models with explicit tenant/legal-entity
    ABAC checks.
 4. Port org hierarchy, roles, and service-account policy evaluation.
-5. Decommission Python compatibility modules one domain at a time after Rust
-   parity and production routing evidence.
+5. Restore missing historical backend behavior only through Rust services with Buck2 tests, production routing evidence, and TypeScript contract alignment.

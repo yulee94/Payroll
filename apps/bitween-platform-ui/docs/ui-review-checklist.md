@@ -4,19 +4,19 @@
 
 ## 기본 원칙
 
-- 변경 파일은 `apps/bitween-platform-ui`, `ui`, `assets`, `locales`, frontend 문서 범위 안에 머문다.
-- `services`, `core/payroll`, `payroll_builder.py`, `tax.py`, `insurance.py`, 운영 `config`, `templates`, `users`, `output`, `workspace` 데이터는 수정하지 않는다.
+- 변경 파일은 `apps/bitween-platform-ui`, `assets`, frontend 계약/문서 범위 안에 머문다.
+- Rust backend crates, 운영 `config`, `templates`, `users`, `output`, `workspace` 데이터는 frontend-only 검토에서 수정하지 않는다.
 - backend 데이터가 부족하면 서비스 파일을 바꾸지 않고 PR 설명의 `Backend Requests`에 요청사항으로 남긴다.
 - 화면은 B2B 업무 플랫폼답게 차분하고 스캔하기 쉬워야 한다.
 - 버튼, 탭, 필터, 테이블, 상태 배지, 빈 상태, 오류 상태는 같은 규칙으로 보이게 한다.
 - 텍스트가 버튼, 카드, 표 셀 안에서 잘리거나 겹치지 않아야 한다.
 
-## 실행 및 로그인
+## 실행
 
-- 정적 미리보기는 `apps/bitween-platform-ui`에서 `node preview/server.js`로 실행한다.
-- 브라우저에서 `http://127.0.0.1:4173/` 또는 `http://localhost:4173/`을 연다.
-- 데모 로그인 계정은 법인코드 `0000`, 아이디 `admin`, 비밀번호 `admin`이다.
-- 로그인 실패, 빈 입력, 데모 안내 문구가 사용자가 이해할 수 있는 표현인지 확인한다.
+- 로컬 브라우저 셸은 `apps/bitween-platform-ui`에서 `npm run live`로 실행한다.
+- 브라우저에서 `http://127.0.0.1:4174/` 또는 `http://localhost:4174/`을 연다.
+- `/api/platform/v1/view-model` 응답이 `backend: rust_native`이고 준비 상태·차단 항목·다음 행동이 Rust 응답에서 렌더링되는지 확인한다.
+- 인증이 필요한 기능은 데모 계정으로 우회하지 않고 명시적인 readiness-blocked 또는 contract-missing 상태로 보여야 한다.
 
 ## 공통 Shell
 
@@ -59,11 +59,12 @@
 
 ## 자료함 / AI / 관리자 / 설정
 
-- 자료함은 폴더, 최근 문서, 미리보기, 보안 범위를 분리해서 보여준다.
+- 자료함은 보관함, 접수한 파일, 검토가 필요한 항목, 저장 전 확인 흐름을 분리해서 보여준다.
+- 자료함의 인사/급여 자료 접수는 헤더 행 선택, 필드 매핑, 정규화 힌트, 명시적 무시/보존 결정을 실제 저장 흐름과 연결해야 하며 죽은 버튼이나 설명뿐인 항목을 남기지 않는다.
 - AI 화면은 추천, 요약, 초안, 사람 검토 필요 상태를 backend 호출 없이 frontend 표시 상태로만 다룬다.
 - 관리자 화면은 법인 Branch, 하위계정, 권한 매트릭스가 업무 담당자에게 읽기 쉬워야 한다.
 - 설정 화면은 국제화, 화면 표시, 계정 관련 설정을 사용자가 찾기 쉽게 배치한다.
-- 현재 브랜치에 없는 backend 연동 설정은 TODO 또는 backend 요청사항으로만 남긴다.
+- 현재 브랜치에 없는 backend 연동 설정은 명시적인 backend 요청사항으로만 남긴다.
 
 ## 반응형 및 접근성
 
@@ -87,3 +88,4 @@ PR 설명에는 다음 항목을 남긴다.
 - `git diff --check`
 - `node --check preview/app.js`
 - `npm run typecheck`는 `npm`과 `node_modules`가 있는 환경에서 실행한다.
+- 자료함 접수/매핑/저장 흐름을 바꾸면 `npm run verify:archive-intake-stories`를 실행해 실제 UI 사용 경로의 정상 ZIP 업로드, 빈/불완전 파일 edge case, 악의적 ZIP 항목 거부, 잘못된 매핑 변경 거부, 시각적 매핑 편집 affordance가 퇴행하지 않았음을 확인한다.

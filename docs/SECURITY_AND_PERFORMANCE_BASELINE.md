@@ -136,7 +136,7 @@ A PR in this transition track is not production-ready unless it states:
 - Which Zero Trust boundary was added or preserved.
 - What performance budget applies and how it was measured or deferred.
 - Which tests or checks prove the claim.
-- What Python compatibility path remains and when it can be deleted.
+- What legacy compatibility path remains and when it can be deleted.
 - Which Korean labor-law or labor-market policy facts were used, the official source/effective date for each fact, and whether the value is configuration-backed.
 - Which UI/UX maturity gate applies for role workspaces, employee self-service, manager insights, compliance cockpit, lifecycle timelines, auditability, accessibility, Korean localization, and full single-language Korean/English/Chinese/Japanese review.
 - Whether auth/security messages, WebAuthn/passkey flows, JWT/session errors, policy-denied states, and audit-facing copy are localized through stable codes and catalog arrays instead of hardcoded strings.

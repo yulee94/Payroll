@@ -385,7 +385,7 @@ mod tests {
     }
 
     #[test]
-    fn preserves_raw_amount_fallback_salary_parity() {
+    fn preserves_raw_amount_default_salary_parity() {
         let result = calculate_payroll_salary(
             PayrollSalaryInput::new()
                 .with_name("김시급")

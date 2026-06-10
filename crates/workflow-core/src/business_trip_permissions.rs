@@ -674,9 +674,9 @@ mod tests {
             Some(profile(&["approver"]))
         )));
 
-        let mut traveler_fallback = input("traveler-1", "tenant-a", "staff", None);
-        traveler_fallback.trip.requester_id.clear();
-        assert!(can_view_business_trip_lifecycle(&traveler_fallback));
+        let mut traveler_default_scope = input("traveler-1", "tenant-a", "staff", None);
+        traveler_default_scope.trip.requester_id.clear();
+        assert!(can_view_business_trip_lifecycle(&traveler_default_scope));
 
         let mut site_manager = profile(&["site_manager"]);
         site_manager.site_ids = vec!["site-1".to_string()];

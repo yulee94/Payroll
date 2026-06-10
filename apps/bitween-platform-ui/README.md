@@ -6,20 +6,18 @@ This app is the documented frontend direction for Bitween. It is isolated from b
 
 ## Screens Covered
 
-- Login screen separated from the authenticated platform shell
-- Platform launcher/home with metrics, work queue, and module cards
-- Sidebar/menu navigation with compact horizontal behavior on narrow screens
-- Payroll readiness and payroll workflow steps
-- Payroll setting summary and file preview/archive workflow surfaces
-- HR, workflow, archive, AI, admin, and settings dashboard screens
+- Rust-backed live operations shell with authenticated role workspaces
+- HR, payroll, workflow, 전자결재, 자료함, admin, and settings surfaces routed from the Rust live view-model
+- Payroll operator work, schedule, follow-up, and close-period workflows without technical readiness walls
+- Signed-out auth gate that starts configured company identity, access request, onboarding, and sign-out routes
 - Shared card, badge, table, filter, empty-state, metric, and action button patterns
 
 ## Source Map
 
-- `App.tsx`: auth preview state, screen routing, shell entry
+- `App.tsx`: live shell routing and React Native entry
 - `src/components.tsx`: shared React Native UI primitives
-- `src/screens.tsx`: login, launcher, payroll, and module screens
-- `src/data.ts`: typed safe mock data for frontend preview
+- `src/screens.tsx`: launcher, payroll, and module screens
+- `src/data.ts`: legacy static review data for surfaces not yet migrated; do not use for production/live wiring
 - `src/i18n/catalog.json`: catalog-array source for localized UI copy
 - `src/i18n/index.ts`: locale normalization, translation lookup, and language option helpers
 - `scripts/verify-i18n-catalog.mjs`: verifies every catalog row has Korean, English, Chinese, and Japanese values and rejects localized UI copy outside the catalog in the React Native and static preview sources
@@ -37,10 +35,13 @@ The package is aligned to Expo SDK 54, which targets React Native 0.81, React 19
 
 ```powershell
 npm install
+npm run verify:auth-routes
+npm run verify:signed-out-auth-ux
 npm run check:strict-config
 npm run verify:data-mode
 npm run verify:i18n
 npm run typecheck
+npm audit --omit=dev --audit-level=moderate
 npm run export:web
 npm run web
 ```
@@ -53,11 +54,11 @@ Dependency-free UI preview:
 npm run preview
 ```
 
-Then open `http://127.0.0.1:4174/` in a browser. This preview mirrors the current screen structure and interactions without requiring Expo dependencies; it reads the same catalog array through `/catalog.json`.
+Then open `http://127.0.0.1:4174/` in a browser. This preview reads `/catalog.json`, preflights `/api/auth/v1/routes`, and reads the Rust-generated `/api/platform/v1/view-model` payload through the Buck2 live view target.
 
 ## View Model Boundary
 
-`src/viewModel.ts` is the frontend integration seam. During the preview phase it exports `previewPlatformViewModel`; later, Rust/API data should be mapped into the same read-only `PlatformViewModel` shape without changing payroll calculation or service internals.
+`src/viewModel.ts` is the frontend integration seam. Rust/API data should be mapped into the same read-only `PlatformViewModel` shape without changing payroll calculation or service internals.
 
 ## Kubernetes Integration
 
@@ -65,15 +66,13 @@ Production delivery should package this frontend as a containerized workload ser
 
 ## Review Checklist
 
-- Confirm `npm run verify:i18n` passes before adding user-facing copy.
-- Confirm login renders without authenticated navigation.
-- Confirm login button moves to the platform launcher.
-- Confirm navigation switches between payroll, HR, attendance, 정비/렌탈, workflow, archive, AI, admin, and settings.
-- Confirm payroll readiness cards and payroll workflow cards wrap without text clipping.
-- Confirm payroll setting summary and file preview/archive rows are visible on the payroll screen.
+- Confirm `npm run verify:auth-routes`, `npm run verify:signed-out-auth-ux`, `npm run verify:data-mode`, and `npm run verify:i18n` pass before changing auth or user-facing copy.
+- Confirm signed-out users see route-aware company account actions instead of a dead-end missing-address toast.
+- Confirm navigation switches between HR, payroll, workflow, 전자결재, 자료함, and admin surfaces exposed by the Rust payload.
+- Confirm payroll work, schedule, follow-up, and file/archive rows are visible without technical backend/build/storage diagnostics.
 - Confirm module tables show as table rows on wide screens and card rows on narrow screens.
 - Confirm new user-facing copy comes from catalog arrays instead of inline component strings.
-- Confirm language settings include Korean, English, Chinese, and Japanese.
+- Confirm Korean is the first visible language; other locales remain catalog-complete for future rollout.
 - Confirm no backend service, calculation, runtime data, template, or credential file is touched.
 
 ## I18n Policy
@@ -84,6 +83,6 @@ Do not hardcode user-facing labels, statuses, errors, helper text, auth/security
 
 ## Backend Integration Policy
 
-The current implementation uses typed mock data. Existing API-ready outputs should be connected through a small adapter layer once the backend contract is approved.
+The browser runtime is wired to the Rust `bitween-payroll-api` live view-model endpoint. Remaining static TypeScript data is legacy review material and must be replaced by Rust/API contracts before production release.
 
 Do not change backend internals from this frontend app. Missing fields should be documented as backend requests.

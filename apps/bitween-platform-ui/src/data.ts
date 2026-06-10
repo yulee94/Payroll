@@ -1,4 +1,5 @@
 import { defaultLocale, t, type SupportedLocale } from "./i18n";
+import { platformAccents } from "./theme";
 import type {
   CalendarEvent,
   MetricItem,
@@ -7,9 +8,6 @@ import type {
   NavigationItem,
   PayrollStep,
   PlatformId,
-  PreviewAccount,
-  PreviewAccountId,
-  ReadinessCard,
   ReadinessTone,
   TodoItem,
   WorkQueueItem
@@ -20,17 +18,6 @@ type ModuleId = Exclude<PlatformId, "home" | "payroll">;
 type MetricDefinition = { readonly id: string; readonly tone: ReadinessTone };
 type RowDefinition = { readonly id: string; readonly target: PlatformId; readonly tone: ReadinessTone };
 type ActionDefinition = { readonly target: PlatformId };
-type PreviewAccountDefinition = {
-  readonly id: PreviewAccountId;
-  readonly companyCode: string;
-  readonly defaultRoute: PlatformId;
-  readonly developerMode: boolean;
-  readonly employeeNumber: string;
-  readonly navigationIds: readonly PlatformId[];
-  readonly password: string;
-  readonly tone: ReadinessTone;
-  readonly userId: string;
-};
 type ModuleDefinition = {
   readonly filters: readonly string[];
   readonly metrics: readonly MetricDefinition[];
@@ -40,79 +27,25 @@ type ModuleDefinition = {
 };
 
 const navigationItemDefinitions = [
-  { id: "home", accent: "#64748B" },
-  { id: "payroll", accent: "#1F3864" },
-  { id: "hr", accent: "#0D9488" },
-  { id: "attendance", accent: "#0284C7" },
-  { id: "maintenanceRental", accent: "#166534" },
-  { id: "recruit", accent: "#9333EA" },
-  { id: "travel", accent: "#0F766E" },
-  { id: "workflow", accent: "#2563EB" },
-  { id: "archive", accent: "#475569" },
-  { id: "ai", accent: "#7C3AED" },
-  { id: "admin", accent: "#B45309" },
-  { id: "settings", accent: "#0F766E" }
+  { id: "home", accent: platformAccents.home },
+  { id: "payroll", accent: platformAccents.payroll },
+  { id: "hr", accent: platformAccents.hr },
+  { id: "attendance", accent: platformAccents.attendance },
+  { id: "maintenanceRental", accent: platformAccents.maintenanceRental },
+  { id: "recruit", accent: platformAccents.recruit },
+  { id: "travel", accent: platformAccents.travel },
+  { id: "workflow", accent: platformAccents.workflow },
+  { id: "approval", accent: platformAccents.approval },
+  { id: "archive", accent: platformAccents.archive },
+  { id: "ai", accent: platformAccents.ai },
+  { id: "admin", accent: platformAccents.admin }
 ] as const satisfies readonly { readonly id: PlatformId; readonly accent: string }[];
-
-const previewAccountDefinitions = [
-  {
-    companyCode: "0000",
-    defaultRoute: "attendance",
-    developerMode: false,
-    employeeNumber: "BW-1001",
-    id: "fieldWorker",
-    navigationIds: ["home", "attendance", "maintenanceRental", "payroll", "settings"],
-    password: "worker",
-    tone: "ready",
-    userId: "worker"
-  },
-  {
-    companyCode: "0000",
-    defaultRoute: "admin",
-    developerMode: false,
-    employeeNumber: "BW-3001",
-    id: "operationsAdmin",
-    navigationIds: ["home", "payroll", "hr", "attendance", "maintenanceRental", "workflow", "archive", "admin", "settings"],
-    password: "office",
-    tone: "neutral",
-    userId: "office.admin"
-  },
-  {
-    companyCode: "0000",
-    defaultRoute: "payroll",
-    developerMode: false,
-    employeeNumber: "BW-4001",
-    id: "executive",
-    navigationIds: ["home", "payroll", "maintenanceRental", "workflow", "archive", "ai", "settings"],
-    password: "executive",
-    tone: "attention",
-    userId: "executive"
-  },
-  {
-    companyCode: "0000",
-    defaultRoute: "settings",
-    developerMode: true,
-    employeeNumber: "BW-0001",
-    id: "superAdmin",
-    navigationIds: ["home", "payroll", "hr", "attendance", "maintenanceRental", "recruit", "travel", "workflow", "archive", "ai", "admin", "settings"],
-    password: "Dldsnckd94!",
-    tone: "blocked",
-    userId: "admin"
-  }
-] as const satisfies readonly PreviewAccountDefinition[];
 
 const platformMetricDefinitions = [
   { id: "today", tone: "attention" },
   { id: "ready", tone: "ready" },
   { id: "blocked", tone: "blocked" },
   { id: "docs", tone: "neutral" }
-] as const satisfies readonly MetricDefinition[];
-
-const readinessDefinitions = [
-  { id: "roster", tone: "attention" },
-  { id: "policy", tone: "neutral" },
-  { id: "outputs", tone: "ready" },
-  { id: "api", tone: "attention" }
 ] as const satisfies readonly MetricDefinition[];
 
 const payrollStepDefinitions = [
@@ -142,21 +75,21 @@ const previewRowDefinitions = [
 
 const workQueueDefinitions = [
   { id: "payroll-june", target: "payroll", tone: "attention" },
-  { id: "approval-pending", target: "workflow", tone: "neutral" },
+  { id: "approval-pending", target: "approval", tone: "neutral" },
   { id: "travel-diary", target: "travel", tone: "attention" },
   { id: "archive-preview", target: "archive", tone: "ready" }
 ] as const satisfies readonly RowDefinition[];
 
 const calendarEventDefinitions = [
-  { dateLabel: "2026.06.04", id: "calendar-payroll", target: "payroll", timeLabel: "10:00", tone: "attention" },
-  { dateLabel: "2026.06.04", id: "calendar-approval", target: "workflow", timeLabel: "14:00", tone: "neutral" },
-  { dateLabel: "2026.06.05", id: "calendar-recruit", target: "recruit", timeLabel: "09:30", tone: "ready" },
-  { dateLabel: "2026.06.05", id: "calendar-travel", target: "travel", timeLabel: "16:00", tone: "attention" }
-] as const satisfies readonly { readonly dateLabel: string; readonly id: string; readonly target: PlatformId; readonly timeLabel: string; readonly tone: ReadinessTone }[];
+  { dayOffset: 0, id: "calendar-payroll", target: "payroll", timeLabel: "10:00", tone: "attention" },
+  { dayOffset: 0, id: "calendar-approval", target: "approval", timeLabel: "14:00", tone: "neutral" },
+  { dayOffset: 1, id: "calendar-recruit", target: "recruit", timeLabel: "09:30", tone: "ready" },
+  { dayOffset: 1, id: "calendar-travel", target: "travel", timeLabel: "16:00", tone: "attention" }
+] as const satisfies readonly { readonly dayOffset: number; readonly id: string; readonly target: PlatformId; readonly timeLabel: string; readonly tone: ReadinessTone }[];
 
 const todoDefinitions = [
   { completed: false, id: "todo-payroll", target: "payroll", tone: "attention" },
-  { completed: false, id: "todo-approval", target: "workflow", tone: "neutral" },
+  { completed: false, id: "todo-approval", target: "approval", tone: "neutral" },
   { completed: false, id: "todo-travel", target: "travel", tone: "attention" },
   { completed: true, id: "todo-archive", target: "archive", tone: "ready" }
 ] as const satisfies readonly { readonly completed: boolean; readonly id: string; readonly target: PlatformId; readonly tone: ReadinessTone }[];
@@ -234,9 +167,23 @@ const moduleDefinitions = {
       { id: "travel-3", target: "archive", tone: "ready" }
     ],
     primaryAction: { target: "travel" },
-    secondaryAction: { target: "workflow" }
+    secondaryAction: { target: "approval" }
   },
   workflow: {
+    filters: ["all", "trigger", "rule", "handoff"],
+    metrics: [
+      { id: "active", tone: "ready" },
+      { id: "exceptions", tone: "attention" },
+      { id: "handoffs", tone: "neutral" }
+    ],
+    rows: [
+      { id: "wf-1", target: "workflow", tone: "attention" },
+      { id: "wf-2", target: "approval", tone: "neutral" }
+    ],
+    primaryAction: { target: "workflow" },
+    secondaryAction: { target: "approval" }
+  },
+  approval: {
     filters: ["all", "pending", "ongoing", "returned"],
     metrics: [
       { id: "pending", tone: "attention" },
@@ -244,10 +191,10 @@ const moduleDefinitions = {
       { id: "done", tone: "ready" }
     ],
     rows: [
-      { id: "wf-1", target: "workflow", tone: "attention" },
+      { id: "wf-1", target: "approval", tone: "attention" },
       { id: "wf-2", target: "archive", tone: "neutral" }
     ],
-    primaryAction: { target: "workflow" },
+    primaryAction: { target: "approval" },
     secondaryAction: { target: "archive" }
   },
   archive: {
@@ -273,7 +220,7 @@ const moduleDefinitions = {
     ],
     rows: [
       { id: "ai-1", target: "payroll", tone: "ready" },
-      { id: "ai-2", target: "workflow", tone: "attention" }
+      { id: "ai-2", target: "approval", tone: "attention" }
     ],
     primaryAction: { target: "ai" },
     secondaryAction: { target: "settings" }
@@ -318,27 +265,60 @@ const localizeMetric = (locale: SupportedLocale, namespace: string, item: Metric
   tone: item.tone
 });
 
+const contractDueWindow = (locale: SupportedLocale, tone: ReadinessTone): string =>
+  t(locale, `screenContracts.dueWindow.${tone}`);
+
+const contractBlockers = (locale: SupportedLocale, tone: ReadinessTone): string =>
+  t(locale, `screenContracts.blockers.${tone}`);
+
+const contractLiveState = (locale: SupportedLocale, tone: ReadinessTone): string =>
+  t(locale, `screenContracts.liveState.${tone}`);
+
+const contractPermission = (locale: SupportedLocale, target: PlatformId): string =>
+  t(locale, `screenContracts.permission.${target}`);
+
 const localizeRow = (locale: SupportedLocale, namespace: string, row: RowDefinition): ModuleRow => ({
   id: row.id,
+  blockers: contractBlockers(locale, row.tone),
   category: t(locale, `${namespace}.${row.id}.category`),
+  dueWindow: contractDueWindow(locale, row.tone),
+  liveState: contractLiveState(locale, row.tone),
   status: t(locale, `${namespace}.${row.id}.status`),
   owner: t(locale, `${namespace}.${row.id}.owner`),
+  permission: contractPermission(locale, row.target),
   nextStep: t(locale, `${namespace}.${row.id}.nextStep`),
   target: row.target,
   tone: row.tone
 });
 
-export const getPreviewAccounts = (locale: SupportedLocale): readonly PreviewAccount[] =>
-  previewAccountDefinitions.map((account) => ({
-    ...account,
-    companyCodeLabel: account.companyCode,
-    description: t(locale, `accounts.${account.id}.description`),
-    displayName: t(locale, `accounts.${account.id}.displayName`),
-    label: t(locale, `accounts.${account.id}.label`),
-    modeLabel: t(locale, `accounts.${account.id}.modeLabel`),
-    roleLabel: t(locale, `accounts.${account.id}.roleLabel`),
-    tenantName: t(locale, `accounts.${account.id}.tenantName`)
-  }));
+const dateWithOffset = (offsetDays: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + offsetDays);
+  return date;
+};
+
+const numericDateParts = (date: Date) => {
+  const year = String(date.getFullYear());
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return { day, month, year };
+};
+
+const formatScheduleDate = (locale: SupportedLocale, offsetDays: number): string => {
+  const date = dateWithOffset(offsetDays);
+  const parts = numericDateParts(date);
+  if (locale === "ko-KR" || locale === "ja-JP") {
+    return `${parts.year}.${parts.month}.${parts.day}`;
+  }
+  if (locale === "zh-Hans-CN") {
+    return `${parts.year}/${parts.month}/${parts.day}`;
+  }
+  return new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  }).format(date);
+};
 
 export const getNavigationItems = (locale: SupportedLocale): NonEmptyNavigation =>
   navigationItemDefinitions.map((item) => ({
@@ -352,20 +332,15 @@ export const getNavigationItems = (locale: SupportedLocale): NonEmptyNavigation 
 export const getPlatformMetrics = (locale: SupportedLocale): readonly MetricItem[] =>
   platformMetricDefinitions.map((item) => localizeMetric(locale, "platform.metrics", item));
 
-export const getReadinessCards = (locale: SupportedLocale): readonly ReadinessCard[] =>
-  readinessDefinitions.map((item) => ({
-    id: item.id,
-    title: t(locale, `payroll.readiness.${item.id}.title`),
-    value: t(locale, `payroll.readiness.${item.id}.value`),
-    detail: t(locale, `payroll.readiness.${item.id}.detail`),
-    tone: item.tone
-  }));
-
 export const getPayrollSteps = (locale: SupportedLocale): readonly PayrollStep[] =>
   payrollStepDefinitions.map((item) => ({
     id: item.id,
+    blockers: contractBlockers(locale, item.tone),
+    dueWindow: contractDueWindow(locale, item.tone),
     title: t(locale, `payroll.steps.${item.id}.title`),
     detail: t(locale, `payroll.steps.${item.id}.detail`),
+    liveState: contractLiveState(locale, item.tone),
+    permission: contractPermission(locale, "payroll"),
     status: t(locale, `payroll.steps.${item.id}.status`),
     tone: item.tone
   }));
@@ -393,7 +368,7 @@ export const getWorkQueue = (locale: SupportedLocale): readonly WorkQueueItem[] 
 
 export const getCalendarEvents = (locale: SupportedLocale): readonly CalendarEvent[] =>
   calendarEventDefinitions.map((event) => ({
-    dateLabel: event.dateLabel,
+    dateLabel: formatScheduleDate(locale, event.dayOffset),
     id: event.id,
     target: event.target,
     timeLabel: event.timeLabel,
@@ -441,6 +416,7 @@ export const getModuleDashboards = (locale: SupportedLocale): Readonly<Record<Mo
     recruit: localizeModule("recruit", moduleDefinitions.recruit),
     travel: localizeModule("travel", moduleDefinitions.travel),
     workflow: localizeModule("workflow", moduleDefinitions.workflow),
+    approval: localizeModule("approval", moduleDefinitions.approval),
     archive: localizeModule("archive", moduleDefinitions.archive),
     ai: localizeModule("ai", moduleDefinitions.ai),
     admin: localizeModule("admin", moduleDefinitions.admin),
@@ -449,9 +425,7 @@ export const getModuleDashboards = (locale: SupportedLocale): Readonly<Record<Mo
 };
 
 export const navigationItems = getNavigationItems(defaultLocale);
-export const previewAccounts = getPreviewAccounts(defaultLocale);
 export const platformMetrics = getPlatformMetrics(defaultLocale);
-export const readinessCards = getReadinessCards(defaultLocale);
 export const payrollSteps = getPayrollSteps(defaultLocale);
 export const payrollSettingsRows = getPayrollSettingsRows(defaultLocale);
 export const payrollIntegrationRows = getPayrollIntegrationRows(defaultLocale);

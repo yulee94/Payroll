@@ -1,24 +1,66 @@
 import { defaultLocale, t, type SupportedLocale } from "./i18n";
 import type { ReadinessTone, SidebarTheme, SidebarThemeId } from "./types";
 
+export const pantoneBasis = {
+  // Screen approximations for a Pantone-led enterprise UI palette.
+  // Cloud Dancer anchors surfaces; Marina/Alexandrite/Burnt Sienna/Amaranth
+  // supply accessible operational accents after contrast adjustment.
+  alexandrite: "#00666C",
+  amaranth: "#6F3C56",
+  burntSienna: "#C65D52",
+  cloudDancer: "#F0EEE9",
+  marina: "#5085C3"
+} as const;
+
 export const colors = {
-  accent: "#1F3864",
-  accentPressed: "#172B4D",
-  accentSoft: "#E8F2FC",
-  bg: "#F5F7FA",
-  border: "#DDE5EE",
-  card: "#FFFFFF",
-  danger: "#B91C1C",
-  dangerSoft: "#FEE2E2",
-  divider: "#E7EDF4",
-  input: "#FBFCFE",
-  muted: "#667085",
-  sidebar: "#EDF3FA",
-  success: "#047857",
-  successSoft: "#DFF6EC",
-  text: "#111827",
-  warning: "#B45309",
-  warningSoft: "#FEF3C7"
+  accent: "#274E72",
+  accentPressed: "#1C3B56",
+  accentSoft: "#E7F0F9",
+  bg: "#F7F5F0",
+  blue: pantoneBasis.marina,
+  border: "#DDD8CE",
+  card: "#FFFEFA",
+  cloud: pantoneBasis.cloudDancer,
+  danger: "#9F342D",
+  dangerSoft: "#FBE7E4",
+  divider: "#E8E2D8",
+  graphite: "#1F2328",
+  graphiteSoft: "#EAE7E0",
+  green: "#52643A",
+  input: "#FFFDF8",
+  muted: "#6E6A61",
+  purple: pantoneBasis.amaranth,
+  sky: pantoneBasis.marina,
+  slate: "#767167",
+  slateStrong: "#57534A",
+  sidebar: pantoneBasis.cloudDancer,
+  success: "#00666C",
+  successSoft: "#E0F0EF",
+  teal: pantoneBasis.alexandrite,
+  tealActive: "#D9EFED",
+  tealSoft: "#E8F4F2",
+  tealStrong: "#005259",
+  text: "#1F2328",
+  warning: "#8C392F",
+  warningSoft: "#FBE9E5",
+  white: "#FFFFFF",
+  whiteOverlay: "rgba(255, 253, 248, 0.72)"
+} as const;
+
+export const platformAccents = {
+  admin: colors.warning,
+  ai: colors.purple,
+  approval: colors.blue,
+  archive: colors.slateStrong,
+  attendance: colors.sky,
+  home: colors.slate,
+  hr: colors.tealStrong,
+  maintenanceRental: colors.green,
+  payroll: colors.accent,
+  recruit: colors.purple,
+  settings: colors.teal,
+  travel: colors.teal,
+  workflow: colors.purple
 } as const;
 
 export const spacing = {
@@ -40,36 +82,36 @@ type SidebarThemeDefinition = Omit<SidebarTheme, "label" | "description">;
 
 const sidebarThemeDefinitions = [
   {
-    activeBackground: "#DBEAFE",
-    activeText: "#1F3864",
+    activeBackground: colors.accentSoft,
+    activeText: colors.accent,
     id: "steel",
-    sidebar: "#EDF3FA",
-    swatchEnd: "#DBEAFE",
-    swatchStart: "#EDF3FA"
+    sidebar: colors.sidebar,
+    swatchEnd: colors.accentSoft,
+    swatchStart: colors.sidebar
   },
   {
-    activeBackground: "#111827",
-    activeText: "#FFFFFF",
+    activeBackground: colors.graphite,
+    activeText: colors.white,
     id: "graphite",
-    sidebar: "#F3F4F6",
-    swatchEnd: "#111827",
-    swatchStart: "#F3F4F6"
+    sidebar: colors.graphiteSoft,
+    swatchEnd: colors.graphite,
+    swatchStart: colors.graphiteSoft
   },
   {
-    activeBackground: "#CCFBF1",
-    activeText: "#0F766E",
+    activeBackground: colors.tealActive,
+    activeText: colors.teal,
     id: "teal",
-    sidebar: "#E8F5F3",
-    swatchEnd: "#CCFBF1",
-    swatchStart: "#E8F5F3"
+    sidebar: colors.tealSoft,
+    swatchEnd: colors.tealActive,
+    swatchStart: colors.tealSoft
   },
   {
-    activeBackground: "#1F3864",
-    activeText: "#FFFFFF",
+    activeBackground: colors.accent,
+    activeText: colors.white,
     id: "navy",
-    sidebar: "#E8EEF7",
-    swatchEnd: "#1F3864",
-    swatchStart: "#E8EEF7"
+    sidebar: colors.accentSoft,
+    swatchEnd: colors.accent,
+    swatchStart: colors.accentSoft
   }
 ] as const satisfies readonly SidebarThemeDefinition[];
 

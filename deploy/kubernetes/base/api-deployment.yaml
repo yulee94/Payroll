@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bitween-api
+  labels:
+    app.kubernetes.io/name: bitween-api
+    bitween.io/service-tier: app
+spec:
+  replicas: 2
+  revisionHistoryLimit: 10
+  minReadySeconds: 10
+  progressDeadlineSeconds: 300
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bitween-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bitween-api
+        bitween.io/data-classification: confidential
+        bitween.io/service-tier: app
+      annotations:
+        bitween.io/audit-chain: required
+        bitween.io/slo-bundle: deploy/kubernetes/slo/bitween-api.availability.openslo.yaml
+        kubectl.kubernetes.io/default-container: bitween-api
+    spec:
+      serviceAccountName: bitween-api
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: bitween-api
+          image: ghcr.io/bitween/payroll-api:2026.06.10
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: bitween-runtime-config
+          env:
+            - name: BITWEEN_POSTGRES_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: bitween-runtime-secrets
+                  key: postgres-dsn
+            - name: BITWEEN_JWT_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: bitween-runtime-secrets
+                  key: jwt-issuer
+            - name: BITWEEN_JWKS_URI
+              valueFrom:
+                secretKeyRef:
+                  name: bitween-runtime-secrets
+                  key: jwks-uri
+            - name: BITWEEN_RUSTFS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: bitween-rustfs-auth
+                  key: access-key
+            - name: BITWEEN_RUSTFS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: bitween-rustfs-auth
+                  key: secret-key
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+              ephemeral-storage: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+              ephemeral-storage: 1Gi
+          startupProbe:
+            httpGet:
+              path: /api/payroll/v1/healthz
+              port: http
+            failureThreshold: 30
+            periodSeconds: 2
+          readinessProbe:
+            httpGet:
+              path: /api/payroll/v1/readiness
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/payroll/v1/healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 5"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 128Mi

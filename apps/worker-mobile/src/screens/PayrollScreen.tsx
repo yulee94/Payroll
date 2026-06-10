@@ -45,7 +45,7 @@ export function PayrollScreen({ auth }: PayrollScreenProps) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>내 급여 / 연차</Text>
       <Card>
-        <Field label="급여월" value={period} onChangeText={setPeriod} placeholder="YYYY-MM" />
+        <Field label="급여월" value={period} onChangeText={setPeriod} hint="YYYY-MM 형식으로 입력" />
         <PrimaryButton label="생체인증 후 조회" onPress={load} disabled={action.busy || period.length < 7} />
         {action.error ? <Text style={styles.error}>{action.error}</Text> : null}
       </Card>

@@ -3,12 +3,12 @@
 ## Objective
 
 Move payroll operation-policy resolution precedence into Rust for supplied tenant
-settings snapshots. Python may still persist tenant/site settings during the
+G028 current-state note: the former repo-owned compatibility bridge is decommissioned; missing behavior must be restored through Rust/Buck2 services or TypeScript contracts only.
 compatibility rollout, but Rust should own the deterministic choice of which
 normalized policy applies to a payroll request: site override first, then tenant
 default, then built-in global default.
 
-This slice closes the current gap where Python resolves a policy snapshot before
+This slice closes the current gap where Rust resolves a policy snapshot before
 calling the Rust validation service. It does not add filesystem persistence,
 settings UI writes, database repositories, or an HTTP framework.
 
@@ -17,17 +17,17 @@ settings UI writes, database repositories, or an HTTP framework.
 - Rust crate: `crates/payroll-api`
 - Serialization: existing `serde` and `serde_json`
 - TypeScript contract: `frontend/src/contracts/payrollApi.ts`
-- Python compatibility metadata/tests: `services/payroll_api_contract.py` and
-  `tests/test_payroll_operation_policy.py`
+- Rust parity metadata/tests: `Rust-owned contract` and
+  `Rust parity test`
 - No new dependencies
 
 ## Commands
 
 ```sh
-cargo fmt --check
-cargo test --workspace
+buck2 build '<target>[clippy.txt]'
+buck2 test //...
 buck2 test //crates/payroll-api:payroll_api_test
-python -m unittest tests.test_payroll_operation_policy tests.test_payroll_api_contract tests.test_payroll_api_adapter -v
+# G028 retired the former compatibility gate; use Buck2 Rust tests plus TypeScript gates from AGENTS.md.
 npm run typecheck --prefix frontend
 git diff --check
 ```
@@ -41,7 +41,7 @@ git diff --check
 - `crates/payroll-api/src/service.rs` — service facade method for validating a
   payload using Rust policy resolution.
 - `frontend/src/contracts/payrollApi.ts` — TypeScript source/decision DTOs.
-- `services/payroll_api_contract.py`, tests, and docs — contract metadata and
+- `Rust-owned contract`, tests, and docs — contract metadata and
   migration checkpoint updates.
 
 ## Code Style
@@ -71,20 +71,20 @@ Conventions:
 
 - RED: add Rust tests that reference missing policy-resolution types and service
   facade behavior.
-- GREEN: implement the smallest Rust resolver matching Python precedence for
+- GREEN: implement the smallest Rust resolver matching documented precedence for
   supplied settings snapshots.
-- Regression: run Cargo, Buck2, Python policy/API contract tests, frontend
+- Regression: run Buck2 and Rust/TypeScript policy/API contract tests, frontend
   typecheck, and whitespace checks.
 
 ## Boundaries
 
-- Always: preserve existing Python settings persistence and compatibility tests.
+- Always: preserve existing settings persistence and compatibility tests.
 - Always: keep validation response behavior stable while moving policy selection
   into Rust.
 - Always: make source precedence explicit and serializable.
 - Ask first: adding database/filesystem settings repositories, org-config file
   parsing, HTTP framework wiring, or a new dependency.
-- Never: remove Python settings/policy compatibility code until Rust persistence
+- Never: remove settings/policy compatibility backlog until Rust persistence
   and rollout parity are proven.
 
 ## Success Criteria
@@ -96,9 +96,9 @@ Conventions:
 - Rust can validate a payroll payload using a supplied policy settings snapshot
   via `validate_payroll_api_payload_with_policy_settings` and
   `PayrollApiService::validate_run_payload_with_policy_settings`.
-- TypeScript/Python/Markdown contracts describe the Rust policy-resolution
+- TypeScript/Rust/Markdown contracts describe the Rust policy-resolution
   entrypoint, source values, and precedence.
-- Compatibility Python policy tests still pass.
+- Rust policy contract tests still pass.
 - Verification commands in this spec pass locally.
 
 ## Implementation Plan
@@ -112,7 +112,7 @@ Acceptance:
 
 Verification:
 
-- `cargo test -p bitween-payroll-api policy_resolution::tests` fails for missing
+- `buck2 test //crates/payroll-api:payroll_api_test` fails for missing
   symbols.
 
 ### Task 2: Implement Rust resolver and service helper
@@ -128,16 +128,16 @@ Acceptance:
 
 Verification:
 
-- `cargo test -p bitween-payroll-api policy_resolution::tests service::tests`
+- `buck2 test //crates/payroll-api:payroll_api_test`
   passes.
 
 ### Task 3: Align contracts/docs and verify
 
 Acceptance:
 
-- TypeScript/Python/Markdown surfaces name the Rust resolver and policy source
+- TypeScript/Rust/Markdown surfaces name the Rust resolver and policy source
   values.
-- Migration docs record the checkpoint and remaining Python persistence gap.
+- Migration docs record the checkpoint and remaining persistence gap.
 
 Verification:
 

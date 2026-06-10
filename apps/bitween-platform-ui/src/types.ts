@@ -7,6 +7,7 @@ export type PlatformId =
   | "recruit"
   | "travel"
   | "workflow"
+  | "approval"
   | "archive"
   | "ai"
   | "admin"
@@ -15,31 +16,6 @@ export type PlatformId =
 export type ReadinessTone = "ready" | "attention" | "blocked" | "neutral";
 
 export type SidebarThemeId = "steel" | "graphite" | "teal" | "navy";
-
-export type PreviewAccountId =
-  | "fieldWorker"
-  | "operationsAdmin"
-  | "executive"
-  | "superAdmin";
-
-export type PreviewAccount = {
-  readonly id: PreviewAccountId;
-  readonly label: string;
-  readonly description: string;
-  readonly companyCode: string;
-  readonly companyCodeLabel: string;
-  readonly defaultRoute: PlatformId;
-  readonly developerMode: boolean;
-  readonly displayName: string;
-  readonly employeeNumber: string;
-  readonly modeLabel: string;
-  readonly navigationIds: readonly PlatformId[];
-  readonly password: string;
-  readonly roleLabel: string;
-  readonly tenantName: string;
-  readonly tone: ReadinessTone;
-  readonly userId: string;
-};
 
 export type SidebarTheme = {
   readonly id: SidebarThemeId;
@@ -58,14 +34,6 @@ export type NavigationItem = {
   readonly eyebrow: string;
   readonly description: string;
   readonly accent: string;
-};
-
-export type ReadinessCard = {
-  readonly id: string;
-  readonly title: string;
-  readonly value: string;
-  readonly detail: string;
-  readonly tone: ReadinessTone;
 };
 
 export type WorkQueueItem = {
@@ -114,9 +82,13 @@ export type ActionItem = {
 
 export type ModuleRow = {
   readonly id: string;
+  readonly blockers: string;
   readonly category: string;
+  readonly dueWindow: string;
+  readonly liveState: string;
   readonly status: string;
   readonly owner: string;
+  readonly permission: string;
   readonly nextStep: string;
   readonly target: PlatformId;
   readonly tone: ReadinessTone;
@@ -137,8 +109,12 @@ export type ModuleDashboard = {
 
 export type PayrollStep = {
   readonly id: string;
+  readonly blockers: string;
   readonly title: string;
+  readonly dueWindow: string;
   readonly detail: string;
+  readonly liveState: string;
+  readonly permission: string;
   readonly status: string;
   readonly tone: ReadinessTone;
 };

@@ -156,7 +156,7 @@ mod tests {
 
     #[test]
     fn formats_success_run_response_without_exception_object() {
-        let scope = PayrollScope::new("COSS", "Site A", "2026-05").unwrap();
+        let scope = PayrollScope::new("Acme", "Site A", "2026-05").unwrap();
         let policy = OperationPolicy {
             input_basis: PayrollInputBasis::Attendance,
             payday: Some(String::new()),
@@ -172,12 +172,12 @@ mod tests {
             PayrollRunResult::success(scope.clone(), PayrollInputType::Mixed)
                 .with_count(28)
                 .with_warning("rounded overtime")
-                .with_path("ledger", "s3://bitween-payroll/output/ledger.xlsx")
-                .with_path("payslip", "s3://bitween-payroll/output/payslip.xlsx")
+                .with_path("ledger", "rustfs://bitween-payroll/output/ledger.xlsx")
+                .with_path("payslip", "rustfs://bitween-payroll/output/payslip.xlsx")
                 .with_payroll_audit(json!({"generated_by": "rust"}))
                 .with_roster(json!({"source": "templates"}))
                 .with_operation_policy(policy, "tenant"),
-            "payroll-run-2026-05-coss-site-a",
+            "payroll-run-2026-05-acme-site-a",
         );
         let value = serde_json::to_value(response).unwrap();
 
@@ -185,10 +185,10 @@ mod tests {
         assert_eq!(value["status"], "success");
         assert_eq!(value["will_run"], true);
         assert_eq!(value["can_run"], true);
-        assert_eq!(value["request_id"], "payroll-run-2026-05-coss-site-a");
-        assert_eq!(value["scope"], "COSS/Site A/2026-05");
+        assert_eq!(value["request_id"], "payroll-run-2026-05-acme-site-a");
+        assert_eq!(value["scope"], "Acme/Site A/2026-05");
         assert_eq!(value["scope_key"], scope.key());
-        assert_eq!(value["affiliate"], "COSS");
+        assert_eq!(value["affiliate"], "Acme");
         assert_eq!(value["workplace"], "Site A");
         assert_eq!(value["period"], "2026-05");
         assert_eq!(value["input_type"], "mixed");
@@ -196,7 +196,7 @@ mod tests {
         assert_eq!(value["warnings"], json!(["rounded overtime"]));
         assert_eq!(
             value["paths"]["ledger"],
-            "s3://bitween-payroll/output/ledger.xlsx"
+            "rustfs://bitween-payroll/output/ledger.xlsx"
         );
         assert_eq!(value["payroll_audit"]["generated_by"], "rust");
         assert_eq!(value["roster"]["source"], "templates");
@@ -245,7 +245,7 @@ mod tests {
 
     #[test]
     fn omits_empty_request_id_from_run_response() {
-        let scope = PayrollScope::new("COSS", "Site A", "2026-05").unwrap();
+        let scope = PayrollScope::new("Acme", "Site A", "2026-05").unwrap();
 
         let response = run_response_from_result(
             PayrollRunResult::success(scope, PayrollInputType::Invoice),
@@ -260,7 +260,7 @@ mod tests {
     #[test]
     fn service_delegates_run_response_shaping() {
         let service = PayrollApiService::new(ServiceConfig::default());
-        let scope = PayrollScope::new("COSS", "Site A", "2026-05").unwrap();
+        let scope = PayrollScope::new("Acme", "Site A", "2026-05").unwrap();
 
         let response = service.run_response(
             PayrollRunResult::success(scope, PayrollInputType::Invoice).with_count(2),

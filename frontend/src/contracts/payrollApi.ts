@@ -15,7 +15,7 @@ export type PayrollPermission =
   | "platform.payroll"
   | "platform.payroll.executive"
   | "platform.payroll.settings";
-export type PayrollExecutionBackend = "python_compatibility";
+export type PayrollExecutionBackend = "rust_native";
 export type PayrollExecutionStepKind =
   | "extract_attendance"
   | "build_attendance_invoice"
@@ -577,7 +577,7 @@ export interface PayrollExecutionPlan {
   input_type: Exclude<PayrollInputType, "auto">;
   requested_input_type: PayrollInputType;
   backend: PayrollExecutionBackend;
-  compatibility_executor: string;
+  executor: string;
   source_paths: Partial<Record<"invoice" | "attendance", string>>;
   missing_source_paths: Array<"invoice" | "attendance" | string>;
   steps: PayrollExecutionStep[];

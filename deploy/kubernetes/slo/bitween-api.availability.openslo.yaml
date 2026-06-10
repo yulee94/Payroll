@@ -1,0 +1,34 @@
+apiVersion: openslo/v1
+kind: SLO
+metadata:
+  name: bitween-api-availability
+  labels:
+    microservice: bitween-api
+    sli: availability
+    data_classes: confidential
+    pack: internal-korea
+spec:
+  service: bitween-api
+  indicator:
+    metadata:
+      name: bitween-api-success-ratio
+    spec:
+      ratioMetric:
+        counter: true
+        good:
+          metricSource:
+            type: Prometheus
+            spec:
+              query: sum(rate(http_server_request_duration_seconds_count{service_name="bitween-api",http_response_status_code!~"5.."}[5m]))
+        total:
+          metricSource:
+            type: Prometheus
+            spec:
+              query: sum(rate(http_server_request_duration_seconds_count{service_name="bitween-api"}[5m]))
+  objectives:
+    - displayName: Monthly successful request ratio
+      target: 0.995
+  timeWindow:
+    - duration: 30d
+      isRolling: true
+  budgetingMethod: Occurrences

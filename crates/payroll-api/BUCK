@@ -1,6 +1,13 @@
 PAYROLL_API_SRCS = [
     "src/lib.rs",
     "src/access.rs",
+    "src/api_contract.rs",
+    "src/archive_intake_schema.rs",
+    "src/archive_rollback_schema.rs",
+    "migrations/001_archive_intake.sql",
+    "src/auth_policy.rs",
+    "src/auth_session_schema.rs",
+    "src/auth_session.rs",
     "src/attendance.rs",
     "src/deductions.rs",
     "src/error.rs",
@@ -9,9 +16,13 @@ PAYROLL_API_SRCS = [
     "src/employment_insurance_65.rs",
     "src/execution_plan.rs",
     "src/fixed_hours.rs",
+    "src/hr_employee_schema.rs",
     "src/invoice_audit.rs",
+    "src/platform_view.rs",
+    "src/payroll_attendance_schema.rs",
     "src/policy.rs",
     "src/policy_resolution.rs",
+    "src/postgres_repository.rs",
     "src/request.rs",
     "src/response.rs",
     "src/run.rs",
@@ -19,12 +30,27 @@ PAYROLL_API_SRCS = [
     "src/service.rs",
     "src/site_benefits.rs",
     "src/social_insurance.rs",
+    "src/user_preference_schema.rs",
     "src/workplace_hours.rs",
+    "src/workflow_template_schema.rs",
+    "migrations/002_workflow_templates.sql",
+    "migrations/003_hr_employee.sql",
+    "migrations/004_user_preferences.sql",
+    "migrations/005_payroll_attendance_intake.sql",
+    "migrations/006_archive_admission_rollback.sql",
+    "migrations/007_auth_session_security.sql",
 ]
 
 PAYROLL_API_DEPS = [
+    "//third-party/rust:rustls",
+    "//third-party/rust:ring",
     "//third-party/rust:serde",
     "//third-party/rust:serde_json",
+    "//third-party/rust:sha2",
+    "//third-party/rust:tokio",
+    "//third-party/rust:tokio-postgres",
+    "//third-party/rust:tokio-postgres-rustls",
+    "//third-party/rust:webpki-roots",
 ]
 
 rust_library(
@@ -44,4 +70,211 @@ rust_test(
     edition = "2024",
     srcs = PAYROLL_API_SRCS,
     deps = PAYROLL_API_DEPS,
+    visibility = ["PUBLIC"],
+)
+
+rust_binary(
+    name = "platform_live_view",
+    crate = "platform_live_view",
+    crate_root = "src/bin/platform_live_view.rs",
+    edition = "2024",
+    srcs = ["src/bin/platform_live_view.rs"],
+    deps = [
+        ":payroll_api",
+        "//third-party/rust:serde_json",
+    ],
+)
+
+rust_binary(
+    name = "authz_decision",
+    crate = "authz_decision",
+    crate_root = "src/bin/authz_decision.rs",
+    edition = "2024",
+    srcs = ["src/bin/authz_decision.rs"],
+    deps = [
+        ":payroll_api",
+        "//third-party/rust:serde",
+        "//third-party/rust:serde_json",
+    ],
+)
+
+rust_binary(
+    name = "auth_session_validate",
+    crate = "auth_session_validate",
+    crate_root = "src/bin/auth_session_validate.rs",
+    edition = "2024",
+    srcs = ["src/bin/auth_session_validate.rs"],
+    deps = [
+        ":payroll_api",
+        "//third-party/rust:serde_json",
+        "//third-party/rust:sha2",
+        "//third-party/rust:tokio",
+    ],
+)
+
+rust_test(
+    name = "auth_session_validate_test",
+    crate = "auth_session_validate",
+    crate_root = "src/bin/auth_session_validate.rs",
+    edition = "2024",
+    srcs = ["src/bin/auth_session_validate.rs"],
+    deps = [
+        ":payroll_api",
+        "//third-party/rust:serde_json",
+        "//third-party/rust:sha2",
+        "//third-party/rust:tokio",
+    ],
+)
+
+rust_test(
+    name = "authz_decision_test",
+    crate = "authz_decision",
+    crate_root = "src/bin/authz_decision.rs",
+    edition = "2024",
+    srcs = ["src/bin/authz_decision.rs"],
+    deps = [
+        ":payroll_api",
+        "//third-party/rust:serde",
+        "//third-party/rust:serde_json",
+    ],
+)
+
+rust_binary(
+    name = "hr_employee_store",
+    crate = "hr_employee_store",
+    crate_root = "src/bin/hr_employee_store.rs",
+    edition = "2024",
+    srcs = ["src/bin/hr_employee_store.rs"],
+    deps = [
+        ":payroll_api",
+    ] + PAYROLL_API_DEPS,
+)
+
+rust_test(
+    name = "hr_employee_store_test",
+    crate = "hr_employee_store",
+    crate_root = "src/bin/hr_employee_store.rs",
+    edition = "2024",
+    srcs = ["src/bin/hr_employee_store.rs"],
+    deps = [
+        ":payroll_api",
+    ] + PAYROLL_API_DEPS,
+)
+
+rust_binary(
+    name = "archive_intake_store",
+    crate = "archive_intake_store",
+    crate_root = "src/bin/archive_intake_store.rs",
+    edition = "2024",
+    srcs = ["src/bin/archive_intake_store.rs"],
+    deps = [
+        ":payroll_api",
+    ] + PAYROLL_API_DEPS,
+)
+
+rust_test(
+    name = "archive_intake_store_test",
+    crate = "archive_intake_store",
+    crate_root = "src/bin/archive_intake_store.rs",
+    edition = "2024",
+    srcs = ["src/bin/archive_intake_store.rs"],
+    deps = [
+        ":payroll_api",
+    ] + PAYROLL_API_DEPS,
+)
+
+rust_binary(
+    name = "user_preference_store",
+    crate = "user_preference_store",
+    crate_root = "src/bin/user_preference_store.rs",
+    edition = "2024",
+    srcs = ["src/bin/user_preference_store.rs"],
+    deps = [
+        ":payroll_api",
+    ] + PAYROLL_API_DEPS,
+)
+
+rust_test(
+    name = "user_preference_store_test",
+    crate = "user_preference_store",
+    crate_root = "src/bin/user_preference_store.rs",
+    edition = "2024",
+    srcs = ["src/bin/user_preference_store.rs"],
+    deps = [
+        ":payroll_api",
+    ] + PAYROLL_API_DEPS,
+)
+
+rust_binary(
+    name = "workflow_template_store",
+    crate = "workflow_template_store",
+    crate_root = "src/bin/workflow_template_store.rs",
+    edition = "2024",
+    srcs = ["src/bin/workflow_template_store.rs"],
+    deps = [
+        ":payroll_api",
+    ] + PAYROLL_API_DEPS,
+)
+
+rust_test(
+    name = "workflow_template_store_test",
+    crate = "workflow_template_store",
+    crate_root = "src/bin/workflow_template_store.rs",
+    edition = "2024",
+    srcs = ["src/bin/workflow_template_store.rs"],
+    deps = [
+        ":payroll_api",
+    ] + PAYROLL_API_DEPS,
+)
+
+rust_binary(
+    name = "postgres_migrate",
+    crate = "postgres_migrate",
+    crate_root = "src/bin/postgres_migrate.rs",
+    edition = "2024",
+    srcs = ["src/bin/postgres_migrate.rs"],
+    deps = [
+        ":payroll_api",
+        "//third-party/rust:serde",
+        "//third-party/rust:serde_json",
+        "//third-party/rust:tokio",
+    ],
+)
+
+rust_test(
+    name = "postgres_migrate_test",
+    crate = "postgres_migrate",
+    crate_root = "src/bin/postgres_migrate.rs",
+    edition = "2024",
+    srcs = ["src/bin/postgres_migrate.rs"],
+    deps = [
+        ":payroll_api",
+        "//third-party/rust:serde",
+        "//third-party/rust:serde_json",
+        "//third-party/rust:tokio",
+    ],
+)
+
+rust_binary(
+    name = "cloud_native_audit_worker",
+    crate = "cloud_native_audit_worker",
+    crate_root = "src/bin/cloud_native_audit_worker.rs",
+    edition = "2024",
+    srcs = ["src/bin/cloud_native_audit_worker.rs"],
+    deps = [
+        "//third-party/rust:serde",
+        "//third-party/rust:serde_json",
+    ],
+)
+
+rust_test(
+    name = "cloud_native_audit_worker_test",
+    crate = "cloud_native_audit_worker",
+    crate_root = "src/bin/cloud_native_audit_worker.rs",
+    edition = "2024",
+    srcs = ["src/bin/cloud_native_audit_worker.rs"],
+    deps = [
+        "//third-party/rust:serde",
+        "//third-party/rust:serde_json",
+    ],
 )

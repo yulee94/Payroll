@@ -151,7 +151,7 @@ Before launch, replace placeholder URLs/accounts and confirm:
 Targeted backend tests:
 
 ```bash
-python3 -m unittest tests.test_api_surfaces tests.test_mobile_app_api tests.test_mobile_attendance -v
+# G028 retired the former compatibility gate; use Buck2 Rust tests plus TypeScript gates from AGENTS.md.
 ```
 
 Mobile TypeScript and release metadata verification:

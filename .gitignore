@@ -75,6 +75,7 @@ desktop.ini
 /users/
 /workspace/
 /tenant_logos/
+/archive/
 
 # Top-level module data stores (source lives under core/, ui/, services/)
 /accounting/
@@ -119,3 +120,6 @@ desktop.ini
 
 # Buck2 / Reindeer
 /buck-out/
+
+# Local Bitween live review/runtime data; may contain tenant, payroll, or personnel information
+/.bitween/

@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bitween-api
+  labels:
+    app.kubernetes.io/name: bitween-api
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: bitween-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bitween-frontend
+  labels:
+    app.kubernetes.io/name: bitween-frontend
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: bitween-frontend
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bitween-postgres
+  labels:
+    app.kubernetes.io/name: bitween-postgres
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: bitween-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bitween-rustfs
+  labels:
+    app.kubernetes.io/name: bitween-rustfs
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: bitween-rustfs
+  ports:
+    - name: s3
+      port: 9000
+      targetPort: s3

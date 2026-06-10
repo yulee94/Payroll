@@ -30,7 +30,7 @@ Phase 2는 아래 워크플로를 `KcomwelEmploymentInsuranceProvider`로 자동
 
 ## 프로그램 연동 (Phase 1 — 현재)
 
-- 모듈: `core/payroll/employment_insurance_65.py`
+- 모듈: `Rust-owned contract`
 - UI: **급여 설정** → **「만 65세 고용보험」**
 - CSV 컬럼 예: `관리번호`, `성명`, `부과고지보험료`, `조회일` (별칭 지원)
 - 사업장 **산재관리번호**: `payroll_settings`의 `site_settings[사업장].kcomwel_management_no` (선택)
@@ -46,36 +46,14 @@ KCOMWEL 조회 이력이 없으면 **경고**를 표시하고 설정값을 적�
 
 ---
 
-## Phase 2 — API Provider (미구현)
+## Phase 2 — Production provider contract
 
-공인인증서 로그인 및 공식 API·EDI 제휴가 필요하며 MVP 범위 밖입니다.
+공인인증서 로그인 및 공식 API·EDI 제휴가 필요합니다. 자동 조회는 Rust 서비스가 구현될 때까지 명시적으로 비활성 상태로
+추가하지 않고 Rust `bitween-payroll-api` provider boundary에서 구현합니다.
 
-```python
-class KcomwelEmploymentInsuranceProvider(Protocol):
-    def lookup_premium(self, management_no: str, name: str) -> int:
-        """개인별 부과고지보험료(원). 조회 실패 시 예외."""
-        ...
-
-    def is_live(self) -> bool:
-        """True면 API 연동 활성."""
-        ...
-```
-
-### 스텁 구현 예
-
-```python
-from core.payroll.employment_insurance_65 import set_provider
-
-class KcomwelApiProvider:
-    def lookup_premium(self, management_no: str, name: str) -> int:
-        # TODO: 공인인증서 → 정보조회 → 보험가입정보조회 → 개인별 부과고지보험료조회
-        raise NotImplementedError("KCOMWEL API 미연동")
-
-    def is_live(self) -> bool:
-        return False
-
-# set_provider(KcomwelApiProvider())  # 제휴 완료 후
-```
+Provider readiness must expose whether the integration is live, the source of the
+premium record, and a failure mode that keeps payroll execution blocked or
+requires manual CSV evidence rather than silently calculating from missing data.
 
 ### 연동 시 처리 흐름
 
@@ -101,5 +79,6 @@ class KcomwelApiProvider:
 ## 테스트
 
 ```bash
-python -m pytest tests/test_employment_insurance_65.py tests/test_payroll_employment_insurance.py -q
+buck2 test //crates/payroll-api:payroll_api_test
+buck2 test //crates/payroll-api:payroll_api_test
 ```

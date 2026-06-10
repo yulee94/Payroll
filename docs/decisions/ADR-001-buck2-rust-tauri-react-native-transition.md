@@ -14,7 +14,7 @@ Bitween has merged the production business-trip lifecycle foundation and now nee
 
 - Introduce Buck2 as the planned monorepo build orchestrator.
 - Rewrite backend behavior in idiomatic Rust, not Python.
-- Clean up Python after Rust parity is proven.
+- Repo-owned Python has been decommissioned after Rust parity evidence.
 - Continue the TypeScript React Native transition.
 - Add a cross-platform desktop application path using Tauri plus the React Native web-compatible frontend.
 - Enforce RBAC + ABAC authorization and Zero Trust boundaries across backend, Kubernetes, frontend, and desktop surfaces.
@@ -27,7 +27,7 @@ The current repository already contains:
 - Rust workspace and `crates/payroll-api` as the first backend contract slice.
 - TypeScript frontend contracts under `frontend/`.
 - Expo / React Native / React Native Web platform UI under `apps/bitween-platform-ui/`.
-- Python compatibility modules under `core/`, `services/`, and root-level modules that remain characterization sources until Rust parity exists.
+- legacy compatibility modules under `core/`, `services/`, and root-level modules that remain characterization sources until Rust parity exists.
 
 ## Source-backed basis
 
@@ -82,8 +82,8 @@ Adopt this transition direction:
 
 2. **Rust owns production backend behavior.**
    - Rust service/domain crates are the production backend path.
-   - Python remains only as compatibility, characterization, migration tooling, or local data-conversion code until parity is proven.
-   - Each Python cleanup must be attached to a Rust parity test and zero-production-use evidence.
+   - G028 current-state note: the former repo-owned compatibility bridge is decommissioned; missing behavior must be restored through Rust/Buck2 services or TypeScript contracts only.
+   - The completed Python decommission remains guarded by Rust parity tests and zero-production-use evidence.
 
 3. **React Native owns the cross-platform frontend source.**
    - `apps/bitween-platform-ui/` remains the canonical TypeScript UI shell.
@@ -152,26 +152,26 @@ Adopt this transition direction:
 - Cons: Duplicates the app surface and weakens the React Native transition.
 - Rejected: The UI source of truth remains React Native / React Native Web.
 
-### Delete Python immediately
+### Delete legacy backend immediately
 
 - Pros: Faster apparent cleanup.
 - Cons: Destroys behavior references before Rust parity, risks payroll/workflow regressions, and removes characterization tests.
-- Rejected: Python cleanup must follow parity evidence.
+- Resolved: legacy cleanup followed parity evidence and is now guarded by no-Python gates.
 
 ## Consequences
 
 - Early PRs should be documentation, target inventory, and one reproducible Buck2/Rust target at a time.
 - Security and performance gates are documented in `docs/SECURITY_AND_PERFORMANCE_BASELINE.md`.
 - Industry maturity, Korean SME labor-law localization, full single-language i18n, and JWT/WebAuthn guidance are documented in `docs/SAP_KOREAN_SME_BENCHMARK.md` and `docs/I18N_LOCALIZATION.md`.
-- Rust service crates should expose contracts that TypeScript and Tauri can consume without importing Python internals.
+- Rust service crates should expose contracts that TypeScript and Tauri can consume without importing retired backend internals.
 - The desktop app should start as a wrapper around the web-compatible platform UI, then add Tauri commands only behind typed adapters.
-- Python removal becomes a measured decommission program instead of ad-hoc deletion.
-- CI must continue running Cargo/npm/Python checks until replacement Buck2 targets are proven and adopted.
+- Python removal is complete and remains a guarded decommission invariant.
+- CI runs Buck2 and Node product gates; retired Cargo and Python checks are not active product verification paths.
 
 ## Acceptance criteria for first implementation PRs
 
 - Buck2 plan identifies exact targets before introducing `.buckconfig`/`BUCK` files.
-- Rust backend PRs include parity tests against current Python compatibility behavior plus RBAC/ABAC policy tests.
+- Rust backend PRs include parity tests against current legacy compatibility behavior plus RBAC/ABAC policy tests.
 - Frontend PRs keep `apps/bitween-platform-ui/` as the source of truth, can export web assets for Tauri, and pass Korean/English/Chinese/Japanese translation completeness checks before production release.
 - Desktop PRs never duplicate business logic in Tauri commands and declare least-privilege Tauri capabilities.
-- Python cleanup PRs remove only code with Rust replacement evidence and passing characterization tests.
+- Python decommission changes are complete; future gaps require Rust replacement evidence and passing product gates.

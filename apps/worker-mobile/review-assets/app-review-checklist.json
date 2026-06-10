@@ -4,7 +4,7 @@
   "test_account": {
     "tenant_id": "review-tenant",
     "username": "review.worker",
-    "password": "ReviewOnly-ChangeBeforeRelease!",
+    "password": "REDACTED_TEST_SECRET",
     "mfa_otp": "123456",
     "role": "직원"
   },
@@ -18,7 +18,7 @@
     "privacy_policy_url": "https://bitween.example/privacy",
     "terms_url": "https://bitween.example/terms"
   },
-  "support_contact": "support@bitween.example",
+  "support_contact": "redacted@example.invalid",
   "app_description": "Bitween Worker는 현장 직원용 출퇴근, 근태 신청, 급여 조회, 업무 알림 모바일 앱입니다.",
   "assets": {
     "app_icon": "assets/icon.png",

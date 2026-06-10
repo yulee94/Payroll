@@ -11,16 +11,16 @@ Kubernetes-native stack**:
   idiomatic Rust under `crates/` and future Rust service crates.
 - Frontend work is TypeScript-first under `apps/bitween-platform-ui/` and
   `frontend/`.
-- Existing Python modules are compatibility adapters, characterization sources,
-  migration fixtures, or local tooling until each backend slice is rewritten in
-  Rust. Do not document compatibility adapters as the user-facing client.
+- Python implementation has been decommissioned. Do not add new Python source,
+  stubs, tests, scripts, or live wiring. Historical behavior is preserved by
+  Rust Buck2 tests and TypeScript contract gates.
 - Deployment assumptions belong in `docs/KUBERNETES_NATIVE_STACK.md`; API and
   DTO assumptions belong in the relevant contract docs.
 
 Keep the transition incremental and production-safe:
 
-- Preserve legacy compatibility behavior until the Rust replacement has parity
-  tests and an explicit decommission step.
+- Preserve legacy behavior through Rust parity tests and explicit contract
+  fixtures; do not reintroduce Python compatibility adapters.
 - Use stable field names across Rust services and TypeScript contracts.
 - Prefer vertical slices that can be tested, reviewed, and reverted.
 - Do not add a new runtime dependency without a source-backed decision record.
@@ -32,12 +32,8 @@ Prefer narrow changes over broad rewrites.
 - Rust backend: `crates/` plus future service crates for workflow, payroll,
   tenant/org, KPI, mobile attendance, and integrations.
 - TypeScript frontend: `apps/bitween-platform-ui/` and `frontend/`.
-- Compatibility adapters and characterization sources: `services/`, `core/`,
-  existing Python entrypoints, and tests that lock current behavior before Rust
-  migration.
 - Tests: keep Rust tests in the relevant crate; keep TypeScript type checks under
-  `frontend/` or `apps/bitween-platform-ui/`; keep compatibility/characterization
-  tests in `tests/` until the covered behavior is migrated.
+  `frontend/` or `apps/bitween-platform-ui/`; Python tests are retired.
 
 Do not mix unrelated backend, frontend, documentation, and workflow changes in
 one PR unless the change is a small contract update that requires all of them.
@@ -73,8 +69,18 @@ Run the smallest relevant test set first.
 Rust:
 
 ```powershell
-cargo test --workspace
+buck2 build //...
+buck2 test //...
+buck2 build '//crates/payroll-api:payroll_api[check]' '//crates/workflow-core:workflow_core[check]'
+buck2 build '//crates/payroll-api:payroll_api[clippy.txt]'
 ```
+
+`cargo build`, `cargo check`, `cargo test`, `cargo clippy`, `cargo run`, and
+`cargo bench` are retired for this repository. Use Buck2 for build/check/test
+verification. Use target-specific Buck2 `[check]` and `[clippy.txt]` targets
+for changed Rust crates; do not use unsupported recursive provider shortcuts for
+check/clippy. `cargo metadata`, `cargo install`, and `cargo vendor` remain
+allowed only for Buck/Reindeer inputs.
 
 TypeScript contracts/frontends:
 
@@ -88,11 +94,11 @@ npm install
 npm run typecheck
 ```
 
-Compatibility characterization tests:
+Python decommission gate:
 
 ```powershell
-python -m unittest tests.test_payroll_api_adapter tests.test_payroll_api_contract -v
-python -m unittest tests.test_attendance_import tests.test_payroll_api_adapter tests.test_payroll_api_contract tests.test_payroll_automation tests.test_payroll_operation_policy tests.test_payroll_readiness tests.test_payroll_ui_bridge tests.test_payroll_settings_ui_bridge tests.test_preview_grid_filter tests.test_workflow tests.test_org_access -v
+cd apps/bitween-platform-ui
+npm run verify:no-python-source
 ```
 
 ## Data Safety

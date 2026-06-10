@@ -1,24 +1,12 @@
 # Personal AI — development memo
 
-## Streaming status
+AI assistance is routed outside repo-owned Python. Python compatibility shims were removed in G028; do not add new Python AI clients, local assistants, streaming adapters, or tests.
 
-Streaming is not implemented yet. `services/ai_chat_stream.py` currently delegates to synchronous `chat_with_agent`.
+Future TypeScript/Rust platform chat integration:
 
-Future TypeScript/platform chat integration:
+1. Call the Rust/Kubernetes AI policy gateway from an approved server endpoint.
+2. Stream provider responses through that server endpoint with cancellation and bounded error states.
+3. Keep API keys in Kubernetes Secrets, an external secret manager, or service settings approved by the security contract.
+4. Enforce tenant scope, audit logging, and sensitive-data redaction before prompts or files leave the trust boundary.
 
-1. Call the Rust/Kubernetes AI policy gateway.
-2. Stream provider responses through an approved server endpoint.
-3. Update the frontend chat surface incrementally with cancellation and error states.
-4. Keep API keys in service settings, Kubernetes Secrets, or an external secret manager only.
-
-Detailed design: `docs/AI_AGENT.md`
-
-## Responses vs Chat Completions
-
-`services/ai_assistant.py` compatibility behavior:
-
-1. `responses.create` (model: `OPENAI_MODEL` / user setting / `gpt-5.5`)
-2. Fallback to Chat Completions on the same model
-3. Retry with lower-cost fallback model if configured
-
-`AssistantResponse.api_mode`: `responses` | `chat_completions` | `local` | `blocked`
+Detailed design backlog: `docs/AI_AGENT.md`.

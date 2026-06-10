@@ -42,7 +42,7 @@ Phase 2에서 `EdiWebServiceProvider`가 공인인증서·엔드포인트로 동
 
 | 항목 | 경로 |
 |------|------|
-| 코어 모듈 | `core/payroll/edi_insurance.py` |
+| 코어 모듈 | `Rust-owned contract` |
 | 급여 반영 | `core/payroll_calc_rules.resolve_social_insurance` + `use_edi_premiums` |
 | 설정 저장 | `services/payroll_settings_store` → `edi_insurance` |
 | UI | **급여 설정** → 「EDI 보험료 조회 (사대보험)」 |
@@ -87,7 +87,7 @@ provider = EdiWebServiceProvider(
 | 국민건강보험 (NHIS) | 건강·장기요양 EDI | https://www.nhis.or.kr |
 | 근로복지공단 (KCOMWEL) | 고용·산재 EDI | https://total.kcomwel.or.kr |
 
-만 65세 **고용보험 부과고지**는 별도 모듈: `core/payroll/employment_insurance_65.py`, `docs/KCOMWEL_EI_65_API.md`
+만 65세 **고용보험 부과고지**는 별도 모듈: `Rust-owned contract`, `docs/KCOMWEL_EI_65_API.md`
 
 ---
 
@@ -95,5 +95,5 @@ provider = EdiWebServiceProvider(
 
 ```bash
 cd 급여프로그램
-python -m pytest tests/test_edi_insurance.py -q
+# G028 retired this legacy compatibility command; use Buck2 Rust tests plus TypeScript gates from AGENTS.md.
 ```

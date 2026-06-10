@@ -328,7 +328,7 @@ mod tests {
     }
 
     #[test]
-    fn submission_defaults_and_due_fallbacks_match_python() {
+    fn submission_defaults_and_due_dates_are_preserved() {
         let actions = plan_submission_follow_up(&WorkflowSubmissionFollowUpInput {
             document: WorkflowFollowUpDocument {
                 document_id: "doc-2".to_string(),
@@ -338,11 +338,11 @@ mod tests {
             },
             approval_line: vec![],
             tenant_id: "tenant-a".to_string(),
-            session_user_id: "fallback-user".to_string(),
+            session_user_id: "session-owner".to_string(),
             cc_user_ids: vec![],
         });
         assert_eq!(actions.len(), 2);
-        assert_eq!(actions[0].user_id, "fallback-user");
+        assert_eq!(actions[0].user_id, "session-owner");
         assert_eq!(actions[0].title, "[문서] 문서 (2026-07-01~2026-07-05)");
         assert_eq!(actions[1].title, "결재 진행: 문서 ()");
         assert_eq!(actions[1].due_date, "2026-07-05");

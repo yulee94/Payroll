@@ -29,4 +29,5 @@ rust_test(
     edition = "2024",
     srcs = WORKFLOW_CORE_SRCS,
     deps = WORKFLOW_CORE_DEPS,
+    visibility = ["PUBLIC"],
 )

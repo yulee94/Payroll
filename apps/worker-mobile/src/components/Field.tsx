@@ -3,13 +3,15 @@ import { colors, spacing } from '../theme/tokens';
 
 interface FieldProps extends TextInputProps {
   label: string;
+  hint?: string;
 }
 
-export function Field({ label, ...props }: FieldProps) {
+export function Field({ label, hint, ...props }: FieldProps) {
   return (
     <View style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
-      <TextInput {...props} style={[styles.input, props.style]} placeholderTextColor={colors.muted} />
+      <TextInput {...props} style={[styles.input, props.style]} />
+      {hint ? <Text style={styles.hint}>{hint}</Text> : null}
     </View>
   );
 }
@@ -17,6 +19,7 @@ export function Field({ label, ...props }: FieldProps) {
 const styles = StyleSheet.create({
   wrap: { gap: spacing.xs },
   label: { color: colors.muted, fontSize: 13, fontWeight: '700' },
+  hint: { color: colors.muted, fontSize: 12, lineHeight: 16 },
   input: {
     borderColor: colors.border,
     borderRadius: 12,

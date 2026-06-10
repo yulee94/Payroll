@@ -1,19 +1,22 @@
 # Bitween field mobile attendance integration
 
-This document describes the mobile attendance architecture, API surface, and roadmap for integrating field workers into Bitween payroll. Production delivery targets the Kubernetes-native Rust API and TypeScript/mobile frontend stack.
+This document describes the mobile attendance architecture, API surface, and
+roadmap for integrating field workers into Bitween payroll. Production delivery
+targets Kubernetes-native Rust APIs, PostgreSQL, RustFS where files are involved,
+and TypeScript/mobile frontend contracts.
 
 ## Current codebase gap analysis
 
-| Area | Existing implementation | Mobile integration gap |
+| Area | Current Rust/contract foundation | Mobile integration gap |
 |------|-----------|----------------|
-| Attendance | `core/hr/service.py` manual attendance records | No GPS/biometric clock-in events yet |
-| Payroll | Existing payroll pipeline requires invoice-like source rows | Need attendance accumulation as payroll source |
-| Leave | `annual_leave_manager.py`, HR leave records | No real-time mobile leave API yet |
-| Roster | `roster_constants.py`, `bank_account.py` | Email/payslip destination fields scaffolded, mobile profile API pending |
-| Site | KPI `sites`, roster workplace, workflow site reports | Need geofence master data |
-| Auth | `core/session_service.py` compatibility login | Need JWT/device binding for mobile API |
-| Tenant | `core/tenant_data_scope.py` legal-tenant isolation | Same tenant/legal scoping required for mobile API |
-| API | Service functions and compatibility adapters | Rust REST/WebSocket layer pending |
+| Attendance | Rust payroll/attendance intake schemas and DTO contracts | GPS, device, and biometric clock events still need live ingestion routes |
+| Payroll | Rust payroll contracts accept normalized attendance/payroll source data | Attendance accumulation must become a reviewed payroll source in PostgreSQL |
+| Leave | HR leave balance contract is backlog-owned by the Rust HR service | Real-time mobile leave API and approval linkage remain pending |
+| Roster | Rust HR employee schema owns scoped employee/workplace identity | Mobile profile update/admission needs HR approval and audit history |
+| Site | KPI/site, roster workplace, and workflow location references | Geofence master data and policy enforcement remain pending |
+| Auth | Rust OIDC/JWT/WebAuthn session validation and ABAC/RBAC/PBAC policy | Device binding, passkey ceremony UX, and mobile token refresh remain pending |
+| Tenant | Rust authorization scopes tenant, legal entity, and workplace | Same tenant/legal scoping must be enforced on mobile APIs |
+| API | Rust service contracts and TypeScript interfaces | REST/WebSocket mobile transport layer remains pending |
 
 ## Target architecture
 
@@ -26,85 +29,92 @@ flowchart TB
     end
 
     subgraph API["Kubernetes Rust API"]
-        AUTH[JWT + device_uid]
+        AUTH[JWT + device binding]
         INGEST["POST /attendance/events"]
         PROFILE["GET/PATCH /me/profile"]
     end
 
     subgraph Services["Bitween services"]
-        STORE["mobile tenant store / production DB"]
+        PG["PostgreSQL mobile/HR/payroll records"]
         SYNC["attendance sync worker"]
         PAY["payroll source adapter"]
         HR["HR attendance domain"]
-        ROSTER["Roster"]
-        BUILD["Payroll record builder"]
+        ROSTER["HR employee roster"]
+        RUN["Rust payroll run service"]
     end
 
     APP --> AUTH
     GPS --> INGEST
     BIO --> INGEST
-    INGEST --> STORE
-    STORE --> SYNC
+    INGEST --> PG
+    PG --> SYNC
     SYNC --> HR
-    STORE --> PAY
-    PAY -->|"invoice_rows (_payroll_source=attendance_mobile)"| BUILD
-    BUILD --> ROSTER
-    PROFILE --> STORE
+    PG --> PAY
+    PAY --> RUN
+    PROFILE --> PG
+    PG --> ROSTER
 ```
 
-### Data model (`core/mobile/models.py`)
+## Data model
 
 | Model | Purpose |
 |------|------|
-| `SiteGeofence` | Site name, latitude, longitude, radius; matches KPI site and roster workplace |
-| `EmployeeDevice` | Employee ↔ device UID |
-| `BiometricEnrollmentRef` | Biometric template stays in external vault; Bitween stores only `external_ref` |
-| `AttendanceEvent` | clock_in/out, GPS, verification result, work minutes |
-| `PeriodWorkSummary` | Monthly/site workday and hour summary as payroll input source |
+| `SiteGeofence` | Site name, latitude, longitude, radius; matches KPI site and workplace |
+| `EmployeeDevice` | Employee-to-device binding and revocation state |
+| `BiometricEnrollmentRef` | External biometric reference only; Bitween does not store biometric templates |
+| `AttendanceEvent` | Clock-in/out, GPS, verification result, source confidence, and work minutes |
+| `PeriodWorkSummary` | Monthly/site workday and hour summary as reviewed payroll input source |
 
-### Storage
-
-Compatibility path:
-
-- `{app_data_dir}/mobile/{tenant_id}/database.json`
-- Development: `mobile/{tenant}/database.json`
-- Pattern: `core/module_store.py`
+## Storage
 
 Production target:
 
-- Database/object storage behind Rust repositories.
-- Tenant/legal scoping enforced at API and repository boundaries.
-- Mobile ingestion exposed on the separated **Mobile App API** surface through
+- PostgreSQL stores tenant-scoped attendance, device, profile, approval, and
+  payroll-source records with RLS and audit columns.
+- RustFS stores any uploaded attachments or source files; PostgreSQL stores only
+  metadata and object references.
+- Tenant/legal scoping is enforced at API, repository, and authorization-policy
+  boundaries.
+- Mobile ingestion is exposed on a separated Mobile App API surface through
   versioned paths such as `/api/v1/*` and future-compatible endpoints such as
   `/api/v2/tasks`.
 
-### Payroll without invoice upload
+## Payroll without invoice upload
 
 1. Mobile accumulates verified `AttendanceEvent` records.
-2. `payroll_source.aggregate_period_hours(period)` creates `PeriodWorkSummary`.
-3. `summaries_to_invoice_rows()` creates `build_payroll_records` compatible rows.
-4. `services/workplace_hours.py` policy can select fixed hours vs accumulated attendance hours.
-5. Production Rust payroll service accepts the source through the same payroll API contract.
+2. Rust aggregation creates `PeriodWorkSummary` rows for a payroll period.
+3. HR/payroll operators review anomalies, missing punches, geofence exceptions,
+   and manager approvals.
+4. Reviewed summaries become canonical payroll input rows in PostgreSQL.
+5. The Rust payroll service accepts those rows through the same payroll API
+   contract used by other intake paths.
 
-### HR and leave integration
+## HR and leave integration
 
-- `sync.push_verified_to_hr()` mirrors verified events into HR attendance records.
-- Leave balance uses `annual_leave_manager` + HR leave records until Rust API parity is complete.
-- Hiring/termination sync uses `core/hr/roster_sync.py` and roster workplace fields.
+- Verified attendance events mirror into HR attendance records after validation.
+- Leave balance comes from the Rust HR leave service backlog and must not be
+  fabricated in the mobile client.
+- Hiring, termination, workplace assignment, and payslip destination updates flow
+  through HR approval, audit history, and tenant/workplace authorization.
 
-### Employee profile (`core/mobile/profile.py`)
+## Employee profile
 
-- Mobile fields: `email`, `payslip_email`, `phone`, account info.
-- `roster_constants` includes `이메일`, `급여명세서이메일` aliases.
-- `apply_profile_to_roster_row()` updates roster after HR approval.
+- Mobile fields: email, payslip email, phone, emergency contact, and account
+  metadata where policy permits.
+- Profile edits enter a reviewed HR workflow before updating canonical records.
+- The mobile app should show clear pending/approved/rejected status for profile
+  changes.
 
 ## API overview
 
-Mobile endpoints are served by the Mobile App API surface, separate from Web Admin API, Public Customer API, and Internal Admin API. All endpoints require `Authorization: Bearer <jwt>` and tenant/legal-entity scoping through `X-Tenant-Id`, `X-Bitween-Tenant`, or JWT claims.
+Mobile endpoints are served by the Mobile App API surface, separate from Web
+Admin API, Public Customer API, and Internal Admin API. All endpoints require
+`Authorization: Bearer <jwt>` and tenant/legal-entity scoping through JWT claims
+and server-side authorization policy.
 
 | Method | Path | Description |
 |--------|------|------|
-| POST | `/api/v1/login` | Login and issue mobile bearer token |
+| POST | `/api/v1/login` | Start configured OIDC/passkey sign-in flow |
 | GET | `/api/v1/branches` | Branch/worksite list visible to the app user |
 | GET | `/api/v1/tasks` | Current app action task list |
 | GET | `/api/v2/tasks` | Future task payload shape for app upgrades |
@@ -120,9 +130,11 @@ Mobile endpoints are served by the Mobile App API surface, separate from Web Adm
 
 ## Roadmap
 
-1. Characterize current HR/payroll behavior with tests.
-2. Add Rust mobile API DTOs and validation.
-3. Add tenant-scoped repository and migration plan.
-4. Add Kubernetes Deployment, Service, Secrets, and mobile ingestion worker.
-5. Add geofence and biometric provider integrations.
-6. Decommission compatibility-only mobile store after Rust parity.
+1. Add Rust mobile API DTOs, validation, and ABAC/RBAC/PBAC policies.
+2. Add tenant-scoped PostgreSQL repository and migration plan.
+3. Add Kubernetes Deployment, Service, Secrets, and mobile ingestion worker.
+4. Add geofence and biometric-provider integrations without storing biometric
+   templates in Bitween.
+5. Add HR approval workflow for profile, leave, and attendance corrections.
+6. Add payroll-source review/admission and rollback controls for attendance-based
+   payroll inputs.

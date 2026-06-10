@@ -59,7 +59,7 @@ export default function App() {
     return (
       <SafeAreaView style={styles.boot}>
         <StatusBar style="dark" />
-        <Text style={styles.bootText}>Bitween Worker 준비 중...</Text>
+        <Text style={styles.bootText}>계정과 현장 권한을 확인하고 있습니다</Text>
       </SafeAreaView>
     );
   }

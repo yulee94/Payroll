@@ -138,14 +138,14 @@ pub fn migrate_business_trip_record(
     default_tenant_id: &str,
     record: &Value,
     now_iso: &str,
-    fallback_trip_id: &str,
+    default_trip_id: &str,
 ) -> Value {
     let source = normalize_trip_source(record.get("source").unwrap_or(&Value::Null));
     let source_dedupe = text_field(&source, "dedupe_key");
     let trip_id = first_nonempty(&[
         text_field(record, "trip_id"),
         text_field(record, "id"),
-        fallback_trip_id.trim().to_string(),
+        default_trip_id.trim().to_string(),
     ]);
     let planned_start = first_nonempty(&[
         text_field(record, "planned_start"),
@@ -197,7 +197,7 @@ pub fn migrate_business_trip_record(
     insert_string(
         &mut migrated,
         "legal_entity_id",
-        &text_field(record, "legal_entity_id").or_else_str(&text_field(record, "entity_id")),
+        &text_field(record, "legal_entity_id").or_default_str(&text_field(record, "entity_id")),
     );
     insert_string(&mut migrated, "status", &status);
     insert_string(&mut migrated, "kpi_reflection_status", &kpi_status);
@@ -343,12 +343,12 @@ pub fn migrate_business_trip_record(
     Value::Object(migrated)
 }
 
-pub fn business_trip_view_model(record: &Value, now_iso: &str, fallback_trip_id: &str) -> Value {
+pub fn business_trip_view_model(record: &Value, now_iso: &str, default_trip_id: &str) -> Value {
     let migrated = migrate_business_trip_record(
         &text_field(record, "tenant_id"),
         record,
         now_iso,
-        fallback_trip_id,
+        default_trip_id,
     );
     let mut view = Map::new();
     for key in TRIP_VIEW_MODEL_KEYS {
@@ -390,8 +390,8 @@ pub fn transition_trip_status(
         });
     }
 
-    let fallback_trip_id = text_field(record, "trip_id");
-    let mut updated = migrate_business_trip_record(&tenant_id, record, now_iso, &fallback_trip_id);
+    let default_trip_id = text_field(record, "trip_id");
+    let mut updated = migrate_business_trip_record(&tenant_id, record, now_iso, &default_trip_id);
     let Some(obj) = updated.as_object_mut() else {
         return Ok(updated);
     };
@@ -542,14 +542,14 @@ fn string_list(value: Option<&Value>) -> Vec<Value> {
     }
 }
 
-trait OrElseStr {
-    fn or_else_str(self, fallback: &str) -> String;
+trait OrDefaultStr {
+    fn or_default_str(self, default_value: &str) -> String;
 }
 
-impl OrElseStr for String {
-    fn or_else_str(self, fallback: &str) -> String {
+impl OrDefaultStr for String {
+    fn or_default_str(self, default_value: &str) -> String {
         if self.trim().is_empty() {
-            fallback.trim().to_string()
+            default_value.trim().to_string()
         } else {
             self.trim().to_string()
         }
@@ -595,8 +595,8 @@ mod tests {
         });
 
         let migrated =
-            migrate_business_trip_record("tenant-a", &legacy, "2026-06-04T09:00:00Z", "fallback-1");
-        let view = business_trip_view_model(&migrated, "2026-06-04T09:00:00Z", "fallback-1");
+            migrate_business_trip_record("tenant-a", &legacy, "2026-06-04T09:00:00Z", "migration-default-1");
+        let view = business_trip_view_model(&migrated, "2026-06-04T09:00:00Z", "migration-default-1");
 
         assert_eq!(migrated["id"], "legacy-1");
         assert_eq!(migrated["trip_id"], "legacy-1");
@@ -621,7 +621,7 @@ mod tests {
             "tenant-a",
             &json!({"trip_id": "trip-1", "status": "approved", "kpi_reflection_status": "blocked"}),
             "2026-06-04T08:00:00Z",
-            "fallback-1",
+            "migration-default-1",
         );
         let in_progress =
             transition_trip_status(&trip, "in_progress", "2026-06-04T09:00:00Z").unwrap();
@@ -646,7 +646,7 @@ mod tests {
                 "source": {"kind": "gw_import", "document_id": "GW-42", "dedupe_key": "gw:GW-42"}
             }),
             "2026-06-04T08:00:00Z",
-            "fallback-1",
+            "migration-default-1",
         );
 
         assert_eq!(TRIP_SOURCE_KEYS, ["kind", "document_id", "dedupe_key"]);
@@ -670,7 +670,7 @@ mod tests {
             "tenant-a",
             &json!({"trip_id": "trip-1", "status": "draft"}),
             "2026-06-04T08:00:00Z",
-            "fallback-1",
+            "migration-default-1",
         );
 
         assert!(transition_trip_status(&trip, "completed", "2026-06-04T09:00:00Z").is_err());

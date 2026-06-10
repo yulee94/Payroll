@@ -423,7 +423,7 @@ mod tests {
     fn request(tenant_id: &str, workplace: &str) -> PayrollRunRequest {
         PayrollRunRequest {
             request_id: "req-auth".to_owned(),
-            scope: PayrollScope::new("COSS", workplace, "2026-05").unwrap(),
+            scope: PayrollScope::new("Acme", workplace, "2026-05").unwrap(),
             input_type: PayrollInputType::Mixed,
             invoice_path: Some(PathBuf::from("invoice.xlsx")),
             attendance_path: Some(PathBuf::from("attendance.csv")),
@@ -435,21 +435,21 @@ mod tests {
 
     #[test]
     fn finance_manager_in_payroll_unit_can_run_payroll() {
-        let principal = PayrollPrincipal::new("user-finance", "coss")
+        let principal = PayrollPrincipal::new("user-finance", "acme")
             .with_role(PayrollRole::Finance)
             .with_position(PayrollPosition::Manager)
             .with_org_unit("finance")
             .with_effective_platforms(["payroll", "accounting"]);
 
         let decision =
-            authorize_payroll_request(&request("coss", "Site A"), &principal, PayrollAction::Run);
+            authorize_payroll_request(&request("acme", "Site A"), &principal, PayrollAction::Run);
         let value = serde_json::to_value(&decision).unwrap();
 
         assert!(decision.allowed);
         assert_eq!(value["ok"], true);
         assert_eq!(value["action"], "run");
         assert_eq!(value["reason_code"], "");
-        assert_eq!(value["tenant_id"], "coss");
+        assert_eq!(value["tenant_id"], "acme");
         assert_eq!(
             value["required_permissions"],
             serde_json::json!(["platform.payroll.executive"])
@@ -458,14 +458,14 @@ mod tests {
 
     #[test]
     fn team_platform_filter_denies_non_ceo_admin_outside_payroll() {
-        let principal = PayrollPrincipal::new("user-admin", "coss")
+        let principal = PayrollPrincipal::new("user-admin", "acme")
             .with_role(PayrollRole::Admin)
             .with_position(PayrollPosition::Member)
             .with_org_unit("maintenance")
             .with_effective_platforms(["maintenance"]);
 
         let decision = authorize_payroll_request(
-            &request("coss", "Site A"),
+            &request("acme", "Site A"),
             &principal,
             PayrollAction::Validate,
         );
@@ -480,14 +480,14 @@ mod tests {
 
     #[test]
     fn ceo_bypasses_team_platform_filter_for_payroll() {
-        let principal = PayrollPrincipal::new("user-ceo", "coss")
+        let principal = PayrollPrincipal::new("user-ceo", "acme")
             .with_role(PayrollRole::Staff)
             .with_position(PayrollPosition::Ceo)
             .with_org_unit("root")
             .with_effective_platforms(["maintenance"]);
 
         let decision = authorize_payroll_request(
-            &request("coss", "Site A"),
+            &request("acme", "Site A"),
             &principal,
             PayrollAction::Settings,
         );
@@ -498,7 +498,7 @@ mod tests {
 
     #[test]
     fn tenant_mismatch_is_denied_before_permission_checks() {
-        let principal = PayrollPrincipal::new("user-finance", "coss")
+        let principal = PayrollPrincipal::new("user-finance", "acme")
             .with_role(PayrollRole::Finance)
             .with_position(PayrollPosition::Manager)
             .with_org_unit("finance")
@@ -529,7 +529,7 @@ mod tests {
 
     #[test]
     fn affiliate_abac_restriction_denies_unlisted_affiliate() {
-        let principal = PayrollPrincipal::new("user-finance", "coss")
+        let principal = PayrollPrincipal::new("user-finance", "acme")
             .with_role(PayrollRole::Finance)
             .with_position(PayrollPosition::Manager)
             .with_org_unit("finance")
@@ -537,7 +537,7 @@ mod tests {
             .with_allowed_affiliates(["OTHER"]);
 
         let decision =
-            authorize_payroll_request(&request("coss", "Site A"), &principal, PayrollAction::Run);
+            authorize_payroll_request(&request("acme", "Site A"), &principal, PayrollAction::Run);
 
         assert!(!decision.allowed);
         assert_eq!(decision.reason_code, "affiliate_not_allowed");
@@ -545,7 +545,7 @@ mod tests {
 
     #[test]
     fn workplace_abac_restriction_denies_unlisted_site() {
-        let principal = PayrollPrincipal::new("user-finance", "coss")
+        let principal = PayrollPrincipal::new("user-finance", "acme")
             .with_role(PayrollRole::Finance)
             .with_position(PayrollPosition::Manager)
             .with_org_unit("finance")
@@ -553,7 +553,7 @@ mod tests {
             .with_allowed_workplaces(["Site A"]);
 
         let decision =
-            authorize_payroll_request(&request("coss", "Site B"), &principal, PayrollAction::Run);
+            authorize_payroll_request(&request("acme", "Site B"), &principal, PayrollAction::Run);
 
         assert!(!decision.allowed);
         assert_eq!(decision.reason_code, "workplace_not_allowed");
