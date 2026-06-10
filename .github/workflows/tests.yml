@@ -8,38 +8,6 @@ on:
       - 'codex/**'
 
 jobs:
-  unittest:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run focused tests
-        run: |
-          python -m unittest tests.test_attendance_import tests.test_payroll_api_adapter tests.test_payroll_api_contract tests.test_payroll_automation tests.test_payroll_operation_policy tests.test_payroll_readiness tests.test_payroll_ui_bridge tests.test_payroll_settings_ui_bridge tests.test_preview_grid_filter tests.test_workflow tests.test_org_access -v
-
-  rust:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.96.0
-
-      - name: Run Rust tests
-        run: cargo test --workspace
-
   frontend-types:
     runs-on: windows-latest
     steps:
@@ -58,6 +26,46 @@ jobs:
       - name: Type-check frontend contracts
         working-directory: frontend
         run: npm run typecheck
+
+  bitween-platform-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install platform UI dependencies
+        working-directory: apps/bitween-platform-ui
+        run: npm install
+
+      - name: Verify platform UI runtime/auth/i18n guards
+        working-directory: apps/bitween-platform-ui
+        run: |
+          npm run verify:no-python-source
+          npm run verify:buck2-only
+          npm run verify:performance-gates
+          npm run verify:security-gates
+          npm run verify:kubernetes-manifests
+          npm run verify:auth-session
+          npm run verify:office-contract
+          npm run verify:auth-routes
+          npm run verify:route-authorization
+          npm run verify:signed-out-auth-ux
+          npm run verify:data-mode
+          npm run verify:i18n
+          npm run check:strict-config
+
+      - name: Type-check platform UI
+        working-directory: apps/bitween-platform-ui
+        run: npm run typecheck
+
+      - name: Audit platform UI production dependencies
+        working-directory: apps/bitween-platform-ui
+        run: npm audit --omit=dev --audit-level=moderate
 
   rust-buck2-reindeer:
     runs-on: ubuntu-latest
@@ -80,8 +88,53 @@ jobs:
           reindeer --config reindeer.toml buckify
           git diff --exit-code -- third-party/rust/BUCK third-party/rust/vendor
 
-      - name: Build Rust payroll API with Buck2
-        run: buck2 build //crates/payroll-api:payroll_api
+      - name: Build Rust payroll API tools with Buck2
+        run: |
+          buck2 build //crates/payroll-api:payroll_api
+          buck2 build //crates/payroll-api:platform_live_view
+          buck2 build //crates/payroll-api:auth_session_validate
+          buck2 build //crates/payroll-api:authz_decision
+          buck2 build //crates/payroll-api:hr_employee_store
+          buck2 build //crates/payroll-api:archive_intake_store
+          buck2 build //crates/payroll-api:user_preference_store
+          buck2 build //crates/payroll-api:workflow_template_store
+          buck2 build //crates/payroll-api:postgres_migrate
+          buck2 build //crates/payroll-api:cloud_native_audit_worker
 
-      - name: Test Rust payroll API with Buck2
-        run: buck2 test //crates/payroll-api:payroll_api_test
+      - name: Check Rust payroll API tools with Buck2
+        run: |
+          buck2 build '//crates/payroll-api:payroll_api[check]'
+          buck2 build '//crates/payroll-api:platform_live_view[check]'
+          buck2 build '//crates/payroll-api:auth_session_validate[check]'
+          buck2 build '//crates/payroll-api:authz_decision[check]'
+          buck2 build '//crates/payroll-api:hr_employee_store[check]'
+          buck2 build '//crates/payroll-api:archive_intake_store[check]'
+          buck2 build '//crates/payroll-api:user_preference_store[check]'
+          buck2 build '//crates/payroll-api:workflow_template_store[check]'
+          buck2 build '//crates/payroll-api:postgres_migrate[check]'
+          buck2 build '//crates/payroll-api:cloud_native_audit_worker[check]'
+
+      - name: Lint Rust payroll API tools with Buck2
+        run: |
+          buck2 build '//crates/payroll-api:payroll_api[clippy.txt]'
+          buck2 build '//crates/payroll-api:platform_live_view[clippy.txt]'
+          buck2 build '//crates/payroll-api:auth_session_validate[clippy.txt]'
+          buck2 build '//crates/payroll-api:authz_decision[clippy.txt]'
+          buck2 build '//crates/payroll-api:hr_employee_store[clippy.txt]'
+          buck2 build '//crates/payroll-api:archive_intake_store[clippy.txt]'
+          buck2 build '//crates/payroll-api:user_preference_store[clippy.txt]'
+          buck2 build '//crates/payroll-api:workflow_template_store[clippy.txt]'
+          buck2 build '//crates/payroll-api:postgres_migrate[clippy.txt]'
+          buck2 build '//crates/payroll-api:cloud_native_audit_worker[clippy.txt]'
+
+      - name: Test Rust payroll API tools with Buck2
+        run: |
+          buck2 test //crates/payroll-api:payroll_api_test
+          buck2 test //crates/payroll-api:auth_session_validate_test
+          buck2 test //crates/payroll-api:authz_decision_test
+          buck2 test //crates/payroll-api:hr_employee_store_test
+          buck2 test //crates/payroll-api:archive_intake_store_test
+          buck2 test //crates/payroll-api:user_preference_store_test
+          buck2 test //crates/payroll-api:workflow_template_store_test
+          buck2 test //crates/payroll-api:postgres_migrate_test
+          buck2 test //crates/payroll-api:cloud_native_audit_worker_test

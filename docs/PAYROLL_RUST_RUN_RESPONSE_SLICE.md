@@ -3,13 +3,13 @@
 ## Objective
 
 Move payroll run-result response shaping into Rust-owned, framework-neutral code
-while Python still performs compatibility payroll execution. This slice makes the
+while Rust payroll execution remains a backlog item. This slice makes the
 Rust service boundary responsible for turning a supplied run result into the
 stable API success/error envelope used by frontend, desktop, future HTTP, and
 Kubernetes callers.
 
 This is not the Rust payroll executor or persistence layer. The compatibility
-adapter may still call Python payroll automation, but the response envelope it
+Rust payroll execution remains a backlog item, but the response envelope it
 must match is now specified and tested in Rust.
 
 ## Tech Stack
@@ -17,18 +17,18 @@ must match is now specified and tested in Rust.
 - Rust crate: `crates/payroll-api`
 - Serialization: existing `serde` and `serde_json`
 - TypeScript contract: `frontend/src/contracts/payrollApi.ts`
-- Python compatibility metadata/tests: `services/payroll_api_contract.py` and
-  `tests/test_payroll_api_adapter.py`
+- Rust parity metadata/tests: `Rust-owned contract` and
+  `Rust parity test`
 - No new HTTP, database, async runtime, object-storage, or payroll execution
   dependency in this slice
 
 ## Commands
 
 ```sh
-cargo fmt --check
-cargo test --workspace
+buck2 build '<target>[clippy.txt]'
+buck2 test //...
 buck2 test //crates/payroll-api:payroll_api_test
-python -m unittest tests.test_payroll_api_adapter tests.test_payroll_api_contract -v
+# G028 retired the former compatibility gate; use Buck2 Rust tests plus TypeScript gates from AGENTS.md.
 npm run typecheck --prefix frontend
 git diff --check
 ```
@@ -42,7 +42,7 @@ git diff --check
 - `crates/payroll-api/src/lib.rs` and `crates/payroll-api/BUCK` — public exports
   and build graph inputs.
 - `frontend/src/contracts/payrollApi.ts` — TypeScript success/run-failure DTOs.
-- `services/payroll_api_contract.py` and `docs/PAYROLL_API_CONTRACT.md` — stable
+- `Rust-owned contract` and `docs/PAYROLL_API_CONTRACT.md` — stable
   contract examples and migration notes.
 - `docs/RUST_BACKEND_MIGRATION.md` and `docs/BUILD_AND_RUNTIME_TRANSITION.md` —
   Rust migration checkpoint updates.
@@ -55,8 +55,8 @@ Keep the envelope deterministic and data-only:
 let response = service.run_response(
     PayrollRunResult::success(scope, PayrollInputType::Mixed)
         .with_count(28)
-        .with_path("ledger", "s3://bucket/payroll.xlsx"),
-    "payroll-run-2026-05-coss-site-a",
+        .with_path("ledger", "rustfs://bucket/payroll.xlsx"),
+    "payroll-run-2026-05-acme-site-a",
 );
 ```
 
@@ -71,20 +71,20 @@ Conventions:
 - `error_code` is empty on success and `payroll_run_failed` on run failure.
 - `details` is an empty object for run-result envelopes.
 - `request_id` is omitted when empty.
-- Never serialize Python/internal exception objects.
+- Never serialize internal exception objects.
 
 ## Testing Strategy
 
 - RED: add Rust run-response tests that reference missing `PayrollRunResult`,
   `PayrollRunResponse`, and service facade behavior.
 - GREEN: implement the smallest Rust DTOs and serialization behavior that match
-  Python `payroll_api_response(result, request_id=...)`.
-- Regression: run Cargo, Buck2, Python adapter/contract tests, frontend typecheck,
+  documented `payroll_api_response(result, request_id=...)`.
+- Regression: run Buck2 and Rust/TypeScript contract tests, frontend typecheck,
   and whitespace checks.
 
 ## Boundaries
 
-- Always: preserve Python compatibility adapter behavior while rollout is
+- Always: preserve legacy compatibility adapter behavior while rollout is
   incomplete.
 - Always: keep known operation policy fields normalized through existing Rust
   `OperationPolicy`.
@@ -100,14 +100,14 @@ Conventions:
 
 - Rust exposes `PayrollRunResult`, `PayrollRunResponse`, and
   `run_response_from_result`.
-- `PayrollApiService::run_response` returns the same stable envelope as Python
+- `PayrollApiService::run_response` returns the same stable documented envelope as the Rust contract
   `payroll_api_response` for success and execution failure cases.
 - TypeScript contract distinguishes validation errors from run failures so
   `will_run` and `can_run` are typed correctly.
-- Python contract metadata includes a representative run-failure response and
+- Rust contract metadata includes a representative run-failure response and
   states that Rust owns run-result envelope shaping.
 - Migration docs record this completed checkpoint and keep executor/persistence
-  and Python fallback as remaining work.
+  and Rust executor backlog as remaining work.
 - Verification commands in this spec pass locally.
 
 ## Implementation Plan
@@ -123,27 +123,27 @@ Acceptance:
 
 Verification:
 
-- `cargo test -p bitween-payroll-api run::tests` fails for missing symbols.
+- `buck2 test //crates/payroll-api:payroll_api_test` fails for missing symbols.
 
 ### Task 2: Implement Rust run-response DTOs
 
 Acceptance:
 
-- DTOs serialize to the stable Python-compatible envelope for success and run
+- DTOs serialize to the stable legacy-compatible envelope for success and run
   failure results.
 - No exception field exists in the serialized response.
 - `OperationPolicy` is normalized before serialization.
 
 Verification:
 
-- `cargo test -p bitween-payroll-api run::tests` passes.
+- `buck2 test //crates/payroll-api:payroll_api_test` passes.
 
 ### Task 3: Add service facade and align contracts/docs
 
 Acceptance:
 
 - `PayrollApiService::run_response` delegates to Rust response shaping.
-- TypeScript/Python/Markdown contract surfaces document success, validation
+- TypeScript/Rust/Markdown contract surfaces document success, validation
   error, and run-failure response shapes.
 - Migration docs identify this Rust checkpoint and remaining production gaps.
 

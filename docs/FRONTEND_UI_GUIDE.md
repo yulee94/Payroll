@@ -44,26 +44,31 @@ Bitween frontend work is TypeScript-first. The production frontend direction is 
 - UI may display capability hints from RBAC/ABAC policy responses, but backend Rust services must enforce final authorization.
 - Do not import backend modules directly into frontend code.
 - If the UI needs a field that services do not expose yet, list it in `apps/bitween-platform-ui/docs/backend-contract-requests.md`.
-- Production frontend calls the Kubernetes-exposed API layer; local mock data is preview-only.
+- Production frontend calls Rust-owned API/view-model contracts; local static review data is legacy-only and must not be used for production live wiring.
 
 ## Verification Checklist
 
 ```powershell
 cd apps/bitween-platform-ui
 npm install
+npm run verify:auth-routes
+npm run verify:signed-out-auth-ux
+npm run verify:data-mode
 npm run verify:i18n
+npm run check:strict-config
 npm run typecheck
+npm audit --omit=dev --audit-level=moderate
 npm run export:web
 node preview/server.js
 ```
 
 Manual UI review:
 
-- Login renders without authenticated navigation.
-- Login moves to the platform launcher.
-- Navigation switches between payroll, HR, workflow, archive, AI, admin, and settings.
-- Payroll readiness cards and workflow cards wrap without text clipping.
-- Payroll setting summary and file preview/archive rows are visible.
+- Signed-out auth renders company account actions only when configured routes exist; missing routes show one concise setup state, not a dead-end missing-address toast.
+- Authenticated navigation switches between HR, payroll, workflow, 전자결재, 자료함, admin, and top-bar settings.
+- Payroll work, schedule, follow-ups, and close-period actions are visible without technical readiness/build/backend diagnostics.
+- HR manages employee records separately from payroll while keeping related handoffs visible.
+- 자료함 intake rows show uploaded-file review, mapping guidance, anomaly resolution, and admission status.
 - Module tables show rows on wide screens and cards on narrow screens.
 - Employee self-service, manager ongoing/completed/overdue, compliance cockpit, and setup screens have realistic Korean labels and explicit empty/loading/error/permission states.
 - Any legal/policy text shown in UI is a product-policy summary with an internal source/effective-date reference, not unsupported legal advice.

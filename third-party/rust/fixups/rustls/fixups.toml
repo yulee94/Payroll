@@ -1,0 +1,4 @@
+# rustls uses a build script for feature/cfg metadata. Run it explicitly so the
+# TLS connector path stays hermetic under Buck2.
+buildscript.run = true
+precise_srcs = false

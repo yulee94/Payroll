@@ -7,6 +7,7 @@ This directory is reserved for the production desktop application that wraps the
 - **UI source of truth:** `apps/bitween-platform-ui/` using TypeScript, React Native, Expo, and React Native Web.
 - **Desktop shell:** Tauri packages the exported web assets for Windows, macOS, and Linux.
 - **Native bridge:** Tauri Rust commands are allowed only for desktop-specific capabilities such as file dialogs, secure local settings, lifecycle hooks, and controlled shell integration.
+- **Office contract:** Desktop Office work must follow `docs/OFFICE_PRODUCT_CONTRACT.md`; Tauri may add native affordances only after the Rust/PostgreSQL/RustFS Office slice is live-wired and verified.
 - **Localization:** Desktop metadata, native dialogs, command errors, and capability-denied states must follow the active React Native locale for Korean, English, Chinese, and Japanese.
 - **Business backend:** Production business behavior stays in Kubernetes-deployed Rust services; the desktop app calls those APIs through typed frontend adapters.
 

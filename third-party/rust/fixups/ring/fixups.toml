@@ -1,0 +1,28 @@
+# ring uses a build script for platform/crypto object selection. Run it under
+# Reindeer/Buck, provide the Cargo version/link env vars the script validates,
+# and keep source inclusion broad for cfg-selected crypto sources.
+precise_srcs = false
+extra_srcs = ["src/**/*.der", "src/data/**"]
+cargo_env = [
+    "CARGO_PKG_NAME",
+    "CARGO_PKG_VERSION_MAJOR",
+    "CARGO_PKG_VERSION_MINOR",
+    "CARGO_PKG_VERSION_PATCH",
+    "CARGO_PKG_VERSION_PRE",
+]
+
+[buildscript.run]
+rustc_link_lib = true
+rustc_link_search = true
+
+[buildscript.run.env]
+CARGO_MANIFEST_LINKS = "ring_core_0_17_14_"
+CARGO_PKG_VERSION_MAJOR = "0"
+CARGO_PKG_VERSION_MINOR = "17"
+CARGO_PKG_VERSION_PATCH = "14"
+CARGO_PKG_VERSION_PRE = ""
+OPT_LEVEL = "3"
+DEBUG = "false"
+PROFILE = "release"
+CC_aarch64_apple_darwin = "/usr/bin/clang"
+AR_aarch64_apple_darwin = "/usr/bin/ar"

@@ -1,0 +1,3 @@
+# Tokio conditionally includes platform/runtime modules that Reindeer precise source
+# discovery can omit. Keep Buck source discovery broad for hermetic builds.
+precise_srcs = false

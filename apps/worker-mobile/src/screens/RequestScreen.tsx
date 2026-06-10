@@ -59,10 +59,10 @@ export function RequestScreen({ auth, deviceUid }: RequestScreenProps) {
       <Text style={styles.heading}>근무지 이탈 / 휴가 신청</Text>
       <Card>
         <Field label="문서 제목" value={request.title} onChangeText={(v) => update('title', v)} />
-        <Field label="신청 유형" value={request.attendance_type} onChangeText={(v) => update('attendance_type', v as AttendanceRequestInput['attendance_type'])} placeholder="연차/병가/출장/외출/조퇴" />
-        <Field label="시작" value={request.start_at} onChangeText={(v) => update('start_at', v)} placeholder="2026-06-04T10:00:00" />
-        <Field label="종료" value={request.end_at} onChangeText={(v) => update('end_at', v)} placeholder="2026-06-04T12:00:00" />
-        <Field label="사업장" value={request.site_name} onChangeText={(v) => update('site_name', v)} placeholder="화성 정비사업장" />
+        <Field label="신청 유형" value={request.attendance_type} onChangeText={(v) => update('attendance_type', v as AttendanceRequestInput['attendance_type'])} hint="연차, 병가, 출장, 외출, 조퇴 중 선택" />
+        <Field label="시작" value={request.start_at} onChangeText={(v) => update('start_at', v)} hint="예: 2026-06-04T10:00:00" />
+        <Field label="종료" value={request.end_at} onChangeText={(v) => update('end_at', v)} hint="예: 2026-06-04T12:00:00" />
+        <Field label="사업장" value={request.site_name} onChangeText={(v) => update('site_name', v)} hint="출근 기록과 연결되는 사업장명" />
         <Field label="사유" value={request.reason} onChangeText={(v) => update('reason', v)} multiline />
         <PrimaryButton label="결재 요청" onPress={submit} disabled={action.busy || !request.start_at || !request.end_at || !request.reason} />
         {done ? <Text style={styles.success}>결재 요청이 등록되었습니다. 승인 전 이탈 시 알림이 발생합니다.</Text> : null}

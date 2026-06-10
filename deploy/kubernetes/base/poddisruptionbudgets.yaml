@@ -1,0 +1,47 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: bitween-api
+  labels:
+    app.kubernetes.io/name: bitween-api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bitween-api
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: bitween-frontend
+  labels:
+    app.kubernetes.io/name: bitween-frontend
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bitween-frontend
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: bitween-postgres
+  labels:
+    app.kubernetes.io/name: bitween-postgres
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bitween-postgres
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: bitween-rustfs
+  labels:
+    app.kubernetes.io/name: bitween-rustfs
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bitween-rustfs

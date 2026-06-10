@@ -229,7 +229,7 @@ mod tests {
         let response = service.validate_run_payload_with_policy_settings(
             json!({
                 "request_id": "req-policy-resolution",
-                "affiliate": "COSS",
+                "affiliate": "Acme",
                 "workplace": "Site A",
                 "period": "2026-05",
                 "attendance_path": "attendance.csv",

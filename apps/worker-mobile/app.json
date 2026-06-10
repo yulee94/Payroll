@@ -84,7 +84,7 @@
       "release": {
         "privacyPolicyUrl": "https://bitween.example/privacy",
         "termsUrl": "https://bitween.example/terms",
-        "supportContact": "support@bitween.example",
+        "supportContact": "redacted@example.invalid",
         "distributionDefault": "employee-private-first"
       }
     },

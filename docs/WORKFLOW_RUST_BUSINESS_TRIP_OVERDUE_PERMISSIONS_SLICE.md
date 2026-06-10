@@ -9,7 +9,7 @@ keeping the repository pinned to Rust 2024 / Rust 1.96.
 This slice follows the supplied-profile boundary established by
 `docs/WORKFLOW_RUST_BUSINESS_TRIP_PERMISSIONS_SLICE.md`: Rust owns pure decisions
 once callers provide the principal, current user profile, trip row, and requested
-workflow storage tenant. Python remains responsible for `UserSession` conversion,
+G028 current-state note: the former repo-owned compatibility bridge is decommissioned; missing behavior must be restored through Rust/Buck2 services or TypeScript contracts only.
 `get_user_profile` lookup, workflow JSON persistence, overdue side effects,
 notifications/escalations, document/task/report/KPI writes, calendar/To-Do
 links, and UI bridge behavior.
@@ -46,14 +46,14 @@ links, and UI bridge behavior.
 Start RED, then implement only enough to go GREEN, then run the local gate set.
 
 ```sh
-cargo test -p bitween-workflow-core business_trip_permissions --lib
-/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_business_trip_contracts.BusinessTripLifecycleContractTests.test_contract_declares_rust_business_trip_overdue_permissions -v
-cargo fmt --check
-cargo test --workspace
 buck2 test //crates/workflow-core:workflow_core_test
-/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_business_trip_contracts -v
+# G028 retired the former compatibility gate; use Buck2 Rust tests plus TypeScript gates from AGENTS.md.
+buck2 build '<target>[clippy.txt]'
+buck2 test //...
+buck2 test //crates/workflow-core:workflow_core_test
+# G028 retired the former compatibility gate; use Buck2 Rust tests plus TypeScript gates from AGENTS.md.
 git diff --check
-cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
+buck2 build '<target>[clippy.txt]'
 ```
 
 Hosted GitHub Actions remain best-effort because the current account
@@ -63,8 +63,8 @@ steps execute.
 ## Review record
 
 2026-06-04 local five-axis review: no blockers. Correctness is covered by
-RED/GREEN Rust permission tests and Python contract tests; readability preserves
-the existing flat supplied-profile predicate style; architecture keeps Python as
+RED/GREEN Rust permission tests and Rust/TypeScript contract tests; readability preserves
+the existing flat supplied-profile predicate style; architecture keeps the Rust backlog as
 profile resolver and overdue side-effect bridge; security keeps legal-scope
 isolation and denies requester/executor/viewer/approver escalation into overdue
 side-effect authority; performance remains bounded to small in-memory role and
@@ -73,8 +73,8 @@ scope membership checks.
 ## Checklist
 
 - [x] RED Rust unit tests describe overdue/admin permission parity.
-- [x] RED Python contract test names the Rust overdue permission boundary.
+- [x] RED Rust/TypeScript contract test names the Rust overdue permission boundary.
 - [x] Rust 2024 / Rust 1.96 functions implement pure overdue/admin predicates.
 - [x] Contract metadata and migration docs describe the new boundary.
-- [x] Local cargo, Buck, Python, diff, and clippy gates pass.
+- [x] Buck2, diff, and product gates pass.
 - [x] Code review is recorded before merge.

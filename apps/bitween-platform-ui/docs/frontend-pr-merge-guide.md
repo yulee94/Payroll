@@ -8,7 +8,7 @@
 
 - `main`에는 직접 작업하지 않는다.
 - frontend PR은 하나씩 검토하고, 병합 후 다음 PR을 최신 `main` 기준으로 다시 확인한다.
-- `services`, `core/payroll`, `payroll_builder.py`, `tax.py`, `insurance.py`, 운영 `config`, `templates`, `users`, `output`, `workspace` 변경이 섞인 PR은 frontend PR로 병합하지 않는다.
+- Rust backend crates, frontend contract files, production `config`, template data, user data, output data, or workspace runtime data changes are reviewed as separate backend/platform work rather than as a frontend-only PR.
 - PR 설명의 `Changed Screens`, `Tests`, `Backend Safety`, `Backend Requests`를 확인한 뒤 승인한다.
 
 ## 먼저 병합해도 되는 낮은 충돌 PR
@@ -26,7 +26,6 @@
 
 | PR | 주요 화면 | 주요 파일 |
 | --- | --- | --- |
-| #17 Clarify demo login guidance | 로그인 | `src/screens.tsx`, `preview/app.js`, `preview/styles.css` |
 | #13 Add settings workspace UI | 설정 | `src/screens.tsx`, `preview/app.js`, `preview/styles.css` |
 | #14 Make home planner items actionable | 홈/런처 | `src/data.ts`, `src/screens.tsx`, `src/types.ts`, preview |
 | #15 Use explicit module row action targets | 공통 업무 상세 이동 | `src/data.ts`, `src/screens.tsx`, `src/types.ts`, `preview/app.js` |
@@ -34,7 +33,7 @@
 | #18 Add status rails to work tables | 공통 테이블/카드 | `src/components.tsx`, preview |
 | #22 Add frontend shell status footer | shell 하단 상태 영역 | `src/components.tsx`, `preview/app.js`, `preview/styles.css` |
 
-권장 순서는 사용자 진입 흐름 기준으로 `#17 -> #13 -> #14 -> #15 -> #16 -> #18 -> #22`이다. 단, PR #21을 먼저 병합한다면 위 PR들은 반드시 최신 `main`으로 rebase 또는 재검증이 필요하다.
+권장 순서는 사용자 진입 흐름 기준으로 `#13 -> #14 -> #15 -> #16 -> #18 -> #22`이다. 단, PR #21을 먼저 병합한다면 위 PR들은 반드시 최신 `main`으로 rebase 또는 재검증이 필요하다.
 
 ## PR #21 처리 주의
 
@@ -73,9 +72,14 @@ PR #21을 먼저 병합할 경우:
 - `git diff --check`
 - `node --check apps/bitween-platform-ui/preview/app.js`
 - `node --check apps/bitween-platform-ui/preview/server.js`
+- `npm run verify:auth-routes --prefix apps/bitween-platform-ui`
+- `npm run verify:signed-out-auth-ux --prefix apps/bitween-platform-ui`
+- `npm run verify:data-mode --prefix apps/bitween-platform-ui`
+- `npm run verify:i18n --prefix apps/bitween-platform-ui`
 - `npm run typecheck --prefix apps/bitween-platform-ui`는 `npm`과 `node_modules`가 있는 환경에서 실행
-- preview 실행 후 demo 로그인: 법인코드 `0000`, 아이디 `admin`, 비밀번호 `admin`
-- 로그인, 홈/런처, 사이드 메뉴 이동, 급여, 설정, 변경 화면의 버튼/탭/스크롤 확인
+- `npm audit --omit=dev --audit-level=moderate --prefix apps/bitween-platform-ui`
+- `npm run live` 실행 후 `/api/platform/v1/view-model`이 `backend: rust_native`를 반환하는지 확인
+- Rust live operations shell, 로그인/가입/온보딩 경로 상태, 홈/런처, 사이드 메뉴 이동, HR, 급여, workflow, 전자결재, 자료함, admin 화면의 버튼/탭/스크롤 확인
 
 ## Backend 요청 분리
 

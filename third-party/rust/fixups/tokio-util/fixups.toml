@@ -1,0 +1,3 @@
+# tokio-util has optional modules gated by feature cfg; broad source inclusion keeps
+# Buck's hermetic source set aligned with rustc cfg expansion.
+precise_srcs = false

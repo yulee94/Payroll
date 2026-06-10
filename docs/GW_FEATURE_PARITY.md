@@ -1,6 +1,6 @@
-# COSS 그룹웨어(GW) ↔ Bitween 기능 대응표
+# Acme Corporation웨어(GW) ↔ Bitween 기능 대응표
 
-> 기준: `gw.cossok.com` (2026-06-01 브라우저·`gw_import/` 스크랩) vs Bitween platform
+> 기준: `gw.example.invalid` (2026-06-01 브라우저·`gw_import/` 스크랩) vs Bitween platform
 > 목표: 익숙한 GW UX를 유지하면서 Bitween branding, payroll/HR core, Rust backend, and TypeScript frontend remain cleanly separated.
 
 ## 요약
@@ -22,7 +22,7 @@
 | **전자결재 · 결재할 문서** | `workflow` / `inbox:to_approve` | 있음 | GW 상단 탭(전체/대기/기안/공람) 정렬 |
 | **전자결재 · 기안** | `inbox:my_draft`, `inbox:in_progress` | 있음 | 「기안」퀵탭 → `my_draft` |
 | **전자결재 · 공람** | `inbox:circulate` | 있음 | CC(참조) 전용 공람함 |
-| **전자결재 · 양식함** | `core/workflow/form_templates.py` | 부분 | COSS 20+ 양식 내장, GW 전체는 스크립트 동기화 |
+| **전자결재 · 양식함** | `Rust-owned contract` | 부분 | Acme 20+ 양식 내장, GW 전체는 스크립트 동기화 |
 | **전자결재 · 진행/완료/반려** | `inbox:in_progress` 등 | 있음 | 좌측 결재함 네비 유지 |
 | **메일 · 받은/보낸/안읽음** | `workspace` / mail surface | 부분 | 폴더·목록 컬럼(보낸사람/제목/날짜) |
 | **메일 · SMTP/외부연동** | — | 없음 | Phase 2+ (외부 메일 API) |
@@ -70,7 +70,7 @@ Bitween navigation: Platform, groupware/workflow, org, payroll, HR, KPI, archive
 | `manifest.json` | workflow 42건·bulletin 스킵 로그 |
 | `browser_min_screen.json` | 미니화면 스크랩 |
 
-재실행: `python tools/gw_import/apply_browser_import.py` (브라우저 스크랩 JSON 필요)
+재실행: `python Rust-owned contract` (브라우저 스크랩 JSON 필요)
 
 ---
 
@@ -87,6 +87,6 @@ Bitween navigation: Platform, groupware/workflow, org, payroll, HR, KPI, archive
 
 ## 테스트
 
-- `tests/test_workflow.py` — 결재함·공람 필터
-- `tests/test_workflow_inbox_gw.py` — GW 공람·메일 폴더
-- `tests/test_workflow_forms.py` — 양식 검증
+- `Rust parity test` — 결재함·공람 필터
+- `Rust parity test` — GW 공람·메일 폴더
+- `Rust parity test` — 양식 검증

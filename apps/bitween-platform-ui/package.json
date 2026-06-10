@@ -11,24 +11,42 @@
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
     "check:strict-config": "node scripts/check-strict-config.js",
-    "demo": "node scripts/run-demo-preview.mjs 4174",
     "preview": "node preview/server.js 4174",
     "preview:4174": "node preview/server.js 4174",
     "export:web": "expo export --platform web",
     "verify:data-mode": "node scripts/verify-runtime-data-mode.mjs",
-    "verify:i18n": "node scripts/verify-i18n-catalog.mjs"
+    "verify:buck2-only": "node scripts/verify-buck2-only.mjs",
+    "verify:performance-gates": "node scripts/verify-performance-gates.mjs",
+    "verify:security-gates": "node scripts/verify-security-gates.mjs",
+    "verify:i18n": "node scripts/verify-i18n-catalog.mjs",
+    "live": "node preview/server.js 4174",
+    "verify:auth-session": "node scripts/verify-auth-session.mjs",
+    "verify:auth-routes": "node scripts/verify-auth-routes.mjs",
+    "verify:route-authorization": "node scripts/verify-route-authorization.mjs",
+    "verify:signed-out-auth-ux": "node scripts/verify-signed-out-auth-ux.mjs",
+    "verify:sensitive-data": "node scripts/verify-sensitive-data.mjs",
+    "verify:sensitive-history": "node scripts/verify-sensitive-data.mjs --history",
+    "verify:kubernetes-manifests": "node scripts/verify-kubernetes-manifests.mjs",
+    "verify:no-python-source": "node scripts/verify-no-python-source.mjs",
+    "verify:archive-intake-stories": "node scripts/verify-archive-intake-stories.mjs",
+    "verify:office-contract": "node scripts/verify-office-contract.mjs"
   },
   "dependencies": {
     "@expo/metro-runtime": "^6.1.2",
-    "expo": "^54.0.0",
+    "expo": "^56.0.9",
     "expo-status-bar": "^3.0.8",
+    "lucide-react-native": "^1.17.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-native": "^0.81.0",
+    "react-native-svg": "15.12.1",
     "react-native-web": "^0.21.0"
   },
   "devDependencies": {
     "@types/react": "^19.1.0",
     "typescript": "^5.9.0"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   }
 }

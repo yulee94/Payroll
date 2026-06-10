@@ -1,6 +1,6 @@
 # Payroll Automation API Contract
 
-Bitween payroll automation is migrating to a Rust backend service for Kubernetes-native production. The current Python adapter mirrors this contract only for compatibility and characterization until the Rust API becomes authoritative.
+Bitween payroll automation is migrating to a Rust backend service for Kubernetes-native production. The Rust API is authoritative; this contract documents Rust-owned DTOs, TypeScript-facing fields, and remaining Rust service backlog.
 
 ## Entry Point
 
@@ -37,9 +37,9 @@ Rust transition entry point:
 
 Compatibility adapter:
 
-- `services.payroll_api_adapter.run_payroll_api(payload)` mirrors the contract until the Rust service replaces it.
-- `services.payroll_api_adapter.payroll_api_response(result, request_id=...)` remains the Python compatibility equivalent of `PayrollApiService::run_response(result, request_id)` while payroll execution is still Python-backed.
-- `services.payroll_api_adapter.validate_payroll_api_payload(payload)` validates payloads without running payroll generation.
+- `Rust-owned contract(payload)` is retired; Rust service contracts are authoritative.
+- `Rust-owned contract(result, request_id=...)` is retired; `PayrollApiService::run_response(result, request_id)` is authoritative.
+- `Rust-owned contract(payload)` is retired; Rust validation contracts are authoritative.
 
 TypeScript frontend contract:
 
@@ -64,13 +64,13 @@ Readiness endpoint:
 
 ## Attendance Aggregation
 
-Python compatibility code may still parse `.csv`, `.txt`, `.xlsx`, and `.xlsm` attendance uploads and may still build invoice-compatible workbooks. Once attendance rows are normalized, Rust owns the payroll-domain aggregation rule through `aggregate_attendance_records(records, workplace, attendance_policy)` and `PayrollApiService::aggregate_attendance_records(records, workplace, attendance_policy)`.
+remaining Rust service backlog must parse `.csv`, `.txt`, `.xlsx`, and `.xlsm` attendance uploads and may still build invoice-compatible workbooks. Once attendance rows are normalized, Rust owns the payroll-domain aggregation rule through `aggregate_attendance_records(records, workplace, attendance_policy)` and `PayrollApiService::aggregate_attendance_records(records, workplace, attendance_policy)`.
 
 Aggregation invariants:
 
 1. Records are grouped by supplied `name_key`, or by a whitespace-normalized employee name when `name_key` is absent.
 2. `late_grace_minutes` and `early_leave_grace_minutes` are applied per source record before totals are rounded.
-3. Work, late/early, overtime, night, and special hours are rounded with Python-compatible half-even rounding.
+3. Work, late/early, overtime, night, and special hours are rounded with legacy-compatible half-even rounding.
 4. Invoice rows are sorted by employee name and keep zero-valued payroll amount fields until the payroll calculator fills them.
 5. Compatibility invoice fields `_attendance_days` and `_attendance_input` remain present for downstream invoice/workbook bridges.
 
@@ -127,14 +127,14 @@ Example invoice-compatible output row:
 
 ## Workplace Monthly-Hours Application
 
-Python compatibility code may still load tenant/site/global settings and canonical workplace aliases. Once a workplace-hours policy has been supplied for an invoice-compatible payroll row, Rust owns the deterministic monthly-hours selection rule through `resolve_monthly_work_hours(invoice, workplace, workplace_hours_policy)`, `apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)`, and `PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)`.
+remaining Rust service backlog must load tenant/site/global settings and canonical workplace aliases. Once a workplace-hours policy has been supplied for an invoice-compatible payroll row, Rust owns the deterministic monthly-hours selection rule through `resolve_monthly_work_hours(invoice, workplace, workplace_hours_policy)`, `apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)`, and `PayrollApiService::apply_monthly_hours_to_invoice(invoice, workplace, workplace_hours_policy)`.
 
 Application invariants:
 
 1. Invalid or missing modes fall back to `fixed`; missing, invalid, or non-positive policy hours fall back to 209.
 2. Optional `daily_hours` is retained only when positive, and `break_minutes` only when non-negative.
 3. Invoice `work_days` and `base_days` are clamped at zero before mode selection.
-4. All five Python-compatible modes remain stable: `fixed`, `invoice_work_days`, `invoice_base_days`, `work_or_fixed`, and `base_or_fixed`.
+4. All five legacy-compatible modes remain stable: `fixed`, `invoice_work_days`, `invoice_base_days`, `work_or_fixed`, and `base_or_fixed`.
 5. `_monthly_work_hours` and `_monthly_hours_source` preserve the Korean source-label wording used by payroll reviewers.
 
 Example supplied policy:
@@ -173,15 +173,15 @@ Example application output:
 
 ## Invoice Audit Row
 
-Python compatibility code may still resolve settings, match payroll ledger records, resolve employee fixed-hours profiles, and read workbooks. Once a single invoice row, workplace-hours policy, optional ledger record, and optional fixed-hours profile have been supplied, Rust owns the deterministic audit-row evaluation through `audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)` and `PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)`.
+remaining Rust service backlog must resolve settings, match payroll ledger records, resolve employee fixed-hours profiles, and read workbooks. Once a single invoice row, workplace-hours policy, optional ledger record, and optional fixed-hours profile have been supplied, Rust owns the deterministic audit-row evaluation through `audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)` and `PayrollApiService::audit_invoice_row(invoice, workplace, workplace_hours_policy, ledger_record, fixed_hours_profile)`.
 
 Audit invariants:
 
 1. `status` remains either `pass` or `warn`, with Korean labels `정상` and `확인`.
 2. Break-hour estimation uses positive `break_minutes` first; otherwise it falls back to the invoice `base_days - work_days - leave_days` gap when the I/J columns look hour-based.
-3. Base-salary mismatch, missing invoice-hours, missing roster base-hourly, fixed-hours mismatch, and ledger monthly-hour mismatch flags preserve Python Korean wording.
+3. Base-salary mismatch, missing invoice-hours, missing roster base-hourly, fixed-hours mismatch, and ledger monthly-hour mismatch flags preserve documented Korean wording.
 4. Optional fixed-hours profiles reuse the Rust fixed-hours application/audit flags and prepend those flags before row-level warnings.
-5. Settings lookup, record matching, fixed-profile resolution, workbook I/O, and UI text rendering remain Python compatibility boundaries in this slice.
+5. Settings lookup, record matching, fixed-profile resolution, workbook I/O, and UI text rendering remain legacy compatibility boundaries in this slice.
 
 Example audit row output:
 
@@ -213,7 +213,7 @@ Example audit row output:
 
 ## Invoice Audit Batch
 
-Python compatibility code may still resolve workplace settings, match payroll
+remaining Rust service backlog must resolve workplace settings, match payroll
 ledger records by employee, resolve optional fixed-hours profiles, parse
 workbooks, and render UI summary text. Once callers supply per-row
 `InvoiceAuditBatchItem` values, Rust owns deterministic batch summarization
@@ -238,7 +238,7 @@ Batch result invariants:
 4. Row-level status, flags, formulas, hour sources, and fixed-hours fields are
    produced by the Rust row auditor.
 5. Settings lookup, ledger matching, fixed-profile resolution, workbook I/O, and
-   UI text rendering remain Python compatibility boundaries in this slice.
+   UI text rendering remain legacy compatibility boundaries in this slice.
 
 Example batch result shape:
 
@@ -274,7 +274,7 @@ Example batch result shape:
 
 ## Payroll Social-Insurance Calculation
 
-Python compatibility code may still parse employee identity numbers, determine
+remaining Rust service backlog must parse employee identity numbers, determine
 age/KCOMWEL eligibility, read roster/master workbooks, apply EDI premium
 overrides, and mutate workbook/payroll rows. Once callers supply taxable pay,
 optional preset pension/health values, and an already-resolved
@@ -289,7 +289,7 @@ Social-insurance invariants:
 2. `insurance_exempt: true` zeroes pension, health, long-term-care, employment,
    and total worker contributions.
 3. Positive `preset_national_pension` overrides pension-rate calculation after
-   Python-compatible won rounding.
+   legacy-compatible won rounding.
 4. Positive `preset_health_insurance` overrides health-rate calculation; long-
    term care is recalculated from the rounded health amount.
 5. Pension-rate calculation clamps taxable pay to `390_000..6_170_000` before
@@ -313,7 +313,7 @@ Example social-insurance output:
 
 ## Payroll Earnings Calculation
 
-Python compatibility code may still parse invoices, merge employee masters,
+remaining Rust service backlog must parse invoices, merge employee masters,
 normalize strings/cell values, calculate social insurance and taxes, finalize
 deductions, and assemble final payroll records. Once callers supply normalized
 numeric earnings inputs, Rust owns the pure earnings, gross-pay,
@@ -326,7 +326,7 @@ Earnings invariants:
 1. Positive `ordinary_hourly` overrides `(base_salary + fixed_allowance) / 209`;
    otherwise Rust calculates ordinary hourly from the supplied base/fixed pay.
 2. Overtime, night, holiday, overlap, weekly-holiday, meal, transport, other,
-   and additional pay use Python-compatible won rounding.
+   and additional pay use legacy-compatible won rounding.
 3. Weekly holiday pay is prorated by
    `min(weekly_work_hours, 40) / 40 * 8 * ordinary_hourly`.
 4. Raw overtime/night/holiday amounts are used only when computed pay is
@@ -369,7 +369,7 @@ Example earnings output:
 
 ## Payroll Salary Calculation
 
-Python compatibility code may still parse invoices, merge employee masters,
+remaining Rust service backlog must parse invoices, merge employee masters,
 normalize strings/cell values, determine age/KCOMWEL or EDI overrides, write
 workbooks, and assemble final payroll records. Once callers supply normalized
 salary inputs, Rust owns the pure one-employee salary calculation through
@@ -418,7 +418,7 @@ Example supplied salary output:
 
 ## Payroll Deduction Finalization
 
-Python compatibility code may still parse workbooks, match employee rosters,
+remaining Rust service backlog must parse workbooks, match employee rosters,
 resolve social insurance, apply EDI/site/fixed-hour rules, and assemble final
 payroll records. Once callers supply gross pay, insurance total, optional preset
 income/local taxes, and any identity-guarantee insurance deduction, Rust owns the
@@ -438,10 +438,10 @@ Deduction invariants:
    `tax.calculate_tax`.
 6. `identity_guarantee_insurance_deduction` contributes to `total_deduction` by
    absolute value.
-7. `net_pay` is `gross_pay - total_deduction` with Python-compatible won
+7. `net_pay` is `gross_pay - total_deduction` with legacy-compatible won
    rounding.
 
-Simplified income-tax brackets preserve the Python compatibility table for one
+Simplified income-tax brackets preserve the legacy compatibility table for one
 monthly dependent: `0`, `8_000`, `42_000`, `120_000`, `210_000`, `310_000`,
 `420_000`, `650_000`, `920_000`, `1_450_000`, and `2_100_000` at the documented
 upper bounds through `10_000_000`; amounts above that use
@@ -466,7 +466,7 @@ Example finalization output:
 
 ## Employment-Insurance 65+ Payroll Decision
 
-Python compatibility code may still import and persist KCOMWEL verification
+remaining Rust service backlog must import and persist KCOMWEL verification
 records, resolve site management numbers from payroll settings, match employees,
 call future live KCOMWEL APIs, coordinate supplied EDI premium inputs, mutate
 payroll invoice rows, and read/write workbooks. Once callers supply identity, a valid payroll period,
@@ -479,7 +479,7 @@ age-65+ employment-insurance decision through
 Decision invariants:
 
 1. Valid payroll periods use the calendar month end as the age basis.
-2. Korean RRN century codes and six-digit birth dates use Python-compatible age
+2. Korean RRN century codes and six-digit birth dates use legacy-compatible age
    parsing for the supplied period.
 3. Workers below age 65 return `liable`, `premium_amount: null`, and
    `deduct_employment_insurance: true` without requiring a KCOMWEL record.
@@ -489,7 +489,7 @@ Decision invariants:
    insurance deduction enabled.
 6. Missing records return `unknown` and apply the supplied unknown default:
    `skip` suppresses deduction and `deduct` keeps deduction enabled.
-7. Unknown warnings preserve the Korean payroll-review wording used by Python
+7. Unknown warnings preserve the documented Korean payroll-review wording
    compatibility code.
 
 Example supplied-input decision:
@@ -521,7 +521,7 @@ Example unknown decision:
 
 ## EDI Insurance Premium Application
 
-Python compatibility code may still import CSV/Excel EDI files, persist premium
+remaining Rust service backlog must import CSV/Excel EDI files, persist premium
 records, call future EDI providers, resolve tenant/site settings and site
 management numbers, match employees, and coordinate workbook I/O. Once callers
 supply a single invoice row, EDI config, an optional latest premium record, and a
@@ -544,7 +544,7 @@ Application invariants:
    invoice unchanged.
 2. Positive EDI pension, health, long-term-care, employment, and industrial
    accident values override the supplied invoice row.
-3. Missing long-term-care falls back to Python-compatible
+3. Missing long-term-care falls back to legacy-compatible
    `round(health_insurance * 0.1295)` when EDI health insurance is positive.
 4. A zero EDI employment premium clears existing employment insurance for
    non-age-exempt rows; positive employment premiums still apply.
@@ -586,7 +586,7 @@ Example application output:
 
 ## Site-Benefits Application
 
-Python compatibility code may still resolve site/tenant/global benefit settings,
+remaining Rust service backlog must resolve site/tenant/global benefit settings,
 canonicalize workplace aliases, inspect and persist the yearly
 identity-insurance ledger, parse workbooks, and recalculate payroll totals. Once
 callers supply a single invoice row, resolved site-benefits config, and payroll
@@ -639,7 +639,7 @@ Example application output:
 
 ## Fixed-Hours Application
 
-Python compatibility code may still load HR contracts, site job-group templates, payroll settings, and employee rosters. Once a fixed-hours profile has been resolved for an invoice-compatible payroll row, Rust owns the payroll-domain application rule through `apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)` and `PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)`.
+remaining Rust service backlog must load HR contracts, site job-group templates, payroll settings, and employee rosters. Once a fixed-hours profile has been resolved for an invoice-compatible payroll row, Rust owns the payroll-domain application rule through `apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)` and `PayrollApiService::apply_fixed_hours_to_invoice(invoice, fixed_hours_profile, workplace)`.
 
 Application invariants:
 
@@ -647,7 +647,7 @@ Application invariants:
 2. Original invoice `work_days`, `base_days`, `ot_hours`, `special_hours`, and `special_ext_hours` are preserved under `_invoice_*` fields before replacement.
 3. `fixed_extension_hours` replaces `ot_hours` when positive, and `fixed_overtime_hours` replaces `special_hours` when positive.
 4. `_preserve_reference_hours` keeps the original invoice work/base hours for application while audit flags still compare against the resolved profile.
-5. Audit flags preserve the Python compatibility Korean labels for the profile source, pay type, and hour mismatches.
+5. Audit flags preserve the legacy compatibility Korean labels for the profile source, pay type, and hour mismatches.
 
 Example fixed-hours profile:
 
@@ -703,7 +703,7 @@ Example application output:
 
 ## Operation Policy Resolution
 
-For compatibility, Python may still load and save tenant/site settings, but Rust now owns the deterministic policy-resolution decision once a settings snapshot is supplied. Future HTTP, Tauri, mobile, worker, or Kubernetes wrappers should supply a snapshot to `PayrollApiService::validate_run_payload_with_policy_settings(payload, settings)` instead of resolving `operation_policy_source` in client code.
+G028 current-state note: the former repo-owned compatibility bridge is decommissioned; missing behavior must be restored through Rust/Buck2 services or TypeScript contracts only.
 
 Resolution precedence:
 
@@ -742,7 +742,7 @@ The selected policy is normalized in Rust before validation response serializati
 
 ## Execution Planning
 
-Rust now owns deterministic payroll execution planning once a request has been parsed and an operation-policy snapshot has been resolved. The plan does not generate payroll outputs yet; it tells future HTTP, worker, Tauri, or Kubernetes wrappers which source paths and compatibility steps will run before the Python executor is replaced.
+Rust now owns deterministic payroll execution planning once a request has been parsed and an operation-policy snapshot has been resolved. The plan does not generate payroll outputs yet; it tells future HTTP, worker, Tauri, or Kubernetes wrappers which source paths and Rust-owned execution steps will run before payroll output generation is fully service-backed.
 
 Rust entry points:
 
@@ -753,49 +753,49 @@ Planner invariants:
 
 1. Explicit `invoice`, `attendance`, and `mixed` requests keep the caller-requested input type when required source paths exist.
 2. `auto` requests resolve the executable input type from the normalized Rust operation policy.
-3. `mixed` requests with only an attendance source plan an attendance fallback to preserve Python compatibility behavior.
-4. Every step currently names `backend: "python_compatibility"` until Rust owns payroll output generation.
+3. `mixed` requests with only an attendance source plan an attendance-only Rust execution path with an explicit warning.
+4. Every step names `backend: "rust_native"` and `executor: "bitween_payroll_api::PayrollApiService"`.
 
 Example plan:
 
 ```json
 {
   "ok": true,
-  "scope": "COSS/Site A/2026-05",
-  "scope_key": "COSS\u001fSite A\u001f2026-05",
-  "affiliate": "COSS",
+  "scope": "Acme/Site A/2026-05",
+  "scope_key": "Acme\u001fSite A\u001f2026-05",
+  "affiliate": "Acme",
   "workplace": "Site A",
   "period": "2026-05",
   "input_type": "mixed",
   "requested_input_type": "auto",
-  "backend": "python_compatibility",
-  "compatibility_executor": "services.payroll_automation.run_payroll_automation",
+  "backend": "rust_native",
+  "executor": "bitween_payroll_api::PayrollApiService",
   "source_paths": {
-    "invoice": "s3://bitween-payroll/inbox/invoice_2026-05.xlsx",
-    "attendance": "s3://bitween-payroll/inbox/attendance_2026-05.csv"
+    "invoice": "rustfs://bitween-payroll/inbox/invoice_2026-05.xlsx",
+    "attendance": "rustfs://bitween-payroll/inbox/attendance_2026-05.csv"
   },
   "missing_source_paths": [],
   "steps": [
     {
       "kind": "extract_attendance",
-      "backend": "python_compatibility",
-      "input": "s3://bitween-payroll/inbox/attendance_2026-05.csv",
+      "backend": "rust_native",
+      "input": "rustfs://bitween-payroll/inbox/attendance_2026-05.csv",
       "output": "attendance_rows",
-      "description": "Extract attendance rows before merging them into the invoice workbook."
+      "description": "Extract attendance rows with the Rust payroll service contract before merging them into the invoice workbook."
     },
     {
       "kind": "attach_attendance_sheet",
-      "backend": "python_compatibility",
-      "input": "s3://bitween-payroll/inbox/invoice_2026-05.xlsx + attendance_rows",
+      "backend": "rust_native",
+      "input": "rustfs://bitween-payroll/inbox/invoice_2026-05.xlsx + attendance_rows",
       "output": "generated:mixed_invoice",
-      "description": "Attach the attendance sheet to the supplied invoice workbook."
+      "description": "Attach the attendance sheet to the supplied invoice workbook through the Rust payroll service contract."
     },
     {
       "kind": "process_invoice",
-      "backend": "python_compatibility",
+      "backend": "rust_native",
       "input": "generated:mixed_invoice",
       "output": "payroll_outputs",
-      "description": "Process the merged invoice workbook through the compatibility payroll executor."
+      "description": "Process the merged invoice workbook through the Rust payroll service contract."
     }
   ],
   "operation_policy": {
@@ -833,7 +833,7 @@ Example plan:
 ```json
 {
   "scope": {
-    "affiliate": "COSS",
+    "affiliate": "Acme",
     "workplace": "Site A",
     "period": "2026-05"
   }
@@ -844,7 +844,7 @@ Flat shape:
 
 ```json
 {
-  "affiliate": "COSS",
+  "affiliate": "Acme",
   "workplace": "Site A",
   "period": "2026-05"
 }
@@ -854,7 +854,7 @@ Scope key shape:
 
 ```json
 {
-  "scope": "COSS/Site A/2026-05"
+  "scope": "Acme/Site A/2026-05"
 }
 ```
 
@@ -878,16 +878,16 @@ Fields:
 
 ```json
 {
-  "request_id": "payroll-run-2026-05-coss-site-a",
+  "request_id": "payroll-run-2026-05-acme-site-a",
   "scope": {
-    "affiliate": "COSS",
+    "affiliate": "Acme",
     "workplace": "Site A",
     "period": "2026-05"
   },
   "input_type": "mixed",
-  "invoice_path": "s3://bitween-payroll/inbox/invoice_2026-05.xlsx",
-  "attendance_path": "s3://bitween-payroll/inbox/attendance_2026-05.csv",
-  "tenant_id": "coss",
+  "invoice_path": "rustfs://bitween-payroll/inbox/invoice_2026-05.xlsx",
+  "attendance_path": "rustfs://bitween-payroll/inbox/attendance_2026-05.csv",
+  "tenant_id": "acme",
   "metadata": {
     "requested_by": "api",
     "source_system": "Bitween API"
@@ -903,19 +903,19 @@ Fields:
   "status": "success",
   "will_run": true,
   "can_run": true,
-  "request_id": "payroll-run-2026-05-coss-site-a",
-  "scope": "COSS/Site A/2026-05",
-  "scope_key": "COSS\u001fSite A\u001f2026-05",
-  "affiliate": "COSS",
+  "request_id": "payroll-run-2026-05-acme-site-a",
+  "scope": "Acme/Site A/2026-05",
+  "scope_key": "Acme\u001fSite A\u001f2026-05",
+  "affiliate": "Acme",
   "workplace": "Site A",
   "period": "2026-05",
   "input_type": "mixed",
   "count": 28,
   "warnings": [],
   "paths": {
-    "ledger": "s3://bitween-payroll/output/COSS/Site A/2026-05/급여대장.xlsx",
-    "payslip": "s3://bitween-payroll/output/COSS/Site A/2026-05/급여명세서.xlsx",
-    "payment": "s3://bitween-payroll/output/COSS/Site A/2026-05/지급내역.xlsx"
+    "ledger": "rustfs://bitween-payroll/output/Acme/Site A/2026-05/급여대장.xlsx",
+    "payslip": "rustfs://bitween-payroll/output/Acme/Site A/2026-05/급여명세서.xlsx",
+    "payment": "rustfs://bitween-payroll/output/Acme/Site A/2026-05/지급내역.xlsx"
   },
   "error_code": "",
   "details": {},
@@ -950,10 +950,10 @@ Run failures happen after a request has passed validation and execution was atte
   "status": "error",
   "will_run": true,
   "can_run": false,
-  "request_id": "payroll-run-2026-05-coss-site-a",
-  "scope": "COSS/Site A/2026-05",
-  "scope_key": "COSS\u001fSite A\u001f2026-05",
-  "affiliate": "COSS",
+  "request_id": "payroll-run-2026-05-acme-site-a",
+  "scope": "Acme/Site A/2026-05",
+  "scope_key": "Acme\u001fSite A\u001f2026-05",
+  "affiliate": "Acme",
   "workplace": "Site A",
   "period": "2026-05",
   "input_type": "mixed",
@@ -993,18 +993,18 @@ Run failures happen after a request has passed validation and execution was atte
   "status": "validated",
   "will_run": false,
   "can_run": true,
-  "request_id": "payroll-run-2026-05-coss-site-a",
-  "scope": "COSS/Site A/2026-05",
-  "scope_key": "COSS\u001fSite A\u001f2026-05",
-  "affiliate": "COSS",
+  "request_id": "payroll-run-2026-05-acme-site-a",
+  "scope": "Acme/Site A/2026-05",
+  "scope_key": "Acme\u001fSite A\u001f2026-05",
+  "affiliate": "Acme",
   "workplace": "Site A",
   "period": "2026-05",
   "input_type": "mixed",
   "requested_input_type": "mixed",
-  "tenant_id": "coss",
+  "tenant_id": "acme",
   "paths": {
-    "invoice": "s3://bitween-payroll/inbox/invoice_2026-05.xlsx",
-    "attendance": "s3://bitween-payroll/inbox/attendance_2026-05.csv"
+    "invoice": "rustfs://bitween-payroll/inbox/invoice_2026-05.xlsx",
+    "attendance": "rustfs://bitween-payroll/inbox/attendance_2026-05.csv"
   },
   "metadata_keys": ["requested_by", "source_system"],
   "operation_policy": {
@@ -1043,7 +1043,7 @@ Actions and required permissions:
 | `run` | `platform.payroll.executive` | Execute payroll-producing automation. |
 | `settings` | `platform.payroll.settings` | Change tenant/site payroll operation policy. |
 
-RBAC role families are `staff`, `finance`, and `admin`. Position families are `ceo`, `executive`, `director`, `manager`, `team_lead`, `senior`, `member`, and `intern`. Rust preserves the Python compatibility rule that CEO position bypasses team platform filtering, while non-CEO admin/finance grants are still filtered by `effective_platform_ids`.
+RBAC role families are `staff`, `finance`, and `admin`. Position families are `ceo`, `executive`, `director`, `manager`, `team_lead`, `senior`, `member`, and `intern`. Rust preserves the legacy compatibility rule that CEO position bypasses team platform filtering, while non-CEO admin/finance grants are still filtered by `effective_platform_ids`.
 
 ABAC attributes are `tenant_id`, `affiliate`, `workplace`, `period`, `org_unit_id`, `effective_platform_ids`, `allowed_affiliates`, and `allowed_workplaces`. A supplied request `tenant_id` must match the principal tenant. Non-empty affiliate/workplace allow-lists restrict the request scope.
 
@@ -1065,8 +1065,8 @@ Stable denial reason codes:
   "allowed": true,
   "action": "run",
   "user_id": "user-finance",
-  "tenant_id": "coss",
-  "scope": "COSS/Site A/2026-05",
+  "tenant_id": "acme",
+  "scope": "Acme/Site A/2026-05",
   "reason_code": "",
   "reason": "",
   "required_permissions": ["platform.payroll.executive"],
@@ -1083,7 +1083,7 @@ Denied example:
   "action": "run",
   "user_id": "user-finance",
   "tenant_id": "other",
-  "scope": "COSS/Site A/2026-05",
+  "scope": "Acme/Site A/2026-05",
   "reason_code": "tenant_mismatch",
   "reason": "Payroll request tenant does not match the principal tenant.",
   "required_permissions": [],
@@ -1150,7 +1150,7 @@ Validation errors return stable JSON, keep `will_run: false`, and never expose i
   "status": "error",
   "will_run": false,
   "can_run": false,
-  "request_id": "payroll-run-2026-05-coss-site-a",
+  "request_id": "payroll-run-2026-05-acme-site-a",
   "error_code": "invalid_period",
   "error": "period는 YYYY-MM 형식이어야 합니다.",
   "warnings": ["period는 YYYY-MM 형식이어야 합니다."],
@@ -1187,19 +1187,19 @@ Frontend code must use `error_code`, not parse `error` text.
 - `input_type` in validation responses is the resolved input type; `requested_input_type` preserves caller input.
 - Explicit `invoice`, `attendance`, and `mixed` requests preserve caller selection.
 - Responses include `operation_policy` and `operation_policy_source` (`site`, `tenant`, or `global`) so operators can audit which policy was applied.
-- Rust owns site -> tenant -> global policy-resolution precedence for supplied settings snapshots through `PayrollApiService::validate_run_payload_with_policy_settings`; Python settings persistence remains compatibility-only until the repository/storage migration lands.
-- Rust owns supplied-policy workplace monthly-hours application through `PayrollApiService::apply_monthly_hours_to_invoice`; Python settings persistence and canonical workplace alias resolution remain compatibility-only until repository/storage migration lands.
-- Rust owns supplied-input invoice audit row evaluation through `PayrollApiService::audit_invoice_row`; Python settings lookup, ledger matching, fixed-profile resolution, and workbook I/O remain compatibility-only boundaries.
-- Rust owns supplied-input invoice audit batch summarization through `PayrollApiService::audit_invoice_batch`; Python still supplies resolved row inputs and keeps UI text rendering compatibility.
-- Rust owns supplied-input social-insurance calculation through `PayrollApiService::calculate_social_insurance`; Python still parses identities, determines age/KCOMWEL eligibility, reads roster/master workbooks, applies EDI premium overrides, and mutates payroll rows.
-- Rust owns supplied-input earnings/gross/non-taxable/taxable-pay calculation through `PayrollApiService::calculate_payroll_earnings`; Python still parses invoices, merges employee masters, normalizes cells, calculates insurance/tax/deductions, and assembles final payroll records.
-- Rust owns supplied-input one-employee salary calculation through `PayrollApiService::calculate_payroll_salary`; Python still parses/merges payroll sources, resolves age/KCOMWEL/EDI data, writes workbooks, and assembles final payroll records.
-- Rust owns supplied-input final deduction/net-pay calculation through `PayrollApiService::finalize_payroll_deductions`; Python still parses workbooks, matches rosters, resolves social insurance, and assembles final records.
-- Rust owns supplied-input employment-insurance 65+ payroll decisions through `PayrollApiService::resolve_ei_65_for_payroll`; Python still imports/persists KCOMWEL records, resolves settings/site management numbers, calls future live APIs, coordinates supplied EDI premium inputs, and mutates payroll rows.
-- Rust owns supplied-record EDI insurance premium application through `PayrollApiService::apply_edi_premiums_to_invoice`; Python still imports/stores EDI files, resolves settings/site management numbers, matches employees, and handles workbook I/O.
-- Rust owns supplied-config site-benefits row application through `PayrollApiService::apply_site_benefits_to_invoice`; Python still resolves settings, checks/persists identity-insurance ledgers, and recalculates payroll totals.
-- Rust owns resolved fixed-hours profile application through `PayrollApiService::apply_fixed_hours_to_invoice`; Python contract/template/settings resolution remains compatibility-only until persistence and HR contract repositories move to Rust.
-- Rust now owns run-result success and execution-failure envelope shaping through `PayrollApiService::run_response`; Python execution remains a compatibility source until the Rust executor and persistence slices land.
-- Rust normalizes `operation_policy` known fields before serializing responses: invalid input basis falls back to `hybrid`; attendance minute fields are clamped to Python-compatible ranges; missing-clock policy falls back to `warn`.
+- Rust owns site -> tenant -> global policy-resolution precedence for supplied settings snapshots through `PayrollApiService::validate_run_payload_with_policy_settings`; settings persistence remains compatibility-only until the repository/storage migration lands.
+- Rust owns supplied-policy workplace monthly-hours application through `PayrollApiService::apply_monthly_hours_to_invoice`; settings persistence and canonical workplace alias resolution remain compatibility-only until repository/storage migration lands.
+- Rust owns supplied-input invoice audit row evaluation through `PayrollApiService::audit_invoice_row`; Settings lookup, ledger matching, fixed-profile resolution, and workbook I/O remain Rust service backlog boundaries.
+- Rust owns supplied-input invoice audit batch summarization through `PayrollApiService::audit_invoice_batch`; Rust service backlog supplies resolved row inputs and keeps UI text rendering compatibility.
+- Rust owns supplied-input social-insurance calculation through `PayrollApiService::calculate_social_insurance`; Rust service backlog parses identities, determines age/KCOMWEL eligibility, reads roster/master workbooks, applies EDI premium overrides, and mutates payroll rows.
+- Rust owns supplied-input earnings/gross/non-taxable/taxable-pay calculation through `PayrollApiService::calculate_payroll_earnings`; Rust service backlog parses invoices, merges employee masters, normalizes cells, calculates insurance/tax/deductions, and assembles final payroll records.
+- Rust owns supplied-input one-employee salary calculation through `PayrollApiService::calculate_payroll_salary`; Rust service backlog parses/merges payroll sources, resolves age/KCOMWEL/EDI data, writes workbooks, and assembles final payroll records.
+- Rust owns supplied-input final deduction/net-pay calculation through `PayrollApiService::finalize_payroll_deductions`; Rust service backlog parses workbooks, matches rosters, resolves social insurance, and assembles final records.
+- Rust owns supplied-input employment-insurance 65+ payroll decisions through `PayrollApiService::resolve_ei_65_for_payroll`; KCOMWEL record import/persistence, settings/site management-number resolution, live API calls, supplied EDI premium coordination, and payroll row mutation remain Rust service backlog boundaries.
+- Rust owns supplied-record EDI insurance premium application through `PayrollApiService::apply_edi_premiums_to_invoice`; EDI file import/storage, settings/site management-number resolution, employee matching, and workbook I/O remain Rust service backlog boundaries.
+- Rust owns supplied-config site-benefits row application through `PayrollApiService::apply_site_benefits_to_invoice`; Settings resolution, identity-insurance ledger checks/persistence, and payroll-total recalculation remain Rust service backlog boundaries.
+- Rust owns resolved fixed-hours profile application through `PayrollApiService::apply_fixed_hours_to_invoice`; contract/template/settings resolution remains compatibility-only until persistence and HR contract repositories move to Rust.
+- Rust now owns run-result success and execution-failure envelope shaping through `PayrollApiService::run_response`; Rust execution remains a compatibility source until the Rust executor and persistence slices land.
+- Rust normalizes `operation_policy` known fields before serializing responses: invalid input basis falls back to `hybrid`; attendance minute fields are clamped to legacy-compatible ranges; missing-clock policy falls back to `warn`.
 - `PayrollApiService` now owns framework-neutral health/readiness DTOs; future Axum/Actix/Tauri/Kubernetes wrappers should call those Rust functions rather than inventing parallel probe payloads.
 - `PayrollApiService::authorize_run_request` owns tenant/RBAC/ABAC payroll action decisions; wrappers must supply trusted principals and must not authorize from frontend labels.

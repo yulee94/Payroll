@@ -1,4 +1,4 @@
-import { defaultLocale, type SupportedLocale } from "./i18n";
+import { defaultLocale, t, type SupportedLocale } from "./i18n";
 import type {
   CalendarEvent,
   MetricItem,
@@ -7,34 +7,21 @@ import type {
   NavigationItem,
   PayrollStep,
   PlatformId,
-  PreviewAccount,
-  PreviewAccountId,
-  ReadinessCard,
   TodoItem,
   WorkQueueItem
 } from "./types";
 import {
-  getCalendarEvents,
   getModuleDashboards,
-  getNavigationItems,
-  getPreviewAccounts,
-  getPayrollSettingsRows,
-  getPayrollSteps,
-  getPlatformMetrics,
-  getPreviewRows,
-  getReadinessCards,
-  getTodayTodos,
-  getWorkQueue
+  getNavigationItems
 } from "./data";
 
 export type NonEmptyNavigation = readonly [NavigationItem, ...NavigationItem[]];
 
 export type SessionViewModel = {
+  readonly authenticated: boolean;
   readonly companyCodeLabel: string;
-  readonly developerMode: boolean;
   readonly displayName: string;
   readonly employeeNumber: string;
-  readonly modeLabel: string;
   readonly roleLabel: string;
   readonly tenantName: string;
 };
@@ -49,7 +36,6 @@ export type LauncherViewModel = {
 
 export type PayrollViewModel = {
   readonly previewRows: readonly ModuleRow[];
-  readonly readinessCards: readonly ReadinessCard[];
   readonly settingsRows: readonly ModuleRow[];
   readonly steps: readonly PayrollStep[];
 };
@@ -65,60 +51,40 @@ export type PlatformViewModelAdapter = {
   readonly load: (locale: SupportedLocale) => Promise<PlatformViewModel> | PlatformViewModel;
 };
 
-export const getPreviewAccountById = (
-  locale: SupportedLocale,
-  accountId: PreviewAccountId | undefined,
-): PreviewAccount => {
-  const accounts = getPreviewAccounts(locale);
-  const fallback = accounts[0];
-  if (!fallback) {
-    throw new Error("No preview accounts configured");
+const getLiveNavigationItems = (locale: SupportedLocale): NonEmptyNavigation => {
+  const navigation = getNavigationItems(locale).filter((item) =>
+    ["home", "hr", "payroll", "workflow", "approval", "archive", "admin"].includes(item.id),
+  );
+  const first = navigation[0] ?? getNavigationItems(locale)[0];
+  if (!first) {
+    throw new Error("No navigation items configured");
   }
-  return accounts.find((account) => account.id === accountId) ?? fallback;
+  return [first, ...navigation.filter((item) => item.id !== first.id)];
 };
 
-export const getPreviewSession = (
-  locale: SupportedLocale,
-  accountId?: PreviewAccountId,
-): SessionViewModel => {
-  const account = getPreviewAccountById(locale, accountId);
-  return {
-    companyCodeLabel: account.companyCodeLabel,
-    developerMode: account.developerMode,
-    displayName: account.displayName,
-    employeeNumber: account.employeeNumber,
-    modeLabel: account.modeLabel,
-    roleLabel: account.roleLabel,
-    tenantName: account.tenantName
-  };
-};
-
-export const getPreviewPlatformViewModel = (
-  locale: SupportedLocale,
-  accountId?: PreviewAccountId,
-): PlatformViewModel => ({
+export const getLivePlatformViewModel = (locale: SupportedLocale): PlatformViewModel => ({
   launcher: {
-    calendarEvents: getCalendarEvents(locale),
-    metrics: getPlatformMetrics(locale),
-    navigation: getNavigationItems(locale),
-    todayTodos: getTodayTodos(locale),
-    workQueue: getWorkQueue(locale)
+    calendarEvents: [],
+    metrics: [],
+    navigation: getLiveNavigationItems(locale),
+    todayTodos: [],
+    workQueue: []
   },
   modules: getModuleDashboards(locale),
   payroll: {
-    previewRows: getPreviewRows(locale),
-    readinessCards: getReadinessCards(locale),
-    settingsRows: getPayrollSettingsRows(locale),
-    steps: getPayrollSteps(locale)
+    previewRows: [],
+    settingsRows: [],
+    steps: []
   },
-  session: getPreviewSession(locale, accountId)
+  session: {
+    authenticated: false,
+    companyCodeLabel: "tenant-acme",
+    displayName: t(locale, "session.displayName"),
+    employeeNumber: t(locale, "session.employeeNumber.pending"),
+    roleLabel: t(locale, "session.roleLabel"),
+    tenantName: t(locale, "preview.profile.defaultTenantName")
+  }
 });
-
-export const previewPlatformViewModel: PlatformViewModel = getPreviewPlatformViewModel(defaultLocale);
-
-export const previewViewModelAdapter: PlatformViewModelAdapter = {
-  load: (locale) => getPreviewPlatformViewModel(locale)
-};
 
 export const getNavigationItem = (id: PlatformId, locale: SupportedLocale = defaultLocale): NavigationItem => {
   const navigation = getNavigationItems(locale);

@@ -1,4 +1,5 @@
-import type { PropsWithChildren, ReactNode } from "react";
+import { useState, type PropsWithChildren, type ReactNode } from "react";
+import { Bell, CircleHelp, LogOut, MessageSquare, Settings, User } from "lucide-react-native";
 import {
   Image,
   Pressable,
@@ -11,8 +12,8 @@ import {
 import type { StyleProp, ViewStyle } from "react-native";
 
 import { t, type SupportedLocale } from "./i18n";
-import { colors, getSidebarThemes, radius, spacing, toneBackground, toneColor } from "./theme";
-import type { MetricItem, ModuleRow, NavigationItem, ReadinessTone, SidebarTheme, SidebarThemeId } from "./types";
+import { colors, radius, spacing, toneBackground, toneColor } from "./theme";
+import type { MetricItem, ModuleRow, NavigationItem, ReadinessTone, SidebarTheme } from "./types";
 
 const companyLogoUri =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F3864'/%3E%3Cpath d='M18 18h18c7 0 11 4 11 9 0 4-2 7-6 8 5 1 8 5 8 10 0 6-5 10-13 10H18V18zm11 14h6c3 0 5-1 5-4s-2-4-5-4h-6v8zm0 17h7c4 0 6-2 6-5s-2-5-6-5h-7v10z' fill='white'/%3E%3C/svg%3E";
@@ -248,13 +249,10 @@ type SidebarProps = {
   readonly activeId: NavigationItem["id"];
   readonly locale: SupportedLocale;
   readonly onSelect: (id: NavigationItem["id"]) => void;
-  readonly onThemeChange: (id: SidebarThemeId) => void;
   readonly theme: SidebarTheme;
 };
 
-export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeChange, theme }: SidebarProps) {
-  const sidebarThemes = getSidebarThemes(locale);
-
+export function Sidebar({ activeId, compact, items, locale, onSelect, theme }: SidebarProps) {
   return (
     <View style={[styles.sidebar, { backgroundColor: theme.sidebar }, compact && styles.sidebarCompact]}>
       <View style={[styles.brandBlock, compact && styles.brandBlockCompact]}>
@@ -263,41 +261,6 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
           <View>
             <Label size="lg" weight="bold">Bitween</Label>
             <Label size="sm" muted>{t(locale, "shell.brandSubtitle")}</Label>
-          </View>
-        </View>
-      </View>
-      <View style={[styles.themePanel, compact && styles.themePanelCompact]}>
-        <Label size="sm" weight="bold">{t(locale, "shell.themePanel.title")}</Label>
-        <View style={styles.themeChips}>
-          {sidebarThemes.map((item) => {
-            const selected = item.id === theme.id;
-            return (
-              <Pressable
-                accessibilityHint={item.description}
-                accessibilityLabel={t(locale, "shell.themePanel.optionLabel", { label: item.label, description: item.description })}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                key={item.id}
-                onPress={() => onThemeChange(item.id)}
-                style={({ pressed }) => [
-                  styles.themeChip,
-                  selected && { backgroundColor: theme.activeBackground, borderColor: theme.activeText },
-                  pressed && styles.buttonPressed
-                ]}
-              >
-                <View style={[styles.themeSwatch, { backgroundColor: item.swatchStart, borderColor: item.swatchEnd }]}>
-                  <View style={[styles.themeSwatchInset, { backgroundColor: item.swatchEnd }]} />
-                </View>
-                <Text style={[styles.themeChipText, selected && { color: theme.activeText }]}>{item.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-        <View style={styles.themeCurrent}>
-          <View style={[styles.themeCurrentRail, { backgroundColor: theme.activeText }]} />
-          <View style={styles.themeCurrentCopy}>
-            <Label size="sm" weight="bold">{t(locale, "shell.themePanel.current", { theme: theme.label })}</Label>
-            <Label size="sm" muted>{theme.description}</Label>
           </View>
         </View>
       </View>
@@ -333,37 +296,65 @@ export function Sidebar({ activeId, compact, items, locale, onSelect, onThemeCha
 
 type ShellProps = PropsWithChildren<{
   readonly active: NavigationItem;
-  readonly developerMode?: boolean;
-  readonly employeeNumberLabel?: string;
   readonly items: readonly NavigationItem[];
   readonly locale: SupportedLocale;
-  readonly logoutLabel: string;
-  readonly modeLabel?: string;
   readonly onLogout?: () => void;
   readonly onSelect: (id: NavigationItem["id"]) => void;
-  readonly onThemeChange: (id: SidebarThemeId) => void;
-  readonly sessionLabel?: string;
+  readonly session: {
+    readonly displayName: string;
+    readonly roleLabel: string;
+    readonly tenantName: string;
+  };
   readonly sidebarTheme: SidebarTheme;
 }>;
+
+type TopbarPanelKind = "notifications" | "messages";
 
 export function AppShell({
   active,
   children,
-  developerMode = false,
-  employeeNumberLabel,
   items,
   locale,
-  logoutLabel,
-  modeLabel,
   onLogout,
   onSelect,
-  onThemeChange,
-  sessionLabel,
+  session,
   sidebarTheme
 }: ShellProps) {
+  const [activePanel, setActivePanel] = useState<TopbarPanelKind | undefined>();
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [helpStepIndex, setHelpStepIndex] = useState(0);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const { height, width } = useWindowDimensions();
   const compact = width < 980;
   const stableShellHeight = Math.max(720, height);
+  const helpSteps = [1, 2, 3].map((index) => ({
+    detail: t(locale, `shell.help.step${index}.detail`, { screen: active.label }),
+    title: t(locale, `shell.help.step${index}.title`, { screen: active.label })
+  }));
+  const safeHelpStepIndex = Math.min(helpStepIndex, helpSteps.length - 1);
+  const helpStep = helpSteps[safeHelpStepIndex] ?? helpSteps[0] ?? {
+    detail: active.description,
+    title: active.label
+  };
+  const openPanel = (panel: TopbarPanelKind) => {
+    setActivePanel((current) => current === panel ? undefined : panel);
+    setProfileMenuOpen(false);
+  };
+  const openHelp = () => {
+    setHelpOpen((visible) => !visible);
+    setActivePanel(undefined);
+    setProfileMenuOpen(false);
+  };
+  const openProfile = () => {
+    setProfileMenuOpen((visible) => !visible);
+    setActivePanel(undefined);
+  };
+  const selectAndClose = (id: NavigationItem["id"]) => {
+    setActivePanel(undefined);
+    setHelpOpen(false);
+    setProfileMenuOpen(false);
+    onSelect(id);
+  };
 
   return (
     <View style={[styles.shell, !compact && { height: stableShellHeight }, compact && styles.shellCompact]}>
@@ -372,8 +363,7 @@ export function AppShell({
         compact={compact}
         items={items}
         locale={locale}
-        onSelect={onSelect}
-        onThemeChange={onThemeChange}
+        onSelect={selectAndClose}
         theme={sidebarTheme}
       />
       <View style={styles.main}>
@@ -384,36 +374,199 @@ export function AppShell({
             <Label muted>{active.description}</Label>
           </View>
           <View style={styles.headerActions}>
-            {sessionLabel ? <Badge tone="neutral">{sessionLabel}</Badge> : null}
-            {modeLabel ? <Badge tone={developerMode ? "attention" : "neutral"}>{modeLabel}</Badge> : null}
-            {employeeNumberLabel ? <Badge tone="neutral">{employeeNumberLabel}</Badge> : null}
-            {onLogout ? <ActionButton onPress={onLogout} variant="ghost">{logoutLabel}</ActionButton> : null}
+            <TopbarAction active={activePanel === "notifications"} icon="notifications" label={t(locale, "shell.topbar.notifications")} onPress={() => openPanel("notifications")} />
+            <TopbarAction active={activePanel === "messages"} icon="messages" label={t(locale, "shell.topbar.messages")} onPress={() => openPanel("messages")} />
+            <TopbarAction active={helpOpen} icon="help" label={t(locale, "shell.topbar.help")} onPress={openHelp} />
+            <TopbarAction active={active.id === "settings"} icon="settings" label={t(locale, "shell.topbar.settings")} onPress={() => selectAndClose("settings")} />
+            <View style={styles.profileActionGroup}>
+              <TopbarAction active={profileMenuOpen} icon="profile" label={t(locale, "shell.topbar.profile")} onPress={openProfile} />
+              {profileMenuOpen ? <ProfileMenu locale={locale} onLogout={onLogout} onSelect={selectAndClose} session={session} /> : null}
+            </View>
+            {activePanel ? <TopbarPanel active={active} kind={activePanel} locale={locale} onSelect={selectAndClose} /> : null}
           </View>
         </View>
+        {helpOpen ? (
+          <View style={styles.helpPanel}>
+            <View style={styles.helpPanelHead}>
+              <CircleHelp color={colors.accent} size={20} strokeWidth={2.2} />
+              <Label weight="bold">{t(locale, "shell.help.title", { screen: active.label })}</Label>
+            </View>
+            <View style={styles.helpStepCard}>
+              <Label size="sm" muted>{t(locale, "shell.help.progress", { current: safeHelpStepIndex + 1, total: helpSteps.length })}</Label>
+              <Label weight="bold">{helpStep.title}</Label>
+              <Label size="sm" muted>{helpStep.detail}</Label>
+            </View>
+            <View style={styles.helpActions}>
+              <ActionButton onPress={() => setHelpStepIndex((index) => Math.max(0, index - 1))} variant="ghost">{t(locale, "shell.help.previous")}</ActionButton>
+              <ActionButton onPress={() => {
+                if (safeHelpStepIndex === helpSteps.length - 1) {
+                  setHelpOpen(false);
+                  setHelpStepIndex(0);
+                  return;
+                }
+                setHelpStepIndex((index) => Math.min(helpSteps.length - 1, index + 1));
+              }} variant="secondary">
+                {safeHelpStepIndex === helpSteps.length - 1 ? t(locale, "shell.help.close") : t(locale, "shell.help.next")}
+              </ActionButton>
+            </View>
+          </View>
+        ) : null}
         <ScrollView contentContainerStyle={[styles.content, compact && styles.contentCompact]} style={styles.contentScroll}>
           {children}
         </ScrollView>
-        <View accessibilityLabel={t(locale, "shell.status.aria")} style={[styles.statusFooter, compact && styles.statusFooterCompact]}>
-          <View style={styles.statusFooterGroup}>
-            <View style={styles.statusDot} />
-            <Label size="sm" weight="bold">{t(locale, "shell.status.previewTitle")}</Label>
-            <Label size="sm" muted>{t(locale, "shell.status.demoCompany")}</Label>
-          </View>
-          <View style={styles.statusFooterGroup}>
-            <Badge tone="ready">{t(locale, "shell.status.uiOnly")}</Badge>
-            <Label size="sm" muted>{t(locale, "shell.status.logicUnchanged")}</Label>
-          </View>
-          <View style={styles.statusFooterGroup}>
-            <Badge tone="neutral">{t(locale, "shell.status.strictTs")}</Badge>
-            <Label size="sm" muted>{t(locale, "shell.status.reactNativeWebReady")}</Label>
-          </View>
-        </View>
       </View>
     </View>
   );
 }
 
+type TopbarActionProps = {
+  readonly active?: boolean;
+  readonly icon: "notifications" | "messages" | "help" | "settings" | "profile";
+  readonly label: string;
+  readonly onPress: () => void;
+};
+
+function TopbarAction({ active = false, icon, label, onPress }: TopbarActionProps) {
+  const Icon =
+    icon === "notifications" ? Bell :
+    icon === "messages" ? MessageSquare :
+    icon === "help" ? CircleHelp :
+    icon === "settings" ? Settings :
+    User;
+
+  return (
+    <Pressable
+      accessibilityLabel={label}
+      accessibilityRole="button"
+      hitSlop={4}
+      onPress={onPress}
+      style={({ pressed }) => [styles.topbarAction, active && styles.topbarActionActive, pressed && styles.buttonPressed]}
+    >
+      <Icon color={colors.accent} size={18} strokeWidth={2.1} />
+    </Pressable>
+  );
+}
+
+function TopbarPanel({
+  active,
+  kind,
+  locale,
+  onSelect
+}: {
+  readonly active: NavigationItem;
+  readonly kind: TopbarPanelKind;
+  readonly locale: SupportedLocale;
+  readonly onSelect: (id: NavigationItem["id"]) => void;
+}) {
+  const titleKey = kind === "notifications" ? "shell.topbar.notifications.panelTitle" : "shell.topbar.messages.panelTitle";
+  const rows = [1, 2].map((index) => ({
+    detail: t(locale, `shell.topbar.${kind}.item${index}.detail`, { screen: active.label }),
+    target: index === 1 ? active.id : (kind === "notifications" ? "home" : "approval"),
+    title: t(locale, `shell.topbar.${kind}.item${index}.title`, { screen: active.label })
+  }));
+
+  return (
+    <View accessibilityRole="summary" style={styles.topbarPanel}>
+      <Label weight="bold">{t(locale, titleKey)}</Label>
+      {rows.map((row) => (
+        <Pressable
+          accessibilityRole="button"
+          key={row.title}
+          onPress={() => onSelect(row.target)}
+          style={({ pressed }) => [styles.topbarPanelRow, pressed && styles.buttonPressed]}
+        >
+          <Label weight="bold">{row.title}</Label>
+          <Label size="sm" muted>{row.detail}</Label>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
+function ProfileMenu({
+  locale,
+  onLogout,
+  onSelect,
+  session
+}: {
+  readonly locale: SupportedLocale;
+  readonly onLogout?: () => void;
+  readonly onSelect: (id: NavigationItem["id"]) => void;
+  readonly session: ShellProps["session"];
+}) {
+  return (
+    <View accessibilityRole="menu" style={styles.profileMenu}>
+      <View style={styles.profileMenuHeader}>
+        <Label weight="bold">{session.displayName}</Label>
+        <Label size="sm" muted>{session.tenantName}</Label>
+        <Label size="sm" muted>{session.roleLabel}</Label>
+      </View>
+      <Pressable
+        accessibilityRole="menuitem"
+        onPress={() => onSelect("settings")}
+        style={({ pressed }) => [styles.profileMenuItem, pressed && styles.buttonPressed]}
+      >
+        <Settings color={colors.accent} size={16} strokeWidth={2.1} />
+        <Label>{t(locale, "shell.profile.settings")}</Label>
+      </Pressable>
+      {onLogout ? (
+        <Pressable
+          accessibilityRole="menuitem"
+          onPress={onLogout}
+          style={({ pressed }) => [styles.profileMenuItem, pressed && styles.buttonPressed]}
+        >
+          <LogOut color={colors.accent} size={16} strokeWidth={2.1} />
+          <Label>{t(locale, "shell.profile.signout")}</Label>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+type AuthAction = "signin" | "signup" | "onboarding";
+
+type AuthGateProps = {
+  readonly locale: SupportedLocale;
+  readonly notice?: string;
+  readonly onAction: (action: AuthAction) => void;
+};
+
+export function AuthGate({ locale, notice, onAction }: AuthGateProps) {
+  return (
+    <View style={styles.authGate}>
+      <Card style={styles.authPanel}>
+        <Image accessibilityLabel={t(locale, "shell.companyLogo")} source={{ uri: companyLogoUri }} style={styles.logoLarge} />
+        <Label size="xl" weight="bold">{t(locale, "auth.gate.title")}</Label>
+        <Label muted>{t(locale, "auth.gate.detail")}</Label>
+        {notice ? <Label size="sm" muted>{notice}</Label> : null}
+        <View style={styles.authActions}>
+          <ActionButton onPress={() => onAction("signin")}>{t(locale, "auth.action.signin")}</ActionButton>
+          <ActionButton onPress={() => onAction("signup")} variant="secondary">{t(locale, "auth.action.signup")}</ActionButton>
+          <ActionButton onPress={() => onAction("onboarding")} variant="ghost">{t(locale, "auth.action.onboarding")}</ActionButton>
+        </View>
+      </Card>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  authActions: {
+    alignItems: "stretch",
+    gap: spacing.sm,
+    width: "100%"
+  },
+  authGate: {
+    alignItems: "center",
+    backgroundColor: colors.bg,
+    flex: 1,
+    justifyContent: "center",
+    padding: spacing.xl
+  },
+  authPanel: {
+    alignItems: "center",
+    maxWidth: 460,
+    width: "100%"
+  },
   badge: {
     alignSelf: "flex-start",
     borderRadius: radius.md,
@@ -566,7 +719,36 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
-    justifyContent: "flex-end"
+    justifyContent: "flex-end",
+    position: "relative",
+    zIndex: 2
+  },
+  helpPanel: {
+    backgroundColor: colors.accentSoft,
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md
+  },
+  helpActions: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm
+  },
+  helpPanelHead: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm
+  },
+  helpStepCard: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    gap: spacing.xs,
+    padding: spacing.md
   },
   headerCompact: {
     flexDirection: "column",
@@ -588,6 +770,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     height: 38,
     width: 38
+  },
+  logoLarge: {
+    borderRadius: radius.lg,
+    height: 54,
+    width: 54
   },
   metricCard: {
     backgroundColor: colors.bg,
@@ -653,6 +840,37 @@ const styles = StyleSheet.create({
     flexGrow: 0,
     flexShrink: 0,
     minHeight: "auto"
+  },
+  profileActionGroup: {
+    position: "relative"
+  },
+  profileMenu: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.sm,
+    minWidth: 220,
+    padding: spacing.md,
+    position: "absolute",
+    right: 0,
+    top: 46,
+    zIndex: 5
+  },
+  profileMenuHeader: {
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    gap: 2,
+    paddingBottom: spacing.sm
+  },
+  profileMenuItem: {
+    alignItems: "center",
+    borderRadius: radius.md,
+    flexDirection: "row",
+    gap: spacing.sm,
+    minHeight: 38,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm
   },
   rowCard: {
     backgroundColor: colors.input,
@@ -727,101 +945,6 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     width: "100%"
   },
-  statusDot: {
-    backgroundColor: colors.success,
-    borderRadius: 999,
-    height: 8,
-    width: 8
-  },
-  statusFooter: {
-    alignItems: "center",
-    backgroundColor: colors.card,
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.md,
-    justifyContent: "space-between",
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md
-  },
-  statusFooterCompact: {
-    alignItems: "flex-start",
-    paddingHorizontal: spacing.md
-  },
-  statusFooterGroup: {
-    alignItems: "center",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-    minHeight: 30
-  },
-  themeChip: {
-    alignItems: "center",
-    backgroundColor: colors.input,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: spacing.sm,
-    minHeight: 34,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm
-  },
-  themeChips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm
-  },
-  themeChipText: {
-    color: colors.text,
-    fontSize: 12,
-    fontWeight: "700",
-    lineHeight: 16
-  },
-  themeCurrent: {
-    alignItems: "stretch",
-    backgroundColor: colors.input,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: spacing.sm,
-    padding: spacing.sm
-  },
-  themeCurrentCopy: {
-    flex: 1,
-    gap: spacing.xs,
-    minWidth: 0
-  },
-  themeCurrentRail: {
-    borderRadius: 999,
-    width: 4
-  },
-  themePanel: {
-    backgroundColor: "rgba(255, 255, 255, 0.54)",
-    borderColor: colors.border,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-    padding: spacing.sm
-  },
-  themePanelCompact: {
-    marginBottom: spacing.md
-  },
-  themeSwatch: {
-    borderRadius: 999,
-    borderWidth: 1,
-    height: 18,
-    overflow: "hidden",
-    width: 18
-  },
-  themeSwatchInset: {
-    alignSelf: "flex-end",
-    height: 18,
-    width: 9
-  },
   table: {
     borderColor: colors.border,
     borderRadius: radius.lg,
@@ -880,5 +1003,52 @@ const styles = StyleSheet.create({
   textXl: {
     fontSize: 24,
     lineHeight: 32
+  },
+  topbarAction: {
+    alignItems: "center",
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.xs,
+    height: 38,
+    justifyContent: "center",
+    minHeight: 38,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    width: 38
+  },
+  topbarActionActive: {
+    backgroundColor: colors.accentSoft,
+    borderColor: colors.accent
+  },
+  topbarActionLabel: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 16,
+    maxWidth: 72
+  },
+  topbarPanel: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    gap: spacing.sm,
+    minWidth: 260,
+    padding: spacing.md,
+    position: "absolute",
+    right: 48,
+    top: 46,
+    zIndex: 4
+  },
+  topbarPanelRow: {
+    backgroundColor: colors.input,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    gap: 2,
+    padding: spacing.md
   }
 });

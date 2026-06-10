@@ -6,7 +6,7 @@ Move payroll API authorization decisions into Rust-owned, framework-neutral code
 before selecting an HTTP framework. This slice defines tenant/legal-entity,
 RBAC, and ABAC invariants for payroll validation/run/settings actions so future
 HTTP, Tauri, mobile, and Kubernetes wrappers call one Rust decision point instead
-of duplicating Python compatibility checks.
+of duplicating legacy compatibility checks.
 
 This is still not full authentication. The caller/session/JWT layer remains a
 future wrapper concern; this slice only evaluates a supplied principal and parsed
@@ -17,16 +17,16 @@ payroll request.
 - Rust crate: `crates/payroll-api`
 - Serialization: existing `serde` and `serde_json`
 - No new auth, JWT, HTTP, database, or policy engine dependency
-- Compatibility source: `core/org_access.py`, `core/org_positions.py`, and
-  `tests/test_org_access.py`
+- Historical source: pre-G028 compatibility source was removed; keep parity evidence in Rust tests, TypeScript contracts, and documented fixtures.
+  `Rust parity test`
 
 ## Commands
 
 ```sh
-cargo fmt --check
-cargo test --workspace
+buck2 build '<target>[clippy.txt]'
+buck2 test //...
 buck2 test //crates/payroll-api:payroll_api_test
-python -m unittest tests.test_org_access tests.test_payroll_api_contract -v
+# G028 retired the former compatibility gate; use Buck2 Rust tests plus TypeScript gates from AGENTS.md.
 npm run typecheck --prefix frontend
 ```
 
@@ -38,7 +38,7 @@ npm run typecheck --prefix frontend
   parsed payroll request.
 - `frontend/src/contracts/payrollApi.ts` — TypeScript DTOs for authorization
   actions and decision responses.
-- `services/payroll_api_contract.py` and `docs/PAYROLL_API_CONTRACT.md` — stable
+- `Rust-owned contract` and `docs/PAYROLL_API_CONTRACT.md` — stable
   contract metadata and examples.
 - Migration docs under `docs/` — checkpoint and remaining gap updates.
 
@@ -47,7 +47,7 @@ npm run typecheck --prefix frontend
 Keep authorization explicit and dependency-free:
 
 ```rust
-let principal = PayrollPrincipal::new("user-1", "coss")
+let principal = PayrollPrincipal::new("user-1", "acme")
     .with_role(PayrollRole::Finance)
     .with_position(PayrollPosition::Manager)
     .with_org_unit("finance")
@@ -64,20 +64,20 @@ Conventions:
 - RBAC comes from role + position families.
 - ABAC uses tenant, affiliate, workplace, org unit, and effective platform
   attributes supplied by the caller/session layer.
-- CEO position bypasses team platform filtering to match Python compatibility;
+- CEO position bypasses team platform filtering to match legacy compatibility;
   non-CEO admin/finance roles are still filtered by effective unit platforms.
 
 ## Testing Strategy
 
 - RED: Rust authorization tests assert the public decision types/functions before
   implementation.
-- GREEN: implement the smallest Rust model matching Python platform scoping.
-- Regression: run Cargo, Buck2, Python org access/contract tests, and frontend
+- GREEN: implement the smallest Rust model matching documented platform scoping.
+- Regression: run Buck2 and Rust/TypeScript authorization contract tests, and frontend
   typecheck.
 
 ## Boundaries
 
-- Always: keep Python compatibility behavior intact.
+- Always: keep legacy compatibility behavior intact.
 - Always: deny cross-tenant payroll requests when request tenant and principal
   tenant differ.
 - Always: require payroll platform permission after role/position plus effective
@@ -96,8 +96,8 @@ Conventions:
   cannot access payroll; non-CEO admin outside payroll platform is still denied;
   CEO is allowed across platforms.
 - Tenant mismatch and workplace ABAC restrictions deny with stable reason codes.
-- TypeScript/Python/Markdown contract surfaces describe the same decision shape.
-- Cargo, Buck2, Python, and TypeScript verification commands pass locally.
+- TypeScript/Rust/Markdown contract surfaces describe the same decision shape.
+- Buck2 and TypeScript verification commands pass locally.
 
 ## Implementation Plan
 
@@ -109,7 +109,7 @@ Acceptance:
 
 Verification:
 
-- `cargo test -p bitween-payroll-api access::tests` fails for missing symbols.
+- `buck2 test //crates/payroll-api:payroll_api_test` fails for missing symbols.
 
 ### Task 2: Implement Rust authorization model
 
@@ -121,13 +121,13 @@ Acceptance:
 
 Verification:
 
-- `cargo test -p bitween-payroll-api access::tests` passes.
+- `buck2 test //crates/payroll-api:payroll_api_test` passes.
 
 ### Task 3: Align contracts/docs and verify
 
 Acceptance:
 
-- TypeScript/Python/Markdown contract surfaces include the authorization decision
+- TypeScript/Rust/Markdown contract surfaces include the authorization decision
   DTO and invariant notes.
 - Migration docs identify this authorization checkpoint and remaining production
   auth work.

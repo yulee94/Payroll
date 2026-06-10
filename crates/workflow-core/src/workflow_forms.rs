@@ -41,7 +41,8 @@ pub struct WorkflowFormFieldDef {
     pub field_type: String,
     pub required: bool,
     pub options: Vec<String>,
-    pub placeholder: String,
+    #[serde(default)]
+    pub input_hint: String,
     pub maps_to: String,
 }
 
@@ -97,7 +98,7 @@ pub fn builtin_form_schema(document_type: &str) -> Vec<WorkflowFormFieldDef> {
                 .kind("multiline")
                 .required()
                 .maps_to("summary"),
-            field("substitute", "업무 인수자").placeholder("부재 시 대리인"),
+            field("substitute", "업무 인수자").input_hint("부재 시 대리인"),
         ]),
         DOC_TYPE_PURCHASE => fields(&[
             field("title", "구매 건명").required().maps_to("title"),
@@ -145,7 +146,7 @@ pub fn builtin_form_schema(document_type: &str) -> Vec<WorkflowFormFieldDef> {
             field("title", "보고 제목").required().maps_to("title"),
             field("closing_month", "마감 월")
                 .required()
-                .placeholder("YYYY-MM"),
+                .input_hint("YYYY-MM"),
             field("period_start", "집계 시작")
                 .kind("date")
                 .required()
@@ -187,7 +188,7 @@ pub fn builtin_form_schema(document_type: &str) -> Vec<WorkflowFormFieldDef> {
             field("site_id", "현장/사업장 ID"),
             field("department_id", "부서 ID"),
             field("trip_dedupe_key", "출장 중복 방지 키")
-                .placeholder("비워두면 문서 ID 기준 자동 연결"),
+                .input_hint("비워두면 문서 ID 기준 자동 연결"),
         ]),
         _ => builtin_form_schema(DOC_TYPE_GENERAL),
     }
@@ -308,7 +309,7 @@ fn field(key: &str, label: &str) -> FieldBuilder {
         field_type: "text".to_string(),
         required: false,
         options: Vec::new(),
-        placeholder: String::new(),
+        input_hint: String::new(),
         maps_to: String::new(),
     }
 }
@@ -320,7 +321,7 @@ struct FieldBuilder {
     field_type: String,
     required: bool,
     options: Vec<String>,
-    placeholder: String,
+    input_hint: String,
     maps_to: String,
 }
 
@@ -347,8 +348,8 @@ impl FieldBuilder {
         self
     }
 
-    fn placeholder(mut self, placeholder: &str) -> Self {
-        self.placeholder = placeholder.to_string();
+    fn input_hint(mut self, hint: &str) -> Self {
+        self.input_hint = hint.to_string();
         self
     }
 
@@ -364,7 +365,7 @@ impl FieldBuilder {
             field_type: self.field_type.clone(),
             required: self.required,
             options: self.options.clone(),
-            placeholder: self.placeholder.clone(),
+            input_hint: self.input_hint.clone(),
             maps_to: self.maps_to.clone(),
         }
     }
@@ -465,7 +466,7 @@ mod tests {
     }
 
     #[test]
-    fn document_field_shaping_matches_python_fallbacks() {
+    fn document_field_shaping_preserves_business_trip_values() {
         let built = build_document_fields(
             DOC_TYPE_BUSINESS_TRIP_REQUEST,
             &values(&[
@@ -495,7 +496,7 @@ mod tests {
     }
 
     #[test]
-    fn item_summary_amount_and_attendance_fallbacks_match_python() {
+    fn item_summary_amount_and_attendance_defaults_are_stable() {
         let built = build_document_fields(
             DOC_TYPE_PURCHASE,
             &values(&[

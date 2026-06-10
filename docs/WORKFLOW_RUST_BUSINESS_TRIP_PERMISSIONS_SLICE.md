@@ -8,8 +8,8 @@ Move the pure, supplied-profile business-trip lifecycle permission decisions int
 
 This slice is intentionally narrow: Rust owns deterministic tenant/legal scope,
 visibility, and manage predicates once callers provide the principal, trip row,
-current user workflow profile, and optional requester/traveler profile. Python
-compatibility code remains responsible for `UserSession` conversion,
+current user workflow profile, and optional requester/traveler profile. The
+remaining Rust service backlog owns `UserSession` conversion,
 `get_user_profile` lookup, workflow JSON storage, document/task/report/KPI side
 effects, overdue evaluation, notifications, calendar/To-Do links, and UI bridge
 behavior.
@@ -59,14 +59,14 @@ behavior.
 Start RED, then implement only enough to go GREEN, then run the local gate set.
 
 ```sh
-cargo test -p bitween-workflow-core business_trip_permissions --lib
-/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_business_trip_contracts.BusinessTripLifecycleContractTests.test_contract_declares_rust_business_trip_permissions -v
-cargo fmt --check
-cargo test --workspace
 buck2 test //crates/workflow-core:workflow_core_test
-/tmp/payroll-policy-venv/bin/python -m unittest tests.test_workflow_business_trip_contracts -v
+# G028 retired the former compatibility gate; use Buck2 Rust tests plus TypeScript gates from AGENTS.md.
+buck2 build '<target>[clippy.txt]'
+buck2 test //...
+buck2 test //crates/workflow-core:workflow_core_test
+# G028 retired the former compatibility gate; use Buck2 Rust tests plus TypeScript gates from AGENTS.md.
 git diff --check
-cargo clippy --workspace -- -D warnings -A clippy::too_many_arguments -A clippy::derivable_impls -A clippy::large_enum_variant
+buck2 build '<target>[clippy.txt]'
 ```
 
 Hosted GitHub Actions remain best-effort because the current account
@@ -76,8 +76,8 @@ steps execute.
 ## Review record
 
 2026-06-04 local five-axis review: no blockers. Correctness is covered by
-RED/GREEN Rust permission tests and Python contract tests; readability keeps the
-module flat and DTO-driven; architecture preserves Python as resolver and
+RED/GREEN Rust permission tests and Rust/TypeScript contract tests; readability keeps the
+module flat and DTO-driven; architecture preserves the Rust backlog as resolver and
 side-effect bridge; security keeps sibling legal-tenant admins out of shared
 workflow-root data and keeps viewer scoped-only; performance is bounded to
 small in-memory role/id set checks.
@@ -85,9 +85,9 @@ small in-memory role/id set checks.
 ## Checklist
 
 - [x] RED Rust unit tests describe permission parity.
-- [x] RED Python contract test names the Rust permission boundary.
+- [x] RED Rust/TypeScript contract test names the Rust permission boundary.
 - [x] Rust 2024 / Rust 1.96 module implements pure permission predicates.
 - [x] BUCK and public crate exports include the new module.
 - [x] Contract metadata and migration docs describe the new boundary.
-- [x] Local cargo, Buck, Python, diff, and clippy gates pass.
+- [x] Buck2, diff, and product gates pass.
 - [x] Code review is recorded before merge.

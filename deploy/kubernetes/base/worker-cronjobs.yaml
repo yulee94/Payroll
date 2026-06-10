@@ -1,0 +1,86 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: bitween-cloud-native-audit-worker
+  labels:
+    app.kubernetes.io/name: bitween-cloud-native-audit-worker
+    bitween.io/service-tier: worker
+spec:
+  schedule: "*/30 * * * *"
+  timeZone: Asia/Seoul
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: bitween-cloud-native-audit-worker
+            bitween.io/data-classification: restricted
+            bitween.io/service-tier: worker
+          annotations:
+            bitween.io/audit-chain: required
+            bitween.io/audit-event-schema: bitween.audit-event.v1
+            bitween.io/otel-semconv: service.name,http.response.status_code
+        spec:
+          serviceAccountName: bitween-worker
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 60
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: cloud-native-audit-worker
+              image: ghcr.io/bitween/payroll-api:2026.06.10
+              imagePullPolicy: IfNotPresent
+              command: ["/usr/local/bin/cloud_native_audit_worker"]
+              envFrom:
+                - configMapRef:
+                    name: bitween-runtime-config
+              env:
+                - name: BITWEEN_OTEL_SERVICE_NAME
+                  value: bitween-cloud-native-audit-worker
+                - name: BITWEEN_POSTGRES_DSN
+                  valueFrom:
+                    secretKeyRef:
+                      name: bitween-runtime-secrets
+                      key: postgres-dsn
+                - name: BITWEEN_RUSTFS_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: bitween-rustfs-auth
+                      key: access-key
+                - name: BITWEEN_RUSTFS_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: bitween-rustfs-auth
+                      key: secret-key
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                  ephemeral-storage: 64Mi
+                limits:
+                  cpu: 250m
+                  memory: 256Mi
+                  ephemeral-storage: 256Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir:
+                sizeLimit: 64Mi

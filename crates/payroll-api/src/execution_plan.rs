@@ -3,18 +3,17 @@ use crate::request::{PayrollInputType, PayrollRunRequest};
 use serde::Serialize;
 use std::collections::BTreeMap;
 
-pub const PAYROLL_PYTHON_COMPATIBILITY_EXECUTOR: &str =
-    "services.payroll_automation.run_payroll_automation";
+pub const PAYROLL_RUST_NATIVE_EXECUTOR: &str = "bitween_payroll_api::PayrollApiService";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PayrollExecutionBackend {
-    PythonCompatibility,
+    RustNative,
 }
 
 impl PayrollExecutionBackend {
     pub const fn as_str(self) -> &'static str {
         match self {
-            Self::PythonCompatibility => "python_compatibility",
+            Self::RustNative => "rust_native",
         }
     }
 }
@@ -76,7 +75,7 @@ pub struct PayrollExecutionPlan {
     pub input_type: PayrollInputType,
     pub requested_input_type: PayrollInputType,
     pub backend: PayrollExecutionBackend,
-    pub compatibility_executor: String,
+    pub executor: String,
     pub source_paths: BTreeMap<String, String>,
     pub missing_source_paths: Vec<String>,
     pub steps: Vec<PayrollExecutionStep>,
@@ -102,7 +101,7 @@ pub fn plan_payroll_execution(
                     PayrollExecutionStepKind::ProcessInvoice,
                     invoice_path,
                     "payroll_outputs",
-                    "Process the invoice workbook through the compatibility payroll executor.",
+                    "Process the invoice workbook through the Rust payroll service contract.",
                 ));
             } else {
                 missing_source_paths.push("invoice".to_owned());
@@ -124,37 +123,37 @@ pub fn plan_payroll_execution(
                     PayrollExecutionStepKind::ExtractAttendance,
                     &attendance_path,
                     "attendance_rows",
-                    "Extract attendance rows before merging them into the invoice workbook.",
+                    "Extract attendance rows with the Rust payroll service contract before merging them into the invoice workbook.",
                 ));
                 steps.push(step(
                     PayrollExecutionStepKind::AttachAttendanceSheet,
                     format!("{} + attendance_rows", invoice_path),
                     "generated:mixed_invoice",
-                    "Attach the attendance sheet to the supplied invoice workbook.",
+                    "Attach the attendance sheet to the supplied invoice workbook through the Rust payroll service contract.",
                 ));
                 steps.push(step(
                     PayrollExecutionStepKind::ProcessInvoice,
                     "generated:mixed_invoice",
                     "payroll_outputs",
-                    "Process the merged invoice workbook through the compatibility payroll executor.",
+                    "Process the merged invoice workbook through the Rust payroll service contract.",
                 ));
             }
             (Some(invoice_path), None) => {
                 warnings.push(
-                    "mixed request is missing attendance; planned invoice fallback for Python compatibility"
+                    "mixed request is missing attendance; planned invoice-only Rust execution path"
                         .to_owned(),
                 );
                 steps.push(step(
                     PayrollExecutionStepKind::ProcessInvoice,
                     &invoice_path,
                     "payroll_outputs",
-                    "Process the invoice workbook through the compatibility payroll executor.",
+                    "Process the invoice workbook through the Rust payroll service contract.",
                 ));
                 source_paths.remove("attendance");
             }
             (None, Some(attendance_path)) => {
                 warnings.push(
-                    "mixed request is missing invoice; planned attendance fallback for Python compatibility"
+                    "mixed request is missing invoice; planned attendance-only Rust execution path"
                         .to_owned(),
                 );
                 steps.extend(attendance_steps(&attendance_path));
@@ -176,8 +175,8 @@ pub fn plan_payroll_execution(
         period: request.scope.period.clone(),
         input_type,
         requested_input_type: request.input_type,
-        backend: PayrollExecutionBackend::PythonCompatibility,
-        compatibility_executor: PAYROLL_PYTHON_COMPATIBILITY_EXECUTOR.to_owned(),
+        backend: PayrollExecutionBackend::RustNative,
+        executor: PAYROLL_RUST_NATIVE_EXECUTOR.to_owned(),
         source_paths,
         missing_source_paths,
         steps,
@@ -200,14 +199,14 @@ fn planned_input_type(
         (None, Some(_)) => (
             PayrollInputType::Attendance,
             vec![
-                "mixed request is missing invoice; planned attendance fallback for Python compatibility"
+                "mixed request is missing invoice; planned attendance-only Rust execution path"
                     .to_owned(),
             ],
         ),
         (Some(_), None) => (
             PayrollInputType::Invoice,
             vec![
-                "mixed request is missing attendance; planned invoice fallback for Python compatibility"
+                "mixed request is missing attendance; planned invoice-only Rust execution path"
                     .to_owned(),
             ],
         ),
@@ -238,13 +237,13 @@ fn attendance_steps(attendance_path: &str) -> Vec<PayrollExecutionStep> {
             PayrollExecutionStepKind::BuildAttendanceInvoice,
             "attendance_rows",
             "generated:attendance_invoice",
-            "Build a compatibility invoice workbook from attendance rows.",
+            "Build an invoice workbook from attendance rows through the Rust payroll service contract.",
         ),
         step(
             PayrollExecutionStepKind::ProcessInvoice,
             "generated:attendance_invoice",
             "payroll_outputs",
-            "Process the generated attendance invoice through the compatibility payroll executor.",
+            "Process the generated attendance invoice through the Rust payroll service contract.",
         ),
     ]
 }
@@ -257,7 +256,7 @@ fn step(
 ) -> PayrollExecutionStep {
     PayrollExecutionStep {
         kind,
-        backend: PayrollExecutionBackend::PythonCompatibility,
+        backend: PayrollExecutionBackend::RustNative,
         input: input.into(),
         output: output.into(),
         description: description.into(),
@@ -278,10 +277,10 @@ mod tests {
     use std::{collections::BTreeMap, path::PathBuf};
 
     #[test]
-    fn plans_auto_attendance_policy_to_compatibility_steps() {
+    fn plans_auto_attendance_policy_to_rust_native_steps() {
         let request = parse_payroll_api_request(json!({
             "request_id": "req-plan-attendance",
-            "affiliate": "COSS",
+            "affiliate": "Acme",
             "workplace": "Site A",
             "period": "2026-05",
             "attendance_path": "attendance.csv",
@@ -299,7 +298,8 @@ mod tests {
         let value = serde_json::to_value(&plan).unwrap();
 
         assert!(plan.ok);
-        assert_eq!(plan.backend, PayrollExecutionBackend::PythonCompatibility);
+        assert_eq!(plan.backend, PayrollExecutionBackend::RustNative);
+        assert_eq!(plan.executor, crate::PAYROLL_RUST_NATIVE_EXECUTOR);
         assert_eq!(plan.input_type, PayrollInputType::Attendance);
         assert_eq!(plan.requested_input_type, PayrollInputType::Auto);
         assert_eq!(plan.source_paths["attendance"], "attendance.csv");
@@ -313,7 +313,8 @@ mod tests {
             PayrollExecutionStepKind::BuildAttendanceInvoice
         );
         assert_eq!(plan.steps[2].kind, PayrollExecutionStepKind::ProcessInvoice);
-        assert_eq!(value["backend"], "python_compatibility");
+        assert_eq!(value["backend"], "rust_native");
+        assert_eq!(value["executor"], crate::PAYROLL_RUST_NATIVE_EXECUTOR);
         assert_eq!(value["steps"][1]["kind"], "build_attendance_invoice");
         assert_eq!(value["operation_policy_source"], "site");
     }
@@ -322,7 +323,7 @@ mod tests {
     fn explicit_invoice_request_ignores_attendance_policy() {
         let request = parse_payroll_api_request(json!({
             "request_id": "req-plan-invoice",
-            "affiliate": "COSS",
+            "affiliate": "Acme",
             "workplace": "Site A",
             "period": "2026-05",
             "invoice_path": "invoice.xlsx",
@@ -351,7 +352,7 @@ mod tests {
     fn plans_mixed_sources_with_attendance_attachment_step() {
         let request = parse_payroll_api_request(json!({
             "request_id": "req-plan-mixed",
-            "affiliate": "COSS",
+            "affiliate": "Acme",
             "workplace": "Site A",
             "period": "2026-05",
             "invoice_path": "invoice.xlsx",
@@ -381,14 +382,14 @@ mod tests {
     }
 
     #[test]
-    fn mixed_without_invoice_falls_back_to_attendance_plan_for_python_compatibility() {
+    fn mixed_without_invoice_plans_attendance_only_rust_path() {
         let request = PayrollRunRequest {
-            request_id: "req-plan-fallback".to_owned(),
-            scope: PayrollScope::new("COSS", "Site A", "2026-05").unwrap(),
+            request_id: "req-plan-default".to_owned(),
+            scope: PayrollScope::new("Acme", "Site A", "2026-05").unwrap(),
             input_type: PayrollInputType::Mixed,
             invoice_path: None,
             attendance_path: Some(PathBuf::from("attendance.csv")),
-            tenant_id: Some("coss".to_owned()),
+            tenant_id: Some("acme".to_owned()),
             metadata: BTreeMap::new(),
             validate_only: false,
         };
@@ -408,7 +409,7 @@ mod tests {
         assert!(
             plan.warnings
                 .iter()
-                .any(|warning| warning.contains("attendance fallback"))
+                .any(|warning| warning.contains("attendance-only Rust execution path"))
         );
     }
 
@@ -417,7 +418,7 @@ mod tests {
         let service = PayrollApiService::new(ServiceConfig::default());
         let request = parse_payroll_api_request(json!({
             "request_id": "req-service-plan",
-            "affiliate": "COSS",
+            "affiliate": "Acme",
             "workplace": "Site A",
             "period": "2026-05",
             "invoice_path": "invoice.xlsx",
@@ -430,11 +431,8 @@ mod tests {
             OperationPolicySnapshot::new(OperationPolicy::new(PayrollInputBasis::Invoice), "site"),
         );
 
-        assert_eq!(plan.scope, "COSS/Site A/2026-05");
+        assert_eq!(plan.scope, "Acme/Site A/2026-05");
         assert_eq!(plan.input_type, PayrollInputType::Invoice);
-        assert_eq!(
-            plan.steps[0].backend,
-            PayrollExecutionBackend::PythonCompatibility
-        );
+        assert_eq!(plan.steps[0].backend, PayrollExecutionBackend::RustNative);
     }
 }

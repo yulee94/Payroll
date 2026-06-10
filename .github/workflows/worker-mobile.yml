@@ -4,21 +4,15 @@ on:
   push:
     paths:
       - 'apps/worker-mobile/**'
-      - 'core/api_surfaces.py'
-      - 'core/mobile/**'
-      - 'tests/test_api_surfaces.py'
-      - 'tests/test_mobile_app_api.py'
-      - 'tests/test_mobile_attendance.py'
+      - 'crates/**'
+      - 'frontend/**'
       - 'docs/MOBILE_WORKER_APP.md'
       - '.github/workflows/worker-mobile.yml'
   pull_request:
     paths:
       - 'apps/worker-mobile/**'
-      - 'core/api_surfaces.py'
-      - 'core/mobile/**'
-      - 'tests/test_api_surfaces.py'
-      - 'tests/test_mobile_app_api.py'
-      - 'tests/test_mobile_attendance.py'
+      - 'crates/**'
+      - 'frontend/**'
       - 'docs/MOBILE_WORKER_APP.md'
       - '.github/workflows/worker-mobile.yml'
 
@@ -27,11 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Mobile API contract tests
-        run: python -m unittest tests.test_api_surfaces tests.test_mobile_app_api tests.test_mobile_attendance -v
       - uses: actions/setup-node@v4
         with:
           node-version: '22.13.0'

@@ -376,7 +376,7 @@ mod tests {
     }
 
     #[test]
-    fn uses_raw_amount_fallback_and_caps_non_taxable_meal_pay() {
+    fn uses_raw_amount_default_and_caps_non_taxable_meal_pay() {
         let result = calculate_payroll_earnings(
             PayrollEarningsInput::new()
                 .with_ordinary_hourly(12_000.0)

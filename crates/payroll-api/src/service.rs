@@ -439,14 +439,14 @@ mod tests {
         let service = PayrollApiService::new(ServiceConfig::default());
         let request = parse_payroll_api_request(json!({
             "request_id": "req-auth-service",
-            "affiliate": "COSS",
+            "affiliate": "Acme",
             "workplace": "Site A",
             "period": "2026-05",
             "invoice_path": "invoice.xlsx",
-            "tenant_id": "coss"
+            "tenant_id": "acme"
         }))
         .unwrap();
-        let principal = PayrollPrincipal::new("user-finance", "coss")
+        let principal = PayrollPrincipal::new("user-finance", "acme")
             .with_role(PayrollRole::Finance)
             .with_position(PayrollPosition::Manager)
             .with_org_unit("finance")
@@ -458,7 +458,7 @@ mod tests {
         assert!(decision.allowed);
         assert_eq!(value["ok"], true);
         assert_eq!(value["action"], "run");
-        assert_eq!(value["scope"], "COSS/Site A/2026-05");
+        assert_eq!(value["scope"], "Acme/Site A/2026-05");
     }
 
     #[test]
@@ -582,7 +582,7 @@ mod tests {
         let service = PayrollApiService::new(ServiceConfig::default());
         let readiness = service.readiness(vec![
             ReadinessCheck::ready("policy", "Rust policy invariants loaded"),
-            ReadinessCheck::degraded("python_execution", "Compatibility fallback still active"),
+            ReadinessCheck::degraded("persistence", "Relational persistence is not connected"),
             ReadinessCheck::not_ready("database", "Rust persistence is not configured"),
         ]);
         let value = serde_json::to_value(&readiness).unwrap();
