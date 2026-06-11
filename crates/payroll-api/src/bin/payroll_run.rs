@@ -174,14 +174,27 @@ async fn load_ledger(
     Ok(ledger)
 }
 
-/// Parse a PostgreSQL `numeric` text representation into whole won. The ledger
-/// figures are integers; we round any fractional remainder to the nearest won.
+/// Parse a PostgreSQL `numeric` text representation into whole won.
+///
+/// The ledger figures are integers, so we parse the integer part directly with
+/// [`i64::from_str`] (no f64 round-tripping). A trailing zero-only fraction
+/// (`.0`, `.00`, …) is tolerated and stripped; any NON-ZERO fractional part is
+/// rejected as an error rather than silently rounded, so unexpected sub-won
+/// values surface instead of corrupting the reconciliation totals.
 fn parse_numeric_to_won(value: &str) -> Result<i64, String> {
-    let parsed: f64 = value
-        .trim()
-        .parse()
-        .map_err(|_| "payroll_run_numeric_parse_failed".to_owned())?;
-    Ok(parsed.round() as i64)
+    let trimmed = value.trim();
+    let integer_part = match trimmed.split_once('.') {
+        Some((integer, fraction)) => {
+            if fraction.bytes().any(|byte| byte != b'0') {
+                return Err("payroll_run_numeric_fraction_unexpected".to_owned());
+            }
+            integer
+        }
+        None => trimmed,
+    };
+    integer_part
+        .parse::<i64>()
+        .map_err(|_| "payroll_run_numeric_parse_failed".to_owned())
 }
 
 fn payload_i64(payload: &serde_json::Value, key: &str) -> i64 {
@@ -237,10 +250,20 @@ mod tests {
 
     #[test]
     fn numeric_text_parses_to_whole_won() {
+        // Bare integers and zero-only fractions parse to the exact won.
+        assert_eq!(parse_numeric_to_won("4538380").unwrap(), 4_538_380);
+        assert_eq!(parse_numeric_to_won("4538380.00").unwrap(), 4_538_380);
         assert_eq!(parse_numeric_to_won("97646611").unwrap(), 97_646_611);
-        assert_eq!(parse_numeric_to_won("97646611.00").unwrap(), 97_646_611);
-        assert_eq!(parse_numeric_to_won("100.49").unwrap(), 100);
+        assert_eq!(parse_numeric_to_won(" 97646611.0 ").unwrap(), 97_646_611);
+        assert_eq!(parse_numeric_to_won("-261100").unwrap(), -261_100);
+
+        // Non-numeric text is an error.
+        assert!(parse_numeric_to_won("abc").is_err());
         assert!(parse_numeric_to_won("not-a-number").is_err());
+
+        // A NON-ZERO fractional part is rejected, not silently rounded.
+        assert!(parse_numeric_to_won("1.5").is_err());
+        assert!(parse_numeric_to_won("100.49").is_err());
     }
 
     #[test]

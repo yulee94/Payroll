@@ -47,8 +47,12 @@ pub struct WorkerReconciliation {
     pub gross: i64,
     pub source_deductions: i64,
     pub source_net: i64,
-    /// Net recomputed by the engine in PRESET mode (ledger tax + insurance fed
-    /// back in). This is the integrity round-trip and must match exactly.
+    /// Net derived from the DIRECT ledger identity `gross - ledger_total_deductions`,
+    /// where `ledger_total_deductions` is the worker's own summed signed
+    /// components (income_tax + local_income_tax + insurance_total). For a
+    /// self-consistent ledger this equals `source_net` exactly — including
+    /// refund rows (negative income_tax, net > gross) and zero-local-tax rows.
+    /// This is the integrity check; it is NOT engine-routed.
     pub computed_net: i64,
     pub net_match: bool,
     /// Income + local tax recorded on the ledger.
@@ -84,21 +88,18 @@ pub struct ReconciliationReport {
 
 /// Reconcile one worker against the source ledger.
 ///
-/// PRESET mode round-trips the ledger's own insurance total + preset
-/// income/local tax through [`finalize_payroll_deductions`] and asserts the
-/// engine reproduces the ledger net.
+/// The integrity check (`computed_net` / `net_match`) is a DIRECT arithmetic
+/// identity: `computed_net = gross - ledger_total_deductions`, where
+/// `ledger_total_deductions` is the worker's own summed signed components
+/// (income_tax + local_income_tax + insurance_total). For a self-consistent
+/// ledger this reproduces `source_net` exactly for ALL workers — including
+/// refund rows (negative income_tax, net > gross) and zero-local-tax rows —
+/// and only flags `net_match=false` on genuine ledger corruption.
 ///
-/// RECOMPUTE mode runs the same engine with no presets so the 간이세액표 +
-/// local 10% path computes income tax from scratch; the variance versus the
-/// ledger tax is recorded as-is.
+/// The engine RECOMPUTE path (no presets → 간이세액표 + local 10%) is used
+/// ONLY to report `tax_variance`; it never drives `net_match`.
 pub fn reconcile_worker(worker: &LedgerWorker) -> WorkerReconciliation {
     let insurance_total = worker.insurance_total();
-
-    let preset = finalize_payroll_deductions(
-        PayrollDeductionInput::new(worker.gross, insurance_total)
-            .with_preset_income_tax(worker.income_tax)
-            .with_preset_local_income_tax(worker.local_income_tax),
-    );
 
     let recompute =
         finalize_payroll_deductions(PayrollDeductionInput::new(worker.gross, insurance_total));
@@ -106,14 +107,21 @@ pub fn reconcile_worker(worker: &LedgerWorker) -> WorkerReconciliation {
     let source_tax = worker.income_tax + worker.local_income_tax;
     let recomputed_tax = recompute.tax_total;
 
+    // DIRECT ledger identity (signed). The ledger total deduction is the sum of
+    // the worker's own recorded components; net = gross - that total. This is
+    // self-consistent by construction for a clean ledger and is NOT routed
+    // through the deduction engine's preset filters.
+    let ledger_total_deductions = source_tax + insurance_total;
+    let computed_net = worker.gross - ledger_total_deductions;
+
     WorkerReconciliation {
         employee_key: worker.employee_key.clone(),
         name: worker.name.clone(),
         gross: worker.gross,
         source_deductions: worker.total_deductions,
         source_net: worker.net,
-        computed_net: preset.net_pay,
-        net_match: preset.net_pay == worker.net,
+        computed_net,
+        net_match: computed_net == worker.net,
         source_tax,
         recomputed_tax,
         tax_variance: recomputed_tax - source_tax,
@@ -189,13 +197,73 @@ mod tests {
     }
 
     #[test]
-    fn preset_mode_reproduces_ledger_net_exactly() {
+    fn direct_identity_reproduces_ledger_net_exactly() {
         let worker = synthetic_worker("employee-synthetic-1");
         let reconciliation = reconcile_worker(&worker);
 
+        // computed_net is the direct identity gross - ledger_total_deductions.
+        assert_eq!(
+            reconciliation.computed_net,
+            worker.gross - worker.total_deductions
+        );
         assert_eq!(reconciliation.computed_net, worker.net);
         assert!(reconciliation.net_match);
         assert_eq!(reconciliation.source_net, worker.net);
+    }
+
+    // (a) Refund worker: negative income_tax, net > gross. The engine-routed
+    // PRESET path would discard the negative preset (`> 0` filter) and recompute
+    // from the 간이세액표, producing a false net_match=false. The direct identity
+    // must still match.
+    #[test]
+    fn refund_worker_with_negative_income_tax_matches() {
+        let worker = LedgerWorker {
+            employee_key: "employee-synthetic-refund".to_owned(),
+            name: "Synthetic Refund Worker".to_owned(),
+            gross: 2_000_000,
+            income_tax: -400_000,
+            local_income_tax: -40_000,
+            health_insurance: 70_900,
+            national_pension: 90_000,
+            employment_insurance: 18_000,
+            total_deductions: -261_100,
+            net: 2_261_100,
+        };
+        // Sanity: the fixture is a self-consistent refund ledger row whose net
+        // EXCEEDS gross (the year-end tax refund outweighs the insurance total).
+        assert_eq!(worker.component_sum(), worker.total_deductions);
+        assert!(worker.income_tax < 0);
+        assert!(worker.net > worker.gross);
+
+        let reconciliation = reconcile_worker(&worker);
+        assert_eq!(reconciliation.computed_net, worker.net);
+        assert!(reconciliation.net_match);
+    }
+
+    // (b) Zero local tax with positive income tax. The PRESET local-tax branch
+    // applies a `> 0` filter and would synthesize a 10% local tax, corrupting
+    // the engine net. The direct identity honors the recorded zero.
+    #[test]
+    fn zero_local_tax_with_positive_income_tax_matches() {
+        let worker = LedgerWorker {
+            employee_key: "employee-synthetic-zerolocal".to_owned(),
+            name: "Synthetic Zero-Local Worker".to_owned(),
+            gross: 2_500_000,
+            income_tax: 60_000,
+            local_income_tax: 0,
+            health_insurance: 88_625,
+            national_pension: 112_500,
+            employment_insurance: 22_500,
+            total_deductions: 283_625,
+            net: 2_216_375,
+        };
+        assert_eq!(worker.component_sum(), worker.total_deductions);
+        assert_eq!(worker.local_income_tax, 0);
+        assert!(worker.income_tax > 0);
+
+        let reconciliation = reconcile_worker(&worker);
+        assert_eq!(reconciliation.computed_net, worker.net);
+        assert!(reconciliation.net_match);
     }
 
     #[test]
@@ -235,6 +303,8 @@ mod tests {
         assert_eq!(report.totals.net, 5_276_640);
     }
 
+    // (c) Genuine ledger corruption: source_net != gross - deductions. The
+    // direct identity still flags it so real corruption is not masked.
     #[test]
     fn net_mismatch_is_reported_when_ledger_net_is_inconsistent() {
         let mut worker = synthetic_worker("employee-synthetic-1");
@@ -243,6 +313,11 @@ mod tests {
         let reconciliation = reconcile_worker(&worker);
 
         assert!(!reconciliation.net_match);
+        // computed_net stays the true identity; only source_net is corrupt.
+        assert_eq!(
+            reconciliation.computed_net,
+            worker.gross - worker.total_deductions
+        );
         assert_ne!(reconciliation.computed_net, reconciliation.source_net);
 
         let report = reconcile_period("2026-05", &[worker]);

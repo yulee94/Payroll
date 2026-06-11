@@ -186,6 +186,8 @@ async fn import(input: LedgerImportInput) -> Result<LedgerImportResult, String> 
 
         imported += 1;
         gross_total += worker.gross;
+        // SIGNED economic total (matches source_payload.total_deductions);
+        // intentionally distinct from the clamped (`max(0)`) DB column above.
         deduction_total += worker.total_deductions;
         net_total += worker.net;
     }

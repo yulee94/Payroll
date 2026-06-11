@@ -141,6 +141,18 @@ const API_ENDPOINT_CONTRACTS: &[ApiEndpointContract] = &[
     ApiEndpointContract {
         module: "payroll",
         method: "GET",
+        path: "/api/payroll/v1/run",
+        request_schema: "none",
+        response_schema: "bitween.payroll.reconciliation-report.v1",
+        auth_operation: "payroll_run",
+        rust_boundary: "bitween_payroll_api::reconcile_period",
+        persistence_contract: "read-only PostgreSQL payroll_input ledger reconciliation; no writes",
+        object_lifecycle: NO_OBJECT_LIFECYCLE,
+        implementation_state: API_IMPLEMENTATION_LIVE_RUST_SERVICE,
+    },
+    ApiEndpointContract {
+        module: "payroll",
+        method: "GET",
         path: "/api/payroll/v1/healthz",
         request_schema: "none",
         response_schema: "bitween.payroll.health.v1",
