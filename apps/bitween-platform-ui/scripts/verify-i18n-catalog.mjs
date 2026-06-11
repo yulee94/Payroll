@@ -193,6 +193,34 @@ for (const sourceFile of sourceFiles) {
   }
 }
 
+// Every literal key passed to the t() lookup must exist in the catalog. A
+// catalog-only check cannot see a call site whose key literal was mangled
+// (for example by an automated redaction pass), which surfaces only at
+// runtime as a thrown "Missing i18n message" for whichever locale renders
+// that screen first.
+const callSiteFiles = [
+  join(__dirname, "..", "preview", "app.js"),
+  join(__dirname, "..", "src", "screens.tsx")
+];
+const i18nCallPatterns = [
+  /(?<![A-Za-z0-9_$.])t\(\s*"([^"\n]+)"/g,
+  /(?<![A-Za-z0-9_$.])t\([^)"\n]*\?\s*"([^"\n]+)"\s*:\s*"([^"\n]+)"/g
+];
+for (const sourceFile of callSiteFiles) {
+  const lines = readFileSync(sourceFile, "utf8").split(/\r?\n/);
+  for (const [index, line] of lines.entries()) {
+    for (const pattern of i18nCallPatterns) {
+      for (const match of line.matchAll(pattern)) {
+        for (const key of match.slice(1)) {
+          if (key !== undefined && !keys.has(key)) {
+            errors.push(`${sourceFile}:${index + 1} references missing i18n message key "${key}"`);
+          }
+        }
+      }
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error("i18n catalog verification failed:");
   for (const error of errors) {
@@ -201,4 +229,4 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log(`i18n catalog verified: ${keys.size} messages across ${expectedLocales.length} locales with no localized copy outside the catalog`);
+console.log(`i18n catalog verified: ${keys.size} messages across ${expectedLocales.length} locales with no localized copy outside the catalog and all source key references resolved`);
