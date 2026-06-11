@@ -11,7 +11,7 @@ struct RouteAuthorizationDecision {
     allowed: bool,
     operation: String,
     reason: &'static str,
-    policy_id: Option<&'static str>,
+    policy_id: Option<String>,
     auth_policy_schema: Option<&'static str>,
 }
 
@@ -55,7 +55,7 @@ fn authorize_operation(operation: &str) -> Result<RouteAuthorizationDecision, St
         allowed: policy.allowed,
         operation: policy.operation.to_owned(),
         reason: policy.reason,
-        policy_id: Some(policy.policy_id),
+        policy_id: Some(policy.policy_id.clone()),
         auth_policy_schema: Some(policy.schema),
     })
 }
@@ -134,7 +134,55 @@ mod tests {
             let decision = authorize_operation("hr_employee_write").unwrap();
             assert!(decision.allowed);
             assert_eq!(decision.reason, "authorized");
-            assert_eq!(decision.policy_id, Some("bitween.authz.rbac-abac-pbac.v1"));
+            assert_eq!(
+                decision.policy_id.as_deref(),
+                Some("bitween.authz.rbac-abac-pbac.v1")
+            );
+        });
+    }
+
+    #[test]
+    fn custom_policy_env_grants_a_custom_role_an_operation() {
+        let mut vars = verified_env();
+        for (key, value) in &mut vars {
+            if *key == "BITWEEN_SESSION_ROLE" {
+                *value = "finance_runner";
+            }
+        }
+        vars.push((
+            "BITWEEN_AUTHZ_POLICY_JSON",
+            r#"{
+                "policy_id": "bitween.authz.rbac-abac-pbac.v1",
+                "operations": {
+                    "hr_employee_write": {
+                        "required_acr": "elevated",
+                        "required_data_class": "employee_restricted",
+                        "requires_workplace_scope": true
+                    }
+                },
+                "roles": {
+                    "finance_runner": {
+                        "max_data_class": "employee_restricted",
+                        "grants": ["hr_employee_write"]
+                    }
+                }
+            }"#,
+        ));
+        with_env(&vars, || {
+            let decision = authorize_operation("hr_employee_write").unwrap();
+            assert!(decision.allowed);
+            assert_eq!(decision.reason, "authorized");
+        });
+    }
+
+    #[test]
+    fn invalid_policy_env_fails_closed() {
+        let mut vars = verified_env();
+        vars.push(("BITWEEN_AUTHZ_POLICY_JSON", "{ not valid json"));
+        with_env(&vars, || {
+            let decision = authorize_operation("hr_employee_write").unwrap();
+            assert!(!decision.allowed);
+            assert_eq!(decision.reason, "authz_policy_invalid");
         });
     }
 
