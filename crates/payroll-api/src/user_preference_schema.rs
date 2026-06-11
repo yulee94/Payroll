@@ -53,6 +53,7 @@ mod tests {
         assert!(sql.contains("workspace_density text NOT NULL DEFAULT 'work_dense'"));
         assert!(sql.contains("UNIQUE (tenant_id, user_id)"));
         assert!(sql.contains("ALTER TABLE bitween_settings.user_preference ENABLE ROW LEVEL SECURITY"));
+        assert!(sql.contains("ALTER TABLE bitween_settings.user_preference FORCE ROW LEVEL SECURITY"));
         assert!(sql.contains("current_setting('bitween.tenant_id', true)"));
     }
 }

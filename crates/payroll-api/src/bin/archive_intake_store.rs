@@ -12,6 +12,9 @@ use std::process;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const ARCHIVE_SOURCE_SYNC_CONTENT_TYPE: &str = "application/vnd.ms-excel; charset=utf-8";
+// Bounds the caller-declared file_size_bytes from intake metadata; this store
+// never measures object bytes. Real upload-size and decompression-bomb
+// enforcement happens in the uploader before the object reaches RustFS.
 const MAX_FILE_BYTES: u64 = 50 * 1024 * 1024;
 const EMPTY_SHA256: &str = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 
@@ -2033,7 +2036,8 @@ async fn admit_postgres_hr_employee_staging(
                   ) AS after_payload \
                 FROM admissible_rows a \
                 LEFT JOIN bitween_hr.employee e \
-                  ON e.tenant_id = $1 AND e.employee_key = a.employee_key \
+                  ON e.tenant_id = $1 AND e.legal_entity_id = $3 AND e.workplace_id = $4 \
+                  AND e.employee_key = a.employee_key \
              ), recovery_points AS ( \
                 INSERT INTO bitween_archive.archive_admission_recovery_point ( \
                     intake_id, tenant_id, target_table, business_key, action, before_exists, before_payload, after_payload, captured_by \
@@ -2058,7 +2062,7 @@ async fn admit_postgres_hr_employee_staging(
                        $2::uuid, row_hash, row_payload, 'admitted', \
                        $5, $5 \
                 FROM admissible_rows \
-                ON CONFLICT (tenant_id, employee_key) DO UPDATE \
+                ON CONFLICT (tenant_id, legal_entity_id, workplace_id, employee_key) DO UPDATE \
                   SET display_name = EXCLUDED.display_name, team = EXCLUDED.team, \
                       role_title = EXCLUDED.role_title, employment_status = EXCLUDED.employment_status, \
                       source_intake_id = EXCLUDED.source_intake_id, source_row_hash = EXCLUDED.source_row_hash, \
@@ -4316,15 +4320,6 @@ fn anomalies(
     items
 }
 
-fn staged_rows_for_record(
-    database_target: &DatabaseTarget,
-    columns: &[String],
-    sample_text: &str,
-) -> Result<Vec<StagedBusinessRow>, String> {
-    let field_mappings = infer_field_mappings(database_target, columns);
-    staged_rows_for_record_with_mappings(database_target, columns, sample_text, &field_mappings)
-}
-
 fn staged_rows_for_record_with_mappings(
     database_target: &DatabaseTarget,
     columns: &[String],
@@ -4905,6 +4900,15 @@ fn now_unix_nanos() -> u128 {
 mod tests {
     use super::*;
 
+    fn staged_rows_for_record(
+        database_target: &DatabaseTarget,
+        columns: &[String],
+        sample_text: &str,
+    ) -> Result<Vec<StagedBusinessRow>, String> {
+        let field_mappings = infer_field_mappings(database_target, columns);
+        staged_rows_for_record_with_mappings(database_target, columns, sample_text, &field_mappings)
+    }
+
     fn input(file_name: impl Into<String>, sample_text: impl Into<String>) -> ArchiveIntakeInput {
         ArchiveIntakeInput {
             file_name: Some(file_name.into()),
@@ -5363,7 +5367,7 @@ mod tests {
         assert!(source.contains("archive_admission_recovery_point"));
         assert!(source.contains("before_payload"));
         assert!(source.contains("after_payload"));
-        assert!(source.contains("ON CONFLICT (tenant_id, employee_key) DO UPDATE"));
+        assert!(source.contains("ON CONFLICT (tenant_id, legal_entity_id, workplace_id, employee_key) DO UPDATE"));
         assert!(source.contains("archive_source_sync"));
         assert!(source.contains("bitween_hr.employee"));
         assert!(source.contains("bitween_hr.attendance_record"));

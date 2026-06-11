@@ -104,9 +104,6 @@ desktop.ini
 !/fixtures/gw_import/attachments/
 !/fixtures/gw_import/attachments/729a5d49019e000012/
 !/fixtures/gw_import/attachments/729a5d49019e000012/sample_receipt.txt
-/tools/gw_import/_probe_*.py
-/tools/gw_import/_parse_snapshot.py
-/tools/gw_import/_extract_gw_forms.py
 
 # Keep payroll form templates trackable, but avoid committing roster/personnel workbooks
 /templates/.roster_meta.json
@@ -123,3 +120,6 @@ desktop.ini
 
 # Local Bitween live review/runtime data; may contain tenant, payroll, or personnel information
 /.bitween/
+
+# OMC session state
+.omc/

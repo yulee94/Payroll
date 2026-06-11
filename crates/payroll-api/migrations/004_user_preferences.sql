@@ -37,6 +37,7 @@ CREATE INDEX IF NOT EXISTS user_preference_tenant_user_idx
   ON bitween_settings.user_preference (tenant_id, user_id);
 
 ALTER TABLE bitween_settings.user_preference ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bitween_settings.user_preference FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY user_preference_tenant_isolation ON bitween_settings.user_preference
   USING (tenant_id = current_setting('bitween.tenant_id', true))

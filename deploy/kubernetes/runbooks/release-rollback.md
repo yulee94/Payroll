@@ -54,6 +54,24 @@ migration job, self-hosted PostgreSQL, and self-hosted RustFS object storage.
    and user-facing impact window.
 6. Re-run the same local and cluster gates before reopening business operations.
 
+## Operational prerequisites and caveats
+
+- The `bitween-system` namespace is a prerequisite managed outside this kustomize
+  base. It is referenced by NetworkPolicies and by the Gateway HTTPRoute
+  `parentRef`. The namespace must exist and carry the standard
+  `kubernetes.io/metadata.name: bitween-system` label before ingress routing
+  works. Create it once before the first `kubectl apply -k` and do not rely on
+  kustomize to manage it.
+
+- The postgres and rustfs PodDisruptionBudgets are configured with
+  `maxUnavailable: 0` on single-replica StatefulSets. This means
+  `kubectl drain` on the node hosting either pod will block indefinitely by
+  design — the disruption budget will not allow the eviction. Node maintenance
+  requires manually deleting the pod after confirming a clean shutdown and a
+  successful backup (for postgres) or a completed in-flight operation (for
+  rustfs). Verify PVC reattachment and pod restart before returning the node to
+  service.
+
 ## Drift response
 
 Any drift in Deployment probes, security context, NetworkPolicy, image tags,

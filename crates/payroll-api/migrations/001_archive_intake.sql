@@ -241,13 +241,21 @@ CREATE INDEX IF NOT EXISTS archive_admission_audit_tenant_idx
   ON bitween_archive.archive_admission_audit (tenant_id, approved_at DESC);
 
 ALTER TABLE bitween_archive.archive_intake ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bitween_archive.archive_intake FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_archive.archive_intake_version ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bitween_archive.archive_intake_version FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_archive.archive_intake_issue ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bitween_archive.archive_intake_issue FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_archive.archive_mapping_template ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bitween_archive.archive_mapping_template FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_archive.hr_employee_staging ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bitween_archive.hr_employee_staging FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_archive.hr_attendance_staging ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bitween_archive.hr_attendance_staging FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_archive.payroll_input_staging ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bitween_archive.payroll_input_staging FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_archive.archive_admission_audit ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bitween_archive.archive_admission_audit FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY archive_intake_tenant_isolation ON bitween_archive.archive_intake
   USING (tenant_id = current_setting('bitween.tenant_id', true))
