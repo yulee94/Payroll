@@ -211,3 +211,132 @@ still needs dependency-reviewed identity depth for:
   server-side assertion boundary,
 - step-up verification for payroll export, policy change, privileged HR edits, and approval signing,
 - recovery/offboarding flows that preserve audit evidence and least privilege.
+
+## Deferred authorization decisions (recorded 2026-06-10)
+
+- WebAuthn/OIDC re-verification layers are env-gated (`auth_session_validate`);
+  when unconfigured, step-up trust rests on IdP-asserted JWT claims. Production
+  deployments MUST wire the WebAuthn/OIDC env for sensitive/critical ACR
+  operations.
+
+- Tenant scope uses session-scoped `set_config(..., false)` with one connection
+  per process invocation; connection pooling across tenants is NOT supported
+  until the repository moves to transaction-local scope.
+
+- Sessions carry a single role; multi-role sessions are deferred.
+
+- `AuthzRequest` carries no actor identity, so separation-of-duties (payroll
+  runner ≠ approver) is not yet expressible; `platform_owner` bypasses RBAC by
+  design and must be treated as an audited break-glass role.
+
+- ABAC scope attributes are display strings (legal entity, workplace) compared
+  by exact match; migration to opaque IDs is deferred.
+
+- Payroll workflow state is derived from deployment env flags as a monotonic
+  prefix chain (hardened to fail closed); persisting per-period workflow state
+  with validated transitions in Postgres is the durable end state.
+
+- RLS (including FORCE) is bypassed for superuser roles — the application DSN
+  must use a non-superuser role.
+
+## Data-driven authorization policy (recorded 2026-06-10)
+
+The RBAC/ABAC/PBAC matrix is configurable, not compiled-in. The Rust
+authorization layer loads an `AuthzPolicy` at decision time:
+
+- Default: when `BITWEEN_AUTHZ_POLICY_JSON` is unset or blank, the built-in
+  policy (`policy_id` `bitween.authz.rbac-abac-pbac.v1`) is used. The built-in
+  matrix is byte-for-byte identical to the prior compile-time matrix.
+- Override: when `BITWEEN_AUTHZ_POLICY_JSON` is set, its JSON document is parsed
+  and validated. Operations remain a closed code-owned set (operation ids are
+  touchpoints); roles are open strings (legacy aliases such as `payroll_ops`,
+  `tenant_admin`, `approver` are normalized to their canonical role id before
+  lookup).
+- Fail closed: any parse or validation error makes every decision deny with
+  reason `authz_policy_invalid` and `allowed=false`. The layer never silently
+  falls back to the built-in policy when the variable is set but invalid.
+  This includes the case where `BITWEEN_AUTHZ_POLICY_JSON` is set to a
+  non-unicode value (`VarError::NotUnicode`): a configured-but-unreadable
+  variable is treated as invalid and fails closed, not as if it were unset.
+  Only an unset or blank variable falls back to the built-in policy.
+
+Load-time validation rejects: empty `policy_id`, empty `roles`, unknown
+operation id (in `operations` or any grant; `"*"` is the wildcard grant),
+unknown ACR / data-class / workflow-state strings, and any role whose
+`max_data_class` is below a granted operation's `required_data_class` (dead
+grants are configuration errors).
+
+Additional load-time validation hardening:
+
+- Duplicate role keys are rejected. Two JSON role keys that normalize to the
+  same canonical role id (for example `it_security_admin` and its alias
+  `tenant_admin`, or `payroll_ops` and `payroll_operator`) are a configuration
+  error rather than a silent overwrite, so a privileged definition can never
+  shadow a restricted one.
+- Duplicate operation keys are rejected for the same reason. Operation ids fold
+  case, whitespace, and `-`/`_` variants onto one canonical id (for example
+  `payroll-export` and `payroll_export`), so colliding keys are a configuration
+  error rather than a silent overwrite where a looser workflow window could
+  swallow a tighter one.
+- The wildcard ceiling rule applies to `"*"`. A role granting `"*"` must have a
+  `max_data_class` at least as high as the maximum `required_data_class` across
+  all operations (using the policy's per-operation overrides where present and
+  the built-in requirement otherwise). A wildcard whose ceiling is below that
+  maximum is rejected as a dead grant, exactly like a named operation grant.
+
+Decision behavior for unknown roles: an unknown (non-blank) role still denies
+with reason `rbac_denied` (semantically correct under configurable policies),
+but the decision's `role` field is `null` for any role that does not resolve to
+an entry in the policy's role map. The layer never echoes an arbitrary
+caller-supplied role string back into the decision; only roles that exist in the
+policy are reflected.
+
+Per-operation workflow-window fallback: when a custom policy omits an operation
+from its `operations` map, the operation's workflow window falls back to the
+built-in window (the same fallback used for `required_acr`,
+`required_data_class`, and `requires_workplace_scope`). The PBAC gate therefore
+fails closed for operations that have a built-in window, instead of treating a
+missing entry as "all states allowed".
+
+The `inconsistent` workflow state: payroll workflow state is derived from
+deployment lifecycle env flags that must form a clean prefix chain (each stage
+requires every earlier flag). When the flags do not form a prefix chain — for
+example `BITWEEN_PAYROLL_APPROVAL_REQUESTED=true` without
+`BITWEEN_PAYROLL_CALCULATED=true`, or `BITWEEN_PAYOUT_PREPARED=true` set alone —
+the derived state is `inconsistent` rather than a demotion to the last
+consistent prefix. `inconsistent` denies every operation that declares an
+explicit workflow window (the built-in gated operations `payroll_run`,
+`payroll_export`, `approval_signing`, `workflow_step_execute`,
+`payroll_policy_change`, and `workflow_template_write`) with
+`pbac_workflow_denied`. Operations with no window (`allowed_workflow_states` of
+`null`/omitted) remain allowed in `inconsistent`; that asymmetry is intended.
+`inconsistent` is a fail-closed sentinel only: it serializes as the string
+`"inconsistent"` but is never accepted by the workflow-state parser, so no
+custom policy can declare a window that opens on it.
+
+JSON shape (one custom role granted one operation):
+
+```json
+{
+  "policy_id": "bitween.authz.rbac-abac-pbac.v1",
+  "operations": {
+    "payroll_run": {
+      "required_acr": "sensitive",
+      "required_data_class": "payroll_confidential",
+      "requires_workplace_scope": true,
+      "allowed_workflow_states": ["inputs_closed", "calculated"]
+    }
+  },
+  "roles": {
+    "finance_runner": {
+      "max_data_class": "payroll_confidential",
+      "grants": ["payroll_run"]
+    }
+  }
+}
+```
+
+An `allowed_workflow_states` of `null` or omitted means the operation is
+permitted in every workflow state; a `grants` entry of `"*"` grants every
+operation (still bounded by the role's `max_data_class` ceiling and the
+per-operation ACR/scope/workflow gates).

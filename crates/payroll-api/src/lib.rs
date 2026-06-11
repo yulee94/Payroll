@@ -44,9 +44,10 @@ pub use archive_rollback_schema::{
     ArchiveRollbackPostgresContract, archive_rollback_postgres_contract,
 };
 pub use auth_policy::{
-    AUTH_POLICY_SCHEMA, AUTHZ_POLICY_ID, AuthAcrLevel, AuthDataClass, AuthSensitiveOperation,
-    AuthStepUpDecision, AuthWorkflowState, AuthzDecision, AuthzRequest, AuthzRole,
-    evaluate_authorization, evaluate_step_up,
+    AUTH_POLICY_SCHEMA, AUTHZ_POLICY_ENV, AUTHZ_POLICY_ID, AuthAcrLevel, AuthDataClass,
+    AuthSensitiveOperation, AuthStepUpDecision, AuthWorkflowState, AuthzDecision, AuthzPolicy,
+    AuthzPolicyError, AuthzRequest, OperationPolicy as AuthzOperationPolicy, RolePolicy,
+    evaluate_authorization, evaluate_step_up, normalize_role,
 };
 pub use auth_session::{
     AUTH_OIDC_DISCOVERY_SCHEMA, AUTH_ROUTE_ACTION_SCHEMA, AUTH_ROUTES_SCHEMA,
