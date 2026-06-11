@@ -363,3 +363,28 @@ An `allowed_workflow_states` of `null` or omitted means the operation is
 permitted in every workflow state; a `grants` entry of `"*"` grants every
 operation (still bounded by the role's `max_data_class` ceiling and the
 per-operation ACR/scope/workflow gates).
+
+## Dev-only auth bypass (local testing)
+
+The local preview server (`apps/bitween-platform-ui/preview/server.js`) supports
+a developer convenience to skip the JWT/WebAuthn login screen without standing
+up an IdP. It is set with `BITWEEN_DEV_AUTH_BYPASS=1` and synthesizes a verified
+`platform_owner` session scoped to dev defaults (overridable via the standard
+`BITWEEN_*` scope vars).
+
+It is structurally impossible to use in production:
+
+- The code path exists only in the local preview server, never in the deployed
+  Rust `payroll_api`, which has no equivalent.
+- The server **refuses to boot** (exits non-zero, logs "Refusing to start") when
+  the bypass is requested alongside any production signal the deployment
+  actually sets: `NODE_ENV=production`, `BITWEEN_RUNTIME_MODE=production`, or
+  `BITWEEN_AUTH_REQUIRED=true` (the latter two are the markers in the Kubernetes
+  configmap; `NODE_ENV` is not relied on alone).
+- The synthesized session is produced only when no production signal is present.
+- The preview server binds to `127.0.0.1` only.
+
+The Rust authorization layer still evaluates every request under the active
+policy; the bypass only supplies a session the server would otherwise reject for
+lack of a token. `verify:auth-session` proves both the runtime bypass and the
+production-refusal at boot.
