@@ -49,9 +49,7 @@ CREATE INDEX IF NOT EXISTS session_event_audit_jti_idx
   WHERE jwt_id_sha256 IS NOT NULL;
 
 ALTER TABLE bitween_auth.jwt_revocation ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_auth.jwt_revocation FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_auth.session_event_audit ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_auth.session_event_audit FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY jwt_revocation_tenant_isolation ON bitween_auth.jwt_revocation
   USING (tenant_id = current_setting('bitween.tenant_id', true))

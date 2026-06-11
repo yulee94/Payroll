@@ -482,6 +482,16 @@ impl AuthzPolicy {
 
     /// Parses and validates a JSON policy document.
     pub fn from_json(raw: &str) -> Result<Self, AuthzPolicyError> {
+        // `serde_json::Value` silently keeps the last value for byte-identical
+        // duplicate object keys (its backing map is last-wins), so a document with
+        // two identical `"payroll_export"` operation keys or two identical role
+        // keys would slip past the normalize-collision guards in `parse_operations`
+        // / `parse_roles` — those only ever see the surviving key. Reject byte-
+        // identical duplicates by streaming the raw document through a guard that
+        // walks every object and errors on a repeated key BEFORE the `Value` parse
+        // collapses them.
+        reject_duplicate_json_keys(raw)?;
+
         let value: serde_json::Value =
             serde_json::from_str(raw).map_err(|error| AuthzPolicyError::new(error.to_string()))?;
         Self::from_value(&value)
@@ -823,6 +833,94 @@ fn parse_roles(
     }
 
     Ok(roles)
+}
+
+/// Streams the raw JSON document through a deserializer that walks every object
+/// and errors on a repeated key within the same object, recursing into nested
+/// objects and arrays. This catches byte-identical duplicate keys that
+/// `serde_json::Value` would otherwise collapse last-wins before the
+/// normalize-collision guards in `parse_operations` / `parse_roles` run.
+fn reject_duplicate_json_keys(raw: &str) -> Result<(), AuthzPolicyError> {
+    serde_json::from_str::<DuplicateKeyGuard>(raw)
+        .map(|_| ())
+        .map_err(|error| AuthzPolicyError::new(error.to_string()))
+}
+
+/// A zero-sized value whose `Deserialize` impl walks the entire JSON tree solely
+/// to reject objects with repeated keys. serde_json's streaming deserializer
+/// surfaces every key to `MapAccess` (unlike `Value`, which folds duplicates), so
+/// the visitor sees both occurrences and can fail on the second.
+struct DuplicateKeyGuard;
+
+impl<'de> serde::Deserialize<'de> for DuplicateKeyGuard {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_any(DuplicateKeyGuardVisitor)
+    }
+}
+
+struct DuplicateKeyGuardVisitor;
+
+impl<'de> serde::de::Visitor<'de> for DuplicateKeyGuardVisitor {
+    type Value = DuplicateKeyGuard;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str("any JSON value with no duplicate object keys")
+    }
+
+    fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::MapAccess<'de>,
+    {
+        use serde::de::Error as _;
+        let mut seen = std::collections::HashSet::new();
+        while let Some(key) = map.next_key::<String>()? {
+            if !seen.insert(key.clone()) {
+                return Err(A::Error::custom(format!("duplicate object key: {key}")));
+            }
+            // Recurse into the value so nested objects/arrays are guarded too.
+            map.next_value::<DuplicateKeyGuard>()?;
+        }
+        Ok(DuplicateKeyGuard)
+    }
+
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::SeqAccess<'de>,
+    {
+        while seq.next_element::<DuplicateKeyGuard>()?.is_some() {}
+        Ok(DuplicateKeyGuard)
+    }
+
+    fn visit_bool<E>(self, _value: bool) -> Result<Self::Value, E> {
+        Ok(DuplicateKeyGuard)
+    }
+
+    fn visit_i64<E>(self, _value: i64) -> Result<Self::Value, E> {
+        Ok(DuplicateKeyGuard)
+    }
+
+    fn visit_u64<E>(self, _value: u64) -> Result<Self::Value, E> {
+        Ok(DuplicateKeyGuard)
+    }
+
+    fn visit_f64<E>(self, _value: f64) -> Result<Self::Value, E> {
+        Ok(DuplicateKeyGuard)
+    }
+
+    fn visit_str<E>(self, _value: &str) -> Result<Self::Value, E> {
+        Ok(DuplicateKeyGuard)
+    }
+
+    fn visit_none<E>(self) -> Result<Self::Value, E> {
+        Ok(DuplicateKeyGuard)
+    }
+
+    fn visit_unit<E>(self) -> Result<Self::Value, E> {
+        Ok(DuplicateKeyGuard)
+    }
 }
 
 /// A load-time policy validation error. Callers translate this into the
@@ -1741,6 +1839,134 @@ mod tests {
         let error =
             AuthzPolicy::from_json(raw).expect_err("colliding operation keys must be rejected");
         assert!(error.message().contains("duplicate operation"));
+    }
+
+    #[test]
+    fn byte_identical_duplicate_operation_keys_are_rejected_at_load() {
+        // serde_json::Value keeps the last value for byte-identical duplicate keys,
+        // so two identical "payroll_export" operation keys would never reach the
+        // normalize-collision guard. The raw-string duplicate-key walker must
+        // reject them before the Value parse collapses the document.
+        let raw = r#"{
+            "policy_id": "bitween.authz.rbac-abac-pbac.v1",
+            "operations": {
+                "payroll_export": {
+                    "required_acr": "sensitive",
+                    "required_data_class": "payroll_confidential",
+                    "requires_workplace_scope": true,
+                    "allowed_workflow_states": ["approved"]
+                },
+                "payroll_export": {
+                    "required_acr": "sensitive",
+                    "required_data_class": "payroll_confidential",
+                    "requires_workplace_scope": true,
+                    "allowed_workflow_states": null
+                }
+            },
+            "roles": {
+                "payroll_operator": {
+                    "max_data_class": "payroll_confidential",
+                    "grants": ["payroll_export"]
+                }
+            }
+        }"#;
+        let error = AuthzPolicy::from_json(raw)
+            .expect_err("byte-identical duplicate operation keys must be rejected");
+        assert!(error.message().contains("duplicate object key: payroll_export"));
+    }
+
+    #[test]
+    fn byte_identical_duplicate_role_keys_are_rejected_at_load() {
+        // Same last-wins footgun for role keys: two byte-identical "payroll_operator"
+        // keys would collapse to the second (more privileged) definition silently.
+        let raw = r#"{
+            "policy_id": "bitween.authz.rbac-abac-pbac.v1",
+            "operations": {},
+            "roles": {
+                "payroll_operator": {
+                    "max_data_class": "internal",
+                    "grants": []
+                },
+                "payroll_operator": {
+                    "max_data_class": "payroll_confidential",
+                    "grants": ["payroll_run"]
+                }
+            }
+        }"#;
+        let error = AuthzPolicy::from_json(raw)
+            .expect_err("byte-identical duplicate role keys must be rejected");
+        assert!(error.message().contains("duplicate object key: payroll_operator"));
+    }
+
+    #[test]
+    fn unknown_required_acr_is_rejected_at_load() {
+        let raw = r#"{
+            "policy_id": "bitween.authz.rbac-abac-pbac.v1",
+            "operations": {
+                "payroll_run": {
+                    "required_acr": "ultra",
+                    "required_data_class": "payroll_confidential",
+                    "requires_workplace_scope": true,
+                    "allowed_workflow_states": ["inputs_closed"]
+                }
+            },
+            "roles": {
+                "payroll_operator": {
+                    "max_data_class": "payroll_confidential",
+                    "grants": ["payroll_run"]
+                }
+            }
+        }"#;
+        let error = AuthzPolicy::from_json(raw).expect_err("unknown required_acr must be rejected");
+        assert!(error.message().contains("unknown required_acr"));
+    }
+
+    #[test]
+    fn unknown_required_data_class_is_rejected_at_load() {
+        let raw = r#"{
+            "policy_id": "bitween.authz.rbac-abac-pbac.v1",
+            "operations": {
+                "payroll_run": {
+                    "required_acr": "sensitive",
+                    "required_data_class": "top_secret",
+                    "requires_workplace_scope": true,
+                    "allowed_workflow_states": ["inputs_closed"]
+                }
+            },
+            "roles": {
+                "payroll_operator": {
+                    "max_data_class": "payroll_confidential",
+                    "grants": ["payroll_run"]
+                }
+            }
+        }"#;
+        let error =
+            AuthzPolicy::from_json(raw).expect_err("unknown required_data_class must be rejected");
+        assert!(error.message().contains("unknown required_data_class"));
+    }
+
+    #[test]
+    fn unknown_allowed_workflow_state_is_rejected_at_load() {
+        let raw = r#"{
+            "policy_id": "bitween.authz.rbac-abac-pbac.v1",
+            "operations": {
+                "payroll_run": {
+                    "required_acr": "sensitive",
+                    "required_data_class": "payroll_confidential",
+                    "requires_workplace_scope": true,
+                    "allowed_workflow_states": ["inputs_closed", "in_orbit"]
+                }
+            },
+            "roles": {
+                "payroll_operator": {
+                    "max_data_class": "payroll_confidential",
+                    "grants": ["payroll_run"]
+                }
+            }
+        }"#;
+        let error =
+            AuthzPolicy::from_json(raw).expect_err("unknown workflow state must be rejected");
+        assert!(error.message().contains("unknown workflow state"));
     }
 
     #[test]

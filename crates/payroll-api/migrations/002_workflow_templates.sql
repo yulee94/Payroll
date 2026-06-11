@@ -271,21 +271,13 @@ CREATE INDEX IF NOT EXISTS workflow_data_record_type_idx
   ON bitween_workflow.workflow_data_record (tenant_id, record_type, status, updated_at DESC);
 
 ALTER TABLE bitween_workflow.workflow_template ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_workflow.workflow_template FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_workflow.workflow_template_version ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_workflow.workflow_template_version FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_workflow.workflow_node ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_workflow.workflow_node FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_workflow.workflow_edge ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_workflow.workflow_edge FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_workflow.workflow_publish_check ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_workflow.workflow_publish_check FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_workflow.workflow_audit_event ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_workflow.workflow_audit_event FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_workflow.workflow_runtime_instance ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_workflow.workflow_runtime_instance FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_workflow.workflow_data_record ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_workflow.workflow_data_record FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY workflow_template_tenant_isolation ON bitween_workflow.workflow_template
   USING (tenant_id = current_setting('bitween.tenant_id', true))

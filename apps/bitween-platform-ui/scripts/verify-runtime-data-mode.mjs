@@ -792,7 +792,8 @@ requireText(rustApiContractSource, "response_schema: AUTH_ROUTES_SCHEMA", "Rust 
 requireText(rustApiContractSource, "response_schema: AUTH_ROUTE_ACTION_SCHEMA", "Rust API contract spine must reuse the auth route-action schema constant instead of duplicating schema strings.");
 requireText(payrollBuckSource, "src/api_contract.rs", "crates/payroll-api/BUCK must include the Rust API contract spine source.");
 requireText(rustAuthPolicySource, "AUTHZ_POLICY_ID", "Rust auth policy must declare a stable PBAC policy id.");
-requireText(rustAuthPolicySource, "AuthzRole", "Rust auth policy must model RBAC roles.");
+requireText(rustAuthPolicySource, "RolePolicy", "Rust auth policy must model RBAC roles.");
+requireText(rustAuthPolicySource, "normalize_role", "Rust auth policy must normalize RBAC role aliases to canonical role ids.");
 requireText(rustAuthPolicySource, "AuthzRequest", "Rust auth policy must model an authorization request.");
 requireText(rustAuthPolicySource, "AuthzDecision", "Rust auth policy must model a fail-closed authorization decision.");
 requireText(rustAuthPolicySource, "AuthDataClass", "Rust auth policy must model ABAC data classification.");
@@ -1042,7 +1043,8 @@ requireText(rustPostgresRepositorySource, "WORKFLOW_TEMPLATE_POSTGRES_MIGRATION_
 requireText(rustPostgresRepositorySource, "PAYROLL_ATTENDANCE_POSTGRES_MIGRATION_SQL", "Rust PostgreSQL migration runner must include canonical payroll/attendance migration SQL.");
 requireText(rustPostgresRepositorySource, "ARCHIVE_ROLLBACK_POSTGRES_MIGRATION_SQL", "Rust PostgreSQL migration runner must include archive recovery/rollback migration SQL.");
 requireText(rustPostgresRepositorySource, "AUTH_SESSION_POSTGRES_MIGRATION_SQL", "Rust PostgreSQL migration runner must include auth-session revocation/audit migration SQL.");
-requireText(rustPostgresRepositorySource, "required_postgres_migrations() -> [PostgresMigration; 7]", "Rust PostgreSQL migration runner must include all seven required production migrations.");
+requireText(rustPostgresRepositorySource, "RLS_ENFORCEMENT_POSTGRES_MIGRATION_SQL", "Rust PostgreSQL migration runner must include the RLS-enforcement migration SQL.");
+requireText(rustPostgresRepositorySource, "required_postgres_migrations() -> [PostgresMigration; 8]", "Rust PostgreSQL migration runner must include all eight required production migrations (001-007 plus the 008 RLS-enforcement follow-up).");
 requireText(rustPostgresRepositorySource, "postgres_migration_registry_sql", "Rust PostgreSQL migration runner must create an idempotent migration registry.");
 requireText(rustPostgresRepositorySource, "schema_migration", "Rust PostgreSQL migration runner must persist migration registry rows.");
 requireText(rustPostgresRepositorySource, "checksum_sha256", "Rust PostgreSQL migration runner must record SHA-256 migration checksums.");

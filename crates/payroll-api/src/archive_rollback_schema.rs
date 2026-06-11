@@ -71,11 +71,8 @@ mod tests {
         assert!(sql.contains("generated_object_uri text CHECK"));
         assert!(sql.contains("target_table IN ('hr_employee', 'hr_attendance', 'payroll_input')"));
         assert!(sql.contains("ALTER TABLE bitween_archive.archive_admission_recovery_point ENABLE ROW LEVEL SECURITY"));
-        assert!(sql.contains("ALTER TABLE bitween_archive.archive_admission_recovery_point FORCE ROW LEVEL SECURITY"));
         assert!(sql.contains("ALTER TABLE bitween_archive.archive_source_sync ENABLE ROW LEVEL SECURITY"));
-        assert!(sql.contains("ALTER TABLE bitween_archive.archive_source_sync FORCE ROW LEVEL SECURITY"));
         assert!(sql.contains("ALTER TABLE bitween_archive.archive_admission_rollback ENABLE ROW LEVEL SECURITY"));
-        assert!(sql.contains("ALTER TABLE bitween_archive.archive_admission_rollback FORCE ROW LEVEL SECURITY"));
         assert!(sql.contains("archive_admission_recovery_point_tenant_isolation"));
         assert!(sql.contains("archive_source_sync_tenant_isolation"));
         assert!(sql.contains("archive_admission_rollback_tenant_isolation"));

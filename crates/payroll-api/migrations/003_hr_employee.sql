@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS bitween_hr.employee (
   updated_by text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (tenant_id, legal_entity_id, workplace_id, employee_key)
+  UNIQUE (tenant_id, employee_key)
 );
 
 CREATE TRIGGER employee_set_updated_at
@@ -43,7 +43,6 @@ CREATE INDEX IF NOT EXISTS employee_team_idx
   ON bitween_hr.employee (tenant_id, team, display_name);
 
 ALTER TABLE bitween_hr.employee ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_hr.employee FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY employee_tenant_scope_isolation ON bitween_hr.employee
   USING (

@@ -21,6 +21,7 @@ pub mod policy;
 pub mod policy_resolution;
 pub mod postgres_repository;
 pub mod request;
+pub mod rls_enforcement_schema;
 pub mod response;
 pub mod run;
 pub mod salary;
@@ -137,6 +138,11 @@ pub use postgres_repository::{
 pub use request::{
     PayrollInputType, PayrollRunRequest, PayrollScope, parse_payroll_api_request,
     request_id_from_payload,
+};
+pub use rls_enforcement_schema::{
+    RLS_ENFORCEMENT_POSTGRES_FORCED_TABLES, RLS_ENFORCEMENT_POSTGRES_MIGRATION_NAME,
+    RLS_ENFORCEMENT_POSTGRES_MIGRATION_SQL, RLS_ENFORCEMENT_POSTGRES_SCHEMA_VERSION,
+    RlsEnforcementPostgresContract, rls_enforcement_postgres_contract,
 };
 pub use response::{
     PayrollApiErrorResponse, PayrollApiResponse, PayrollValidationResponse,

@@ -83,9 +83,7 @@ CREATE INDEX IF NOT EXISTS payroll_input_source_idx
   ON bitween_payroll.payroll_input (tenant_id, source_intake_id);
 
 ALTER TABLE bitween_hr.attendance_record ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_hr.attendance_record FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_payroll.payroll_input ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bitween_payroll.payroll_input FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY attendance_record_scope_isolation ON bitween_hr.attendance_record
   USING (

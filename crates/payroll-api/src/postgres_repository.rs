@@ -371,7 +371,7 @@ impl PostgresRepositoryConfig {
     }
 }
 
-pub fn required_postgres_migrations() -> [PostgresMigration; 7] {
+pub fn required_postgres_migrations() -> [PostgresMigration; 8] {
     [
         PostgresMigration {
             name: crate::archive_intake_schema::ARCHIVE_INTAKE_POSTGRES_MIGRATION_NAME,
@@ -400,6 +400,17 @@ pub fn required_postgres_migrations() -> [PostgresMigration; 7] {
         PostgresMigration {
             name: crate::auth_session_schema::AUTH_SESSION_POSTGRES_MIGRATION_NAME,
             sql: crate::auth_session_schema::AUTH_SESSION_POSTGRES_MIGRATION_SQL,
+        },
+        // 008 runs LAST: it FORCEs RLS on every table from 001-007 and swaps the
+        // bitween_hr.employee unique key to the full tenant scope. Shipping it as a
+        // follow-up migration (rather than editing 001-007 in place) keeps the
+        // checksums of the already-applied migrations stable, so databases
+        // provisioned from main upgrade cleanly instead of tripping
+        // postgres_migration_checksum_mismatch. It must follow 003 (employee table)
+        // because the archive-intake employee upsert targets its named unique key.
+        PostgresMigration {
+            name: crate::rls_enforcement_schema::RLS_ENFORCEMENT_POSTGRES_MIGRATION_NAME,
+            sql: crate::rls_enforcement_schema::RLS_ENFORCEMENT_POSTGRES_MIGRATION_SQL,
         },
     ]
 }
@@ -640,7 +651,7 @@ mod tests {
     fn required_migrations_include_archive_workflow_hr_settings_payroll_rollback_and_auth_in_order() {
         let migrations = required_postgres_migrations();
 
-        assert_eq!(migrations.len(), 7);
+        assert_eq!(migrations.len(), 8);
         assert_eq!(migrations[0].name, "001_archive_intake.sql");
         assert!(migrations[0].sql.contains("bitween_archive.archive_intake"));
         assert_eq!(migrations[1].name, "002_workflow_templates.sql");
@@ -660,6 +671,15 @@ mod tests {
         assert_eq!(migrations[6].name, "007_auth_session_security.sql");
         assert!(migrations[6].sql.contains("bitween_auth.jwt_revocation"));
         assert!(migrations[6].sql.contains("bitween_auth.session_event_audit"));
+        // 008 must come after 003 so the employee table exists before its unique key
+        // is swapped, and it FORCEs RLS on the tables enabled by 001-007.
+        assert_eq!(migrations[7].name, "008_rls_force_and_employee_scope.sql");
+        assert!(migrations[7]
+            .sql
+            .contains("ALTER TABLE bitween_hr.employee FORCE ROW LEVEL SECURITY"));
+        assert!(migrations[7]
+            .sql
+            .contains("ADD CONSTRAINT employee_tenant_scope_key"));
     }
 
     #[test]

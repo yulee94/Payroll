@@ -51,7 +51,6 @@ mod tests {
         assert!(sql.contains("'active', 'on_leave', 'offboarding'"));
         assert!(sql.contains("sensitivity_label text NOT NULL DEFAULT 'restricted'"));
         assert!(sql.contains("ALTER TABLE bitween_hr.employee ENABLE ROW LEVEL SECURITY"));
-        assert!(sql.contains("ALTER TABLE bitween_hr.employee FORCE ROW LEVEL SECURITY"));
         assert!(sql.contains("current_setting('bitween.tenant_id', true)"));
         assert!(sql.contains("current_setting('bitween.legal_entity_id', true)"));
         assert!(sql.contains("current_setting('bitween.workplace_id', true)"));

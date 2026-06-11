@@ -59,9 +59,7 @@ mod tests {
         assert!(sql.contains("source_row_hash char(64) NOT NULL"));
         assert!(sql.contains("source_payload jsonb NOT NULL"));
         assert!(sql.contains("ALTER TABLE bitween_hr.attendance_record ENABLE ROW LEVEL SECURITY"));
-        assert!(sql.contains("ALTER TABLE bitween_hr.attendance_record FORCE ROW LEVEL SECURITY"));
         assert!(sql.contains("ALTER TABLE bitween_payroll.payroll_input ENABLE ROW LEVEL SECURITY"));
-        assert!(sql.contains("ALTER TABLE bitween_payroll.payroll_input FORCE ROW LEVEL SECURITY"));
         assert!(sql.contains("current_setting('bitween.tenant_id', true)"));
         assert!(sql.contains("current_setting('bitween.legal_entity_id', true)"));
         assert!(sql.contains("current_setting('bitween.workplace_id', true)"));

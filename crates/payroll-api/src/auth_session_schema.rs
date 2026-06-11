@@ -60,11 +60,6 @@ mod tests {
                     .contains(&format!("ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")),
                 "missing RLS enablement for {table}"
             );
-            assert!(
-                AUTH_SESSION_POSTGRES_MIGRATION_SQL
-                    .contains(&format!("ALTER TABLE {table} FORCE ROW LEVEL SECURITY")),
-                "missing RLS force for {table}; table owners bypass RLS without FORCE"
-            );
         }
         assert!(AUTH_SESSION_POSTGRES_MIGRATION_SQL.contains("jwt_revocation_tenant_isolation"));
         assert!(AUTH_SESSION_POSTGRES_MIGRATION_SQL.contains("session_event_audit_tenant_isolation"));

@@ -239,6 +239,15 @@ still needs dependency-reviewed identity depth for:
 - RLS (including FORCE) is bypassed for superuser roles — the application DSN
   must use a non-superuser role.
 
+- `FORCE ROW LEVEL SECURITY` on every tenant-scoped table and the widened
+  `bitween_hr.employee` unique key (`tenant_id, legal_entity_id, workplace_id,
+  employee_key`) are applied by a follow-up migration (`008_rls_force_and_employee_scope.sql`)
+  rather than by editing the already-shipped migrations 001-007 in place. The
+  migration ledger records a sha256 per migration and hard-fails on a checksum
+  mismatch, so editing a previously applied migration would break every upgrade
+  from a database provisioned from `main`. Shipping the hardening as migration 008
+  keeps the checksums of 001-007 stable while delivering the change on upgrade.
+
 ## Data-driven authorization policy (recorded 2026-06-10)
 
 The RBAC/ABAC/PBAC matrix is configurable, not compiled-in. The Rust
@@ -246,7 +255,16 @@ authorization layer loads an `AuthzPolicy` at decision time:
 
 - Default: when `BITWEEN_AUTHZ_POLICY_JSON` is unset or blank, the built-in
   policy (`policy_id` `bitween.authz.rbac-abac-pbac.v1`) is used. The built-in
-  matrix is byte-for-byte identical to the prior compile-time matrix.
+  matrix is identical to the prior compile-time matrix except for the review
+  fixes documented in this contract. Those deltas are intentional, not drift:
+  - `payroll_policy_change` and `workflow_template_write` are frozen to the
+    `open | approved | archived` workflow window. Edits after inputs close would
+    invalidate what the approver reviews, so the window reopens only once the run
+    is approved or archived.
+  - `workflow_step_execute` was removed from the HR roles (`hr_operator`,
+    `hr_manager`). It is classified `payroll_confidential`, above the HR roles'
+    `employee_restricted` data-class ceiling, so the grant could never be
+    exercised (it was a dead grant).
 - Override: when `BITWEEN_AUTHZ_POLICY_JSON` is set, its JSON document is parsed
   and validated. Operations remain a closed code-owned set (operation ids are
   touchpoints); roles are open strings (legacy aliases such as `payroll_ops`,
@@ -268,16 +286,21 @@ grants are configuration errors).
 
 Additional load-time validation hardening:
 
-- Duplicate role keys are rejected. Two JSON role keys that normalize to the
-  same canonical role id (for example `it_security_admin` and its alias
-  `tenant_admin`, or `payroll_ops` and `payroll_operator`) are a configuration
-  error rather than a silent overwrite, so a privileged definition can never
-  shadow a restricted one.
-- Duplicate operation keys are rejected for the same reason. Operation ids fold
-  case, whitespace, and `-`/`_` variants onto one canonical id (for example
-  `payroll-export` and `payroll_export`), so colliding keys are a configuration
-  error rather than a silent overwrite where a looser workflow window could
-  swallow a tighter one.
+- Duplicate role keys are rejected. This covers both byte-identical repeats
+  (two JSON keys spelled exactly the same, which `serde_json::Value` would
+  otherwise collapse last-wins before validation) and normalize-collisions (two
+  keys that fold onto the same canonical role id, for example `it_security_admin`
+  and its alias `tenant_admin`, or `payroll_ops` and `payroll_operator`). Byte-
+  identical repeats are caught by a raw-document duplicate-key walker that runs
+  before the value parse; normalize-collisions are caught during role parsing.
+  Either is a configuration error rather than a silent overwrite, so a privileged
+  definition can never shadow a restricted one.
+- Duplicate operation keys are rejected for the same reasons. Byte-identical
+  repeats are caught by the same raw-document walker; normalize-collisions are
+  caught during operation parsing, where operation ids fold case, whitespace, and
+  `-`/`_` variants onto one canonical id (for example `payroll-export` and
+  `payroll_export`). Either is a configuration error rather than a silent
+  overwrite where a looser workflow window could swallow a tighter one.
 - The wildcard ceiling rule applies to `"*"`. A role granting `"*"` must have a
   `max_data_class` at least as high as the maximum `required_data_class` across
   all operations (using the policy's per-operation overrides where present and
