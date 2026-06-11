@@ -24,6 +24,7 @@ PAYROLL_API_SRCS = [
     "src/policy_resolution.rs",
     "src/postgres_repository.rs",
     "src/request.rs",
+    "src/rls_enforcement_schema.rs",
     "src/response.rs",
     "src/run.rs",
     "src/salary.rs",
@@ -39,6 +40,7 @@ PAYROLL_API_SRCS = [
     "migrations/005_payroll_attendance_intake.sql",
     "migrations/006_archive_admission_rollback.sql",
     "migrations/007_auth_session_security.sql",
+    "migrations/008_rls_force_and_employee_scope.sql",
 ]
 
 PAYROLL_API_DEPS = [

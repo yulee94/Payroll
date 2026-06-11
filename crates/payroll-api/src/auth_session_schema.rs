@@ -54,7 +54,13 @@ mod tests {
 
     #[test]
     fn auth_session_schema_enforces_tenant_rls() {
-        assert!(AUTH_SESSION_POSTGRES_MIGRATION_SQL.contains("ENABLE ROW LEVEL SECURITY"));
+        for table in AUTH_SESSION_POSTGRES_TABLES {
+            assert!(
+                AUTH_SESSION_POSTGRES_MIGRATION_SQL
+                    .contains(&format!("ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")),
+                "missing RLS enablement for {table}"
+            );
+        }
         assert!(AUTH_SESSION_POSTGRES_MIGRATION_SQL.contains("jwt_revocation_tenant_isolation"));
         assert!(AUTH_SESSION_POSTGRES_MIGRATION_SQL.contains("session_event_audit_tenant_isolation"));
         assert!(AUTH_SESSION_POSTGRES_MIGRATION_SQL.contains("current_setting('bitween.tenant_id', true)"));

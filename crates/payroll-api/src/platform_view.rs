@@ -1,6 +1,6 @@
 use crate::auth_policy::{
-    AUTHZ_POLICY_ID, AuthAcrLevel, AuthSensitiveOperation, AuthWorkflowState, AuthzRequest,
-    AuthzRole, evaluate_authorization, evaluate_step_up,
+    AUTHZ_POLICY_ID, AuthAcrLevel, AuthSensitiveOperation, AuthWorkflowState, AuthzDecision,
+    AuthzPolicy, AuthzRequest, evaluate_authorization, evaluate_step_up,
 };
 use crate::execution_plan::PAYROLL_RUST_NATIVE_EXECUTOR;
 use crate::service::{
@@ -421,7 +421,11 @@ impl PlatformLiveConfig {
     }
 
     pub fn session_allows_sensitive_operation(&self, operation: AuthSensitiveOperation) -> bool {
-        self.session_authenticated() && evaluate_step_up(self.session_acr(), operation).allowed
+        let Ok(policy) = AuthzPolicy::from_env() else {
+            return false;
+        };
+        self.session_authenticated()
+            && evaluate_step_up(&policy, self.session_acr(), operation).allowed
     }
 
     pub fn session_is_authenticated(&self) -> bool {
@@ -431,8 +435,14 @@ impl PlatformLiveConfig {
     pub fn session_authorization_decision(
         &self,
         operation: AuthSensitiveOperation,
-    ) -> crate::auth_policy::AuthzDecision {
-        evaluate_authorization(&self.session_authorization_request(operation))
+    ) -> AuthzDecision {
+        // Fail closed on an invalid configured policy: never fall back to the
+        // built-in matrix when BITWEEN_AUTHZ_POLICY_JSON is set but invalid.
+        let policy = match AuthzPolicy::from_env() {
+            Ok(policy) => policy,
+            Err(_) => return AuthzDecision::policy_invalid(operation),
+        };
+        evaluate_authorization(&policy, &self.session_authorization_request(operation))
     }
 
     pub fn session_authorizes_operation(&self, operation: AuthSensitiveOperation) -> bool {
@@ -447,7 +457,7 @@ impl PlatformLiveConfig {
             policy_id: &self.session_authz_policy_id,
             operation,
             current_acr: self.session_acr(),
-            role: AuthzRole::parse(&self.session_actor_role),
+            role: Some(&self.session_actor_role),
             actor_tenant_id: &self.session_authorized_tenant_id,
             resource_tenant_id: &self.tenant_id,
             actor_legal_entity: &self.session_authorized_legal_entity,
@@ -458,7 +468,35 @@ impl PlatformLiveConfig {
         }
     }
 
+    /// Derives the PBAC workflow state from the deployment lifecycle flags.
+    ///
+    /// The advanced flags must form a clean prefix chain: each stage requires
+    /// every earlier stage to be set. When a flag is set without its full
+    /// prefix (e.g. `approval_requested` without `payroll_calculated`), the
+    /// combination is inconsistent and must fail closed via
+    /// [`AuthWorkflowState::Inconsistent`] rather than demoting to the last
+    /// consistent prefix state, which would open early-window operations.
     fn payroll_auth_workflow_state(&self) -> AuthWorkflowState {
+        let inputs_trio =
+            self.payroll_inputs_closed && self.attendance_closed && self.deductions_reviewed;
+        let calculated_chain = inputs_trio && self.payroll_calculated;
+        let approval_chain = calculated_chain && self.approval_requested;
+        let approved_chain = approval_chain && self.payout_prepared;
+
+        // Any advanced flag set without its required prefix is inconsistent.
+        if self.payroll_calculated && !inputs_trio {
+            return AuthWorkflowState::Inconsistent;
+        }
+        if self.approval_requested && !calculated_chain {
+            return AuthWorkflowState::Inconsistent;
+        }
+        if self.payout_prepared && !approval_chain {
+            return AuthWorkflowState::Inconsistent;
+        }
+        if self.payroll_evidence_archived && !approved_chain {
+            return AuthWorkflowState::Inconsistent;
+        }
+
         if self.payroll_evidence_archived {
             AuthWorkflowState::Archived
         } else if self.payout_prepared {
@@ -467,7 +505,7 @@ impl PlatformLiveConfig {
             AuthWorkflowState::ApprovalPending
         } else if self.payroll_calculated {
             AuthWorkflowState::Calculated
-        } else if self.payroll_inputs_closed && self.attendance_closed && self.deductions_reviewed {
+        } else if inputs_trio {
             AuthWorkflowState::InputsClosed
         } else {
             AuthWorkflowState::Open
@@ -1704,5 +1742,123 @@ mod tests {
         assert!(
             !policy_change.session_authorizes_operation(AuthSensitiveOperation::PayrollPolicyChange)
         );
+    }
+
+    #[test]
+    fn workflow_state_requires_the_full_flag_prefix_chain() {
+        // Walk the lifecycle flags strictly in order. Each stage must observe
+        // its own state only once every earlier flag is set, including the
+        // ApprovalPending stage that an earlier prefix-demotion bug skipped.
+        let mut config = PlatformLiveConfig::default();
+        assert_eq!(config.payroll_auth_workflow_state(), AuthWorkflowState::Open);
+
+        config.payroll_inputs_closed = true;
+        config.attendance_closed = true;
+        config.deductions_reviewed = true;
+        assert_eq!(
+            config.payroll_auth_workflow_state(),
+            AuthWorkflowState::InputsClosed
+        );
+
+        config.payroll_calculated = true;
+        assert_eq!(
+            config.payroll_auth_workflow_state(),
+            AuthWorkflowState::Calculated
+        );
+
+        config.approval_requested = true;
+        assert_eq!(
+            config.payroll_auth_workflow_state(),
+            AuthWorkflowState::ApprovalPending
+        );
+
+        config.payout_prepared = true;
+        assert_eq!(
+            config.payroll_auth_workflow_state(),
+            AuthWorkflowState::Approved
+        );
+
+        config.payroll_evidence_archived = true;
+        assert_eq!(
+            config.payroll_auth_workflow_state(),
+            AuthWorkflowState::Archived
+        );
+    }
+
+    #[test]
+    fn lone_advanced_flags_without_prefix_are_inconsistent() {
+        // A flag set without its required prefix must fail closed to
+        // Inconsistent rather than demoting to the last consistent prefix state.
+        let mut payout_only = PlatformLiveConfig::default();
+        payout_only.payout_prepared = true;
+        assert_eq!(
+            payout_only.payroll_auth_workflow_state(),
+            AuthWorkflowState::Inconsistent
+        );
+
+        let mut approval_without_calculated = PlatformLiveConfig::default();
+        approval_without_calculated.payroll_inputs_closed = true;
+        approval_without_calculated.attendance_closed = true;
+        approval_without_calculated.deductions_reviewed = true;
+        approval_without_calculated.approval_requested = true;
+        assert_eq!(
+            approval_without_calculated.payroll_auth_workflow_state(),
+            AuthWorkflowState::Inconsistent
+        );
+
+        let mut calculated_without_inputs = PlatformLiveConfig::default();
+        calculated_without_inputs.payroll_calculated = true;
+        assert_eq!(
+            calculated_without_inputs.payroll_auth_workflow_state(),
+            AuthWorkflowState::Inconsistent
+        );
+
+        let mut archived_without_payout = PlatformLiveConfig::default();
+        archived_without_payout.payroll_inputs_closed = true;
+        archived_without_payout.attendance_closed = true;
+        archived_without_payout.deductions_reviewed = true;
+        archived_without_payout.payroll_calculated = true;
+        archived_without_payout.approval_requested = true;
+        archived_without_payout.payroll_evidence_archived = true;
+        assert_eq!(
+            archived_without_payout.payroll_auth_workflow_state(),
+            AuthWorkflowState::Inconsistent
+        );
+    }
+
+    #[test]
+    fn inconsistent_workflow_state_denies_windowed_operations() {
+        // An inconsistent flag combination (approval_requested without the
+        // calculated chain) must deny every explicitly-windowed operation with
+        // pbac_workflow_denied, even for a platform owner with critical ACR.
+        let mut owner = PlatformLiveConfig::default()
+            .with_scope("tenant-acme", "Acme", "Acme", "Seoul", "2026-06")
+            .with_auth_provider_configured(true)
+            .with_verified_session(true, "platform_owner")
+            .with_acr_level("critical", 1);
+        owner.payroll_inputs_closed = true;
+        owner.attendance_closed = true;
+        owner.deductions_reviewed = true;
+        owner.approval_requested = true; // calculated chain is missing
+
+        assert_eq!(
+            owner.payroll_auth_workflow_state(),
+            AuthWorkflowState::Inconsistent
+        );
+        for operation in [
+            AuthSensitiveOperation::PayrollRun,
+            AuthSensitiveOperation::PayrollExport,
+            AuthSensitiveOperation::ApprovalSigning,
+            AuthSensitiveOperation::WorkflowTemplateWrite,
+        ] {
+            let decision = owner.session_authorization_decision(operation);
+            assert!(!decision.allowed, "{} must deny in inconsistent state", operation.id());
+            assert_eq!(
+                decision.reason,
+                "pbac_workflow_denied",
+                "{} must be pbac_workflow_denied in inconsistent state",
+                operation.id()
+            );
+        }
     }
 }
