@@ -57,6 +57,12 @@ function assertStaticContracts() {
   requireText(serverSource, '"//crates/payroll-api:auth_session_validate"', "preview/server.js must call the Rust auth_session_validate target.");
   requireText(serverSource, "authSessionEnvForRustTargets", "preview/server.js must derive Rust target session env from the verifier.");
   requireText(serverSource, "deniedAuthSessionEnv", "preview/server.js must force an unauthenticated session when JWT validation fails.");
+  requireText(serverSource, "BITWEEN_DEV_AUTH_BYPASS", "preview/server.js dev auth bypass must be gated behind an explicit opt-in env var.");
+  requireText(serverSource, "isProductionSignal", "preview/server.js must detect production from the deployment's real signals to disable the dev auth bypass.");
+  requireText(serverSource, "BITWEEN_RUNTIME_MODE", "preview/server.js production guard must honor BITWEEN_RUNTIME_MODE, the deployed production marker.");
+  requireText(serverSource, "BITWEEN_AUTH_REQUIRED", "preview/server.js production guard must honor BITWEEN_AUTH_REQUIRED, the deployed production marker.");
+  requireText(serverSource, "Refusing to start", "preview/server.js must refuse to boot when the dev auth bypass is requested in production.");
+  requireText(serverSource, "devAuthBypassActive = devAuthBypassRequested && !isProductionEnv", "preview/server.js dev auth bypass must only activate outside production.");
   requireText(rustAuthSessionSource, "AUTH_SESSION_SCHEMA", "Rust auth session verifier must expose a stable schema.");
   requireText(rustAuthSessionSource, "AUTH_OIDC_DISCOVERY_SCHEMA", "Rust auth session verifier must expose a stable OIDC discovery schema.");
   requireText(rustAuthSessionSource, "validate_oidc_discovery", "Rust auth session verifier must validate OIDC discovery metadata.");
@@ -295,11 +301,54 @@ async function assertPreviewSessionWiring() {
       errors.push(`invalid JWT/JWKS session must fail closed in the Rust live payload: ${JSON.stringify(response.body?.session)}`);
     }
   });
+
+  // Dev auth bypass authenticates with NO JWT configured (local testing only).
+  const bypassPort = port + 2;
+  await withServer(bypassPort, { BITWEEN_DEV_AUTH_BYPASS: "1", BITWEEN_HTTP_TELEMETRY: "off" }, async () => {
+    const response = await requestJson(bypassPort, "/api/platform/v1/view-model");
+    if (response.body?.session?.authenticated !== true || response.body?.session?.role !== "platform_owner") {
+      errors.push(`dev auth bypass must authenticate a platform_owner session without a JWT: ${JSON.stringify(response.body?.session)}`);
+    }
+  });
+}
+
+async function assertDevBypassRefusesProduction() {
+  // The critical safety property: production can never bypass auth. The server
+  // must exit non-zero and never bind a socket when the bypass is requested
+  // alongside ANY production signal the deployment actually sets — not just
+  // NODE_ENV (which the k8s configmap does not set) but the authoritative
+  // BITWEEN_RUNTIME_MODE and BITWEEN_AUTH_REQUIRED markers.
+  const productionSignals = [
+    { label: "NODE_ENV=production", env: { NODE_ENV: "production" } },
+    { label: "BITWEEN_RUNTIME_MODE=production", env: { BITWEEN_RUNTIME_MODE: "production" } },
+    { label: "BITWEEN_AUTH_REQUIRED=true", env: { BITWEEN_AUTH_REQUIRED: "true" } },
+  ];
+  let offset = 7;
+  for (const signal of productionSignals) {
+    const port = 5900 + ((process.pid + offset) % 200);
+    offset += 1;
+    const { child, stderr } = launchServer(port, {
+      BITWEEN_DEV_AUTH_BYPASS: "1",
+      BITWEEN_HTTP_TELEMETRY: "off",
+      ...signal.env,
+    });
+    const exitCode = await new Promise((resolve) => {
+      child.once("exit", (code) => resolve(code));
+      setTimeout(() => { try { child.kill("SIGKILL"); } catch {} resolve("timeout"); }, 10000);
+    });
+    if (exitCode !== 1) {
+      errors.push(`dev auth bypass under ${signal.label} must refuse to boot (exit 1), got: ${exitCode}`);
+    }
+    if (!stderr().includes("Refusing to start")) {
+      errors.push(`dev auth bypass under ${signal.label} must log a clear refusal to start.`);
+    }
+  }
 }
 
 assertStaticContracts();
 assertBinaryValidation();
 await assertPreviewSessionWiring();
+await assertDevBypassRefusesProduction();
 
 if (errors.length > 0) {
   console.error("Auth session verification failed:");

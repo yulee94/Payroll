@@ -19,6 +19,37 @@ const routeLatencyBudgetMs = Number(process.env.BITWEEN_ROUTE_LATENCY_BUDGET_MS 
 const rateLimitWindowMs = Number(process.env.BITWEEN_RATE_LIMIT_WINDOW_MS || 60_000);
 const defaultMutableRateLimitMax = Number(process.env.BITWEEN_MUTATION_RATE_LIMIT_MAX || 60);
 const authRateLimitMax = Number(process.env.BITWEEN_AUTH_RATE_LIMIT_MAX || 30);
+// --- Dev-only auth bypass (local testing convenience) ---
+// Skips the JWT/WebAuthn login screen on the loopback preview server WITHOUT a
+// real IdP, by synthesizing a verified platform_owner session. It is
+// structurally impossible to use in production: (1) this code path exists only
+// in the local preview server, never in the deployed Rust payroll_api, which
+// has no equivalent; (2) the server refuses to boot when the bypass is
+// requested while ANY production signal is present; (3) the synthesized session
+// is produced only outside production; and (4) the server binds loopback only.
+// The Rust authz layer still evaluates every request — the bypass merely
+// supplies a session it would otherwise reject for lack of a token.
+const devAuthBypassRequested = ["1", "true", "yes", "on"].includes(
+  String(process.env.BITWEEN_DEV_AUTH_BYPASS || "").trim().toLowerCase()
+);
+// Production is detected from every signal the deployment actually sets, not
+// just NODE_ENV (which the k8s configmap does not set): BITWEEN_RUNTIME_MODE
+// and BITWEEN_AUTH_REQUIRED are the authoritative production markers.
+function isProductionSignal() {
+  const norm = (name) => String(process.env[name] || "").trim().toLowerCase();
+  if (["production", "prod"].includes(norm("NODE_ENV"))) return true;
+  if (["production", "prod"].includes(norm("BITWEEN_RUNTIME_MODE"))) return true;
+  if (["1", "true", "yes", "on"].includes(norm("BITWEEN_AUTH_REQUIRED"))) return true;
+  return false;
+}
+const isProductionEnv = isProductionSignal();
+if (devAuthBypassRequested && isProductionEnv) {
+  throw new Error(
+    "BITWEEN_DEV_AUTH_BYPASS is a local-testing tool and must never run in production " +
+      "(NODE_ENV/BITWEEN_RUNTIME_MODE=production or BITWEEN_AUTH_REQUIRED=true). Refusing to start."
+  );
+}
+const devAuthBypassActive = devAuthBypassRequested && !isProductionEnv;
 const clients = new Set();
 const rateLimitBuckets = new Map();
 const sessionCookieName = "__Host-bitween_session";
@@ -335,7 +366,44 @@ function verifiedAuthSessionEnv(verification) {
   };
 }
 
+function devAuthBypassEnv() {
+  // Synthesize a fully verified, platform_owner session scoped to consistent
+  // dev defaults so the live view skips the login screen and authz_decision
+  // permits mutations. Any scope value can still be overridden via the real
+  // BITWEEN_* env vars for scope-specific testing.
+  const tenantId = process.env.BITWEEN_TENANT_ID || "tenant-acme";
+  const tenantName = process.env.BITWEEN_TENANT_NAME || "Acme";
+  const legalEntity = process.env.BITWEEN_PAYROLL_AFFILIATE || "Acme";
+  const workplace = process.env.BITWEEN_PAYROLL_WORKPLACE || "Seoul";
+  const period = process.env.BITWEEN_PAYROLL_PERIOD || "2026-06";
+  return {
+    ...process.env,
+    BITWEEN_TENANT_ID: tenantId,
+    BITWEEN_TENANT_NAME: tenantName,
+    BITWEEN_PAYROLL_AFFILIATE: legalEntity,
+    BITWEEN_PAYROLL_WORKPLACE: workplace,
+    BITWEEN_PAYROLL_PERIOD: period,
+    BITWEEN_AUTH_CONFIGURED: "true",
+    BITWEEN_SESSION_JWT_VERIFIED: "true",
+    BITWEEN_SESSION_JWT_ISSUER: "https://dev-auth.bitween.local",
+    BITWEEN_SESSION_JWT_AUDIENCE: "bitween-platform",
+    BITWEEN_SESSION_JWT_SUBJECT: "dev-bypass-operator",
+    BITWEEN_SESSION_JWT_EXPIRES_AT_UNIX: "4102444800",
+    BITWEEN_WEBAUTHN_USER_VERIFIED: "true",
+    BITWEEN_SESSION_ACR_LEVEL: "critical",
+    BITWEEN_SESSION_ACR_EVENT_AT_UNIX: "1",
+    BITWEEN_SESSION_ROLE: process.env.BITWEEN_SESSION_ROLE || "platform_owner",
+    BITWEEN_SESSION_AUTHZ_POLICY_ID:
+      process.env.BITWEEN_SESSION_AUTHZ_POLICY_ID || "bitween.authz.rbac-abac-pbac.v1",
+    BITWEEN_SESSION_AUTHZ_TENANT_ID: tenantId,
+    BITWEEN_SESSION_AUTHZ_LEGAL_ENTITY: legalEntity,
+    BITWEEN_SESSION_AUTHZ_WORKPLACE: workplace,
+    BITWEEN_SESSION_AUTH_FAILURE_REASON: ""
+  };
+}
+
 function authSessionEnvForRustTargets() {
+  if (devAuthBypassActive) return devAuthBypassEnv();
   if (!authSessionValidationConfigured()) return process.env;
   const result = runAuthSessionValidate();
   let verification;
@@ -1689,4 +1757,9 @@ for (const filePath of [
 
 server.listen(port, "127.0.0.1", () => {
   console.log(`Bitween Rust live UI running at http://127.0.0.1:${port}`);
+  if (devAuthBypassActive) {
+    console.warn(
+      "WARNING: BITWEEN_DEV_AUTH_BYPASS active — login screen skipped with a synthesized platform_owner session. Local testing only; this can never run in production (the server refuses to boot under NODE_ENV/BITWEEN_RUNTIME_MODE=production or BITWEEN_AUTH_REQUIRED=true)."
+    );
+  }
 });
