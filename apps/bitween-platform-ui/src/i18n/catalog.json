@@ -6217,6 +6217,195 @@
       }
     },
     {
+      "key": "preview.payroll.reconciliation.title",
+      "values": {
+        "ko-KR": "급여 실행 및 원장 대조",
+        "en-US": "Payroll run and ledger reconciliation",
+        "zh-Hans-CN": "薪资执行与台账核对",
+        "ja-JP": "給与計算と元帳照合"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.detail",
+      "values": {
+        "ko-KR": "계산 결과를 원본 급여대장과 비교해 차인지급액이 정확히 일치하는지 확인합니다.",
+        "en-US": "Compare the computed results with the original payroll ledger to confirm that net pay matches exactly.",
+        "zh-Hans-CN": "将计算结果与原始薪资台账比较，确认实发金额完全一致。",
+        "ja-JP": "計算結果を元の給与台帳と比較し、差引支給額が完全に一致するか確認します。"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.failed",
+      "values": {
+        "ko-KR": "급여 대조 결과를 불러오지 못했습니다.",
+        "en-US": "Could not load the payroll reconciliation result.",
+        "zh-Hans-CN": "无法加载薪资核对结果。",
+        "ja-JP": "給与照合の結果を読み込めませんでした。"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.empty.title",
+      "values": {
+        "ko-KR": "대조할 급여 자료가 없습니다",
+        "en-US": "No payroll records to reconcile",
+        "zh-Hans-CN": "暂无可核对的薪资记录",
+        "ja-JP": "照合できる給与データがありません"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.empty.detail",
+      "values": {
+        "ko-KR": "해당 기간의 급여 입력을 먼저 등록하면 대조 결과가 표시됩니다.",
+        "en-US": "Register payroll inputs for this period first to see reconciliation results.",
+        "zh-Hans-CN": "请先登记该期间的薪资输入，核对结果即会显示。",
+        "ja-JP": "対象期間の給与入力を先に登録すると照合結果が表示されます。"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.badge.pass",
+      "values": {
+        "ko-KR": "전원 일치",
+        "en-US": "All matched",
+        "zh-Hans-CN": "全部一致",
+        "ja-JP": "全員一致"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.badge.variance",
+      "values": {
+        "ko-KR": "차이 있음",
+        "en-US": "Variance found",
+        "zh-Hans-CN": "存在差异",
+        "ja-JP": "差異あり"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.summary.period",
+      "values": {
+        "ko-KR": "정산 기간",
+        "en-US": "Period",
+        "zh-Hans-CN": "结算期间",
+        "ja-JP": "対象期間"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.summary.workers",
+      "values": {
+        "ko-KR": "일치 인원",
+        "en-US": "Matched workers",
+        "zh-Hans-CN": "一致人数",
+        "ja-JP": "一致人数"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.summary.matchCount",
+      "values": {
+        "ko-KR": "{matched}명 / {total}명 일치",
+        "en-US": "{matched} of {total} matched",
+        "zh-Hans-CN": "{matched} / {total} 一致",
+        "ja-JP": "{matched}名 / {total}名 一致"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.summary.gross",
+      "values": {
+        "ko-KR": "급여총액 합계",
+        "en-US": "Total gross pay",
+        "zh-Hans-CN": "薪资总额合计",
+        "ja-JP": "給与総額合計"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.summary.deductions",
+      "values": {
+        "ko-KR": "공제총액 합계",
+        "en-US": "Total deductions",
+        "zh-Hans-CN": "扣除总额合计",
+        "ja-JP": "控除総額合計"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.summary.net",
+      "values": {
+        "ko-KR": "차인지급액 합계",
+        "en-US": "Total net pay",
+        "zh-Hans-CN": "实发金额合计",
+        "ja-JP": "差引支給額合計"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.summary.status",
+      "values": {
+        "ko-KR": "대조 결과",
+        "en-US": "Reconciliation status",
+        "zh-Hans-CN": "核对结果",
+        "ja-JP": "照合結果"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.row.match",
+      "values": {
+        "ko-KR": "일치",
+        "en-US": "Match",
+        "zh-Hans-CN": "一致",
+        "ja-JP": "一致"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.row.delta",
+      "values": {
+        "ko-KR": "차이 {delta}",
+        "en-US": "Δ {delta}",
+        "zh-Hans-CN": "差异 {delta}",
+        "ja-JP": "差異 {delta}"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.column.name",
+      "values": {
+        "ko-KR": "성명",
+        "en-US": "Name",
+        "zh-Hans-CN": "姓名",
+        "ja-JP": "氏名"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.column.gross",
+      "values": {
+        "ko-KR": "급여총액",
+        "en-US": "Gross pay",
+        "zh-Hans-CN": "薪资总额",
+        "ja-JP": "給与総額"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.column.deductions",
+      "values": {
+        "ko-KR": "공제총액",
+        "en-US": "Deductions",
+        "zh-Hans-CN": "扣除总额",
+        "ja-JP": "控除総額"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.column.net",
+      "values": {
+        "ko-KR": "차인지급액",
+        "en-US": "Net pay",
+        "zh-Hans-CN": "实发金额",
+        "ja-JP": "差引支給額"
+      }
+    },
+    {
+      "key": "preview.payroll.reconciliation.column.status",
+      "values": {
+        "ko-KR": "대조",
+        "en-US": "Status",
+        "zh-Hans-CN": "核对",
+        "ja-JP": "照合"
+      }
+    },
+    {
       "key": "preview.payroll.detail.nextActionRule",
       "values": {
         "ko-KR": "다음 조치 규칙",

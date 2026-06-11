@@ -1623,7 +1623,7 @@ async fn load_postgres_steps(
                     condition_expression::text, permission_scope::text, enabled, \
                     EXTRACT(EPOCH FROM updated_at)::bigint \
              FROM bitween_workflow.workflow_node \
-             WHERE tenant_id = $1 AND template_version_id = $2::uuid \
+             WHERE tenant_id = $1 AND template_version_id = $2::text::uuid \
              ORDER BY position_y, position_x, step_key",
             &[&session.scope.tenant_id, &version_id],
         )
@@ -1676,7 +1676,7 @@ async fn apply_postgres_edges(
              FROM bitween_workflow.workflow_edge edge \
              JOIN bitween_workflow.workflow_node from_node ON from_node.id = edge.from_node_id \
              JOIN bitween_workflow.workflow_node to_node ON to_node.id = edge.to_node_id \
-             WHERE edge.tenant_id = $1 AND edge.template_version_id = $2::uuid \
+             WHERE edge.tenant_id = $1 AND edge.template_version_id = $2::text::uuid \
              ORDER BY from_node.step_key, edge.sort_order, to_node.step_key",
             &[&session.scope.tenant_id, &version_id],
         )
@@ -1705,7 +1705,7 @@ async fn load_postgres_data_records(
             "SELECT step_key, record_type, target, status, record_count, payload::text, \
                     EXTRACT(EPOCH FROM updated_at)::bigint \
              FROM bitween_workflow.workflow_data_record \
-             WHERE tenant_id = $1 AND template_version_id = $2::uuid \
+             WHERE tenant_id = $1 AND template_version_id = $2::text::uuid \
              ORDER BY updated_at DESC, step_key",
             &[&session.scope.tenant_id, &version_id],
         )
@@ -1750,7 +1750,7 @@ async fn load_postgres_template_versions(
             "SELECT id::text, version, graph_hash, change_summary, created_by, \
                     EXTRACT(EPOCH FROM created_at)::bigint, rollback_of_version \
              FROM bitween_workflow.workflow_template_version \
-             WHERE tenant_id = $1 AND template_id = $2::uuid \
+             WHERE tenant_id = $1 AND template_id = $2::text::uuid \
              ORDER BY version",
             &[&session.scope.tenant_id, &template_id],
         )
@@ -1849,7 +1849,7 @@ async fn save_postgres_template(
         .query_one(
             "INSERT INTO bitween_workflow.workflow_template_version \
                (template_id, tenant_id, version, status, graph_hash, change_summary, created_by, rollback_of_version) \
-             VALUES ($1::uuid, $2, $3, 'published', $4, $5, $6, $7) \
+             VALUES ($1::text::uuid, $2, $3, 'published', $4, $5, $6, $7) \
              ON CONFLICT (template_id, version) DO UPDATE SET \
                status = 'published', graph_hash = EXCLUDED.graph_hash, change_summary = EXCLUDED.change_summary, \
                rollback_of_version = EXCLUDED.rollback_of_version, \
@@ -1866,19 +1866,19 @@ async fn save_postgres_template(
             ],
         )
         .await
-        .map_err(|_| "workflow_postgres_version_upsert_failed".to_owned())?
+        .map_err(|e| format!("workflow_postgres_version_upsert_failed: {e}"))?
         .get::<_, String>(0);
 
     transaction
         .execute(
-            "DELETE FROM bitween_workflow.workflow_edge WHERE tenant_id = $1 AND template_version_id = $2::uuid",
+            "DELETE FROM bitween_workflow.workflow_edge WHERE tenant_id = $1 AND template_version_id = $2::text::uuid",
             &[&tenant_id, &version_id],
         )
         .await
         .map_err(|_| "workflow_postgres_edge_replace_failed".to_owned())?;
     transaction
         .execute(
-            "DELETE FROM bitween_workflow.workflow_node WHERE tenant_id = $1 AND template_version_id = $2::uuid",
+            "DELETE FROM bitween_workflow.workflow_node WHERE tenant_id = $1 AND template_version_id = $2::text::uuid",
             &[&tenant_id, &version_id],
         )
         .await
@@ -1915,7 +1915,7 @@ async fn save_postgres_nodes(
                 "INSERT INTO bitween_workflow.workflow_node \
                    (template_id, template_version_id, tenant_id, step_key, title, action, owner_role, status, tone, lane, node_type, \
                     position_x, position_y, condition_expression, permission_scope, slo_minutes, escalation_role, enabled, updated_by) \
-                 VALUES ($1::uuid, $2::uuid, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::jsonb, $15::jsonb, $16, $17, $18, $19) \
+                 VALUES ($1::text::uuid, $2::text::uuid, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14::text::jsonb, $15::text::jsonb, $16, $17, $18, $19) \
                  RETURNING id::text",
                 &[
                     &template_id,
@@ -1969,7 +1969,7 @@ async fn save_postgres_edges(
                 .execute(
                     "INSERT INTO bitween_workflow.workflow_edge \
                        (template_id, template_version_id, tenant_id, from_node_id, to_node_id, edge_type, condition_expression, sort_order, created_by) \
-                     VALUES ($1::uuid, $2::uuid, $3, $4::uuid, $5::uuid, 'success', '{}'::jsonb, $6, $7)",
+                     VALUES ($1::text::uuid, $2::text::uuid, $3, $4::text::uuid, $5::text::uuid, 'success', '{}'::jsonb, $6, $7)",
                     &[
                         &template_id,
                         &version_id,
@@ -2010,7 +2010,7 @@ async fn save_postgres_data_records(
             .execute(
                 "INSERT INTO bitween_workflow.workflow_data_record \
                    (template_id, template_version_id, tenant_id, step_key, record_type, target, status, scope_hash, business_scope, record_count, payload, evidence, updated_by) \
-                 VALUES ($1::uuid, $2::uuid, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11::jsonb, $12::jsonb, $13) \
+                 VALUES ($1::text::uuid, $2::text::uuid, $3, $4, $5, $6, $7, $8, $9::text::jsonb, $10, $11::text::jsonb, $12::text::jsonb, $13) \
                  ON CONFLICT (tenant_id, template_version_id, step_key, record_type, scope_hash) DO UPDATE SET \
                    target = EXCLUDED.target, status = EXCLUDED.status, business_scope = EXCLUDED.business_scope, \
                    record_count = EXCLUDED.record_count, payload = EXCLUDED.payload, evidence = EXCLUDED.evidence, \
@@ -2057,7 +2057,7 @@ async fn insert_postgres_audit_event(
         .execute(
             "INSERT INTO bitween_workflow.workflow_audit_event \
                (template_id, template_version_id, tenant_id, step_key, action, actor_user_id, actor_role, before_state, after_state, trace_id) \
-             VALUES ($1::uuid, $2::uuid, $3, $4, $5, $6, 'platform_owner', '{}'::jsonb, $7::jsonb, $8)",
+             VALUES ($1::text::uuid, $2::text::uuid, $3, $4, $5, $6, 'platform_owner', '{}'::jsonb, $7::text::jsonb, $8)",
             &[
                 &template_id,
                 &version_id_param,

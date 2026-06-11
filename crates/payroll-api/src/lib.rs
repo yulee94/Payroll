@@ -20,6 +20,7 @@ pub mod payroll_attendance_schema;
 pub mod policy;
 pub mod policy_resolution;
 pub mod postgres_repository;
+pub mod reconciliation;
 pub mod request;
 pub mod rls_enforcement_schema;
 pub mod response;
@@ -126,6 +127,10 @@ pub use policy::{
 };
 pub use policy_resolution::{
     OperationPolicySource, PayrollPolicySettings, ResolvedOperationPolicy, resolve_operation_policy,
+};
+pub use reconciliation::{
+    LedgerWorker, ReconciliationReport, ReconciliationTotals, WorkerReconciliation,
+    reconcile_period, reconcile_worker,
 };
 pub use postgres_repository::{
     PostgresClientSession, PostgresConnectionFailure, PostgresDriverConfig,

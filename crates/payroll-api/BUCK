@@ -23,6 +23,7 @@ PAYROLL_API_SRCS = [
     "src/policy.rs",
     "src/policy_resolution.rs",
     "src/postgres_repository.rs",
+    "src/reconciliation.rs",
     "src/request.rs",
     "src/rls_enforcement_schema.rs",
     "src/response.rs",
@@ -279,4 +280,48 @@ rust_test(
         "//third-party/rust:serde",
         "//third-party/rust:serde_json",
     ],
+)
+
+rust_binary(
+    name = "payroll_ledger_import",
+    crate = "payroll_ledger_import",
+    crate_root = "src/bin/payroll_ledger_import.rs",
+    edition = "2024",
+    srcs = ["src/bin/payroll_ledger_import.rs"],
+    deps = [
+        ":payroll_api",
+    ] + PAYROLL_API_DEPS,
+)
+
+rust_test(
+    name = "payroll_ledger_import_test",
+    crate = "payroll_ledger_import",
+    crate_root = "src/bin/payroll_ledger_import.rs",
+    edition = "2024",
+    srcs = ["src/bin/payroll_ledger_import.rs"],
+    deps = [
+        ":payroll_api",
+    ] + PAYROLL_API_DEPS,
+)
+
+rust_binary(
+    name = "payroll_run",
+    crate = "payroll_run",
+    crate_root = "src/bin/payroll_run.rs",
+    edition = "2024",
+    srcs = ["src/bin/payroll_run.rs"],
+    deps = [
+        ":payroll_api",
+    ] + PAYROLL_API_DEPS,
+)
+
+rust_test(
+    name = "payroll_run_test",
+    crate = "payroll_run",
+    crate_root = "src/bin/payroll_run.rs",
+    edition = "2024",
+    srcs = ["src/bin/payroll_run.rs"],
+    deps = [
+        ":payroll_api",
+    ] + PAYROLL_API_DEPS,
 )
