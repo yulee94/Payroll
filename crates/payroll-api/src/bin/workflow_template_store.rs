@@ -11,7 +11,6 @@ use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 use std::process;
 use std::time::{SystemTime, UNIX_EPOCH};
-use tokio_postgres::GenericClient;
 
 const DEFAULT_TEMPLATE_ID: &str = "payroll-close";
 const MAX_POSITION: u16 = 100;

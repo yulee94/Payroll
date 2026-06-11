@@ -76,8 +76,11 @@ CREATE INDEX IF NOT EXISTS archive_admission_rollback_tenant_idx
   ON bitween_archive.archive_admission_rollback (tenant_id, requested_at DESC);
 
 ALTER TABLE bitween_archive.archive_admission_recovery_point ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bitween_archive.archive_admission_recovery_point FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_archive.archive_source_sync ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bitween_archive.archive_source_sync FORCE ROW LEVEL SECURITY;
 ALTER TABLE bitween_archive.archive_admission_rollback ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bitween_archive.archive_admission_rollback FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY archive_admission_recovery_point_tenant_isolation
   ON bitween_archive.archive_admission_recovery_point

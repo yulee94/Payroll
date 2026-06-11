@@ -122,6 +122,10 @@ mod tests {
                 sql.contains(&format!("ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")),
                 "missing RLS enablement for {table}"
             );
+            assert!(
+                sql.contains(&format!("ALTER TABLE {table} FORCE ROW LEVEL SECURITY")),
+                "missing RLS force for {table}; table owners bypass RLS without FORCE"
+            );
         }
         assert!(sql.contains("current_setting('bitween.tenant_id', true)"));
         assert!(sql.contains("WITH CHECK (tenant_id = current_setting('bitween.tenant_id', true))"));

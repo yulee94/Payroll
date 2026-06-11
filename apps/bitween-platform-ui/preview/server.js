@@ -406,8 +406,9 @@ function requestError(statusCode, code, message) {
 
 function decodeRequestPath(rawUrl) {
   const rawPath = String(rawUrl || "/").split("?")[0] || "/";
+  let decoded;
   try {
-    return { ok: true, urlPath: decodeURIComponent(rawPath) };
+    decoded = decodeURIComponent(rawPath);
   } catch {
     return {
       ok: false,
@@ -415,6 +416,14 @@ function decodeRequestPath(rawUrl) {
       error: requestError(400, "request_path_invalid", "요청 경로 형식이 올바르지 않습니다.")
     };
   }
+  if (decoded.includes("\0")) {
+    return {
+      ok: false,
+      urlPath: rawPath,
+      error: requestError(400, "request_path_invalid", "요청 경로 형식이 올바르지 않습니다.")
+    };
+  }
+  return { ok: true, urlPath: decoded };
 }
 
 function requireAuthorizedOperation(operation) {
@@ -556,6 +565,10 @@ function originHost(value) {
   }
 }
 
+// Trust model: requests with neither an Origin nor a Sec-Fetch-Site header pass this
+// check by design; browser-initiated cross-origin requests always carry one of them,
+// and non-browser clients have no ambient cookies. The authoritative gate for mutations
+// is the Rust authz_decision session check plus the 127.0.0.1 bind.
 function requireSameOriginMutation(req) {
   if (!isMutationMethod(req.method || "")) return;
   const host = requestHost(req);
@@ -981,6 +994,9 @@ function extractZipIntakeSamples(file) {
     if (!safeName || entry.isDirectory || entry.isEncrypted || isZipSymlink(entry)) continue;
     const ext = path.extname(safeName).slice(1).toLowerCase();
     if (!["csv", "tsv", "txt", "xlsx"].includes(ext)) continue;
+    // NOTE: uncompressedSize comes from the attacker-controlled central directory and is
+    // only an early-skip optimization — the enforced bound is maxOutputLength passed to
+    // zlib.inflateRawSync in readZipEntryBuffer.
     if (entry.uncompressedSize > maxZipMemberBytes) continue;
     if (totalExtracted + entry.uncompressedSize > maxZipTotalExtractedBytes) break;
     const data = readZipEntryBuffer(
@@ -1641,14 +1657,23 @@ const server = http.createServer(async (req, res) => {
     sendIndex(res);
     return;
   }
-  const safePath = urlPath;
-  const filePath = path.normalize(path.join(root, safePath));
-  if (!filePath.startsWith(root)) {
-    res.writeHead(403, { ...noCacheHeaders, "content-type": "text/plain; charset=utf-8" });
-    res.end("Forbidden");
-    return;
+  try {
+    const safePath = urlPath;
+    const filePath = path.normalize(path.join(root, safePath));
+    if (filePath !== root && !filePath.startsWith(root + path.sep)) {
+      res.writeHead(403, { ...noCacheHeaders, "content-type": "text/plain; charset=utf-8" });
+      res.end("Forbidden");
+      return;
+    }
+    sendFile(res, filePath);
+  } catch (error) {
+    res.writeHead(500, { ...noCacheHeaders, "content-type": types[".json"] });
+    res.end(JSON.stringify({
+      ok: false,
+      error: "static_file_error",
+      detail: error.message
+    }));
   }
-  sendFile(res, filePath);
 });
 
 for (const filePath of [

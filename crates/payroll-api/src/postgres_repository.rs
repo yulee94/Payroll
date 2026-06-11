@@ -128,10 +128,7 @@ impl PostgresClientSession {
         &self,
         migrations: &[PostgresMigration],
     ) -> Result<Vec<PostgresMigrationReceipt>, PostgresConnectionFailure> {
-        self.client
-            .batch_execute(postgres_migration_registry_sql())
-            .await
-            .map_err(|_| self.failure("postgres_migration_registry_failed"))?;
+        self.bootstrap_migration_registry().await?;
 
         let mut receipts = Vec::with_capacity(migrations.len());
         for migration in migrations {
@@ -140,10 +137,80 @@ impl PostgresClientSession {
         Ok(receipts)
     }
 
+    /// Creates the migration ledger schema/table under the same advisory lock as
+    /// migration apply: CREATE SCHEMA/TABLE IF NOT EXISTS is not concurrency-safe
+    /// during true first creation (two sessions can both pass the not-exists check
+    /// and the loser fails on a catalog unique index), so the bootstrap must be
+    /// serialized too.
+    async fn bootstrap_migration_registry(&self) -> Result<(), PostgresConnectionFailure> {
+        self.client
+            .batch_execute(postgres_migration_begin_sql())
+            .await
+            .map_err(|_| self.failure("postgres_migration_transaction_failed"))?;
+        let bootstrap = async {
+            self.client
+                .execute(postgres_migration_lock_sql(), &[&POSTGRES_MIGRATION_LOCK_KEY])
+                .await
+                .map_err(|_| self.failure("postgres_migration_lock_failed"))?;
+            self.client
+                .batch_execute(postgres_migration_registry_sql())
+                .await
+                .map_err(|_| self.failure("postgres_migration_registry_failed"))
+        };
+        match bootstrap.await {
+            Ok(_) => {
+                self.client
+                    .batch_execute("COMMIT")
+                    .await
+                    .map_err(|_| self.failure("postgres_migration_transaction_failed"))?;
+                Ok(())
+            }
+            Err(failure) => {
+                let _ = self.client.batch_execute("ROLLBACK").await;
+                Err(failure)
+            }
+        }
+    }
+
     async fn apply_migration(
         &self,
         migration: PostgresMigration,
     ) -> Result<PostgresMigrationReceipt, PostgresConnectionFailure> {
+        self.client
+            .batch_execute(postgres_migration_begin_sql())
+            .await
+            .map_err(|_| self.failure("postgres_migration_transaction_failed"))?;
+        match self.apply_migration_in_transaction(migration).await {
+            Ok(receipt) => {
+                self.client
+                    .batch_execute("COMMIT")
+                    .await
+                    .map_err(|_| self.failure("postgres_migration_transaction_failed"))?;
+                Ok(receipt)
+            }
+            Err(failure) => {
+                let _ = self.client.batch_execute("ROLLBACK").await;
+                Err(failure)
+            }
+        }
+    }
+
+    async fn apply_migration_in_transaction(
+        &self,
+        migration: PostgresMigration,
+    ) -> Result<PostgresMigrationReceipt, PostgresConnectionFailure> {
+        // Six store binaries run apply_required_migrations at startup and may race
+        // on a fresh database. The transaction-scoped advisory lock serializes
+        // migrators; the lookup runs after the lock so a concurrent migrator's
+        // committed ledger row is visible (this requires READ COMMITTED, which the
+        // explicit BEGIN pins regardless of default_transaction_isolation). The
+        // lock releases at COMMIT/ROLLBACK, which also makes DDL + ledger insert
+        // atomic.
+        self.client
+            .execute(postgres_migration_lock_sql(), &[&POSTGRES_MIGRATION_LOCK_KEY])
+            .await
+            .map_err(|_| self.failure("postgres_migration_lock_failed"))?;
+
         let checksum = migration.checksum_sha256();
         if let Some(row) = self
             .client
@@ -339,6 +406,23 @@ pub fn required_postgres_migrations() -> [PostgresMigration; 7] {
 
 pub fn postgres_migration_registry_sql() -> &'static str {
     "CREATE SCHEMA IF NOT EXISTS bitween_migrations;\nCREATE TABLE IF NOT EXISTS bitween_migrations.schema_migration (\n    migration_name text PRIMARY KEY,\n    checksum_sha256 char(64) NOT NULL CHECK (checksum_sha256 ~ '^[0-9a-f]{64}$'),\n    applied_at timestamptz NOT NULL DEFAULT now()\n);"
+}
+
+/// Cluster-wide advisory lock key reserved for schema migration serialization.
+pub const POSTGRES_MIGRATION_LOCK_KEY: i64 = 0x6269_7477_6565_6e01;
+
+pub fn postgres_migration_begin_sql() -> &'static str {
+    // Lock-then-lookup visibility requires per-statement snapshots: under
+    // REPEATABLE READ/SERIALIZABLE the snapshot is taken when the advisory-lock
+    // SELECT starts executing (before it blocks), so a concurrent migrator's
+    // committed ledger row would be invisible after the lock is granted. Pin
+    // READ COMMITTED so an inherited default_transaction_isolation cannot
+    // break that invariant.
+    "BEGIN ISOLATION LEVEL READ COMMITTED"
+}
+
+pub fn postgres_migration_lock_sql() -> &'static str {
+    "SELECT pg_advisory_xact_lock($1)"
 }
 
 pub fn postgres_migration_lookup_sql() -> &'static str {
@@ -612,5 +696,20 @@ mod tests {
             postgres_migration_insert_sql(),
             "INSERT INTO bitween_migrations.schema_migration (migration_name, checksum_sha256) VALUES ($1, $2)"
         );
+    }
+
+    #[test]
+    fn migration_transactions_pin_isolation_and_serialize_on_one_lock_key() {
+        // Lock-then-lookup visibility depends on per-statement snapshots, so the
+        // explicit BEGIN must pin READ COMMITTED rather than inherit
+        // default_transaction_isolation.
+        assert_eq!(
+            postgres_migration_begin_sql(),
+            "BEGIN ISOLATION LEVEL READ COMMITTED"
+        );
+        // Transaction-scoped advisory lock: released at COMMIT/ROLLBACK, shared
+        // by the registry bootstrap and every migration apply.
+        assert_eq!(postgres_migration_lock_sql(), "SELECT pg_advisory_xact_lock($1)");
+        assert_eq!(POSTGRES_MIGRATION_LOCK_KEY, 0x6269_7477_6565_6e01);
     }
 }

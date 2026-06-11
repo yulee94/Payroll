@@ -86,7 +86,7 @@ spec:
                 command: ["/bin/sh", "-c", "pg_ctl -D /var/lib/postgresql/data/pgdata -m fast -w stop"]
           securityContext:
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
           volumeMounts:
@@ -94,10 +94,15 @@ spec:
               mountPath: /var/lib/postgresql/data
             - name: tmp
               mountPath: /tmp
+            - name: run-postgresql
+              mountPath: /var/run/postgresql
       volumes:
         - name: tmp
           emptyDir:
             sizeLimit: 256Mi
+        - name: run-postgresql
+          emptyDir:
+            sizeLimit: 16Mi
   volumeClaimTemplates:
     - metadata:
         name: data
