@@ -62,6 +62,8 @@ const state = {
   liveError: undefined,
   liveView: undefined,
   locale: "ko-KR",
+  payrollReconciliation: undefined,
+  payrollReconciliationError: undefined,
   profileMenuOpen: false,
   selectedEmployeeId: "",
   selectedAdminKey: "",
@@ -114,6 +116,7 @@ async function boot() {
   await applyPreferenceResponse(preferencesResponse);
   await applyAuthRoutesResponse(authRoutesResponse);
   await applyWorkflowResponse(workflowResponse);
+  await loadPayrollReconciliation();
   document.title = t("preview.documentTitle");
   render();
 }
@@ -142,6 +145,7 @@ async function refreshLiveView() {
   await loadUserPreferences();
   await loadAuthRoutes();
   await loadWorkflowTemplates();
+  await loadPayrollReconciliation();
   render();
 }
 
@@ -173,6 +177,33 @@ async function applyHrResponse(response) {
 async function loadArchiveIntakes() {
   const response = await fetch("/api/archive/v1/intake");
   await applyArchiveResponse(response);
+}
+
+function payrollReconciliationPeriod() {
+  return state.liveView?.payroll?.scope?.period || "";
+}
+
+async function loadPayrollReconciliation() {
+  const period = payrollReconciliationPeriod();
+  if (!period) {
+    state.payrollReconciliation = undefined;
+    state.payrollReconciliationError = undefined;
+    return;
+  }
+  const response = await fetch(`/api/payroll/v1/run?period=${encodeURIComponent(period)}`);
+  await applyPayrollReconciliationResponse(response);
+}
+
+async function applyPayrollReconciliationResponse(response) {
+  if (response.ok) {
+    state.payrollReconciliation = await response.json();
+    state.payrollReconciliationError = undefined;
+  } else {
+    state.payrollReconciliation = undefined;
+    state.payrollReconciliationError = await response.json().catch(() => ({
+      detail: t("preview.payroll.reconciliation.failed")
+    }));
+  }
 }
 
 async function loadUserPreferences() {
@@ -1440,7 +1471,67 @@ function renderPayroll() {
       ${payrollStageSummary(allSteps)}
       ${workSurfacePanel(steps, selected, "payroll")}
     </section>
+    <section class="card payroll-reconciliation-card">
+      ${sectionHead("", t("preview.payroll.reconciliation.title"), t("preview.payroll.reconciliation.detail"))}
+      ${payrollReconciliationPanel()}
+    </section>
   `;
+}
+
+function formatWon(value) {
+  const amount = Number(value) || 0;
+  return new Intl.NumberFormat(state.locale).format(Math.round(amount));
+}
+
+function payrollReconciliationPanel() {
+  if (state.payrollReconciliationError) {
+    return `<div class="notice warning">${escapeText(state.payrollReconciliationError.detail || t("preview.payroll.reconciliation.failed"))}</div>`;
+  }
+  const report = state.payrollReconciliation;
+  if (!report || !Array.isArray(report.workers) || report.workers.length === 0) {
+    return empty(t("preview.payroll.reconciliation.empty.title"), t("preview.payroll.reconciliation.empty.detail"));
+  }
+  const totals = report.totals || {};
+  const aggregateBadge = totals.all_net_match
+    ? badge(t("preview.payroll.reconciliation.badge.pass"), "ready")
+    : badge(t("preview.payroll.reconciliation.badge.variance"), "blocked");
+  const summary = `
+    <div class="payroll-reconciliation-summary">
+      <div class="detail-grid">
+        <div class="detail-item"><span class="helper">${t("preview.payroll.reconciliation.summary.period")}</span><strong>${escapeText(report.period || "")}</strong></div>
+        <div class="detail-item"><span class="helper">${t("preview.payroll.reconciliation.summary.workers")}</span><strong>${t("preview.payroll.reconciliation.summary.matchCount", { matched: totals.net_match_count ?? 0, total: totals.workers ?? 0 })}</strong></div>
+        <div class="detail-item"><span class="helper">${t("preview.payroll.reconciliation.summary.gross")}</span><strong>${formatWon(totals.gross)}</strong></div>
+        <div class="detail-item"><span class="helper">${t("preview.payroll.reconciliation.summary.deductions")}</span><strong>${formatWon(totals.total_deductions)}</strong></div>
+        <div class="detail-item"><span class="helper">${t("preview.payroll.reconciliation.summary.net")}</span><strong>${formatWon(totals.net)}</strong></div>
+        <div class="detail-item"><span class="helper">${t("preview.payroll.reconciliation.summary.status")}</span>${aggregateBadge}</div>
+      </div>
+    </div>`;
+  const rows = report.workers.map((worker) => {
+    const matchBadge = worker.net_match
+      ? badge(t("preview.payroll.reconciliation.row.match"), "ready")
+      : badge(t("preview.payroll.reconciliation.row.delta", { delta: formatWon((worker.computed_net ?? 0) - (worker.source_net ?? 0)) }), "blocked");
+    const name = worker.name || worker.employee_key || "";
+    return `
+      <div class="payroll-reconciliation-row" role="row">
+        <span class="payroll-reconciliation-name"><strong>${escapeText(name)}</strong></span>
+        <span class="payroll-reconciliation-amount">${formatWon(worker.gross)}</span>
+        <span class="payroll-reconciliation-amount">${formatWon(worker.source_deductions)}</span>
+        <span class="payroll-reconciliation-amount">${formatWon(worker.source_net)}</span>
+        <span class="payroll-reconciliation-status">${matchBadge}</span>
+      </div>`;
+  }).join("");
+  return `
+    ${summary}
+    <div class="payroll-reconciliation-table" role="table" aria-label="${t("preview.payroll.reconciliation.title")}">
+      <div class="payroll-reconciliation-row payroll-reconciliation-head" role="row">
+        <span>${t("preview.payroll.reconciliation.column.name")}</span>
+        <span class="payroll-reconciliation-amount">${t("preview.payroll.reconciliation.column.gross")}</span>
+        <span class="payroll-reconciliation-amount">${t("preview.payroll.reconciliation.column.deductions")}</span>
+        <span class="payroll-reconciliation-amount">${t("preview.payroll.reconciliation.column.net")}</span>
+        <span class="payroll-reconciliation-status">${t("preview.payroll.reconciliation.column.status")}</span>
+      </div>
+      ${rows}
+    </div>`;
 }
 
 function renderWorkflow() {

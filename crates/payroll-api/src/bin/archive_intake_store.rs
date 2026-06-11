@@ -852,7 +852,7 @@ async fn load_postgres_issues(
         .query(
             "SELECT issue_type, code, severity, COALESCE(column_name, '') \
              FROM bitween_archive.archive_intake_issue \
-             WHERE tenant_id = $1 AND intake_id = $2::uuid AND status = 'open' \
+             WHERE tenant_id = $1 AND intake_id = $2::text::uuid AND status = 'open' \
              ORDER BY created_at, code, COALESCE(column_name, '')",
             &[&session.scope.tenant_id, &intake_id],
         )
@@ -951,7 +951,7 @@ async fn load_postgres_source_versions(
             "SELECT version, object_uri, content_sha256, file_size_bytes, \
                     EXTRACT(EPOCH FROM created_at)::bigint \
              FROM bitween_archive.archive_intake_version \
-             WHERE tenant_id = $1 AND intake_id = $2::uuid \
+             WHERE tenant_id = $1 AND intake_id = $2::text::uuid \
              ORDER BY version DESC \
              LIMIT 20",
             &[&session.scope.tenant_id, &intake_id],
@@ -985,7 +985,7 @@ async fn load_postgres_recovery_points(
             "SELECT id::text, target_table, business_key, action, before_exists, recovery_status, \
                     EXTRACT(EPOCH FROM captured_at)::bigint \
              FROM bitween_archive.archive_admission_recovery_point \
-             WHERE tenant_id = $1 AND intake_id = $2::uuid \
+             WHERE tenant_id = $1 AND intake_id = $2::text::uuid \
              ORDER BY captured_at DESC, business_key \
              LIMIT 50",
             &[&session.scope.tenant_id, &intake_id],
@@ -1020,7 +1020,7 @@ async fn load_postgres_source_sync_items(
             "SELECT id::text, operation, status, source_object_uri, COALESCE(generated_object_uri, ''), \
                     EXTRACT(EPOCH FROM created_at)::bigint \
              FROM bitween_archive.archive_source_sync \
-             WHERE tenant_id = $1 AND intake_id = $2::uuid \
+             WHERE tenant_id = $1 AND intake_id = $2::text::uuid \
              ORDER BY created_at DESC \
              LIMIT 20",
             &[&session.scope.tenant_id, &intake_id],
@@ -1422,7 +1422,7 @@ async fn add_postgres_intake(
                 $6, $7, $8, $9, $10, \
                 $11, $12, $13, $14, \
                 $15, $16, $17, $18, $19, $20, \
-                $21, $22::jsonb, $23, $24, 'restricted' \
+                $21, $22::text::jsonb, $23, $24, 'restricted' \
              ) RETURNING id::text",
             &[
                 &tenant_id,
@@ -1452,7 +1452,7 @@ async fn add_postgres_intake(
             ],
         )
         .await
-        .map_err(|_| "archive_postgres_intake_insert_failed".to_owned())?;
+        .map_err(|e| format!("archive_postgres_intake_insert_failed: {e}"))?;
     let intake_id: String = row.get(0);
 
     transaction
@@ -1460,7 +1460,7 @@ async fn add_postgres_intake(
             "INSERT INTO bitween_archive.archive_intake_version ( \
                 intake_id, tenant_id, version, object_uri, object_bucket, object_key, \
                 content_sha256, file_size_bytes, created_by \
-             ) VALUES ($1::uuid, $2, 1, $3, $4, $5, $6, $7, $8)",
+             ) VALUES ($1::text::uuid, $2, 1, $3, $4, $5, $6, $7, $8)",
             &[
                 &intake_id,
                 &tenant_id,
@@ -1495,7 +1495,7 @@ async fn add_postgres_intake(
             .execute(
                 "INSERT INTO bitween_archive.archive_intake_issue ( \
                     intake_id, tenant_id, issue_type, code, severity, column_name, prompt, owner_role \
-                 ) VALUES ($1::uuid, $2, 'guidance', $3, $4, NULLIF($5, ''), $6, 'archive_operator')",
+                 ) VALUES ($1::text::uuid, $2, 'guidance', $3, $4, NULLIF($5, ''), $6, 'archive_operator')",
                 &[
                     &intake_id,
                     &tenant_id,
@@ -1516,7 +1516,7 @@ async fn add_postgres_intake(
             .execute(
                 "INSERT INTO bitween_archive.archive_intake_issue ( \
                     intake_id, tenant_id, issue_type, code, severity, column_name, prompt, owner_role \
-                 ) VALUES ($1::uuid, $2, 'anomaly', $3, $4, NULLIF($5, ''), $6, 'archive_operator')",
+                 ) VALUES ($1::text::uuid, $2, 'anomaly', $3, $4, NULLIF($5, ''), $6, 'archive_operator')",
                 &[
                     &intake_id,
                     &tenant_id,
@@ -1556,9 +1556,9 @@ async fn resolve_postgres_intake_issue(
     let updated = transaction
         .execute(
             "UPDATE bitween_archive.archive_intake_issue \
-             SET status = 'resolved', resolution = $6::jsonb, resolved_by = $7, resolved_at = now() \
+             SET status = 'resolved', resolution = $6::text::jsonb, resolved_by = $7, resolved_at = now() \
              WHERE tenant_id = $1 \
-               AND intake_id = $2::uuid \
+               AND intake_id = $2::text::uuid \
                AND issue_type = $3 \
                AND code = $4 \
                AND COALESCE(column_name, '') = $5 \
@@ -1604,7 +1604,7 @@ async fn apply_postgres_field_mappings(
             "SELECT family, database_target, extracted_columns::text, \
                     content_sample_row_count, status, next_action \
              FROM bitween_archive.archive_intake \
-             WHERE tenant_id = $1 AND id = $2::uuid \
+             WHERE tenant_id = $1 AND id = $2::text::uuid \
              FOR UPDATE",
             &[&tenant_id, &intake_id],
         )
@@ -1704,7 +1704,7 @@ async fn upsert_postgres_mapping_template(
         .execute(
             "INSERT INTO bitween_archive.archive_mapping_template ( \
                 tenant_id, business_family, source_fingerprint, target_table, mapping, status, approved_by, approved_at \
-             ) VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, CASE WHEN $6 = 'active' THEN now() ELSE NULL END) \
+             ) VALUES ($1, $2, $3, $4, $5::text::jsonb, $6, $7, CASE WHEN $6 = 'active' THEN now() ELSE NULL END) \
              ON CONFLICT (tenant_id, business_family, source_fingerprint, target_table) \
              DO UPDATE SET mapping = EXCLUDED.mapping, \
                            status = EXCLUDED.status, \
@@ -1742,9 +1742,9 @@ async fn refresh_postgres_mapping_issues(
         transaction
             .execute(
                 "UPDATE bitween_archive.archive_intake_issue \
-                 SET status = 'resolved', resolution = $4::jsonb, resolved_by = $5, resolved_at = now() \
+                 SET status = 'resolved', resolution = $4::text::jsonb, resolved_by = $5, resolved_at = now() \
                  WHERE tenant_id = $1 \
-                   AND intake_id = $2::uuid \
+                   AND intake_id = $2::text::uuid \
                    AND issue_type = 'guidance' \
                    AND code = 'confirm_missing_required_data' \
                    AND COALESCE(column_name, '') = $3 \
@@ -1764,9 +1764,9 @@ async fn refresh_postgres_mapping_issues(
         transaction
             .execute(
                 "UPDATE bitween_archive.archive_intake_issue \
-                 SET status = 'resolved', resolution = $4::jsonb, resolved_by = $5, resolved_at = now() \
+                 SET status = 'resolved', resolution = $4::text::jsonb, resolved_by = $5, resolved_at = now() \
                  WHERE tenant_id = $1 \
-                   AND intake_id = $2::uuid \
+                   AND intake_id = $2::text::uuid \
                    AND issue_type = 'guidance' \
                    AND code = 'explain_column' \
                    AND COALESCE(column_name, '') = $3 \
@@ -1796,7 +1796,7 @@ async fn refresh_postgres_mapping_issues(
             .execute(
                 "INSERT INTO bitween_archive.archive_intake_issue ( \
                     intake_id, tenant_id, issue_type, code, severity, column_name, prompt, owner_role \
-                 ) VALUES ($1::uuid, $2, 'guidance', $3, $4, NULLIF($5, ''), $6, 'archive_operator')",
+                 ) VALUES ($1::text::uuid, $2, 'guidance', $3, $4, NULLIF($5, ''), $6, 'archive_operator')",
                 &[
                     &intake_id,
                     &tenant_id,
@@ -1824,7 +1824,7 @@ async fn refresh_postgres_intake_review_state(
                   COALESCE(bool_or(issue_type = 'anomaly'), false) AS has_open_anomaly, \
                   COUNT(*) > 0 AS has_open_issue \
                 FROM bitween_archive.archive_intake_issue \
-                WHERE tenant_id = $1 AND intake_id = $2::uuid AND status = 'open' \
+                WHERE tenant_id = $1 AND intake_id = $2::text::uuid AND status = 'open' \
              ) \
              UPDATE bitween_archive.archive_intake \
              SET postgres_ready = ( \
@@ -1849,7 +1849,7 @@ async fn refresh_postgres_intake_review_state(
                         AND content_sample_row_count > 0 THEN 'converted' \
                    ELSE 'not_readable' \
                  END \
-             WHERE tenant_id = $1 AND id = $2::uuid",
+             WHERE tenant_id = $1 AND id = $2::text::uuid",
             &[&tenant_id, &intake_id],
         )
         .await
@@ -1874,7 +1874,7 @@ async fn admit_postgres_intake(
         .query_opt(
             "SELECT database_target, status, postgres_ready, payroll_period \
              FROM bitween_archive.archive_intake \
-             WHERE tenant_id = $1 AND id = $2::uuid \
+             WHERE tenant_id = $1 AND id = $2::text::uuid \
              FOR UPDATE",
             &[&tenant_id, &intake_id],
         )
@@ -1984,7 +1984,7 @@ async fn admit_postgres_intake(
             "UPDATE bitween_archive.archive_intake \
              SET status = $3, postgres_ready = false, next_action = 'none', \
                  admission_approved_by = $4, admission_approved_at = now() \
-             WHERE tenant_id = $1 AND id = $2::uuid",
+             WHERE tenant_id = $1 AND id = $2::text::uuid",
             &[&tenant_id, &intake_id, &admitted_status, &actor],
         )
         .await
@@ -2016,7 +2016,7 @@ async fn admit_postgres_hr_employee_staging(
                   row_hash, row_payload \
                 FROM bitween_archive.hr_employee_staging \
                 WHERE tenant_id = $1 \
-                  AND intake_id = $2::uuid \
+                  AND intake_id = $2::text::uuid \
                   AND validation_status IN ('pending_review', 'valid') \
                   AND NULLIF(display_name, '') IS NOT NULL \
                   AND NULLIF(department, '') IS NOT NULL \
@@ -2031,7 +2031,7 @@ async fn admit_postgres_hr_employee_staging(
                   jsonb_build_object( \
                     'display_name', a.display_name, 'team', a.department, 'role_title', 'Employee', \
                     'employment_status', CASE WHEN a.employment_status IN ('active', 'on_leave', 'offboarding') THEN a.employment_status ELSE 'active' END, \
-                    'source_intake_id', $2::uuid, 'source_row_hash', a.row_hash, 'source_payload', a.row_payload, \
+                    'source_intake_id', $2::text::uuid, 'source_row_hash', a.row_hash, 'source_payload', a.row_payload, \
                     'admission_status', 'admitted' \
                   ) AS after_payload \
                 FROM admissible_rows a \
@@ -2042,7 +2042,7 @@ async fn admit_postgres_hr_employee_staging(
                 INSERT INTO bitween_archive.archive_admission_recovery_point ( \
                     intake_id, tenant_id, target_table, business_key, action, before_exists, before_payload, after_payload, captured_by \
                 ) \
-                SELECT $2::uuid, $1, 'hr_employee', employee_key, \
+                SELECT $2::text::uuid, $1, 'hr_employee', employee_key, \
                        CASE WHEN before_exists THEN 'replace' ELSE 'insert' END, \
                        before_exists, before_payload, after_payload, $5 \
                 FROM existing_rows \
@@ -2059,7 +2059,7 @@ async fn admit_postgres_hr_employee_staging(
                 ) \
                 SELECT $1, $3, $4, employee_key, display_name, department, 'Employee', \
                        CASE WHEN employment_status IN ('active', 'on_leave', 'offboarding') THEN employment_status ELSE 'active' END, \
-                       $2::uuid, row_hash, row_payload, 'admitted', \
+                       $2::text::uuid, row_hash, row_payload, 'admitted', \
                        $5, $5 \
                 FROM admissible_rows \
                 ON CONFLICT (tenant_id, legal_entity_id, workplace_id, employee_key) DO UPDATE \
@@ -2095,9 +2095,9 @@ async fn reject_invalid_hr_employee_staging(
     let rejected = transaction
         .execute(
             "UPDATE bitween_archive.hr_employee_staging \
-             SET validation_status = 'invalid', issues = $3::jsonb \
+             SET validation_status = 'invalid', issues = $3::text::jsonb \
              WHERE tenant_id = $1 \
-               AND intake_id = $2::uuid \
+               AND intake_id = $2::text::uuid \
                AND validation_status IN ('pending_review', 'valid') \
                AND (NULLIF(display_name, '') IS NULL OR NULLIF(department, '') IS NULL)",
             &[&tenant_id, &intake_id, &issues_json],
@@ -2116,9 +2116,9 @@ async fn reject_unadmitted_hr_employee_staging(
     let rejected = transaction
         .execute(
             "UPDATE bitween_archive.hr_employee_staging \
-             SET validation_status = 'invalid', issues = $3::jsonb \
+             SET validation_status = 'invalid', issues = $3::text::jsonb \
              WHERE tenant_id = $1 \
-               AND intake_id = $2::uuid \
+               AND intake_id = $2::text::uuid \
                AND validation_status IN ('pending_review', 'valid')",
             &[&tenant_id, &intake_id, &issues_json],
         )
@@ -2146,7 +2146,7 @@ async fn admit_postgres_hr_attendance_staging(
                   'employee-' || lower(regexp_replace(employee_external_id, '[^a-zA-Z0-9_-]+', '-', 'g')) || '|' || work_date::text AS business_key \
                 FROM bitween_archive.hr_attendance_staging \
                 WHERE tenant_id = $1 \
-                  AND intake_id = $2::uuid \
+                  AND intake_id = $2::text::uuid \
                   AND validation_status IN ('pending_review', 'valid') \
                   AND NULLIF(employee_external_id, '') IS NOT NULL \
                   AND work_date IS NOT NULL \
@@ -2159,7 +2159,7 @@ async fn admit_postgres_hr_attendance_staging(
                   ), '{}'::jsonb) AS before_payload, \
                   jsonb_build_object( \
                     'employee_key', a.employee_key, 'work_date', a.work_date, \
-                    'source_intake_id', $2::uuid, 'source_row_hash', a.row_hash, \
+                    'source_intake_id', $2::text::uuid, 'source_row_hash', a.row_hash, \
                     'source_payload', a.row_payload, 'admission_status', 'admitted' \
                   ) AS after_payload \
                 FROM admissible_rows a \
@@ -2170,7 +2170,7 @@ async fn admit_postgres_hr_attendance_staging(
                 INSERT INTO bitween_archive.archive_admission_recovery_point ( \
                     intake_id, tenant_id, target_table, business_key, action, before_exists, before_payload, after_payload, captured_by \
                 ) \
-                SELECT $2::uuid, $1, 'hr_attendance', business_key, \
+                SELECT $2::text::uuid, $1, 'hr_attendance', business_key, \
                        CASE WHEN before_exists THEN 'replace' ELSE 'insert' END, \
                        before_exists, before_payload, after_payload, $5 \
                 FROM existing_rows \
@@ -2184,7 +2184,7 @@ async fn admit_postgres_hr_attendance_staging(
                     tenant_id, legal_entity_id, workplace_id, employee_key, work_date, \
                     source_intake_id, source_row_hash, source_payload, created_by, updated_by \
                 ) \
-                SELECT $1, $3, $4, employee_key, work_date, $2::uuid, row_hash, row_payload, $5, $5 \
+                SELECT $1, $3, $4, employee_key, work_date, $2::text::uuid, row_hash, row_payload, $5, $5 \
                 FROM admissible_rows \
                 ON CONFLICT (tenant_id, legal_entity_id, workplace_id, employee_key, work_date) DO UPDATE \
                   SET source_intake_id = EXCLUDED.source_intake_id, source_row_hash = EXCLUDED.source_row_hash, \
@@ -2216,9 +2216,9 @@ async fn reject_invalid_hr_attendance_staging(
     let rejected = transaction
         .execute(
             "UPDATE bitween_archive.hr_attendance_staging \
-             SET validation_status = 'invalid', issues = $3::jsonb \
+             SET validation_status = 'invalid', issues = $3::text::jsonb \
              WHERE tenant_id = $1 \
-               AND intake_id = $2::uuid \
+               AND intake_id = $2::text::uuid \
                AND validation_status IN ('pending_review', 'valid') \
                AND (NULLIF(employee_external_id, '') IS NULL OR work_date IS NULL)",
             &[&tenant_id, &intake_id, &issues_json],
@@ -2237,9 +2237,9 @@ async fn reject_unadmitted_hr_attendance_staging(
     let rejected = transaction
         .execute(
             "UPDATE bitween_archive.hr_attendance_staging \
-             SET validation_status = 'invalid', issues = $3::jsonb \
+             SET validation_status = 'invalid', issues = $3::text::jsonb \
              WHERE tenant_id = $1 \
-               AND intake_id = $2::uuid \
+               AND intake_id = $2::text::uuid \
                AND validation_status IN ('pending_review', 'valid')",
             &[&tenant_id, &intake_id, &issues_json],
         )
@@ -2269,7 +2269,7 @@ async fn admit_postgres_payroll_input_staging(
                   $5 || '|' || 'employee-' || lower(regexp_replace(employee_external_id, '[^a-zA-Z0-9_-]+', '-', 'g')) AS business_key \
                 FROM bitween_archive.payroll_input_staging \
                 WHERE tenant_id = $1 \
-                  AND intake_id = $2::uuid \
+                  AND intake_id = $2::text::uuid \
                   AND validation_status IN ('pending_review', 'valid') \
                   AND NULLIF(employee_external_id, '') IS NOT NULL \
                   AND gross_pay IS NOT NULL \
@@ -2284,7 +2284,7 @@ async fn admit_postgres_payroll_input_staging(
                   jsonb_build_object( \
                     'payroll_period', $5, 'employee_key', a.employee_key, \
                     'gross_pay', a.gross_pay, 'deduction_total', a.deduction_total, \
-                    'source_intake_id', $2::uuid, 'source_row_hash', a.row_hash, \
+                    'source_intake_id', $2::text::uuid, 'source_row_hash', a.row_hash, \
                     'source_payload', a.row_payload, 'admission_status', 'admitted' \
                   ) AS after_payload \
                 FROM admissible_rows a \
@@ -2295,7 +2295,7 @@ async fn admit_postgres_payroll_input_staging(
                 INSERT INTO bitween_archive.archive_admission_recovery_point ( \
                     intake_id, tenant_id, target_table, business_key, action, before_exists, before_payload, after_payload, captured_by \
                 ) \
-                SELECT $2::uuid, $1, 'payroll_input', business_key, \
+                SELECT $2::text::uuid, $1, 'payroll_input', business_key, \
                        CASE WHEN before_exists THEN 'replace' ELSE 'insert' END, \
                        before_exists, before_payload, after_payload, $6 \
                 FROM existing_rows \
@@ -2309,7 +2309,7 @@ async fn admit_postgres_payroll_input_staging(
                     tenant_id, legal_entity_id, workplace_id, payroll_period, employee_key, \
                     gross_pay, deduction_total, source_intake_id, source_row_hash, source_payload, created_by, updated_by \
                 ) \
-                SELECT $1, $3, $4, $5, employee_key, gross_pay, deduction_total, $2::uuid, row_hash, row_payload, $6, $6 \
+                SELECT $1, $3, $4, $5, employee_key, gross_pay, deduction_total, $2::text::uuid, row_hash, row_payload, $6, $6 \
                 FROM admissible_rows \
                 ON CONFLICT (tenant_id, legal_entity_id, workplace_id, payroll_period, employee_key) DO UPDATE \
                   SET gross_pay = EXCLUDED.gross_pay, deduction_total = EXCLUDED.deduction_total, \
@@ -2349,9 +2349,9 @@ async fn reject_invalid_payroll_input_staging(
     let rejected = transaction
         .execute(
             "UPDATE bitween_archive.payroll_input_staging \
-             SET validation_status = 'invalid', issues = $3::jsonb \
+             SET validation_status = 'invalid', issues = $3::text::jsonb \
              WHERE tenant_id = $1 \
-               AND intake_id = $2::uuid \
+               AND intake_id = $2::text::uuid \
                AND validation_status IN ('pending_review', 'valid') \
                AND (NULLIF(employee_external_id, '') IS NULL OR gross_pay IS NULL)",
             &[&tenant_id, &intake_id, &issues_json],
@@ -2370,9 +2370,9 @@ async fn reject_unadmitted_payroll_input_staging(
     let rejected = transaction
         .execute(
             "UPDATE bitween_archive.payroll_input_staging \
-             SET validation_status = 'invalid', issues = $3::jsonb \
+             SET validation_status = 'invalid', issues = $3::text::jsonb \
              WHERE tenant_id = $1 \
-               AND intake_id = $2::uuid \
+               AND intake_id = $2::text::uuid \
                AND validation_status IN ('pending_review', 'valid')",
             &[&tenant_id, &intake_id, &issues_json],
         )
@@ -2408,7 +2408,7 @@ async fn insert_postgres_admission_audit(
         .execute(
             "INSERT INTO bitween_archive.archive_admission_audit ( \
                 intake_id, tenant_id, target_table, admitted_rows, rejected_rows, approved_by, rollback_ref, evidence \
-             ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb)",
+             ) VALUES ($1::text::uuid, $2, $3, $4, $5, $6, $7::text::jsonb, $8::text::jsonb)",
             &[
                 &intake_id,
                 &tenant_id,
@@ -2455,9 +2455,9 @@ async fn insert_postgres_source_sync(
                 intake_id, tenant_id, source_version, target_table, operation, status, \
                 source_object_uri, change_payload, requested_by \
              ) \
-             SELECT id, tenant_id, version, $3, $4, 'pending', object_uri, $5::jsonb, $6 \
+             SELECT id, tenant_id, version, $3, $4, 'pending', object_uri, $5::text::jsonb, $6 \
              FROM bitween_archive.archive_intake \
-             WHERE tenant_id = $1 AND id = $2::uuid",
+             WHERE tenant_id = $1 AND id = $2::text::uuid",
             &[
                 &tenant_id,
                 &intake_id,
@@ -2495,7 +2495,7 @@ async fn complete_postgres_source_sync(
             "SELECT intake_id::text, source_version, target_table, operation, source_object_uri, \
                     change_payload::text, requested_by \
              FROM bitween_archive.archive_source_sync \
-             WHERE tenant_id = $1 AND id = $2::uuid AND status = 'pending' \
+             WHERE tenant_id = $1 AND id = $2::text::uuid AND status = 'pending' \
              FOR UPDATE",
             &[&tenant_id, &sync_item_id],
         )
@@ -2527,8 +2527,8 @@ async fn complete_postgres_source_sync(
         .execute(
             "UPDATE bitween_archive.archive_source_sync \
              SET status = 'synced', generated_object_uri = $3, synced_at = now(), \
-                 change_payload = change_payload || $4::jsonb \
-             WHERE tenant_id = $1 AND id = $2::uuid AND status = 'pending'",
+                 change_payload = change_payload || $4::text::jsonb \
+             WHERE tenant_id = $1 AND id = $2::text::uuid AND status = 'pending'",
             &[
                 &tenant_id,
                 &completion.sync_item_id,
@@ -2564,8 +2564,8 @@ async fn fail_postgres_source_sync(
         .client
         .execute(
             "UPDATE bitween_archive.archive_source_sync \
-             SET status = 'failed', change_payload = change_payload || $3::jsonb \
-             WHERE tenant_id = $1 AND id = $2::uuid AND status = 'pending'",
+             SET status = 'failed', change_payload = change_payload || $3::text::jsonb \
+             WHERE tenant_id = $1 AND id = $2::text::uuid AND status = 'pending'",
             &[&tenant_id, &failure.sync_item_id, &metadata_json],
         )
         .await
@@ -2655,7 +2655,7 @@ async fn rollback_postgres_intake(
         .query_opt(
             "SELECT database_target, status \
              FROM bitween_archive.archive_intake \
-             WHERE tenant_id = $1 AND id = $2::uuid \
+             WHERE tenant_id = $1 AND id = $2::text::uuid \
              FOR UPDATE",
             &[&tenant_id, &intake_id],
         )
@@ -2750,7 +2750,7 @@ async fn rollback_postgres_intake(
             "UPDATE bitween_archive.archive_intake \
              SET status = 'ready_for_staging', postgres_ready = true, next_action = 'save_to_business_data', \
                  admission_approved_by = NULL, admission_approved_at = NULL \
-             WHERE tenant_id = $1 AND id = $2::uuid",
+             WHERE tenant_id = $1 AND id = $2::text::uuid",
             &[&tenant_id, &intake_id],
         )
         .await
@@ -2776,7 +2776,7 @@ async fn reverse_postgres_hr_employee_admission(
             "WITH available AS ( \
                 SELECT id, business_key, action, before_payload \
                 FROM bitween_archive.archive_admission_recovery_point \
-                WHERE tenant_id = $1 AND intake_id = $2::uuid AND target_table = 'hr_employee' \
+                WHERE tenant_id = $1 AND intake_id = $2::text::uuid AND target_table = 'hr_employee' \
                   AND recovery_status = 'available' \
                   AND ($6 = '' OR id = NULLIF($6, '')::uuid) \
              ), restored AS ( \
@@ -2841,7 +2841,7 @@ async fn reverse_postgres_hr_attendance_admission(
             "WITH available AS ( \
                 SELECT id, business_key, action, before_payload \
                 FROM bitween_archive.archive_admission_recovery_point \
-                WHERE tenant_id = $1 AND intake_id = $2::uuid AND target_table = 'hr_attendance' \
+                WHERE tenant_id = $1 AND intake_id = $2::text::uuid AND target_table = 'hr_attendance' \
                   AND recovery_status = 'available' \
                   AND ($6 = '' OR id = NULLIF($6, '')::uuid) \
              ), restored AS ( \
@@ -2902,7 +2902,7 @@ async fn reverse_postgres_payroll_input_admission(
             "WITH available AS ( \
                 SELECT id, business_key, action, before_payload \
                 FROM bitween_archive.archive_admission_recovery_point \
-                WHERE tenant_id = $1 AND intake_id = $2::uuid AND target_table = 'payroll_input' \
+                WHERE tenant_id = $1 AND intake_id = $2::text::uuid AND target_table = 'payroll_input' \
                   AND recovery_status = 'available' \
                   AND ($6 = '' OR id = NULLIF($6, '')::uuid) \
              ), restored AS ( \
@@ -2960,7 +2960,7 @@ async fn reset_postgres_hr_employee_staging_after_rollback(
         .execute(
             "UPDATE bitween_archive.hr_employee_staging \
              SET validation_status = 'valid' \
-             WHERE tenant_id = $1 AND intake_id = $2::uuid AND validation_status = 'admitted'",
+             WHERE tenant_id = $1 AND intake_id = $2::text::uuid AND validation_status = 'admitted'",
             &[&tenant_id, &intake_id],
         )
         .await
@@ -2977,7 +2977,7 @@ async fn reset_postgres_hr_attendance_staging_after_rollback(
         .execute(
             "UPDATE bitween_archive.hr_attendance_staging \
              SET validation_status = 'valid' \
-             WHERE tenant_id = $1 AND intake_id = $2::uuid AND validation_status = 'admitted'",
+             WHERE tenant_id = $1 AND intake_id = $2::text::uuid AND validation_status = 'admitted'",
             &[&tenant_id, &intake_id],
         )
         .await
@@ -2994,7 +2994,7 @@ async fn reset_postgres_payroll_input_staging_after_rollback(
         .execute(
             "UPDATE bitween_archive.payroll_input_staging \
              SET validation_status = 'valid' \
-             WHERE tenant_id = $1 AND intake_id = $2::uuid AND validation_status = 'admitted'",
+             WHERE tenant_id = $1 AND intake_id = $2::text::uuid AND validation_status = 'admitted'",
             &[&tenant_id, &intake_id],
         )
         .await
@@ -3024,7 +3024,7 @@ async fn insert_postgres_rollback_audit(
         .execute(
             "INSERT INTO bitween_archive.archive_admission_rollback ( \
                 intake_id, tenant_id, target_table, reversed_rows, requested_by, reason, evidence \
-             ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7::jsonb)",
+             ) VALUES ($1::text::uuid, $2, $3, $4, $5, $6, $7::text::jsonb)",
             &[
                 &intake_id,
                 &tenant_id,
@@ -3059,7 +3059,7 @@ async fn insert_postgres_staging_rows(
                         "INSERT INTO bitween_archive.hr_employee_staging ( \
                             intake_id, tenant_id, row_number, row_hash, employee_external_id, \
                             display_name, department, employment_status, row_payload \
-                         ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)",
+                         ) VALUES ($1::text::uuid, $2, $3, $4, $5, $6, $7, $8, $9::text::jsonb)",
                         &[
                             &intake_id,
                             &tenant_id,
@@ -3081,7 +3081,7 @@ async fn insert_postgres_staging_rows(
                         "INSERT INTO bitween_archive.hr_attendance_staging ( \
                             intake_id, tenant_id, row_number, row_hash, employee_external_id, \
                             work_date, row_payload \
-                         ) VALUES ($1::uuid, $2, $3, $4, $5, NULLIF($6, '')::date, $7::jsonb)",
+                         ) VALUES ($1::text::uuid, $2, $3, $4, $5, NULLIF($6, '')::date, $7::text::jsonb)",
                         &[
                             &intake_id,
                             &tenant_id,
@@ -3102,8 +3102,8 @@ async fn insert_postgres_staging_rows(
                             intake_id, tenant_id, legal_entity_id, workplace_id, payroll_period, \
                             row_number, row_hash, employee_external_id, gross_pay, deduction_total, row_payload \
                          ) VALUES ( \
-                            $1::uuid, $2, $3, $4, $5, $6, $7, $8, \
-                            NULLIF($9, '')::numeric, NULLIF($10, '')::numeric, $11::jsonb \
+                            $1::text::uuid, $2, $3, $4, $5, $6, $7, $8, \
+                            NULLIF($9, '')::numeric, NULLIF($10, '')::numeric, $11::text::jsonb \
                          )",
                         &[
                             &intake_id,

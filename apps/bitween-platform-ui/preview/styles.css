@@ -3104,6 +3104,49 @@ button.planner-item {
   gap: 3px;
 }
 
+.payroll-reconciliation-summary {
+  margin-bottom: 14px;
+}
+
+.payroll-reconciliation-table {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: grid;
+  overflow: hidden;
+}
+
+.payroll-reconciliation-row {
+  align-items: center;
+  background: var(--card);
+  border-bottom: 1px solid var(--divider);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+  padding: 12px 13px;
+  text-align: left;
+}
+
+.payroll-reconciliation-row:last-child {
+  border-bottom: 0;
+}
+
+.payroll-reconciliation-head {
+  background: var(--accent-soft);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.payroll-reconciliation-amount {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.payroll-reconciliation-status {
+  justify-self: end;
+}
+
 .notice.warning {
   background: var(--warning-soft);
   border: 1px solid var(--warning-border);

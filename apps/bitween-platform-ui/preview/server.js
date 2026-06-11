@@ -15,6 +15,10 @@ const maxZipEntries = 512;
 const maxZipMemberBytes = 8 * 1024 * 1024;
 const maxZipTotalExtractedBytes = 16 * 1024 * 1024;
 const maxZipTextSampleBytes = 64 * 1024;
+// Max data rows captured per sheet for staging. The 64KB sample-byte cap above
+// remains the hard bound; this just stops a real roster/ledger (dozens of rows)
+// from being silently truncated to a tiny preview window.
+const maxSheetSampleDataRows = 2000;
 const routeLatencyBudgetMs = Number(process.env.BITWEEN_ROUTE_LATENCY_BUDGET_MS || 1500);
 const rateLimitWindowMs = Number(process.env.BITWEEN_RATE_LIMIT_WINDOW_MS || 60_000);
 const defaultMutableRateLimitMax = Number(process.env.BITWEEN_MUTATION_RATE_LIMIT_MAX || 60);
@@ -257,6 +261,19 @@ function runArchiveIntakeStore(args, input) {
       env: rustTargetEnv(),
       input,
       timeout: 15000
+    }
+  );
+}
+
+function runPayrollRun(period) {
+  return spawnSync(
+    "buck2",
+    ["run", "//crates/payroll-api:payroll_run", "--", period],
+    {
+      cwd: repoRoot,
+      encoding: "utf8",
+      env: rustTargetEnv(),
+      timeout: 20000
     }
   );
 }
@@ -1179,7 +1196,7 @@ function bestSheetSample(rows) {
     const score = headerRowScore(normalized);
     if (score > best.score) {
       const sampleRows = rows
-        .slice(index + 1, index + 21)
+        .slice(index + 1, index + 1 + maxSheetSampleDataRows)
         .map(normalizeSheetRow)
         .filter((candidate) => candidate.some((cell) => cleanPreviewText(cell)));
       best = {
@@ -1534,6 +1551,29 @@ async function handleUserPreferences(req, res, urlPath) {
   return true;
 }
 
+function resolvePayrollRunPeriod(req) {
+  const query = String(req.url || "").split("?")[1] || "";
+  const params = new URLSearchParams(query);
+  const requested = String(params.get("period") || "").trim();
+  const fallback = String(process.env.BITWEEN_PAYROLL_PERIOD || "").trim();
+  const period = requested || fallback;
+  if (!/^[0-9]{4}-[0-9]{2}$/.test(period)) {
+    throw requestError(400, "payroll_run_invalid_period", "정산 기간 형식은 YYYY-MM 이어야 합니다.");
+  }
+  return period;
+}
+
+async function handlePayrollRun(req, res, urlPath) {
+  if (req.method === "GET" && urlPath === "/api/payroll/v1/run") {
+    requireAuthorizedOperation("payroll_run");
+    requireRelationalStoreAvailable();
+    const period = resolvePayrollRunPeriod(req);
+    sendStoreResult(res, runPayrollRun(period), "payroll_run_unavailable");
+    return true;
+  }
+  return false;
+}
+
 async function handleWorkflowTemplates(req, res, urlPath) {
   if (req.method === "GET" && urlPath === "/api/workflow/v1/templates") {
     requireAuthorizedOperation("workflow_template_read");
@@ -1705,6 +1745,7 @@ const server = http.createServer(async (req, res) => {
     if (await handleAuthRoutes(req, res, urlPath)) return;
     if (await handleHrEmployees(req, res, urlPath)) return;
     if (await handleArchiveIntake(req, res, urlPath)) return;
+    if (await handlePayrollRun(req, res, urlPath)) return;
     if (await handleUserPreferences(req, res, urlPath)) return;
     if (await handleWorkflowTemplates(req, res, urlPath)) return;
   } catch (error) {
